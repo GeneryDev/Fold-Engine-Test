@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>50385bf4-0bb8-43ed-acf4-e8b33a0f8945</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Sandbox</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Components\LevelRenderable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Components\Living.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DemoScene.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\Sprite.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Systems\HealthSystem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Systems\LevelRenderer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WooferGameController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WooferRenderingUnit.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Content\" />
+  </ItemGroup>
+  <ItemGroup>
+    <MonoGameContentReference Include="$(MSBuildThisFileDirectory)Content\Content.mgcb" />
+  </ItemGroup>
+</Project>

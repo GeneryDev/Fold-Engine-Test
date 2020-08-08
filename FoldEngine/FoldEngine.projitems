@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>cedfa9f1-c37e-4e0b-afa3-dcfde9aad727</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>FoldEngine</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Components\Component.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Components\MultiComponentView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Components\SimpleComponentView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Components\Transform.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FoldGame.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FoldGameEntry.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FoldUtil.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GraphicsContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\RenderSurface.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\Texture2DWrapper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\TextureManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IGameController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IRenderingLayer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IRenderingUnit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scenes\ComponentMap.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scenes\Entity.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scenes\EntityObjectPool.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scenes\Scene.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scenes\SystemMap.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Systems\GameSystem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Time.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\Color.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\Complex.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\Rectangle.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\Vector2.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\VectorInt2.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Content\" />
+  </ItemGroup>
+  <ItemGroup>
+    <MonoGameContentReference Include="$(MSBuildThisFileDirectory)Content\Content.mgcb" />
+  </ItemGroup>
+</Project>

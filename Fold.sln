@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30320.27
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "FoldEngine", "FoldEngine\FoldEngine.shproj", "{AD06BF8F-7FFF-4C50-944C-05F3C8568CA8}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Sandbox", "Sandbox\Sandbox.shproj", "{9BB3BE52-030D-4380-96E9-2C05587F929F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntryProject", "EntryProject\EntryProject.csproj", "{67D866C2-47A9-4314-9C33-713A78F62336}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		FoldEngine\FoldEngine.projitems*{67d866c2-47a9-4314-9c33-713a78f62336}*SharedItemsImports = 4
+		Sandbox\Sandbox.projitems*{67d866c2-47a9-4314-9c33-713a78f62336}*SharedItemsImports = 4
+		Sandbox\Sandbox.projitems*{9bb3be52-030d-4380-96e9-2c05587f929f}*SharedItemsImports = 13
+		FoldEngine\FoldEngine.projitems*{ad06bf8f-7fff-4c50-944c-05f3c8568ca8}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{67D866C2-47A9-4314-9C33-713A78F62336}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67D866C2-47A9-4314-9C33-713A78F62336}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67D866C2-47A9-4314-9C33-713A78F62336}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67D866C2-47A9-4314-9C33-713A78F62336}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {84F057BB-A655-4443-BBDF-F43C49763024}
+	EndGlobalSection
+EndGlobal
