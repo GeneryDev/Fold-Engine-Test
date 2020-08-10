@@ -9,33 +9,8 @@ using FoldEngine.Scenes;
 
 namespace FoldEngine.Components
 {
-    public abstract class Component
-
+    public static class Component
     {
-        //Instance
-        internal Scene Scene;
-        internal long EntityId;
-
-        private Entity _owner = null;
-        public Entity Owner
-        {
-            get
-            {
-                if(_owner == null)
-                {
-                    _owner = Scene.EntityObjectPool.GetOrCreateEntityObject(EntityId);
-                }
-                return _owner;
-            }
-        }
-
-        public override string ToString()
-        {
-            return $"C[{IdentifierOf(this.GetType())}]:{EntityId}";
-        }
-
-
-        //Static
         private static Dictionary<Type, string> TypeToIdentifierMap = null;
         private static Dictionary<string, Type> IdentifierToTypeMap = null;
 
@@ -62,7 +37,7 @@ namespace FoldEngine.Components
         /// </summary>
         /// <typeparam name="T">The component type of which to retrieve the identifier</typeparam>
         /// <returns>The identifier for the given type, if it exists</returns>
-        public static string IdentifierOf<T>() where T : Component
+        public static string IdentifierOf<T>() where T : struct
         {
             return IdentifierOf(typeof(T));
         }

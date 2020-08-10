@@ -13,10 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentReference.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentSet.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\Component.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\MultiComponentIterator.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Components\MultiComponentView.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Components\SimpleComponentView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\Transform.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FoldGame.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FoldGameEntry.cs" />

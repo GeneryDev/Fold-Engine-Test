@@ -40,15 +40,6 @@ namespace FoldEngine.Systems
             return Owner.Components.CreateIterator<T>(flags);
         }
 
-        protected MultiComponentView CreateComponentView(params Type[] watchingTypes)
-        {
-            return Owner.Components.CreateView(watchingTypes);
-        }
-        protected SimpleComponentView CreateComponentView(Type watchingType)
-        {
-            return Owner.Components.CreateView(watchingType);
-        }
-
         internal virtual void Initialize() { }
     }
 

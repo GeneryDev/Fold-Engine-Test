@@ -7,9 +7,9 @@ using System.Text;
 namespace Sandbox.Components
 {
     [Component("sandbox:level_renderable")]
-    public class LevelRenderable : Component
+    public struct LevelRenderable
     {
-        public float ZOrder { get; set; }
+        public float ZOrder;
 
     }
 }
