@@ -9,8 +9,12 @@
     <Import_RootNamespace>FoldEngine</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentIterator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentReference.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentSet.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\Component.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Components\MultiComponentIterator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\MultiComponentView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\SimpleComponentView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\Transform.cs" />
@@ -24,7 +28,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IGameController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IRenderingLayer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IRenderingUnit.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Scenes\ComponentMap.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentMap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scenes\Entity.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scenes\EntityObjectPool.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scenes\Scene.cs" />
@@ -33,6 +37,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Time.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Color.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Complex.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\MathUtil.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Rectangle.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Vector2.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\VectorInt2.cs" />

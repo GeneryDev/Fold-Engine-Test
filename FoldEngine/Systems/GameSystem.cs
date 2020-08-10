@@ -27,6 +27,19 @@ namespace FoldEngine.Systems
         public virtual void OnUpdate() { }
         public virtual void OnRender() { }
 
+        protected MultiComponentIterator CreateComponentIterator(params Type[] watchingTypes)
+        {
+            return Owner.Components.CreateMultiIterator(watchingTypes);
+        }
+        protected ComponentIterator CreateComponentIterator(Type watchingType, IterationFlags flags)
+        {
+            return Owner.Components.CreateIterator(watchingType, flags);
+        }
+        protected ComponentIterator CreateComponentIterator<T>(IterationFlags flags) where T : struct
+        {
+            return Owner.Components.CreateIterator<T>(flags);
+        }
+
         protected MultiComponentView CreateComponentView(params Type[] watchingTypes)
         {
             return Owner.Components.CreateView(watchingTypes);
@@ -66,8 +79,8 @@ namespace FoldEngine.Systems
         public ListeningAttribute(params Type[] watching)
         {
             //TODO event class
-            if (!watching.All(t => typeof(ComponentAttachment).IsAssignableFrom(t))) throw new ArgumentException("watching");
-            Watching = watching.Select(t => ComponentAttachment.IdentifierOf(t)).ToArray();
+            if (!watching.All(t => typeof(Component).IsAssignableFrom(t))) throw new ArgumentException("watching");
+            Watching = watching.Select(t => Component.IdentifierOf(t)).ToArray();
         }
     }
 }

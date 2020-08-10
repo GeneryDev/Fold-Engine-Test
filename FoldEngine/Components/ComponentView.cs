@@ -6,20 +6,20 @@ namespace FoldEngine.Components
 {
     public abstract class ComponentView
     {
-        public delegate void ComponentUpdated(ComponentAttachment component);
+        public delegate void ComponentUpdated(Component component);
 
         public event ComponentUpdated ComponentAdded;
         public event ComponentUpdated ComponentRemoved;
 
-        internal abstract void AddComponent(ComponentAttachment component);
-        internal abstract void RemoveComponent(ComponentAttachment component);
-        internal abstract bool Matches(ComponentAttachment component);
+        internal abstract void AddComponent(Component component);
+        internal abstract void RemoveComponent(Component component);
+        internal abstract bool Matches(Component component);
 
-        protected void InvokeComponentAdded(ComponentAttachment component)
+        protected void InvokeComponentAdded(Component component)
         {
             ComponentAdded?.Invoke(component);
         }
-        protected void InvokeComponentRemoved(ComponentAttachment component)
+        protected void InvokeComponentRemoved(Component component)
         {
             ComponentRemoved?.Invoke(component);
         }

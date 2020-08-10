@@ -7,9 +7,14 @@ using System.Text;
 namespace Sandbox.Components
 {
     [Component("sandbox:living")]
-    public class Living : ComponentAttachment
+    public struct Living
     {
-        public int Health = 100;
-        public int MaxHealth = 100;
+        public int Health;
+        public int MaxHealth;
+
+        public override string ToString()
+        {
+            return $"sandbox:living|{Health}/{MaxHealth}";
+        }
     }
 }

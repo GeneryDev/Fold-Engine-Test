@@ -10,6 +10,7 @@ using FoldEngine.Scenes;
 namespace FoldEngine.Components
 {
     public abstract class Component
+
     {
         //Instance
         internal Scene Scene;

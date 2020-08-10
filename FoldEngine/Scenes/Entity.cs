@@ -22,17 +22,17 @@ namespace FoldEngine.Scenes
             EntityId = entityId;
         }
 
-        public T GetComponent<T>() where T : ComponentAttachment
+        public T GetComponent<T>() where T : struct
         {
             return Scene.Components.GetComponent<T>(EntityId);
         }
 
-        public T AddComponent<T>() where T : ComponentAttachment, new()
+        public T AddComponent<T>() where T : struct
         {
             return Scene.Components.CreateComponent<T>(EntityId);
         }
 
-        public void RemoveComponent<T>() where T : ComponentAttachment
+        public void RemoveComponent<T>() where T : struct
         {
             Scene.Components.RemoveComponent<T>(EntityId);
         }

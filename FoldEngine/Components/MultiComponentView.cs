@@ -1,5 +1,4 @@
-﻿using FoldEngine.Scenes;
-
+﻿
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,14 +11,14 @@ namespace FoldEngine.Components
         private ComponentGrouping Grouping = ComponentGrouping.And;
         internal Type[] Watching;
 
-        private readonly List<ComponentAttachment> WatchedComponents = new List<ComponentAttachment>();
+        private readonly List<Component> WatchedComponents = new List<Component>();
 
         internal MultiComponentView(Type[] watchingTypes)
         {
             Watching = watchingTypes;
         }
 
-        internal override void AddComponent(ComponentAttachment component)
+        internal override void AddComponent(Component component)
         {
             int insertionIndex = ComponentMap.FindIndexForEntityId(component.EntityId, WatchedComponents);
             while(insertionIndex > 0 && insertionIndex < WatchedComponents.Count && WatchedComponents[insertionIndex-1].EntityId == component.EntityId)
@@ -52,12 +51,12 @@ namespace FoldEngine.Components
             WatchedComponents.Insert(insertionIndex, component);
             InvokeComponentAdded(component);
         }
-        internal override void RemoveComponent(ComponentAttachment component)
+        internal override void RemoveComponent(Component component)
         {
             InvokeComponentRemoved(component);
             WatchedComponents.Remove(component);
         }
-        internal override bool Matches(ComponentAttachment component)
+        internal override bool Matches(Component component)
         {
             Type componentType = component.GetType();
             foreach(Type watchingType in Watching) {
@@ -111,7 +110,7 @@ namespace FoldEngine.Components
                     {
                         Type watchingType = Watching[watchingTypeIndex];
 
-                        ComponentAttachment component = WatchedComponents[index];
+                        Component component = WatchedComponents[index];
                         if(component.EntityId == entityId && component.GetType() == watchingType)
                         {
                             group.Pack(watchingTypeIndex, component);
@@ -133,16 +132,10 @@ namespace FoldEngine.Components
         }
     }
 
-    public enum ComponentGrouping
-    {
-        And,
-        Or
-    }
-
     public struct MultiComponentViewGroup
     {
         internal Type[] Types;
-        internal ComponentAttachment[] Components;
+        internal Component[] Components;
 
         public long EntityId { get; internal set; }
 
@@ -150,15 +143,15 @@ namespace FoldEngine.Components
         {
             EntityId = -1;
             Types = types;
-            Components = new ComponentAttachment[Types.Length];
+            Components = new Component[Types.Length];
         }
 
-        internal void Pack(int index, ComponentAttachment component)
+        internal void Pack(int index, Component component)
         {
             Components[index] = component;
         }
 
-        public T Get<T>() where T : ComponentAttachment
+        public T Get<T>() where T : Component
         {
             for(int i = 0; i < Types.Length; i++)
             {
@@ -167,7 +160,7 @@ namespace FoldEngine.Components
                     return (T)Components[i];
                 }
             }
-            throw new Exception($"This view does not contain components of type {ComponentAttachment.IdentifierOf<T>()}");
+            throw new Exception($"This view does not contain components of type {Component.IdentifierOf<T>()}");
         }
     }
 }

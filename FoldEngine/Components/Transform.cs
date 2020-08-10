@@ -1,4 +1,5 @@
-﻿using FoldEngine.Util;
+﻿using FoldEngine.Scenes;
+using FoldEngine.Util;
 
 using Microsoft.Xna.Framework;
 
@@ -12,12 +13,15 @@ using System.Threading.Tasks;
 namespace FoldEngine.Components
 {
     [Component("fold:transform_2d")]
-    public class Transform : ComponentAttachment
+    public struct Transform
     {
-        public Transform Parent { get; internal set; }
+        public Scene Scene;
+        public long ParentId;
+
+        //public ref Transform Parent => ParentId != -1 ? Scene.Components.GetComponent<Transform>(ParentId) : ref new Transform();
 
         public Vector2 LocalPosition;
-        internal Complex RotationComplex = new Complex(1, 0);
+        internal Complex RotationComplex;
         public Vector2 LocalScale;
 
         internal float _localRotation;
@@ -34,7 +38,7 @@ namespace FoldEngine.Components
             }
         }
 
-        public float Rotation
+        /*public float Rotation
         {
             get
             {
@@ -71,6 +75,11 @@ namespace FoldEngine.Components
                 transform = transform.Parent;
             }
             return point;
+        }*/
+
+        public override string ToString()
+        {
+            return $"fold:transform_2d|{LocalPosition}";
         }
     }
 }
