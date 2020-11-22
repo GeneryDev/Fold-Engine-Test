@@ -13,18 +13,65 @@ using System.Threading.Tasks;
 namespace FoldEngine.Components
 {
     [Component("fold:transform_2d")]
+    [ComponentInitializer(typeof(Transform), nameof(InitializeComponent))]
     public struct Transform
     {
-        public Scene Scene;
-        public long ParentId;
+        /// <summary>
+        /// Static unique null transform. Has no scene, or children
+        /// </summary>
+        private static Transform NullTransform = default;
+        /// <summary>
+        /// Only false for null transforms
+        /// Double negative was chosen such that default transforms have this as false by default, and thus can't be considered not-null
+        /// </summary>
+        public readonly bool IsNotNull;
 
-        //public ref Transform Parent => ParentId != -1 ? Scene.Components.GetComponent<Transform>(ParentId) : ref new Transform();
+        /// <summary>
+        /// Reference to the scene this component belongs to.
+        /// </summary>
+        public Scene Scene { get; internal set; }
+        /// <summary>
+        /// ID of the entity that owns this transform (-1 for null)
+        /// </summary>
+        private readonly long OwnerId;
+        /// <summary>
+        /// ID of the parent entity (-1 for null and transforms without parent)
+        /// </summary>
+        private long ParentId;
 
+        /// <summary>
+        /// Position in 2D space where this entity is located, relative to its parent
+        /// </summary>
         public Vector2 LocalPosition;
+        /// <summary>
+        /// Complex number used to quickly multiply coordinates for rotations.
+        /// </summary>
         internal Complex RotationComplex;
+        /// <summary>
+        /// 2D vector for the scale of this entity
+        /// </summary>
         public Vector2 LocalScale;
 
+        /// <summary>
+        /// Entity ID of this transform's first child (or -1 if it has no children)
+        /// </summary>
+        private long firstChild;
+        /// <summary>
+        /// Entity ID of this transform's previous sibling (or -1 if it's the first child)
+        /// </summary>
+        private long previousSibling;
+        /// <summary>
+        /// Entity ID of this transform's next sibling (or -1 if it's the last child)
+        /// </summary>
+        private long nextSibling;
+
+        /// <summary>
+        /// Float used to save this transform's rotation in radians. Used for the LocalRotation property
+        /// </summary>
         internal float _localRotation;
+        /// <summary>
+        /// This transform's local rotation, in radians.
+        /// </summary>
         public float LocalRotation
         {
             get
@@ -38,48 +85,223 @@ namespace FoldEngine.Components
             }
         }
 
-        /*public float Rotation
+        /// <summary>
+        /// Returns an initialized transform component with all its correct default values.
+        /// </summary>
+        /// <param name="scene">The scene this transform is being created in</param>
+        /// <param name="entityId">The ID of the entity this transform is being created for</param>
+        /// <returns>An initialized transform component with all its correct default values.</returns>
+        public static Transform InitializeComponent(Scene scene, long entityId)
+        {
+            return new Transform(entityId) { Scene = scene };
+        }
+
+        private Transform(long entityId)
+        {
+            IsNotNull = true;
+
+            Scene = null;
+            OwnerId = entityId;
+            ParentId = -1;
+
+            firstChild = -1;
+            previousSibling = -1;
+            nextSibling = -1;
+
+            LocalPosition = Vector2.Zero;
+            RotationComplex = new Complex(1, 0);
+            LocalScale = new Vector2(1, 1);
+
+            _localRotation = 0;
+        }
+
+        /// <summary>
+        /// Returns a read-only reference to this transform's parent, or RootTransform if this transform has no parent.
+        /// </summary>
+        public ref readonly Transform Parent
         {
             get
             {
-                return _localRotation + (Parent?._localRotation ?? 0f);
-            }
-            set
-            {
-                float newLocalRotation = value;
-                if(Parent != null)
+                if (!IsNotNull) return ref NullTransform;
+                if (ParentId != -1)
                 {
-                    newLocalRotation -= Parent.Rotation;
+                    return ref Scene.Components.GetComponent<Transform>(ParentId);
                 }
-                LocalRotation = newLocalRotation;
+                else
+                {
+                    return ref NullTransform;
+                }
             }
         }
 
+        /// <summary>
+        /// Returns a mutable reference to this transform's parent. 
+        /// The reason the Parent property doesn't return a mutable reference is to avoid accidental reassignment of components.
+        /// Only use this property when you need to change a property on the parent transform. Otherwise, use Parent.
+        /// DO NOT assign a value to the returned reference.
+        /// </summary>
+        public ref Transform MutableParent
+        {
+            get
+            {
+                if (!IsNotNull) return ref NullTransform;
+                if (ParentId != -1)
+                {
+                    return ref Scene.Components.GetComponent<Transform>(ParentId);
+                }
+                else
+                {
+                    return ref NullTransform;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets the given entity as this transform's parent, and adds this as a child of the given entity's transform.
+        /// </summary>
+        /// <param name="entity">The container entity that should become this transform's parent</param>
+        public void SetParent(Entity entity)
+        {
+            SetParent(entity.EntityId);
+        }
+        /// <summary>
+        /// Sets the given entity as this transform's parent, and adds this as a child of the given entity's transform.
+        /// </summary>
+        /// <param name="entityId">The ID of the entity that should become this transform's parent</param>
+        public void SetParent(long entityId)
+        {
+            if (!IsNotNull) throw new InvalidOperationException();
+            //TODO clearing children of old parent; ensuring root doesn't change.
+            ParentId = entityId;
+            AddChild(ref MutableParent, ref this);
+        }
+        /// <summary>
+        /// Adds a child to the given parent.
+        /// </summary>
+        /// <param name="parent">The transform to which the given transform child should be added.</param>
+        /// <param name="child">The child to be added to the parent.</param>
+        private static void AddChild(ref Transform parent, ref Transform child)
+        {
+            if (!parent.IsNotNull) throw new InvalidOperationException();
+            if (parent.firstChild == -1)
+            {
+                parent.firstChild = child.OwnerId;
+                return;
+            }
+            ref Transform currentChild = ref parent.Scene.Components.GetComponent<Transform>(parent.firstChild);
+            while(currentChild.nextSibling != -1)
+            {
+                currentChild = ref parent.Scene.Components.GetComponent<Transform>(currentChild.nextSibling);
+            }
+            currentChild.nextSibling = child.OwnerId;
+            child.previousSibling = currentChild.OwnerId;
+        }
+
+        public int ChildCount
+        {
+            get
+            {
+                if (firstChild == -1)
+                {
+                    return 0;
+                }
+                int count = 1;
+                ref Transform currentChild = ref Scene.Components.GetComponent<Transform>(firstChild);
+                while (currentChild.nextSibling != -1)
+                {
+                    currentChild = ref Scene.Components.GetComponent<Transform>(currentChild.nextSibling);
+                    count++;
+                }
+                return count;
+            }
+        }
+
+        public ComponentReference<Transform>[] Children
+        {
+            get
+            {
+                if (firstChild == -1)
+                {
+                    return new ComponentReference<Transform>[0];
+                }
+                ComponentReference<Transform>[] children = new ComponentReference<Transform>[ChildCount];
+
+                ref Transform currentChild = ref Scene.Components.GetComponent<Transform>(firstChild);
+                for(int i = 0; i < children.Length; i++)
+                {
+                    children[i] = new ComponentReference<Transform>(Scene, currentChild.OwnerId);
+                    if(i < children.Length-1)
+                    {
+                        currentChild = ref Scene.Components.GetComponent<Transform>(currentChild.nextSibling);
+                    }
+                }
+                return children;
+            }
+        }
+
+
+        /// <summary>
+        /// This transform's absolute rotation, in radians.
+        /// </summary>
+        public float Rotation
+        {
+            get
+            {
+                if (!IsNotNull) return 0f;
+                float total = _localRotation;
+                ref readonly Transform current = ref Parent;
+                while(current.IsNotNull)
+                {
+                    total += current._localRotation;
+                    current = ref current.Parent;
+                }
+                return total;
+            }
+            set
+            {
+                if (!IsNotNull) throw new InvalidOperationException();
+                LocalRotation = value - Parent.Rotation;
+            }
+        }
+
+        /// <summary>
+        /// This transform's absolute position in 2D space
+        /// </summary>
         public Vector2 Position
         {
             get
             {
-                return Apply(LocalPosition, Parent);
+                if (!IsNotNull) return Vector2.Zero;
+                return Parent.Apply(LocalPosition);
             }
             set
             {
-                LocalPosition = (value - Apply(Vector2.Zero, Parent));
+                if (!IsNotNull) throw new InvalidOperationException();
+                LocalPosition = (value - Parent.Apply(Vector2.Zero));
             }
         }
 
-        private static Vector2 Apply(Vector2 point, Transform transform)
+        /// <summary>
+        /// Applies this transformation to the given point in 2D space.
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        private Vector2 Apply(Vector2 point)
         {
-            while(transform != null)
+            if (!IsNotNull) return point;
+            ref readonly Transform current = ref this;
+
+            while(current.IsNotNull)
             {
-                point = Apply((Vector2)((Complex)(point * transform.LocalScale) * transform.RotationComplex) + transform.LocalPosition, transform.Parent);
-                transform = transform.Parent;
+                point = (Vector2)((Complex)(point * current.LocalScale) * current.RotationComplex) + current.LocalPosition;
+                current = ref current.Parent;
             }
             return point;
-        }*/
+        }
 
         public override string ToString()
         {
-            return $"fold:transform_2d|{LocalPosition}";
+            return IsNotNull ? $"fold:transform_2d|{LocalPosition}" : $"fold:transform_2d|NULL";
         }
     }
 }

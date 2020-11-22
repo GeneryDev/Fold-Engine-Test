@@ -51,11 +51,6 @@ namespace FoldEngine.Components
             _finished = false;
         }
 
-        public override bool HasNext()
-        {
-            throw new InvalidOperationException();
-        }
-
         public override bool Next()
         {
             _started = true;
@@ -91,8 +86,8 @@ namespace FoldEngine.Components
                 long lowestId = long.MaxValue;
                 foreach (ComponentIterator iterator in Iterators)
                 {
-                    bool active = true;
-                    if(!iterator.Started || iterator.GetEntityId() <= CurrentEntityId)
+                    bool active = false;
+                    if(!iterator.Started || (!iterator.Finished && iterator.GetEntityId() <= CurrentEntityId))
                     {
                         active = iterator.Next();
                     }
@@ -122,7 +117,7 @@ namespace FoldEngine.Components
             {
                 if (ComponentTypes[i] == type)
                 {
-                    return Iterators[i] != null && Iterators[i].GetEntityId() == CurrentEntityId;
+                    return Iterators[i] != null && Iterators[i].Started && !Iterators[i].Finished && Iterators[i].GetEntityId() == CurrentEntityId;
                 }
             }
             throw new ArgumentException("This MultiComponentIterator does not track components of type " + type);
@@ -136,7 +131,7 @@ namespace FoldEngine.Components
             {
                 if (ComponentTypes[i] == type)
                 {
-                    if (Iterators[i] != null && Iterators[i].GetEntityId() == CurrentEntityId)
+                    if (Iterators[i] != null && Iterators[i].Started && !Iterators[i].Finished && Iterators[i].GetEntityId() == CurrentEntityId)
                     {
                         return ref ((ComponentIterator<T>)Iterators[i]).GetComponent();
                     }

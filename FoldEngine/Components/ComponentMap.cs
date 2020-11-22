@@ -42,7 +42,7 @@ namespace FoldEngine.Components
             Type componentType = typeof(T);
             if (!Map.ContainsKey(componentType))
             {
-                Map[componentType] = new ComponentSet<T>(entityId);
+                Map[componentType] = new ComponentSet<T>(Scene, entityId);
             }
             return ref ((ComponentSet<T>)Map[componentType]).Create(entityId);
         }

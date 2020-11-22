@@ -34,17 +34,18 @@ namespace FoldEngine.Scenes
             EntityObjectPool = new EntityObjectPool(this);
         }
 
-        public long CreateEntityId()
+        public long CreateEntityId(string name)
         {
             long newEntityId = nextEntityId++;
-            Components.CreateComponent<Transform>(newEntityId);
+            ref Transform transform = ref Components.CreateComponent<Transform>(newEntityId);
+            Components.CreateComponent<EntityName>(newEntityId).Name = name;
             Console.WriteLine($"Created entity {newEntityId}");
             return newEntityId;
         }
 
-        public Entity CreateEntity()
+        public Entity CreateEntity(string name = "Unnamed Entity")
         {
-            return EntityObjectPool.GetOrCreateEntityObject(CreateEntityId());
+            return EntityObjectPool.GetOrCreateEntityObject(CreateEntityId(name));
         }
 
         bool initialized = false;

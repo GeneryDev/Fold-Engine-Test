@@ -33,7 +33,7 @@ namespace Woofer
 
         public void Draw()
         {
-            Layers["level"].Surface.Draw(testSprite, new Rectangle((int)Time.TotalTime, 16, 16, 16), Color.White);
+            Layers["level"].Surface.Draw(testSprite, new Rectangle((int)Time.TotalTime, 16, 16, 16), null, Color.White, (float)Math.PI / 3, Vector2.Zero);
             Layers["level"].Surface.Draw(testSprite, new Rectangle((int)Time.TotalTime, 0, 8, 8), Color.White);
             Layers["hud"].Surface.Draw(testSprite, new Rectangle((int)Time.TotalTime, 16, 16, 16), Color.White);
         }

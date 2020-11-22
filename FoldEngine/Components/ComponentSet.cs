@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using FoldEngine.Scenes;
 
 namespace FoldEngine.Components
 {
@@ -13,6 +14,8 @@ namespace FoldEngine.Components
     public class ComponentSet<T> : ComponentSet where T : struct
     {
         private const int StartingDenseSize = 16;
+
+        internal readonly Scene Scene;
 
         internal ComponentSetEntry<T>[] dense; //resized on flush
         internal int n; //dense count
@@ -26,8 +29,9 @@ namespace FoldEngine.Components
 
         private readonly List<long> IDsMarkedForRemoval = new List<long>();
 
-        public ComponentSet(long startingId)
+        public ComponentSet(Scene scene, long startingId)
         {
+            this.Scene = scene;
             minId = MathUtil.MaximumSetBit(startingId);
             maxId = MathUtil.NearestPowerOfTwo(startingId - minId) + minId;
 
@@ -103,6 +107,7 @@ namespace FoldEngine.Components
                     //if ModifiedTimestamp == CurrentTimestamp + 2: it was added THIS tick and thus should NOT be enumerated
                     IDsMarkedForRemoval.Remove(entityId);
                     dense[sparseIndex].Component = default; //Reset component data
+                    Component.InitializeComponent(ref dense[sparseIndex].Component, Scene, entityId);
                     return ref dense[sparseIndex].Component;
                 } else
                 {
@@ -117,6 +122,7 @@ namespace FoldEngine.Components
                 dense[n - 1].ModifiedTimestamp = CurrentTimestamp;
                 dense[n - 1].EntityId = entityId;
                 dense[n - 1].Component = default;
+                Component.InitializeComponent(ref dense[n - 1].Component, Scene, entityId);
                 return ref dense[n - 1].Component;
             } else
             {

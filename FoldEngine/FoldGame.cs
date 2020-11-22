@@ -41,6 +41,8 @@ namespace FoldEngine
         {
             controller.Initialize();
 
+            FoldEngine.Components.Component.PopulateIdentifiers();
+
             base.Initialize();
         }
 

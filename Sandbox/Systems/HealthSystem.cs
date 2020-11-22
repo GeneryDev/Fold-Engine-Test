@@ -22,7 +22,7 @@ namespace Sandbox.Systems
 
         public override void OnUpdate()
         {
-            Console.WriteLine("HealthSystem update");
+            //Console.WriteLine("HealthSystem update");
             //Owner.Components.DebugPrint<Transform>();
             //Owner.Components.DebugPrint<Living>();
 
@@ -30,14 +30,14 @@ namespace Sandbox.Systems
 
             while(LivingComponents.Next())
             {
-                Console.WriteLine($"Entity {LivingComponents.GetEntityId()} has:");
+                //Console.WriteLine($"Entity {LivingComponents.GetEntityId()} has:");
                 if (LivingComponents.Has<Transform>())
                 {
-                    Console.WriteLine(LivingComponents.Get<Transform>());
+                    //Console.WriteLine(LivingComponents.Get<Transform>());
                 };
                 if (LivingComponents.Has<Living>())
                 {
-                    Console.WriteLine(LivingComponents.Get<Living>());
+                    //Console.WriteLine(LivingComponents.Get<Living>());
                 };
             }
             /*
@@ -47,7 +47,7 @@ namespace Sandbox.Systems
                 //Console.WriteLine(living.Get<Transform>());
                 //Console.WriteLine(living.Get<Living>());
             }*/
-            Console.WriteLine();
+            //Console.WriteLine();
         }
     }
 }

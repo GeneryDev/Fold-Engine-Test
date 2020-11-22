@@ -14,7 +14,19 @@ namespace FoldEngine.Scenes
         public readonly Scene Scene;
         internal long EntityId;
 
-        public Transform Transform => GetComponent<Transform>();
+        public ref Transform Transform => ref GetComponent<Transform>();
+        public string Name
+        {
+            get
+            {
+                return GetComponent<EntityName>().Name;
+            }
+            set
+            {
+                ref EntityName component = ref GetComponent<EntityName>();
+                component.Name = value;
+            }
+        }
 
         public Entity(Scene scene, long entityId)
         {
@@ -22,14 +34,14 @@ namespace FoldEngine.Scenes
             EntityId = entityId;
         }
 
-        public T GetComponent<T>() where T : struct
+        public ref T GetComponent<T>() where T : struct
         {
-            return Scene.Components.GetComponent<T>(EntityId);
+            return ref Scene.Components.GetComponent<T>(EntityId);
         }
 
-        public T AddComponent<T>() where T : struct
+        public ref T AddComponent<T>() where T : struct
         {
-            return Scene.Components.CreateComponent<T>(EntityId);
+            return ref Scene.Components.CreateComponent<T>(EntityId);
         }
 
         public void RemoveComponent<T>() where T : struct
