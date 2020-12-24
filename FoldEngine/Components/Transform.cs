@@ -270,11 +270,7 @@ namespace FoldEngine.Components
         /// </summary>
         public Vector2 Position
         {
-            get
-            {
-                if (!IsNotNull) return Vector2.Zero;
-                return Parent.Apply(LocalPosition);
-            }
+            get => Parent.Apply(Vector2.Zero);
             set
             {
                 if (!IsNotNull) throw new InvalidOperationException();
@@ -299,11 +295,6 @@ namespace FoldEngine.Components
                 current = ref current.Parent;
             }
             return point;
-        }
-
-        public Vector2 ApplyLocal(Vector2 point) {
-            if(!IsNotNull) return point;
-            return Apply(LocalPosition + point);
         }
 
         public override string ToString()

@@ -30,7 +30,7 @@ namespace FoldEngine.Rendering {
                 ref Camera camera = ref _cameras.GetComponent();
                 ref Transform view = ref _cameras.GetCoComponent<Transform>();
                 
-                // view.LocalRotation += Time.DeltaTime;
+                view.LocalRotation += Time.DeltaTime;
                 
                 Vector2 cameraPos = view.Position;
                 float cameraRot = view.Rotation;
@@ -83,10 +83,10 @@ namespace FoldEngine.Rendering {
                     
                     layer.Surface.Draw(new DrawQuadInstruction(
                         renderer.Textures["test"],
-                        RenderingLayer.Convert(layer, (Complex)(transform.ApplyLocal(new Vector2(-w/2, h/2)) - cameraPos) * cameraRotNegativeComplex),
-                        RenderingLayer.Convert(layer, (Complex)(transform.ApplyLocal(new Vector2(-w/2, -h/2)) - cameraPos) * cameraRotNegativeComplex),
-                        RenderingLayer.Convert(layer, (Complex)(transform.ApplyLocal(new Vector2(w/2, h/2)) - cameraPos) * cameraRotNegativeComplex),
-                        RenderingLayer.Convert(layer, (Complex)(transform.ApplyLocal(new Vector2(w/2, -h/2)) - cameraPos) * cameraRotNegativeComplex),
+                        RenderingLayer.Convert(layer, (Complex)(transform.Apply(new Vector2(-w/2, h/2)) - cameraPos) * cameraRotNegativeComplex),
+                        RenderingLayer.Convert(layer, (Complex)(transform.Apply(new Vector2(-w/2, -h/2)) - cameraPos) * cameraRotNegativeComplex),
+                        RenderingLayer.Convert(layer, (Complex)(transform.Apply(new Vector2(w/2, h/2)) - cameraPos) * cameraRotNegativeComplex),
+                        RenderingLayer.Convert(layer, (Complex)(transform.Apply(new Vector2(w/2, -h/2)) - cameraPos) * cameraRotNegativeComplex),
                         new Vector2(0, 0),
                         new Vector2(0, 1),
                         new Vector2(1, 0),
@@ -94,7 +94,7 @@ namespace FoldEngine.Rendering {
                     ));
                     
                     
-                    layer.Surface.Draw(new DrawRectInstruction(renderer.Textures.GetAtlasTexture("main"), new Vector2(0, 0)));
+                    layer.Surface.Draw(new DrawRectInstruction(renderer.Textures.GetAtlasTexture("main"), new Vector2(0, -128)));
                 }
 
                 
