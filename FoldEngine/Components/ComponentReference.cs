@@ -8,18 +8,18 @@ namespace FoldEngine.Components
 {
     public class ComponentReference<T> where T : struct
     {
-        Scene Scene;
-        long EntityId;
+        Scene _scene;
+        long _entityId;
 
         public ComponentReference(Scene scene, long entityId)
         {
-            Scene = scene;
-            EntityId = entityId;
+            _scene = scene;
+            _entityId = entityId;
         }
 
         public ref T Get()
         {
-            return ref Scene.Components.GetComponent<T>(EntityId);
+            return ref _scene.Components.GetComponent<T>(_entityId);
         }
     }
 }

@@ -10,11 +10,11 @@ namespace FoldEngine.Components
 {
     public class MultiComponentIterator : ComponentIterator
     {
-        private ComponentGrouping Grouping = ComponentGrouping.And;
-        private Type[] ComponentTypes;
-        private ComponentIterator[] Iterators;
+        private ComponentGrouping _grouping = ComponentGrouping.And;
+        private Type[] _componentTypes;
+        private ComponentIterator[] _iterators;
 
-        private long CurrentEntityId = -1;
+        private long _currentEntityId = -1;
 
         private bool _started = false;
         private bool _finished = false;
@@ -32,21 +32,21 @@ namespace FoldEngine.Components
                 }
             }
 
-            ComponentTypes = componentTypes;
+            _componentTypes = componentTypes;
 
-            Iterators = new ComponentIterator[ComponentTypes.Length];
-            for (int i = 0; i < Iterators.Length; i++)
+            _iterators = new ComponentIterator[_componentTypes.Length];
+            for (int i = 0; i < _iterators.Length; i++)
             {
-                Iterators[i] = ComponentIterator.CreateForType(ComponentTypes[i], scene, IterationFlags.Ordered);
+                _iterators[i] = ComponentIterator.CreateForType(_componentTypes[i], scene, IterationFlags.Ordered);
             }
         }
 
         public override void Reset() {
-            foreach(ComponentIterator iterator in Iterators)
+            foreach(ComponentIterator iterator in _iterators)
             {
                 iterator.Reset();
             }
-            CurrentEntityId = -1;
+            _currentEntityId = -1;
             _started = false;
             _finished = false;
         }
@@ -54,7 +54,7 @@ namespace FoldEngine.Components
         public override bool Next()
         {
             _started = true;
-            if (Grouping == ComponentGrouping.And)
+            if (_grouping == ComponentGrouping.And)
             {
                 //all iterators must be on the same ID
 
@@ -64,7 +64,7 @@ namespace FoldEngine.Components
                 while(mismatchingIDs)
                 {
                     mismatchingIDs = false;
-                    foreach(ComponentIterator iterator in Iterators)
+                    foreach(ComponentIterator iterator in _iterators)
                     {
                         if(!iterator.Started || iterator.GetEntityId() != highestId)
                         {
@@ -79,15 +79,15 @@ namespace FoldEngine.Components
                         }
                     }
                 }
-                CurrentEntityId = highestId;
+                _currentEntityId = highestId;
                 return true;
             } else //OR
             {
                 long lowestId = long.MaxValue;
-                foreach (ComponentIterator iterator in Iterators)
+                foreach (ComponentIterator iterator in _iterators)
                 {
                     bool active = false;
-                    if(!iterator.Started || (!iterator.Finished && iterator.GetEntityId() <= CurrentEntityId))
+                    if(!iterator.Started || (!iterator.Finished && iterator.GetEntityId() <= _currentEntityId))
                     {
                         active = iterator.Next();
                     }
@@ -99,25 +99,25 @@ namespace FoldEngine.Components
                     _finished = true;
                     return false;
                 }
-                CurrentEntityId = lowestId;
+                _currentEntityId = lowestId;
                 return true;
             }
         }
 
         public override long GetEntityId()
         {
-            return CurrentEntityId;
+            return _currentEntityId;
         }
 
         public bool Has<T>() where T : struct
         {
             if (!Started || Finished) return false;
             Type type = typeof(T);
-            for (int i = 0; i < ComponentTypes.Length; i++)
+            for (int i = 0; i < _componentTypes.Length; i++)
             {
-                if (ComponentTypes[i] == type)
+                if (_componentTypes[i] == type)
                 {
-                    return Iterators[i] != null && Iterators[i].Started && !Iterators[i].Finished && Iterators[i].GetEntityId() == CurrentEntityId;
+                    return _iterators[i] != null && _iterators[i].Started && !_iterators[i].Finished && _iterators[i].GetEntityId() == _currentEntityId;
                 }
             }
             throw new ArgumentException("This MultiComponentIterator does not track components of type " + type);
@@ -127,13 +127,13 @@ namespace FoldEngine.Components
         {
             if (!Started || Finished) throw new InvalidOperationException("This iterator has not been started or it has been exhausted");
             Type type = typeof(T);
-            for (int i = 0; i < ComponentTypes.Length; i++)
+            for (int i = 0; i < _componentTypes.Length; i++)
             {
-                if (ComponentTypes[i] == type)
+                if (_componentTypes[i] == type)
                 {
-                    if (Iterators[i] != null && Iterators[i].Started && !Iterators[i].Finished && Iterators[i].GetEntityId() == CurrentEntityId)
+                    if (_iterators[i] != null && _iterators[i].Started && !_iterators[i].Finished && _iterators[i].GetEntityId() == _currentEntityId)
                     {
-                        return ref ((ComponentIterator<T>)Iterators[i]).GetComponent();
+                        return ref ((ComponentIterator<T>)_iterators[i]).GetComponent();
                     }
                     else
                     {
@@ -146,7 +146,7 @@ namespace FoldEngine.Components
 
         public MultiComponentIterator SetGrouping(ComponentGrouping grouping)
         {
-            Grouping = grouping;
+            _grouping = grouping;
             return this;
         }
     }

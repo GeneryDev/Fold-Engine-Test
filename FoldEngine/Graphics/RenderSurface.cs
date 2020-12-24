@@ -16,6 +16,7 @@ namespace FoldEngine.Graphics
         internal GraphicsDevice GraphicsDevice;
         internal RenderTarget2D Target;
         internal SpriteBatch Batch;
+        internal TriangleBatch TriBatch;
 
         public Point Size => new Point(Target.Width, Target.Height);
 
@@ -23,53 +24,83 @@ namespace FoldEngine.Graphics
         {
             GraphicsDevice = graphicsDevice;
             Batch = new SpriteBatch(graphicsDevice);
+            TriBatch = new TriangleBatch(graphicsDevice);
             Resize(width, height);
         }
 
-        public void Draw(Texture2DWrapper texture, Rectangle destinationRectangle, Color? color)
+        public void Draw(DrawRectInstruction instruction)
         {
-            Batch.Draw(texture.Texture, destinationRectangle, color ?? Microsoft.Xna.Framework.Color.White);
+            Batch.Draw(instruction.Texture,
+                instruction.DestinationRectangle,
+                instruction.SourceRectangle,
+                instruction.Color ?? Color.White,
+                instruction.Rotation,
+                instruction.Pivot
+                ?? new Vector2((float)instruction.Texture.Texture.Width / 2,
+                    (float)instruction.Texture.Texture.Height / 2),
+                SpriteEffects.None,
+                0);
+            
+            // TriBatch.DrawQuad(
+            //     instruction.Texture,
+            //     new Vector2(instruction.DestinationRectangle.Left, instruction.DestinationRectangle.Bottom),
+            //     new Vector2(instruction.DestinationRectangle.Left, instruction.DestinationRectangle.Top),
+            //     new Vector2(instruction.DestinationRectangle.Right, instruction.DestinationRectangle.Bottom),
+            //     new Vector2(instruction.DestinationRectangle.Right, instruction.DestinationRectangle.Top),
+            //     new Vector2(instruction.SourceRectangle?.Left ?? 0, instruction.SourceRectangle?.Bottom ?? 1),
+            //     new Vector2(instruction.SourceRectangle?.Left ?? 0, instruction.SourceRectangle?.Top ?? 0),
+            //     new Vector2(instruction.SourceRectangle?.Right ?? 1, instruction.SourceRectangle?.Bottom ?? 1),
+            //     new Vector2(instruction.SourceRectangle?.Right ?? 1, instruction.SourceRectangle?.Top ?? 0),
+            //     Color.White
+            // );
         }
 
-        public void Draw(Texture2DWrapper texture, Vector2 position, Color? color)
+        public void Draw(DrawQuadInstruction instruction)
         {
-            Batch.Draw(texture.Texture, position, color ?? Microsoft.Xna.Framework.Color.White);
+            TriBatch.DrawQuad(
+                instruction.Texture,
+                instruction.A,
+                instruction.B,
+                instruction.C,
+                instruction.D,
+                instruction.TexA,
+                instruction.TexB,
+                instruction.TexC,
+                instruction.TexD,
+                instruction.ColorA,
+                instruction.ColorB,
+                instruction.ColorC,
+                instruction.ColorD
+            );
         }
 
-        public void Draw(Texture2DWrapper texture, Rectangle destinationRectangle, Rectangle? sourceRectangle, Color? color)
+        public void Draw(DrawTriangleInstruction instruction)
         {
-            Batch.Draw(texture.Texture, destinationRectangle, sourceRectangle, color ?? Microsoft.Xna.Framework.Color.White);
-        }
-
-        public void Draw(Texture2DWrapper texture, Vector2 position, Rectangle? sourceRectangle, Color? color)
-        {
-            Batch.Draw(texture.Texture, position, sourceRectangle, color ?? Microsoft.Xna.Framework.Color.White);
-        }
-
-        public void Draw(Texture2DWrapper texture, Rectangle destinationRectangle, Rectangle? sourceRectangle, Color? color, float rotation, Vector2 origin)
-        {
-            Batch.Draw(texture.Texture, destinationRectangle, sourceRectangle, color ?? Microsoft.Xna.Framework.Color.White, rotation, origin, SpriteEffects.None, 0.0f);
-        }
-
-        public void Draw(Texture2DWrapper texture, Vector2 position, Rectangle? sourceRectangle, Color? color, float rotation, Vector2 origin, float scale)
-        {
-            Batch.Draw(texture.Texture, position, sourceRectangle, color ?? Microsoft.Xna.Framework.Color.White, rotation, origin, scale, SpriteEffects.None, 0.0f);
-        }
-
-        public void Draw(Texture2DWrapper texture, Vector2 position, Rectangle? sourceRectangle, Color? color, float rotation, Vector2 origin, Vector2 scale)
-        {
-            Batch.Draw(texture.Texture, position, sourceRectangle, color ?? Microsoft.Xna.Framework.Color.White, rotation, origin, scale, SpriteEffects.None, 0.0f);
+            TriBatch.DrawTriangle(
+                instruction.Texture,
+                instruction.A,
+                instruction.B,
+                instruction.C,
+                instruction.TexA,
+                instruction.TexB,
+                instruction.TexC,
+                instruction.ColorA,
+                instruction.ColorB,
+                instruction.ColorC
+            );
         }
 
         internal void Begin()
         {
             Batch.Begin();
+            TriBatch.Begin(samplerState: SamplerState.AnisotropicClamp);
         }
         internal void End()
         {
             GraphicsDevice.SetRenderTarget(Target);
-            GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.Transparent);
+            GraphicsDevice.Clear(Color.Transparent);
             Batch.End();
+            TriBatch.End();
         }
 
         public void Resize(int newWidth, int newHeight)

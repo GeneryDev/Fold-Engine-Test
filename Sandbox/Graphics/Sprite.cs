@@ -9,7 +9,7 @@ namespace Sandbox.Graphics
 {
     public struct Sprite
     {
-        Texture2D Texture;
-        Rectangle Bounds;
+        Texture2D _texture;
+        Rectangle _bounds;
     }
 }

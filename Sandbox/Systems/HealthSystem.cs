@@ -1,45 +1,48 @@
 ﻿using FoldEngine.Components;
 using FoldEngine.Scenes;
 using FoldEngine.Systems;
-
 using Sandbox.Components;
-
 using System;
 using System.Collections.Generic;
 using System.Text;
+using FoldEngine;
+using Microsoft.Xna.Framework;
 
-namespace Sandbox.Systems
-{
+namespace Sandbox.Systems {
     [GameSystem("sandbox:health", ProcessingCycles.Update | ProcessingCycles.Render)]
-    public class HealthSystem : GameSystem
-    {
-        private MultiComponentIterator LivingComponents;
+    public class HealthSystem : GameSystem {
+        private ComponentIterator<Living> _livingComponents;
 
-        internal override void Initialize()
-        {
-            LivingComponents = CreateComponentIterator(typeof(Transform), typeof(Living)).SetGrouping(ComponentGrouping.Or);
+        internal override void Initialize() {
+            _livingComponents = CreateComponentIterator<Living>(IterationFlags.None);
         }
 
-        public override void OnUpdate()
-        {
+        public override void OnUpdate() {
             //Console.WriteLine("HealthSystem update");
             //Owner.Components.DebugPrint<Transform>();
             //Owner.Components.DebugPrint<Living>();
 
-            LivingComponents.Reset();
+            _livingComponents.Reset();
 
-            while(LivingComponents.Next())
-            {
+            while(_livingComponents.Next()) {
                 //Console.WriteLine($"Entity {LivingComponents.GetEntityId()} has:");
-                if (LivingComponents.Has<Transform>())
-                {
-                    //Console.WriteLine(LivingComponents.Get<Transform>());
-                };
-                if (LivingComponents.Has<Living>())
-                {
-                    //Console.WriteLine(LivingComponents.Get<Living>());
-                };
+
+                ref Transform transform = ref _livingComponents.GetCoComponent<Transform>();
+
+                // if(transform.Parent.IsNotNull) {
+                //     transform.LocalPosition += new Vector2(Time.DeltaTime, 0);
+                // } else {
+                //     transform.LocalRotation += Time.DeltaTime;
+                // }
+
+                if(transform.Parent.IsNotNull) {
+                    transform.LocalPosition.X += Time.DeltaTime * 0.5f;
+                    transform.LocalRotation += Time.DeltaTime;
+                } else {
+                    transform.LocalScale.X += Time.DeltaTime * 0.5f;
+                }
             }
+
             /*
             foreach(var living in LivingComponents)
             {

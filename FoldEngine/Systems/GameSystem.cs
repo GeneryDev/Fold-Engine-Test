@@ -1,42 +1,36 @@
 ﻿using FoldEngine.Components;
 using FoldEngine.Scenes;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace FoldEngine.Systems
-{
-    public abstract class GameSystem
-    {
-        public string SystemName { get; private set; }
-
+namespace FoldEngine.Systems {
+    public abstract class GameSystem {
         public Scene Owner { get; internal set; }
 
-        private readonly GameSystemAttribute Attribute;
-        public ProcessingCycles ProcessingCycles => Attribute.ProcessingCycles;
+        private readonly GameSystemAttribute _attribute;
+        public string SystemName => _attribute.SystemName;
+        public ProcessingCycles ProcessingCycles => _attribute.ProcessingCycles;
 
-        public GameSystem()
-        {
-            Attribute = (GameSystemAttribute)this.GetType().GetCustomAttribute(typeof(GameSystemAttribute));
+        protected GameSystem() {
+            _attribute = (GameSystemAttribute) this.GetType().GetCustomAttribute(typeof(GameSystemAttribute));
         }
 
         public virtual void OnInput() { }
         public virtual void OnUpdate() { }
-        public virtual void OnRender() { }
+        public virtual void OnRender(Interfaces.IRenderingUnit renderer) { }
 
-        protected MultiComponentIterator CreateComponentIterator(params Type[] watchingTypes)
-        {
+        protected MultiComponentIterator CreateComponentIterator(params Type[] watchingTypes) {
             return Owner.Components.CreateMultiIterator(watchingTypes);
         }
-        protected ComponentIterator CreateComponentIterator(Type watchingType, IterationFlags flags)
-        {
+
+        protected ComponentIterator CreateComponentIterator(Type watchingType, IterationFlags flags) {
             return Owner.Components.CreateIterator(watchingType, flags);
         }
-        protected ComponentIterator CreateComponentIterator<T>(IterationFlags flags) where T : struct
-        {
+
+        protected ComponentIterator<T> CreateComponentIterator<T>(IterationFlags flags) where T : struct {
             return Owner.Components.CreateIterator<T>(flags);
         }
 
@@ -45,8 +39,7 @@ namespace FoldEngine.Systems
 
 
     [Flags]
-    public enum ProcessingCycles
-    {
+    public enum ProcessingCycles {
         None = 0,
         Input = 1,
         Update = 2,
@@ -54,23 +47,22 @@ namespace FoldEngine.Systems
         All = Input | Update | Render,
     }
 
-    public sealed class GameSystemAttribute : Attribute
-    {
+    public sealed class GameSystemAttribute : Attribute {
         public readonly string SystemName;
         public readonly ProcessingCycles ProcessingCycles;
-        public GameSystemAttribute(string identifier, ProcessingCycles processingCycles)
-        {
+
+        public GameSystemAttribute(string identifier, ProcessingCycles processingCycles) {
             SystemName = identifier;
             ProcessingCycles = processingCycles;
         }
     }
-    public sealed class ListeningAttribute : Attribute
-    {
+
+    public sealed class ListeningAttribute : Attribute {
         public readonly string[] Watching;
-        public ListeningAttribute(params Type[] watching)
-        {
+
+        public ListeningAttribute(params Type[] watching) {
             //TODO event class
-            if (!watching.All(t => typeof(Component).IsAssignableFrom(t))) throw new ArgumentException("watching");
+            if(!watching.All(t => typeof(Component).IsAssignableFrom(t))) throw new ArgumentException("watching");
             Watching = watching.Select(t => Component.IdentifierOf(t)).ToArray();
         }
     }

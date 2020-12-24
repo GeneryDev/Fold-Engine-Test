@@ -33,30 +33,31 @@ namespace FoldEngine.Interfaces
 
 
 
-        internal static Rectangle Convert(IRenderingLayer layer, Rectangle rect)
+        public static Rectangle Convert(IRenderingLayer layer, Rectangle rect)
         {
-            Rectangle destination = layer.Destination;
+            (int x, int y, int width, int height) = layer.Destination;
 
-            double scaleX = (double)destination.Width / layer.LayerSize.X;
-            double scaleY = (double)destination.Height / layer.LayerSize.Y;
+            double scaleX = (double)width / layer.LayerSize.X;
+            double scaleY = (double)height / layer.LayerSize.Y;
 
-            rect.X = (int)Math.Floor(destination.X + rect.X * scaleX);
-            rect.Y = (int)Math.Floor(destination.Y + rect.Y * scaleY);
+            rect.X = (int)Math.Floor(x + rect.X * scaleX);
+            rect.Y = (int)Math.Floor(y + rect.Y * scaleY);
             rect.Width = (int)Math.Round(rect.Width * scaleX);
             rect.Height = (int)Math.Round(rect.Height * scaleY);
 
             return rect;
         }
 
-        internal Point Convert(IRenderingLayer layer, Point point)
+        //TODO
+        public static Vector2 Convert(IRenderingLayer layer, Vector2 point)
         {
-            Rectangle destination = layer.Destination;
+            (int x, int y, int width, int height) = layer.Destination;
 
-            double scaleX = (double)destination.Width / layer.LayerSize.X;
-            double scaleY = (double)destination.Height / layer.LayerSize.Y;
+            double scaleX = (double)width / layer.LayerSize.X;
+            double scaleY = (double)height / layer.LayerSize.Y;
 
-            point.X = (int)Math.Floor(destination.X + point.X * scaleX);
-            point.Y = (int)Math.Floor(destination.Y + point.Y * scaleY);
+            point.X = (int)Math.Round(x + point.X * scaleX) + layer.LayerSize.X/2;
+            point.Y = (int)Math.Round(y + point.Y * scaleY) + layer.LayerSize.Y/2;
 
             return point;
         }

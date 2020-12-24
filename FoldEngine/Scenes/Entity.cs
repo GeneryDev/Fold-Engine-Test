@@ -12,15 +12,12 @@ namespace FoldEngine.Scenes
     public class Entity
     {
         public readonly Scene Scene;
-        internal long EntityId;
+        public readonly long EntityId;
 
         public ref Transform Transform => ref GetComponent<Transform>();
         public string Name
         {
-            get
-            {
-                return GetComponent<EntityName>().Name;
-            }
+            get => GetComponent<EntityName>().Name;
             set
             {
                 ref EntityName component = ref GetComponent<EntityName>();

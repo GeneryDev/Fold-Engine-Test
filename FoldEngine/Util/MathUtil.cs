@@ -6,7 +6,7 @@ namespace FoldEngine.Util
 {
     public class MathUtil
     {
-        public const double LN2 = 0.69314718055994529;
+        public const double Ln2 = 0.69314718055994529;
         public static int NearestPowerOfTwo(int n)
         {
             return 1 << (int)Math.Ceiling(Log2(n));
@@ -29,7 +29,7 @@ namespace FoldEngine.Util
 
         public static double Log2(double n)
         {
-            return Math.Log(n) / LN2;
+            return Math.Log(n) / Ln2;
         }
     }
 }

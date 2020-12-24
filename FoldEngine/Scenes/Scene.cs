@@ -9,6 +9,8 @@ using FoldEngine.Interfaces;
 
 using Microsoft.Xna.Framework;
 
+using Woofer;
+
 namespace FoldEngine.Scenes
 {
     public class Scene
@@ -20,7 +22,7 @@ namespace FoldEngine.Scenes
         public SystemMap Systems;
         internal EntityObjectPool EntityObjectPool;
 
-        private long nextEntityId = 0;
+        private long _nextEntityId = 0;
 
         /// <summary>
         /// The speed at which the game is simulated
@@ -36,7 +38,7 @@ namespace FoldEngine.Scenes
 
         public long CreateEntityId(string name)
         {
-            long newEntityId = nextEntityId++;
+            long newEntityId = _nextEntityId++;
             ref Transform transform = ref Components.CreateComponent<Transform>(newEntityId);
             Components.CreateComponent<EntityName>(newEntityId).Name = name;
             Console.WriteLine($"Created entity {newEntityId}");
@@ -48,7 +50,12 @@ namespace FoldEngine.Scenes
             return EntityObjectPool.GetOrCreateEntityObject(CreateEntityId(name));
         }
 
-        bool initialized = false;
+        bool _initialized = false;
+
+        public virtual void Initialize()
+        {
+            
+        }
 
         public virtual void Input()
         {
@@ -60,10 +67,10 @@ namespace FoldEngine.Scenes
 
         public virtual void Update()
         {
-            if(!initialized)
+            if(!_initialized)
             {
                 Initialize();
-                initialized = true;
+                _initialized = true;
             }
 
             Systems.InvokeUpdate();
@@ -72,9 +79,9 @@ namespace FoldEngine.Scenes
             Components.Flush();
         }
 
-        public virtual void Initialize()
+        public void Render(IRenderingUnit renderer)
         {
-            
+            Systems.InvokeRender(renderer);
         }
 
         private static void WriteMatrix(Matrix mat)

@@ -12,13 +12,13 @@ namespace FoldEngine.Interfaces
 {
     public interface IRenderingUnit
     {
-        TextureManager TextureManager { get; set; }
+        TextureManager Textures { get; set; }
 
         Point ScreenSize { get; }
         Dictionary<string, IRenderingLayer> Layers { get; }
 
         void LoadContent();
 
-        void Draw();
+        void Render();
     }
 }

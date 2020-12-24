@@ -14,7 +14,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)DemoScene.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\Sprite.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Systems\HealthSystem.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Systems\LevelRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WooferGameController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WooferRenderingUnit.cs" />
   </ItemGroup>

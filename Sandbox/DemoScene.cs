@@ -1,26 +1,19 @@
 ﻿using FoldEngine.Components;
 using FoldEngine.Scenes;
-
 using Microsoft.Xna.Framework;
-
 using Sandbox.Components;
 using Sandbox.Systems;
-
 using System;
 using System.Collections.Generic;
 using System.Text;
+using FoldEngine.Rendering;
 
-namespace Sandbox
-{
-    internal class DemoScene : Scene
-    {
-
-
-        public override void Initialize()
-        {
-            var e0 = CreateEntity("Entity 0");
-            var e1 = CreateEntity("Entity 1");
-            var e2 = CreateEntity("Entity 2");
+namespace Sandbox {
+    internal class DemoScene : Scene {
+        public override void Initialize() {
+            Entity e0 = CreateEntity("Entity 0");
+            Entity e1 = CreateEntity("Entity 1");
+            Entity e2 = CreateEntity("Entity 2");
 
 
             /*e0.Transform.Position = new Vector2(1, 2);
@@ -42,8 +35,8 @@ namespace Sandbox
             e1.Transform.LocalScale = Vector2.One * 0.5f;
             Console.WriteLine(e1.Transform.LocalScale);*/
 
-            e1.Transform.LocalPosition = new Vector2(10, 0);
-            e0.Transform.Rotation = (float)Math.PI/2f;
+            e1.Transform.LocalPosition = new Vector2(0, 0);
+            // e0.Transform.Rotation = (float) Math.PI / 4f;
 
             Console.WriteLine(e1.Transform.Position);
 
@@ -51,17 +44,27 @@ namespace Sandbox
             e1.AddComponent<Living>();
 
             e1.Transform.SetParent(e0);
-            e2.Transform.SetParent(e0);
 
 
             ComponentReference<Transform>[] e0Children = e0.Transform.Children;
 
             Systems.Add<HealthSystem>();
-            Console.WriteLine("initializing");
+
+            Systems.Add<LevelRenderer2D>();
 
 
             Components.DebugPrint<Transform>();
             Components.DebugPrint<Living>();
+            
+            
+            
+            
+            
+            Entity cam = CreateEntity("Camera");
+            cam.AddComponent<Camera>().RenderToLayer = "level";
+
+            e0.AddComponent<LevelRenderable>();
+            e1.AddComponent<LevelRenderable>();
         }
     }
 }

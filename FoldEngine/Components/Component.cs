@@ -11,10 +11,10 @@ namespace FoldEngine.Components
 {
     public static class Component
     {
-        private static Dictionary<Type, string> TypeToIdentifierMap = null;
-        private static Dictionary<string, Type> IdentifierToTypeMap = null;
+        private static Dictionary<Type, string> _typeToIdentifierMap = null;
+        private static Dictionary<string, Type> _identifierToTypeMap = null;
 
-        private static Dictionary<Type, Func<Scene, long, object>> CustomInitializers = null;
+        private static Dictionary<Type, Func<Scene, long, object>> _customInitializers = null;
 
         /// <summary>
         /// Retrieves the identifier of the given component type
@@ -23,15 +23,15 @@ namespace FoldEngine.Components
         /// <returns>The identifier for the given type, if it exists</returns>
         public static string IdentifierOf(Type type)
         {
-            if(TypeToIdentifierMap == null)
+            if(_typeToIdentifierMap == null)
             {
-                TypeToIdentifierMap = new Dictionary<Type, string>();
+                _typeToIdentifierMap = new Dictionary<Type, string>();
             }
-            if(!TypeToIdentifierMap.ContainsKey(type))
+            if(!_typeToIdentifierMap.ContainsKey(type))
             {
-                TypeToIdentifierMap[type] = (type.GetCustomAttributes(typeof(ComponentAttribute), false).First() as ComponentAttribute).ComponentName;
+                _typeToIdentifierMap[type] = (type.GetCustomAttributes(typeof(ComponentAttribute), false).First() as ComponentAttribute).ComponentName;
             }
-            return TypeToIdentifierMap[type];
+            return _typeToIdentifierMap[type];
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace FoldEngine.Components
         public static Type TypeForIdentifier(string identifier)
         {
             PopulateIdentifiers();
-            return IdentifierToTypeMap[identifier];
+            return _identifierToTypeMap[identifier];
         }
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace FoldEngine.Components
         /// <param name="assembly">The assembly to search for components</param>
         public static void PopulateDictionaryWithAssembly(Assembly assembly)
         {
-            if (IdentifierToTypeMap == null) IdentifierToTypeMap = new Dictionary<string, Type>();
+            if (_identifierToTypeMap == null) _identifierToTypeMap = new Dictionary<string, Type>();
             foreach (Type type in assembly.GetTypes())
             {
                 if (type.IsValueType)
@@ -65,12 +65,12 @@ namespace FoldEngine.Components
                     if ((attributes = type.GetCustomAttributes(typeof(ComponentAttribute), false)).Length > 0)
                     {
                         string thisIdentifier = (attributes[0] as ComponentAttribute).ComponentName;
-                        IdentifierToTypeMap[thisIdentifier] = type;
+                        _identifierToTypeMap[thisIdentifier] = type;
                     }
                     if ((attributes = type.GetCustomAttributes(typeof(ComponentInitializerAttribute), false)).Length > 0)
                     {
-                        if (CustomInitializers == null) CustomInitializers = new Dictionary<Type, Func<Scene, long, object>>();
-                        CustomInitializers[type] = (attributes[0] as ComponentInitializerAttribute).Initializer;
+                        if (_customInitializers == null) _customInitializers = new Dictionary<Type, Func<Scene, long, object>>();
+                        _customInitializers[type] = (attributes[0] as ComponentInitializerAttribute).Initializer;
                     }
                 }
             }
@@ -81,7 +81,7 @@ namespace FoldEngine.Components
         /// </summary>
         public static void PopulateIdentifiers()
         {
-            if (IdentifierToTypeMap == null)
+            if (_identifierToTypeMap == null)
             {
                 PopulateDictionaryWithAssembly(Assembly.GetEntryAssembly());
             }
@@ -89,10 +89,10 @@ namespace FoldEngine.Components
 
         public static void InitializeComponent<T>(ref T component, Scene scene, long entityId) where T : struct
         {
-            if(CustomInitializers != null && CustomInitializers.ContainsKey(typeof(T)))
+            if(_customInitializers != null && _customInitializers.ContainsKey(typeof(T)))
             {
                 Console.WriteLine($"Initializing component of type {typeof(T)}");
-                component = (T) CustomInitializers[typeof(T)].Invoke(scene, entityId);
+                component = (T) _customInitializers[typeof(T)].Invoke(scene, entityId);
             }
         }
     }

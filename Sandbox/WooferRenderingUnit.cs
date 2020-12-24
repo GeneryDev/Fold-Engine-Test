@@ -15,31 +15,28 @@ namespace Woofer
 {
     public class WooferRenderingUnit : IRenderingUnit
     {
-        private readonly WooferGameController Controller;
+        private readonly WooferGameController _controller;
 
-        public TextureManager TextureManager { get; set; }
+        public TextureManager Textures { get; set; }
         public Point ScreenSize { get; private set; } = new Point(1280, 720);
 
         public Dictionary<string, IRenderingLayer> Layers { get; private set; } = new Dictionary<string, IRenderingLayer>();
 
         public WooferRenderingUnit(WooferGameController controller)
         {
-            Controller = controller;
+            _controller = controller;
             Layers["level"] = new RenderingLayer() { Name = "level", LayerSize = new Point(320, 180), Destination = new Rectangle(Point.Zero, ScreenSize) };
             Layers["hud"] = new RenderingLayer() { Name = "hud", LayerSize = new Point(640, 360), Destination = new Rectangle(Point.Zero, ScreenSize) };
         }
 
-        Texture2DWrapper testSprite;
 
-        public void Draw()
+        public void Render()
         {
-            Layers["level"].Surface.Draw(testSprite, new Rectangle((int)Time.TotalTime, 16, 16, 16), null, Color.White, (float)Math.PI / 3, Vector2.Zero);
-            Layers["level"].Surface.Draw(testSprite, new Rectangle((int)Time.TotalTime, 0, 8, 8), Color.White);
-            Layers["hud"].Surface.Draw(testSprite, new Rectangle((int)Time.TotalTime, 16, 16, 16), Color.White);
+            _controller.ActiveScene?.Render(this);
         }
         public void LoadContent()
         {
-            testSprite = TextureManager.LoadSprite("Textures/test");
+            Textures.LoadSprite("test");
         }
     }
 }

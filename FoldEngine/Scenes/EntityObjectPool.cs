@@ -8,40 +8,40 @@ namespace FoldEngine.Scenes
 {
     internal class EntityObjectPool
     {
-        private readonly Scene Scene;
-        private readonly List<Entity> EntityObjects = new List<Entity>();
+        private readonly Scene _scene;
+        private readonly List<Entity> _entityObjects = new List<Entity>();
 
-        public EntityObjectPool(Scene scene) => this.Scene = scene;
+        public EntityObjectPool(Scene scene) => this._scene = scene;
 
         private Entity InstantiateEntityObject(long entityId)
         {
-            return new Entity(Scene, entityId);
+            return new Entity(_scene, entityId);
         }
 
         internal Entity GetOrCreateEntityObject(long entityId)
         {
-            if (EntityObjects.Count == 0)
+            if (_entityObjects.Count == 0)
             {
                 Entity ent = InstantiateEntityObject(entityId);
-                EntityObjects.Add(ent);
+                _entityObjects.Add(ent);
                 return ent;
             }
 
             int minIndex = 0; // inclusive
-            int maxIndex = EntityObjects.Count; // exclusive
+            int maxIndex = _entityObjects.Count; // exclusive
 
-            if(entityId < EntityObjects[minIndex].EntityId)
+            if(entityId < _entityObjects[minIndex].EntityId)
             {
                 //Entity ID is lower than the lower bound
                 Entity ent = InstantiateEntityObject(entityId);
-                EntityObjects.Insert(0, ent);
+                _entityObjects.Insert(0, ent);
                 return ent;
             }
-            if (entityId > EntityObjects[maxIndex - 1].EntityId)
+            if (entityId > _entityObjects[maxIndex - 1].EntityId)
             {
                 //Entity ID is greater than the upper bound
                 Entity ent = InstantiateEntityObject(entityId);
-                EntityObjects.Add(ent);
+                _entityObjects.Add(ent);
                 return ent;
             }
 
@@ -49,10 +49,10 @@ namespace FoldEngine.Scenes
             {
                 int pivotIndex = (minIndex + maxIndex) / 2;
 
-                long pivotId = EntityObjects[pivotIndex].EntityId;
+                long pivotId = _entityObjects[pivotIndex].EntityId;
                 if (pivotId == entityId)
                 {
-                    return EntityObjects[pivotIndex];
+                    return _entityObjects[pivotIndex];
                 }
                 else if (entityId > pivotId)
                 {
@@ -65,7 +65,7 @@ namespace FoldEngine.Scenes
             }
             {
                 Entity ent = InstantiateEntityObject(entityId);
-                EntityObjects.Insert(minIndex, ent);
+                _entityObjects.Insert(minIndex, ent);
                 return ent;
             }
         }

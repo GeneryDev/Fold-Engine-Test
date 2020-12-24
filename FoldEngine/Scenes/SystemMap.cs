@@ -1,4 +1,5 @@
-﻿using FoldEngine.Systems;
+﻿using FoldEngine.Interfaces;
+using FoldEngine.Systems;
 
 using System;
 using System.Collections.Generic;
@@ -8,106 +9,97 @@ namespace FoldEngine.Scenes
 {
     public class SystemMap
     {
-        private readonly Scene Owner;
+        private readonly Scene _owner;
 
-        private readonly List<GameSystem> All = new List<GameSystem>();
+        private readonly List<GameSystem> _all = new List<GameSystem>();
 
-        private readonly List<GameSystem> InputSystems = new List<GameSystem>();
-        private readonly List<GameSystem> UpdateSystems = new List<GameSystem>();
-        private readonly List<GameSystem> RenderSystems = new List<GameSystem>();
+        private readonly List<GameSystem> _inputSystems = new List<GameSystem>();
+        private readonly List<GameSystem> _updateSystems = new List<GameSystem>();
+        private readonly List<GameSystem> _renderSystems = new List<GameSystem>();
 
-        private readonly Queue<GameSystem> QueuedToAdd = new Queue<GameSystem>();
-        private readonly Queue<GameSystem> QueuedToRemove = new Queue<GameSystem>();
+        private readonly Queue<GameSystem> _queuedToAdd = new Queue<GameSystem>();
+        private readonly Queue<GameSystem> _queuedToRemove = new Queue<GameSystem>();
 
-        public SystemMap(Scene owner) => Owner = owner;
+        public SystemMap(Scene owner) => _owner = owner;
 
         public void Add<T>() where T : GameSystem, new()
         {
-            QueuedToAdd.Enqueue(new T());
+            _queuedToAdd.Enqueue(new T());
         }
         public void Remove(GameSystem sys)
         {
-            QueuedToRemove.Enqueue(sys);
+            _queuedToRemove.Enqueue(sys);
         }
 
         private void UpdateProcessingGroups()
         {
-            InputSystems.Clear();
-            UpdateSystems.Clear();
-            RenderSystems.Clear();
+            _inputSystems.Clear();
+            _updateSystems.Clear();
+            _renderSystems.Clear();
 
-            foreach(GameSystem sys in All)
+            foreach(GameSystem sys in _all)
             {
                 if (sys.ProcessingCycles.HasFlag(ProcessingCycles.Input))
                 {
-                    InputSystems.Add(sys);
+                    _inputSystems.Add(sys);
                 }
                 if (sys.ProcessingCycles.HasFlag(ProcessingCycles.Update))
                 {
-                    UpdateSystems.Add(sys);
+                    _updateSystems.Add(sys);
                 }
                 if (sys.ProcessingCycles.HasFlag(ProcessingCycles.Render))
                 {
-                    RenderSystems.Add(sys);
+                    _renderSystems.Add(sys);
                 }
             }
         }
 
         private void AddDirectly(GameSystem sys)
         {
-            All.Add(sys);
+            _all.Add(sys);
             if (sys.ProcessingCycles.HasFlag(ProcessingCycles.Input))
             {
-                InputSystems.Add(sys);
+                _inputSystems.Add(sys);
             }
             if (sys.ProcessingCycles.HasFlag(ProcessingCycles.Update))
             {
-                UpdateSystems.Add(sys);
+                _updateSystems.Add(sys);
             }
             if (sys.ProcessingCycles.HasFlag(ProcessingCycles.Render))
             {
-                RenderSystems.Add(sys);
+                _renderSystems.Add(sys);
             }
 
-            sys.Owner = Owner;
+            sys.Owner = _owner;
             sys.Initialize();
         }
 
         private void RemoveDirectly(GameSystem sys)
         {
-            All.Remove(sys);
-            InputSystems.Remove(sys);
-            UpdateSystems.Remove(sys);
-            RenderSystems.Remove(sys);
+            _all.Remove(sys);
+            _inputSystems.Remove(sys);
+            _updateSystems.Remove(sys);
+            _renderSystems.Remove(sys);
             sys.Owner = null;
             //todo remove any listeners and disconnect any views
         }
 
         internal void Flush()
         {
+            while (_queuedToAdd.Count > 0)
             {
-                GameSystem toAdd;
-                while (QueuedToAdd.Count > 0)
-                {
-                    toAdd = QueuedToAdd.Dequeue();
-
-                    AddDirectly(toAdd);
-                }
+                AddDirectly(_queuedToAdd.Dequeue());
             }
-            {
-                GameSystem toRemove;
-                while (QueuedToRemove.Count > 0)
-                {
-                    toRemove = QueuedToRemove.Dequeue();
 
-                    RemoveDirectly(toRemove);
-                }
+            while (_queuedToRemove.Count > 0)
+            {
+                RemoveDirectly(_queuedToRemove.Dequeue());
             }
         }
 
         internal void InvokeInput()
         {
-            foreach (GameSystem sys in InputSystems)
+            foreach (GameSystem sys in _inputSystems)
             {
                 sys.OnInput();
             }
@@ -115,17 +107,17 @@ namespace FoldEngine.Scenes
 
         internal void InvokeUpdate()
         {
-            foreach (GameSystem sys in UpdateSystems)
+            foreach (GameSystem sys in _updateSystems)
             {
                 sys.OnUpdate();
             }
         }
 
-        internal void InvokeRender() //TODO needed arguments
+        internal void InvokeRender(IRenderingUnit renderer)
         {
-            foreach (GameSystem sys in RenderSystems)
+            foreach (GameSystem sys in _renderSystems)
             {
-                sys.OnRender();
+                sys.OnRender(renderer);
             }
         }
     }

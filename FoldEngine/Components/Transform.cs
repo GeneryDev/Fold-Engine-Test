@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,7 +20,7 @@ namespace FoldEngine.Components
         /// <summary>
         /// Static unique null transform. Has no scene, or children
         /// </summary>
-        private static Transform NullTransform = default;
+        private static Transform _nullTransform = default;
         /// <summary>
         /// Only false for null transforms
         /// Double negative was chosen such that default transforms have this as false by default, and thus can't be considered not-null
@@ -33,11 +34,11 @@ namespace FoldEngine.Components
         /// <summary>
         /// ID of the entity that owns this transform (-1 for null)
         /// </summary>
-        private readonly long OwnerId;
+        private readonly long _ownerId;
         /// <summary>
         /// ID of the parent entity (-1 for null and transforms without parent)
         /// </summary>
-        private long ParentId;
+        private long _parentId;
 
         /// <summary>
         /// Position in 2D space where this entity is located, relative to its parent
@@ -55,20 +56,20 @@ namespace FoldEngine.Components
         /// <summary>
         /// Entity ID of this transform's first child (or -1 if it has no children)
         /// </summary>
-        private long firstChild;
+        private long _firstChild;
         /// <summary>
         /// Entity ID of this transform's previous sibling (or -1 if it's the first child)
         /// </summary>
-        private long previousSibling;
+        private long _previousSibling;
         /// <summary>
         /// Entity ID of this transform's next sibling (or -1 if it's the last child)
         /// </summary>
-        private long nextSibling;
+        private long _nextSibling;
 
         /// <summary>
         /// Float used to save this transform's rotation in radians. Used for the LocalRotation property
         /// </summary>
-        internal float _localRotation;
+        private float _localRotation;
         /// <summary>
         /// This transform's local rotation, in radians.
         /// </summary>
@@ -101,12 +102,12 @@ namespace FoldEngine.Components
             IsNotNull = true;
 
             Scene = null;
-            OwnerId = entityId;
-            ParentId = -1;
+            _ownerId = entityId;
+            _parentId = -1;
 
-            firstChild = -1;
-            previousSibling = -1;
-            nextSibling = -1;
+            _firstChild = -1;
+            _previousSibling = -1;
+            _nextSibling = -1;
 
             LocalPosition = Vector2.Zero;
             RotationComplex = new Complex(1, 0);
@@ -122,14 +123,14 @@ namespace FoldEngine.Components
         {
             get
             {
-                if (!IsNotNull) return ref NullTransform;
-                if (ParentId != -1)
+                if (!IsNotNull) return ref _nullTransform;
+                if (_parentId != -1)
                 {
-                    return ref Scene.Components.GetComponent<Transform>(ParentId);
+                    return ref Scene.Components.GetComponent<Transform>(_parentId);
                 }
                 else
                 {
-                    return ref NullTransform;
+                    return ref _nullTransform;
                 }
             }
         }
@@ -144,14 +145,14 @@ namespace FoldEngine.Components
         {
             get
             {
-                if (!IsNotNull) return ref NullTransform;
-                if (ParentId != -1)
+                if (!IsNotNull) return ref _nullTransform;
+                if (_parentId != -1)
                 {
-                    return ref Scene.Components.GetComponent<Transform>(ParentId);
+                    return ref Scene.Components.GetComponent<Transform>(_parentId);
                 }
                 else
                 {
-                    return ref NullTransform;
+                    return ref _nullTransform;
                 }
             }
         }
@@ -172,7 +173,7 @@ namespace FoldEngine.Components
         {
             if (!IsNotNull) throw new InvalidOperationException();
             //TODO clearing children of old parent; ensuring root doesn't change.
-            ParentId = entityId;
+            _parentId = entityId;
             AddChild(ref MutableParent, ref this);
         }
         /// <summary>
@@ -183,33 +184,33 @@ namespace FoldEngine.Components
         private static void AddChild(ref Transform parent, ref Transform child)
         {
             if (!parent.IsNotNull) throw new InvalidOperationException();
-            if (parent.firstChild == -1)
+            if (parent._firstChild == -1)
             {
-                parent.firstChild = child.OwnerId;
+                parent._firstChild = child._ownerId;
                 return;
             }
-            ref Transform currentChild = ref parent.Scene.Components.GetComponent<Transform>(parent.firstChild);
-            while(currentChild.nextSibling != -1)
+            ref Transform currentChild = ref parent.Scene.Components.GetComponent<Transform>(parent._firstChild);
+            while(currentChild._nextSibling != -1)
             {
-                currentChild = ref parent.Scene.Components.GetComponent<Transform>(currentChild.nextSibling);
+                currentChild = ref parent.Scene.Components.GetComponent<Transform>(currentChild._nextSibling);
             }
-            currentChild.nextSibling = child.OwnerId;
-            child.previousSibling = currentChild.OwnerId;
+            currentChild._nextSibling = child._ownerId;
+            child._previousSibling = currentChild._ownerId;
         }
 
         public int ChildCount
         {
             get
             {
-                if (firstChild == -1)
+                if (_firstChild == -1)
                 {
                     return 0;
                 }
                 int count = 1;
-                ref Transform currentChild = ref Scene.Components.GetComponent<Transform>(firstChild);
-                while (currentChild.nextSibling != -1)
+                ref Transform currentChild = ref Scene.Components.GetComponent<Transform>(_firstChild);
+                while (currentChild._nextSibling != -1)
                 {
-                    currentChild = ref Scene.Components.GetComponent<Transform>(currentChild.nextSibling);
+                    currentChild = ref Scene.Components.GetComponent<Transform>(currentChild._nextSibling);
                     count++;
                 }
                 return count;
@@ -220,19 +221,19 @@ namespace FoldEngine.Components
         {
             get
             {
-                if (firstChild == -1)
+                if (_firstChild == -1)
                 {
                     return new ComponentReference<Transform>[0];
                 }
                 ComponentReference<Transform>[] children = new ComponentReference<Transform>[ChildCount];
 
-                ref Transform currentChild = ref Scene.Components.GetComponent<Transform>(firstChild);
+                ref Transform currentChild = ref Scene.Components.GetComponent<Transform>(_firstChild);
                 for(int i = 0; i < children.Length; i++)
                 {
-                    children[i] = new ComponentReference<Transform>(Scene, currentChild.OwnerId);
+                    children[i] = new ComponentReference<Transform>(Scene, currentChild._ownerId);
                     if(i < children.Length-1)
                     {
-                        currentChild = ref Scene.Components.GetComponent<Transform>(currentChild.nextSibling);
+                        currentChild = ref Scene.Components.GetComponent<Transform>(currentChild._nextSibling);
                     }
                 }
                 return children;
@@ -286,7 +287,8 @@ namespace FoldEngine.Components
         /// </summary>
         /// <param name="point"></param>
         /// <returns></returns>
-        private Vector2 Apply(Vector2 point)
+        [Pure]
+        public Vector2 Apply(Vector2 point)
         {
             if (!IsNotNull) return point;
             ref readonly Transform current = ref this;
@@ -297,6 +299,11 @@ namespace FoldEngine.Components
                 current = ref current.Parent;
             }
             return point;
+        }
+
+        public Vector2 ApplyLocal(Vector2 point) {
+            if(!IsNotNull) return point;
+            return Apply(LocalPosition + point);
         }
 
         public override string ToString()

@@ -13,22 +13,24 @@ namespace FoldEngine
     /// </summary>
     public class FoldGame : Game
     {
-        GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
+        private readonly GraphicsDeviceManager _graphics;
+        private SpriteBatch _spriteBatch;
 
-        private IGameController controller;
+        private readonly IGameController _controller;
 
         public FoldGame()
         {
-            graphics = new GraphicsDeviceManager(this);
+            _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
         }
 
         public FoldGame(IGameController controller)
         {
-            graphics = new GraphicsDeviceManager(this);
+            _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            this.controller = controller;
+            this._controller = controller;
+
+            (_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight) = _controller.RenderingUnit.ScreenSize;
         }
 
         /// <summary>
@@ -39,7 +41,7 @@ namespace FoldEngine
         /// </summary>
         protected override void Initialize()
         {
-            controller.Initialize();
+            _controller.Initialize();
 
             FoldEngine.Components.Component.PopulateIdentifiers();
 
@@ -53,18 +55,18 @@ namespace FoldEngine
         protected override void LoadContent()
         {
             // Create a new SpriteBatch, which can be used to draw textures.
-            spriteBatch = new SpriteBatch(GraphicsDevice);
+            _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            controller.RenderingUnit.TextureManager = new TextureManager(graphics, GraphicsDevice, spriteBatch, Content);
+            _controller.RenderingUnit.Textures = new TextureManager(_graphics, GraphicsDevice, _spriteBatch, Content);
 
-            foreach (IRenderingLayer layer in controller.RenderingUnit.Layers.Values)
+            foreach (IRenderingLayer layer in _controller.RenderingUnit.Layers.Values)
             {
-                layer.Surface = new RenderSurface(graphics.GraphicsDevice, layer.LayerSize.X, layer.LayerSize.Y);
+                layer.Surface = new RenderSurface(_graphics.GraphicsDevice, layer.LayerSize.X, layer.LayerSize.Y);
             }
 
             // TODO: use this.Content to load your game content here
 
-            controller.RenderingUnit.LoadContent();
+            _controller.RenderingUnit.LoadContent();
         }
 
         /// <summary>
@@ -76,19 +78,31 @@ namespace FoldEngine
             // TODO: Unload any non ContentManager content here
         }
 
+        private bool playing;
+
         /// <summary>
         /// Allows the game to run logic such as updating the world,
         /// checking for collisions, gathering input, and playing audio.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        protected override void Update(GameTime gameTime)
-        {
-            Time.Update(gameTime);
+        protected override void Update(GameTime gameTime) {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+            
+            
+            
+            if(playing) {
+                Time.Update(gameTime);
 
-            controller.Input();
-            controller.Update();
+                _controller.Input();
+                _controller.Update();
+            }
+
+
+            if(!playing && GamePad.GetState(PlayerIndex.One).Buttons.Start == ButtonState.Pressed
+               || Keyboard.GetState().IsKeyDown(Keys.Space)) {
+                playing = true;
+            }
 
             base.Update(gameTime);
         }
@@ -106,17 +120,17 @@ namespace FoldEngine
 
             //Begin sprite batches
             
-            foreach (IRenderingLayer layer in controller.RenderingUnit.Layers.Values)
+            foreach (IRenderingLayer layer in _controller.RenderingUnit.Layers.Values)
             {
                 layer.Surface.Begin();
             }
 
             //Draw the scene, across multiple sprite batches
             
-            controller.RenderingUnit.Draw();
+            _controller.RenderingUnit.Render();
 
             //Resolve each sprite batch into each layer's buffer
-            foreach (IRenderingLayer layer in controller.RenderingUnit.Layers.Values)
+            foreach (IRenderingLayer layer in _controller.RenderingUnit.Layers.Values)
             {
                 layer.Surface.End();
             }
@@ -124,13 +138,13 @@ namespace FoldEngine
             //Draw each layer's buffer onto the screen
             GraphicsDevice.SetRenderTarget(null);
             GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.CornflowerBlue);
-            spriteBatch.Begin(samplerState: SamplerState.PointClamp);
-            if (controller != null)
-                foreach (IRenderingLayer layer in controller.RenderingUnit.Layers.Values)
-            {
-                spriteBatch.Draw(layer.Surface.Target, layer.Destination, Color.White);
-            }
-            spriteBatch.End();
+            _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+            if (_controller != null)
+                foreach (IRenderingLayer layer in _controller.RenderingUnit.Layers.Values)
+                {
+                    _spriteBatch.Draw(layer.Surface.Target, layer.Destination, Color.White);
+                }
+            _spriteBatch.End();
 
             //spriteBatch.Draw(testTex, new Rectangle((int)(gameTime.TotalGameTime.TotalMilliseconds / 10), 16, 16, 16), Color.White);
             //spriteBatch.End();
