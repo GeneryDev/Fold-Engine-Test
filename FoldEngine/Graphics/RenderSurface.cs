@@ -30,29 +30,18 @@ namespace FoldEngine.Graphics
 
         public void Draw(DrawRectInstruction instruction)
         {
-            Batch.Draw(instruction.Texture,
-                instruction.DestinationRectangle,
-                instruction.SourceRectangle,
-                instruction.Color ?? Color.White,
-                instruction.Rotation,
-                instruction.Pivot
-                ?? new Vector2((float)instruction.Texture.Texture.Width / 2,
-                    (float)instruction.Texture.Texture.Height / 2),
-                SpriteEffects.None,
-                0);
-            
-            // TriBatch.DrawQuad(
-            //     instruction.Texture,
-            //     new Vector2(instruction.DestinationRectangle.Left, instruction.DestinationRectangle.Bottom),
-            //     new Vector2(instruction.DestinationRectangle.Left, instruction.DestinationRectangle.Top),
-            //     new Vector2(instruction.DestinationRectangle.Right, instruction.DestinationRectangle.Bottom),
-            //     new Vector2(instruction.DestinationRectangle.Right, instruction.DestinationRectangle.Top),
-            //     new Vector2(instruction.SourceRectangle?.Left ?? 0, instruction.SourceRectangle?.Bottom ?? 1),
-            //     new Vector2(instruction.SourceRectangle?.Left ?? 0, instruction.SourceRectangle?.Top ?? 0),
-            //     new Vector2(instruction.SourceRectangle?.Right ?? 1, instruction.SourceRectangle?.Bottom ?? 1),
-            //     new Vector2(instruction.SourceRectangle?.Right ?? 1, instruction.SourceRectangle?.Top ?? 0),
-            //     Color.White
-            // );
+            TriBatch.DrawQuad(
+                instruction.Texture,
+                new Vector2(instruction.DestinationRectangle.Left, instruction.DestinationRectangle.Bottom),
+                new Vector2(instruction.DestinationRectangle.Left, instruction.DestinationRectangle.Top),
+                new Vector2(instruction.DestinationRectangle.Right, instruction.DestinationRectangle.Bottom),
+                new Vector2(instruction.DestinationRectangle.Right, instruction.DestinationRectangle.Top),
+                new Vector2(instruction.SourceRectangle?.Left ?? 0, instruction.SourceRectangle?.Bottom ?? 1),
+                new Vector2(instruction.SourceRectangle?.Left ?? 0, instruction.SourceRectangle?.Top ?? 0),
+                new Vector2(instruction.SourceRectangle?.Right ?? 1, instruction.SourceRectangle?.Bottom ?? 1),
+                new Vector2(instruction.SourceRectangle?.Right ?? 1, instruction.SourceRectangle?.Top ?? 0),
+                Color.White
+            );
         }
 
         public void Draw(DrawQuadInstruction instruction)

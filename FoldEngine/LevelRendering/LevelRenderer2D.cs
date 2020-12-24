@@ -30,7 +30,7 @@ namespace FoldEngine.Rendering {
                 ref Camera camera = ref _cameras.GetComponent();
                 ref Transform view = ref _cameras.GetCoComponent<Transform>();
                 
-                view.LocalRotation += Time.DeltaTime;
+                // view.LocalRotation += Time.DeltaTime;
                 
                 Vector2 cameraPos = view.Position;
                 float cameraRot = view.Rotation;
@@ -93,13 +93,14 @@ namespace FoldEngine.Rendering {
                         new Vector2(1, 1)
                     ));
                     
+                    
+                    layer.Surface.Draw(new DrawRectInstruction(renderer.Textures.GetAtlasTexture("main"), new Vector2(0, 0)));
                 }
 
                 
                 layer.Surface.Draw(new DrawRectInstruction() {
                     Texture = renderer.Textures["test"],
-                    DestinationRectangle = new Rectangle(0,0,2,2),
-                    Rotation = (float)Math.PI/2
+                    DestinationRectangle = new Rectangle(0,0,2,2)
                 });
                 layer.Surface.Draw(new DrawRectInstruction() {
                     Texture = renderer.Textures["test"],

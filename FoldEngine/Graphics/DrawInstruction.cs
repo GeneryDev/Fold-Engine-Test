@@ -12,11 +12,20 @@ namespace FoldEngine.Graphics
         public Texture2DWrapper Texture;
         public Rectangle DestinationRectangle;
         public Rectangle? SourceRectangle;
-        public Color? Color;
 
-        //radians
-        public float Rotation;
-        public Vector2? Pivot;
+        public DrawRectInstruction(Texture2DWrapper texture, Vector2 destination, Rectangle? sourceRectangle = null) {
+            Texture = texture;
+            DestinationRectangle = new Rectangle(destination.ToPoint(),
+                new Point(sourceRectangle?.Width ?? texture.Texture.Width,
+                    sourceRectangle?.Height ?? texture.Texture.Height));
+            SourceRectangle = sourceRectangle;
+        }
+
+        public DrawRectInstruction(Texture2DWrapper texture, Rectangle destinationRectangle, Rectangle? sourceRectangle = null) {
+            Texture = texture;
+            DestinationRectangle = destinationRectangle;
+            SourceRectangle = sourceRectangle;
+        }
     }
 
     public struct DrawQuadInstruction {

@@ -18,6 +18,8 @@ namespace FoldEngine.Graphics
         private GraphicsDeviceManager _graphics;
         private GraphicsDevice _graphicsDevice;
         private SpriteBatch _spriteBatch;
+        
+        public readonly Dictionary<string, TextureAtlas> Atlases = new Dictionary<string, TextureAtlas>();
 
         public FoldEngine.Graphics.Texture2DWrapper this[string name]
         {
@@ -49,6 +51,14 @@ namespace FoldEngine.Graphics
         public FoldEngine.Graphics.Texture2DWrapper LoadSprite(string name)
         {
             return _sprites[name] = new Texture2DWrapper(_content.Load<Microsoft.Xna.Framework.Graphics.Texture2D>("Textures/" + name));
+        }
+
+        public TextureAtlas CreateAtlas(string name) {
+            return Atlases[name] = new TextureAtlas(_graphicsDevice);
+        }
+
+        public Texture2DWrapper GetAtlasTexture(string name) {
+            return new Texture2DWrapper(Atlases[name].Texture);
         }
     }
 }

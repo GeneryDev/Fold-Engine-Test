@@ -78,8 +78,6 @@ namespace FoldEngine
             // TODO: Unload any non ContentManager content here
         }
 
-        private bool playing;
-
         /// <summary>
         /// Allows the game to run logic such as updating the world,
         /// checking for collisions, gathering input, and playing audio.
@@ -90,19 +88,12 @@ namespace FoldEngine
                 Exit();
             
             
-            
-            if(playing) {
-                Time.Update(gameTime);
+            Time.Update(gameTime);
 
-                _controller.Input();
-                _controller.Update();
-            }
+            _controller.Input();
+            _controller.Update();
 
 
-            if(!playing && GamePad.GetState(PlayerIndex.One).Buttons.Start == ButtonState.Pressed
-               || Keyboard.GetState().IsKeyDown(Keys.Space)) {
-                playing = true;
-            }
 
             base.Update(gameTime);
         }
