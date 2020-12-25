@@ -9,19 +9,19 @@ namespace FoldEngine.Graphics
 {
     public struct DrawRectInstruction
     {
-        public Texture2DWrapper Texture;
+        public ITexture Texture;
         public Rectangle DestinationRectangle;
         public Rectangle? SourceRectangle;
 
-        public DrawRectInstruction(Texture2DWrapper texture, Vector2 destination, Rectangle? sourceRectangle = null) {
+        public DrawRectInstruction(ITexture texture, Vector2 destination, Rectangle? sourceRectangle = null) {
             Texture = texture;
             DestinationRectangle = new Rectangle(destination.ToPoint(),
-                new Point(sourceRectangle?.Width ?? texture.Texture.Width,
-                    sourceRectangle?.Height ?? texture.Texture.Height));
+                new Point(sourceRectangle?.Width ?? texture.Width,
+                    sourceRectangle?.Height ?? texture.Height));
             SourceRectangle = sourceRectangle;
         }
 
-        public DrawRectInstruction(Texture2DWrapper texture, Rectangle destinationRectangle, Rectangle? sourceRectangle = null) {
+        public DrawRectInstruction(ITexture texture, Rectangle destinationRectangle, Rectangle? sourceRectangle = null) {
             Texture = texture;
             DestinationRectangle = destinationRectangle;
             SourceRectangle = sourceRectangle;
@@ -29,7 +29,7 @@ namespace FoldEngine.Graphics
     }
 
     public struct DrawQuadInstruction {
-        public Texture2DWrapper Texture;
+        public ITexture Texture;
         public Vector2 A;
         public Vector2 B;
         public Vector2 C;
@@ -44,7 +44,7 @@ namespace FoldEngine.Graphics
         public Color? ColorD;
 
         public DrawQuadInstruction(
-            Texture2DWrapper texture,
+            ITexture texture,
             Vector2 a,
             Vector2 b,
             Vector2 c,
@@ -74,7 +74,7 @@ namespace FoldEngine.Graphics
     }
 
     public struct DrawTriangleInstruction {
-        public Texture2DWrapper Texture;
+        public ITexture Texture;
         public Vector2 A;
         public Vector2 B;
         public Vector2 C;
@@ -86,7 +86,7 @@ namespace FoldEngine.Graphics
         public Color? ColorC;
 
         public DrawTriangleInstruction(
-            Texture2DWrapper texture,
+            ITexture texture,
             Vector2 a,
             Vector2 b,
             Vector2 c,

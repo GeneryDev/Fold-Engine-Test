@@ -31,15 +31,15 @@ namespace FoldEngine.Graphics
         public void Draw(DrawRectInstruction instruction)
         {
             TriBatch.DrawQuad(
-                instruction.Texture,
+                instruction.Texture.Source,
                 new Vector2(instruction.DestinationRectangle.Left, instruction.DestinationRectangle.Bottom),
                 new Vector2(instruction.DestinationRectangle.Left, instruction.DestinationRectangle.Top),
                 new Vector2(instruction.DestinationRectangle.Right, instruction.DestinationRectangle.Bottom),
                 new Vector2(instruction.DestinationRectangle.Right, instruction.DestinationRectangle.Top),
-                new Vector2(instruction.SourceRectangle?.Left ?? 0, instruction.SourceRectangle?.Bottom ?? 1),
-                new Vector2(instruction.SourceRectangle?.Left ?? 0, instruction.SourceRectangle?.Top ?? 0),
-                new Vector2(instruction.SourceRectangle?.Right ?? 1, instruction.SourceRectangle?.Bottom ?? 1),
-                new Vector2(instruction.SourceRectangle?.Right ?? 1, instruction.SourceRectangle?.Top ?? 0),
+                instruction.Texture.ToSourceUV(new Vector2(instruction.SourceRectangle?.Left ?? 0, instruction.SourceRectangle?.Bottom ?? 1)),
+                instruction.Texture.ToSourceUV(new Vector2(instruction.SourceRectangle?.Left ?? 0, instruction.SourceRectangle?.Top ?? 0)),
+                instruction.Texture.ToSourceUV(new Vector2(instruction.SourceRectangle?.Right ?? 1, instruction.SourceRectangle?.Bottom ?? 1)),
+                instruction.Texture.ToSourceUV(new Vector2(instruction.SourceRectangle?.Right ?? 1, instruction.SourceRectangle?.Top ?? 0)),
                 Color.White
             );
         }
@@ -47,15 +47,15 @@ namespace FoldEngine.Graphics
         public void Draw(DrawQuadInstruction instruction)
         {
             TriBatch.DrawQuad(
-                instruction.Texture,
+                instruction.Texture.Source,
                 instruction.A,
                 instruction.B,
                 instruction.C,
                 instruction.D,
-                instruction.TexA,
-                instruction.TexB,
-                instruction.TexC,
-                instruction.TexD,
+                instruction.Texture.ToSourceUV(instruction.TexA),
+                instruction.Texture.ToSourceUV(instruction.TexB),
+                instruction.Texture.ToSourceUV(instruction.TexC),
+                instruction.Texture.ToSourceUV(instruction.TexD),
                 instruction.ColorA,
                 instruction.ColorB,
                 instruction.ColorC,
@@ -66,13 +66,13 @@ namespace FoldEngine.Graphics
         public void Draw(DrawTriangleInstruction instruction)
         {
             TriBatch.DrawTriangle(
-                instruction.Texture,
+                instruction.Texture.Source,
                 instruction.A,
                 instruction.B,
                 instruction.C,
-                instruction.TexA,
-                instruction.TexB,
-                instruction.TexC,
+                instruction.Texture.ToSourceUV(instruction.TexA),
+                instruction.Texture.ToSourceUV(instruction.TexB),
+                instruction.Texture.ToSourceUV(instruction.TexC),
                 instruction.ColorA,
                 instruction.ColorB,
                 instruction.ColorC

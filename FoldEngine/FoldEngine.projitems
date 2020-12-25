@@ -22,7 +22,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)GraphicsContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\DrawInstruction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\RenderSurface.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Graphics\Texture2DWrapper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\ITexture.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\TextureAtlas.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\TextureManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\TriangleBatch.cs" />

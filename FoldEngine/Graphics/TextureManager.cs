@@ -12,16 +12,16 @@ namespace FoldEngine.Graphics
 {
     public class TextureManager
     {
-        private readonly Dictionary<string, FoldEngine.Graphics.Texture2DWrapper> _sprites = new Dictionary<string, FoldEngine.Graphics.Texture2DWrapper>();
+        private readonly Dictionary<string, FoldEngine.Graphics.ITexture> _sprites = new Dictionary<string, FoldEngine.Graphics.ITexture>();
 
         private ContentManager _content;
         private GraphicsDeviceManager _graphics;
-        private GraphicsDevice _graphicsDevice;
+        internal GraphicsDevice _device;
         private SpriteBatch _spriteBatch;
         
         public readonly Dictionary<string, TextureAtlas> Atlases = new Dictionary<string, TextureAtlas>();
 
-        public FoldEngine.Graphics.Texture2DWrapper this[string name]
+        public FoldEngine.Graphics.ITexture this[string name]
         {
             get
             {
@@ -36,29 +36,25 @@ namespace FoldEngine.Graphics
             set => _sprites[name] = value;
         }
 
-        public TextureManager(GraphicsDeviceManager graphics, GraphicsDevice graphicsDevice, SpriteBatch spriteBatch, ContentManager content)
+        public TextureManager(GraphicsDeviceManager graphics, GraphicsDevice device, SpriteBatch spriteBatch, ContentManager content)
         {
             this._graphics = graphics;
-            this._graphicsDevice = graphicsDevice;
+            this._device = device;
             this._spriteBatch = spriteBatch;
             this._content = content;
 
-            RenderTarget2D nullTexture = new RenderTarget2D(graphicsDevice, 2, 2);
+            RenderTarget2D nullTexture = new RenderTarget2D(device, 2, 2);
             nullTexture.SetData(new Color[] { Color.Magenta, Color.Black, Color.Black, Color.Magenta });
-            _sprites["null"] = new FoldEngine.Graphics.Texture2DWrapper(nullTexture);
+            _sprites["null"] = new FoldEngine.Graphics.DirectTexture(nullTexture);
         }
 
-        public FoldEngine.Graphics.Texture2DWrapper LoadSprite(string name)
+        public FoldEngine.Graphics.ITexture LoadSprite(string name)
         {
-            return _sprites[name] = new Texture2DWrapper(_content.Load<Microsoft.Xna.Framework.Graphics.Texture2D>("Textures/" + name));
+            return _sprites[name] = new DirectTexture(_content.Load<Microsoft.Xna.Framework.Graphics.Texture2D>("Textures/" + name));
         }
 
         public TextureAtlas CreateAtlas(string name) {
-            return Atlases[name] = new TextureAtlas(_graphicsDevice);
-        }
-
-        public Texture2DWrapper GetAtlasTexture(string name) {
-            return new Texture2DWrapper(Atlases[name].Texture);
+            return Atlases[name] = new TextureAtlas(name, this);
         }
     }
 }
