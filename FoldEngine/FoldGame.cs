@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -84,8 +85,16 @@ namespace FoldEngine
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime) {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if(GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
+               || Keyboard.GetState().IsKeyDown(Keys.Escape)) {
+                Console.WriteLine("Exiting via input: ");
+                if(GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed) {
+                    Console.WriteLine("Gamepad");
+                } else {
+                    Console.WriteLine("Keyboard");
+                }
                 Exit();
+            }
             
             
             Time.Update(gameTime);

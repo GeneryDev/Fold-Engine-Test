@@ -61,7 +61,7 @@ namespace Sandbox {
             
             
             Entity cam = CreateEntity("Camera");
-            cam.AddComponent<Camera>().RenderToLayer = "hud";
+            cam.AddComponent<Camera>().RenderToLayer = "screen";
 
             e0.AddComponent<LevelRenderable>();
             e1.AddComponent<LevelRenderable>();

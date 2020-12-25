@@ -94,7 +94,7 @@ namespace FoldEngine.Rendering {
                     ));
                     
                     
-                    layer.Surface.Draw(new DrawRectInstruction(renderer.Textures.GetAtlasTexture("main"), new Vector2(0, -128)));
+                    layer.Surface.Draw(new DrawRectInstruction(renderer.Textures.GetAtlasTexture("main"), new Vector2(0, 0)));
                 }
 
                 

@@ -26,15 +26,18 @@ namespace FoldEngine.Graphics {
             int totalArea = _containedTextures.Select(pair => pair.Value.Width * pair.Value.Height)
                 .Aggregate((accumulator, current) => accumulator + current);
 
-            int initialDimensions = (int) Math.Pow(2, Math.Ceiling(Math.Log(Math.Ceiling(Math.Sqrt(totalArea))) / Math.Log(2)));
+            // int initialDimensions = (int) Math.Pow(2, Math.Ceiling(Math.Log(Math.Ceiling(Math.Sqrt(totalArea))) / Math.Log(2)));
             
-            TargetTexture = new RenderTarget2D(_device, initialDimensions, initialDimensions);
             _batch.Begin();
             
-            _containedTextures.Sort((a, b) => b.Value.Width * b.Value.Height - a.Value.Width * a.Value.Height);
+            // _containedTextures.Sort((a, b) => b.Value.Width * b.Value.Height - a.Value.Width * a.Value.Height); //Largest to smallest (area)
+            // _containedTextures.Sort((a, b) => a.Value.Width * a.Value.Height - b.Value.Width * b.Value.Height); //Smallest to largest (area)
+            _containedTextures.Sort((a, b) => Math.Max(b.Value.Width, b.Value.Height) - Math.Max(a.Value.Width, a.Value.Height)); //Largest to smallest (max axis) //seems best
+            // _containedTextures.Sort((a, b) => Math.Max(a.Value.Width, a.Value.Height) - Math.Max(b.Value.Width, b.Value.Height)); //Smallest to largest (max axis)
             
             List<Rectangle> availableRects = new List<Rectangle>();
-            availableRects.Add(new Rectangle(0, 0, initialDimensions, initialDimensions));
+            availableRects.Add(new Rectangle(0, 0, (int) Math.Sqrt(int.MaxValue), (int) Math.Sqrt(int.MaxValue)));
+            Rectangle usedRect = Rectangle.Empty;
             
             foreach(KeyValuePair<string, Texture2D> pair in _containedTextures) {
                 Texture2D texture = pair.Value;
@@ -46,6 +49,8 @@ namespace FoldEngine.Graphics {
                     throw new Exception("Cannot fit texture " + pair.Key + " into atlas");
                 } else {
                     availableRects.Remove(firstFit);
+                    usedRect = Rectangle.Union(usedRect,
+                        new Rectangle(firstFit.X, firstFit.Y, texture.Width, texture.Height));
                     _batch.Draw(texture, new Vector2(firstFit.X, firstFit.Y), Color.White);
 
                     bool choice = false;
@@ -63,8 +68,12 @@ namespace FoldEngine.Graphics {
                         availableRects.Add(b);
                     }
                 }
-                
             }
+            
+            int finalWidth = (int) Math.Pow(2, Math.Ceiling(Math.Log(usedRect.Width) / Math.Log(2)));
+            int finalHeight = (int) Math.Pow(2, Math.Ceiling(Math.Log(usedRect.Height) / Math.Log(2)));
+            
+            TargetTexture = new RenderTarget2D(_device, finalWidth, finalHeight);
             
             _device.SetRenderTarget(TargetTexture);
             _device.Clear(Color.TransparentBlack);
