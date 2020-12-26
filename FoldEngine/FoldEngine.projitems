@@ -35,6 +35,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)LevelRendering\DebugRendering.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LevelRendering\LevelRenderer2D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LevelRendering\MeshRenderable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Physics\MeshCollider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Physics\Physics.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Physics\PhysicsSystem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Extensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Geometry.cs" />
     <Folder Include="$(MSBuildThisFileDirectory)LevelRendering\2d" />

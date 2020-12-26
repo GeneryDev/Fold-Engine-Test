@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using FoldEngine.Graphics;
+using FoldEngine.Physics;
 using FoldEngine.Rendering;
 using FoldEngine.Util;
 
@@ -51,6 +52,7 @@ namespace Sandbox {
             ComponentReference<Transform>[] e0Children = e0.Transform.Children;
 
             Systems.Add<HealthSystem>();
+            Systems.Add<PhysicsSystem>();
 
             Systems.Add<LevelRenderer2D>();
             Systems.Add<DebugRendering>();
@@ -73,6 +75,8 @@ namespace Sandbox {
             e1MR.MeshIdentifier = "weird";
             e1MR.Matrix = Matrix.CreateScale(64);
             e1MR.Color = Color.Black;
+
+            e0.AddComponent<Physics>();
             
             // ref MeshRenderable e0MR = ref e1.AddComponent<MeshRenderable>();
             // e0MR.TextureIdentifier = "main:soul.start";
@@ -105,11 +109,11 @@ namespace Sandbox {
 
             Meshes.Start("weird", MeshCollection.MeshInputType.Vertices)
                 .Vertex(new Vector2(-1, 0), Vector2.Zero)
-                .Vertex(new Vector2(-2, -1), Vector2.Zero)
-                .Vertex(new Vector2(0, -2), Vector2.Zero)
-                .Vertex(new Vector2(2, 0), Vector2.Zero)
-                .Vertex(new Vector2(0, 2), Vector2.Zero)
                 .Vertex(new Vector2(-2, 1), Vector2.Zero)
+                .Vertex(new Vector2(0, 2), Vector2.Zero)
+                .Vertex(new Vector2(2, 0), Vector2.Zero)
+                .Vertex(new Vector2(0, -2), Vector2.Zero)
+                .Vertex(new Vector2(-2, -1), Vector2.Zero)
                 .End();
         }
     }

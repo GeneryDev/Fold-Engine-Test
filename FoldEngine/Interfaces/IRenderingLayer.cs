@@ -41,7 +41,7 @@ namespace FoldEngine.Interfaces
             double scaleY = (double)height / layer.LayerSize.Y;
 
             rect.X = (int)Math.Floor(x + rect.X * scaleX);
-            rect.Y = (int)Math.Floor(y + rect.Y * scaleY);
+            rect.Y = (int)Math.Floor(y - rect.Y * scaleY);
             rect.Width = (int)Math.Round(rect.Width * scaleX);
             rect.Height = (int)Math.Round(rect.Height * scaleY);
 
@@ -57,13 +57,13 @@ namespace FoldEngine.Interfaces
             double scaleY = (double)height / layer.LayerSize.Y;
 
             point.X = (int)Math.Round(x + point.X * scaleX) + layer.LayerSize.X/2;
-            point.Y = (int)Math.Round(y + point.Y * scaleY) + layer.LayerSize.Y/2;
+            point.Y = (int)Math.Round(y - point.Y * scaleY) + layer.LayerSize.Y/2;
 
             return point;
         }
 
         public static Vector2 ScreenToWorld(IRenderingLayer layer, Vector2 point) {
-            return (point - (layer.Destination.Center.ToVector2())) * (layer.LayerSize.ToVector2() / layer.Destination.Size.ToVector2());
+            return new Vector2(1, -1) * (point - (layer.Destination.Center.ToVector2())) * (layer.LayerSize.ToVector2() / layer.Destination.Size.ToVector2());
         }
     }
 }
