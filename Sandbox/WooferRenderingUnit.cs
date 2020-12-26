@@ -37,21 +37,22 @@ namespace Woofer
         }
         public void LoadContent()
         {
-            Textures.LoadSprite("test");
-            Textures.LoadSprite("ancient_debris_side");
-            Textures.LoadSprite("armor_stand");
-            Textures.LoadSprite("bamboo_stem");
-            Textures.LoadSprite("barrel_top");
-            Textures.LoadSprite("beacon");
-            Textures.LoadSprite("bed_feet_end");
-            Textures.LoadSprite("end_portal_colors");
-            Textures.LoadSprite("guardian");
-            Textures.LoadSprite("pillager");
-            Textures.LoadSprite("witch");
-            Textures.LoadSprite("clouds");
-            Textures.LoadSprite("campfire_smoke");
-            Textures.LoadSprite("soul");
-            Textures.LoadSprite("particles");
+            Textures.LoadTexture("test");
+            Textures.LoadTexture("ancient_debris_side");
+            Textures.LoadTexture("armor_stand");
+            Textures.LoadTexture("bamboo_stem");
+            Textures.LoadTexture("barrel_top");
+            Textures.LoadTexture("beacon");
+            Textures.LoadTexture("bed_feet_end");
+            Textures.LoadTexture("end_portal_colors");
+            Textures.LoadTexture("guardian");
+            Textures.LoadTexture("pillager");
+            Textures.LoadTexture("witch");
+            Textures.LoadTexture("clouds");
+            Textures.LoadTexture("campfire_smoke");
+            Textures.LoadTexture("soul");
+            Textures.LoadTexture("particles");
+            Textures.LoadTexture("four");
             
             TextureAtlas atlas = Textures.CreateAtlas("main");
             atlas.AddTexture("test", Textures["test"]);
@@ -69,9 +70,14 @@ namespace Woofer
             atlas.AddTexture("campfire_smoke", Textures["campfire_smoke"]);
             atlas.AddTexture("soul", Textures["soul"]);
             atlas.AddTexture("particles", Textures["particles"]);
+            atlas.AddTexture("pixel", Textures["four"]);
             atlas.Pack();
             
             Textures.CreateSubTexture("main:soul", "start", new Rectangle(0, 0, 16, 16));
+            Textures.CreateSubTexture("main:pixel", "black_transparent", new Rectangle(0, 0, 1, 1));
+            Textures.CreateSubTexture("main:pixel", "white_transparent", new Rectangle(1, 0, 1, 1));
+            Textures.CreateSubTexture("main:pixel", "black", new Rectangle(0, 1, 1, 1));
+            Textures.CreateSubTexture("main:pixel", "white", new Rectangle(1, 1, 1, 1));
         }
     }
 }

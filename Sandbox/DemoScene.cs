@@ -68,9 +68,10 @@ namespace Sandbox {
             // e1.AddComponent<LevelRenderable>();
 
             ref MeshRenderable e1MR = ref e0.AddComponent<MeshRenderable>();
-            e1MR.TextureIdentifier = "main:end_portal_colors";
+            e1MR.TextureIdentifier = "main:ancient_debris_side";
             e1MR.MeshIdentifier = "circle";
-            e1MR.Matrix = Matrix.CreateScale(128);
+            e1MR.Matrix = Matrix.CreateScale(128*2);
+            e1MR.Color = Color.Aqua;
             
             ref MeshRenderable e0MR = ref e1.AddComponent<MeshRenderable>();
             e0MR.TextureIdentifier = "main:soul.start";

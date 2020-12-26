@@ -48,7 +48,7 @@ namespace FoldEngine.Graphics
             _sprites["null"] = new FoldEngine.Graphics.DirectTexture(nullTexture);
         }
 
-        public FoldEngine.Graphics.ITexture LoadSprite(string name)
+        public FoldEngine.Graphics.ITexture LoadTexture(string name)
         {
             return _sprites[name] = new DirectTexture(_content.Load<Microsoft.Xna.Framework.Graphics.Texture2D>("Textures/" + name));
         }

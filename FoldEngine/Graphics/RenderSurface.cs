@@ -15,7 +15,6 @@ namespace FoldEngine.Graphics
     {
         internal GraphicsDevice GraphicsDevice;
         internal RenderTarget2D Target;
-        internal SpriteBatch Batch;
         internal TriangleBatch TriBatch;
 
         public Point Size => new Point(Target.Width, Target.Height);
@@ -23,7 +22,6 @@ namespace FoldEngine.Graphics
         public RenderSurface(GraphicsDevice graphicsDevice, int width, int height)
         {
             GraphicsDevice = graphicsDevice;
-            Batch = new SpriteBatch(graphicsDevice);
             TriBatch = new TriangleBatch(graphicsDevice);
             Resize(width, height);
         }
@@ -81,14 +79,12 @@ namespace FoldEngine.Graphics
 
         internal void Begin()
         {
-            Batch.Begin();
             TriBatch.Begin(samplerState: SamplerState.PointClamp);
         }
         internal void End()
         {
             GraphicsDevice.SetRenderTarget(Target);
             GraphicsDevice.Clear(Color.Transparent);
-            Batch.End();
             TriBatch.End();
         }
 

@@ -93,7 +93,10 @@ namespace FoldEngine.Rendering {
                                 * cameraRotNegativeComplex),
                             triangle.A.TextureCoordinate * meshRenderable.UVScale + meshRenderable.UVOffset,
                             triangle.B.TextureCoordinate * meshRenderable.UVScale + meshRenderable.UVOffset,
-                            triangle.C.TextureCoordinate * meshRenderable.UVScale + meshRenderable.UVOffset
+                            triangle.C.TextureCoordinate * meshRenderable.UVScale + meshRenderable.UVOffset,
+                            Extensions.MultiplyColor(triangle.A.Color, meshRenderable.Color),
+                            Extensions.MultiplyColor(triangle.B.Color, meshRenderable.Color),
+                            Extensions.MultiplyColor(triangle.C.Color, meshRenderable.Color)
                         ));
                     }
                 }
