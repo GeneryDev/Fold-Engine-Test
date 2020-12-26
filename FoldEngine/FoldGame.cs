@@ -32,6 +32,7 @@ namespace FoldEngine
             this._controller = controller;
 
             (_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight) = _controller.RenderingUnit.ScreenSize;
+            this.IsMouseVisible = true;
         }
 
         /// <summary>
@@ -95,7 +96,7 @@ namespace FoldEngine
                 }
                 Exit();
             }
-            
+
             
             Time.Update(gameTime);
 

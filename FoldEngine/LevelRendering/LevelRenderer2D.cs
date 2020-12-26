@@ -8,6 +8,7 @@ using FoldEngine.Systems;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using Sandbox.Components;
 
 namespace FoldEngine.Rendering {
@@ -49,10 +50,10 @@ namespace FoldEngine.Rendering {
                     
                     layer.Surface.Draw(new DrawQuadInstruction(
                         renderer.Textures["main:beacon"],
-                        RenderingLayer.Convert(layer, (Complex)(transform.Apply(new Vector2(-w/2, h/2)) - cameraPos) * cameraRotNegativeComplex),
-                        RenderingLayer.Convert(layer, (Complex)(transform.Apply(new Vector2(-w/2, -h/2)) - cameraPos) * cameraRotNegativeComplex),
-                        RenderingLayer.Convert(layer, (Complex)(transform.Apply(new Vector2(w/2, h/2)) - cameraPos) * cameraRotNegativeComplex),
-                        RenderingLayer.Convert(layer, (Complex)(transform.Apply(new Vector2(w/2, -h/2)) - cameraPos) * cameraRotNegativeComplex),
+                        RenderingLayer.WorldToScreen(layer, (Complex)(transform.Apply(new Vector2(-w/2, h/2)) - cameraPos) * cameraRotNegativeComplex),
+                        RenderingLayer.WorldToScreen(layer, (Complex)(transform.Apply(new Vector2(-w/2, -h/2)) - cameraPos) * cameraRotNegativeComplex),
+                        RenderingLayer.WorldToScreen(layer, (Complex)(transform.Apply(new Vector2(w/2, h/2)) - cameraPos) * cameraRotNegativeComplex),
+                        RenderingLayer.WorldToScreen(layer, (Complex)(transform.Apply(new Vector2(w/2, -h/2)) - cameraPos) * cameraRotNegativeComplex),
                         new Vector2(0, 0),
                         new Vector2(0, 1),
                         new Vector2(1, 0),
@@ -82,13 +83,13 @@ namespace FoldEngine.Rendering {
 
                         layer.Surface.Draw(new DrawTriangleInstruction(
                             texture,
-                            RenderingLayer.Convert(layer,
+                            RenderingLayer.WorldToScreen(layer,
                                 (Complex) (transform.Apply(vertexA) - cameraPos)
                                 * cameraRotNegativeComplex),
-                            RenderingLayer.Convert(layer,
+                            RenderingLayer.WorldToScreen(layer,
                                 (Complex) (transform.Apply(vertexB) - cameraPos)
                                 * cameraRotNegativeComplex),
-                            RenderingLayer.Convert(layer,
+                            RenderingLayer.WorldToScreen(layer,
                                 (Complex) (transform.Apply(vertexC) - cameraPos)
                                 * cameraRotNegativeComplex),
                             triangle.A.TextureCoordinate * meshRenderable.UVScale + meshRenderable.UVOffset,
@@ -100,7 +101,6 @@ namespace FoldEngine.Rendering {
                         ));
                     }
                 }
-                
             }
 
             if(!anyCamera) {

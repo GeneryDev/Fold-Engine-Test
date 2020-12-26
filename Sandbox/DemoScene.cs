@@ -53,6 +53,7 @@ namespace Sandbox {
             Systems.Add<HealthSystem>();
 
             Systems.Add<LevelRenderer2D>();
+            Systems.Add<DebugRendering>();
 
 
             Components.DebugPrint<Transform>();
@@ -71,7 +72,7 @@ namespace Sandbox {
             e1MR.TextureIdentifier = "main:pixel.white";
             e1MR.MeshIdentifier = "weird";
             e1MR.Matrix = Matrix.CreateScale(64);
-            e1MR.Color = Color.PaleTurquoise;
+            e1MR.Color = Color.Black;
             
             // ref MeshRenderable e0MR = ref e1.AddComponent<MeshRenderable>();
             // e0MR.TextureIdentifier = "main:soul.start";

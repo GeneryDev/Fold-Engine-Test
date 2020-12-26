@@ -33,7 +33,7 @@ namespace FoldEngine.Interfaces
 
 
 
-        public static Rectangle Convert(IRenderingLayer layer, Rectangle rect)
+        public static Rectangle WorldToScreen(IRenderingLayer layer, Rectangle rect)
         {
             (int x, int y, int width, int height) = layer.Destination;
 
@@ -49,7 +49,7 @@ namespace FoldEngine.Interfaces
         }
 
         //TODO
-        public static Vector2 Convert(IRenderingLayer layer, Vector2 point)
+        public static Vector2 WorldToScreen(IRenderingLayer layer, Vector2 point)
         {
             (int x, int y, int width, int height) = layer.Destination;
 
@@ -60,6 +60,10 @@ namespace FoldEngine.Interfaces
             point.Y = (int)Math.Round(y + point.Y * scaleY) + layer.LayerSize.Y/2;
 
             return point;
+        }
+
+        public static Vector2 ScreenToWorld(IRenderingLayer layer, Vector2 point) {
+            return (point - (layer.Destination.Center.ToVector2())) * (layer.LayerSize.ToVector2() / layer.Destination.Size.ToVector2());
         }
     }
 }

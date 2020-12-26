@@ -32,9 +32,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IRenderingUnit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentMap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LevelRendering\Camera.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LevelRendering\DebugRendering.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LevelRendering\LevelRenderer2D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LevelRendering\MeshRenderable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Extensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\Geometry.cs" />
     <Folder Include="$(MSBuildThisFileDirectory)LevelRendering\2d" />
     <Compile Include="$(MSBuildThisFileDirectory)Scenes\Entity.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scenes\EntityObjectPool.cs" />

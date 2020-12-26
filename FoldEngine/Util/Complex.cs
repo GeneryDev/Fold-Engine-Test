@@ -14,6 +14,8 @@ namespace FoldEngine.Util
         public Complex Inverse => new Complex(A / SqrMagnitude, -B / SqrMagnitude);
 
         public Complex Normalized => new Complex(this.A / Magnitude, this.B / Magnitude);
+        public static readonly Complex Real = new Complex(1, 0);
+        public static readonly Complex Imaginary = new Complex(0, 1);
 
         public Complex(float real, float imaginary)
         {
