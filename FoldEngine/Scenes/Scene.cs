@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using FoldEngine.Components;
+using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
 
 using Microsoft.Xna.Framework;
@@ -18,9 +19,11 @@ namespace FoldEngine.Scenes
         public readonly IGameController Controller;
         public string Name { get; set; } = "Scene";
 
-        public ComponentMap Components;
-        public SystemMap Systems;
-        internal EntityObjectPool EntityObjectPool;
+        public readonly ComponentMap Components;
+        public readonly SystemMap Systems;
+        internal readonly EntityObjectPool EntityObjectPool;
+        
+        public readonly MeshCollection Meshes;
 
         private long _nextEntityId = 0;
 
@@ -34,6 +37,7 @@ namespace FoldEngine.Scenes
             Components = new ComponentMap(this);
             Systems = new SystemMap(this);
             EntityObjectPool = new EntityObjectPool(this);
+            Meshes = new MeshCollection();
         }
 
         public long CreateEntityId(string name)

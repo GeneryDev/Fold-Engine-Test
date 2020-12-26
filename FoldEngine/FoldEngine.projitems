@@ -21,6 +21,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)FoldUtil.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GraphicsContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\DrawInstruction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\MeshCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\RenderSurface.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\ITexture.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\TextureAtlas.cs" />
@@ -32,6 +33,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentMap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LevelRendering\Camera.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LevelRendering\LevelRenderer2D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LevelRendering\MeshRenderable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\Extensions.cs" />
     <Folder Include="$(MSBuildThisFileDirectory)LevelRendering\2d" />
     <Compile Include="$(MSBuildThisFileDirectory)Scenes\Entity.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scenes\EntityObjectPool.cs" />

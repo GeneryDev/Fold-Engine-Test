@@ -82,7 +82,7 @@ namespace FoldEngine.Graphics
         internal void Begin()
         {
             Batch.Begin();
-            TriBatch.Begin(samplerState: SamplerState.AnisotropicClamp);
+            TriBatch.Begin(samplerState: SamplerState.PointClamp);
         }
         internal void End()
         {

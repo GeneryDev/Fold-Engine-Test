@@ -36,7 +36,7 @@ namespace Sandbox.Systems {
                 // }
 
                 if(transform.Parent.IsNotNull) {
-                    transform.LocalPosition.X += Time.DeltaTime * 0.5f;
+                    // transform.LocalPosition.X += Time.DeltaTime * 0.5f;
                     transform.LocalRotation += Time.DeltaTime;
                 } else {
                     transform.LocalScale.X += Time.DeltaTime * 0.5f;
