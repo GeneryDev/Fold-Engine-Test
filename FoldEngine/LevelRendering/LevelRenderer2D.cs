@@ -69,15 +69,15 @@ namespace FoldEngine.Rendering {
 
                     ITexture texture = renderer.Textures[meshRenderable.TextureIdentifier];
                     
-                    foreach(var triangle in Owner.Meshes.GetTrianglesForMesh(meshRenderable.MeshIdentifier)) {
+                    foreach(MeshCollection.Triangle triangle in Owner.Meshes.GetTrianglesForMesh(meshRenderable.MeshIdentifier)) {
 
-                        Vector2 vertexA = Extensions.ToVector2(
+                        var vertexA = Extensions.ToVector2(
                             (Matrix.CreateTranslation(triangle.A.Position) * meshRenderable.Matrix)
                             .Translation);
-                        Vector2 vertexB = Extensions.ToVector2(
+                        var vertexB = Extensions.ToVector2(
                             (Matrix.CreateTranslation(triangle.B.Position) * meshRenderable.Matrix)
                             .Translation);
-                        Vector2 vertexC = Extensions.ToVector2(
+                        var vertexC = Extensions.ToVector2(
                             (Matrix.CreateTranslation(triangle.C.Position) * meshRenderable.Matrix)
                             .Translation);
 

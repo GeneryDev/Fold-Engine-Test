@@ -1,8 +1,10 @@
-﻿using System.Security.Cryptography;
+﻿using System.Diagnostics;
+using System.Security.Cryptography;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
 namespace EntryProject.Util {
+    [DebuggerDisplay("{" + nameof(DebugDisplayString) + ",nq}")]
     public struct Line {
         public Vector2 From;
         public Vector2 To;
@@ -11,6 +13,10 @@ namespace EntryProject.Util {
 
         public float MagnitudeSqr => Vector2.DistanceSquared(From, To);
         public float Magnitude => Vector2.Distance(From, To);
+
+        public Vector2 Normal => ((Complex) (To - From) * Complex.Imaginary).Normalized;
+
+        public string DebugDisplayString => $"{From}, {To}";
 
         public Line(Vector2 from, Vector2 to) {
             From = from;

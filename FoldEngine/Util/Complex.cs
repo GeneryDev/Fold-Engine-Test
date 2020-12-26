@@ -60,5 +60,9 @@ namespace FoldEngine.Util
             float y = (float)Math.Sin(radians);
             return new Complex(x, y);
         }
+
+        public Complex ScaleAxes(float realScale, float imaginaryScale) {
+            return new Complex(A * realScale, B * imaginaryScale);
+        }
     }
 }

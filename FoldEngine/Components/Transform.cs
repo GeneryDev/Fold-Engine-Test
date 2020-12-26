@@ -270,7 +270,7 @@ namespace FoldEngine.Components
         /// </summary>
         public Vector2 Position
         {
-            get => Parent.Apply(Vector2.Zero);
+            get => this.Apply(Vector2.Zero);
             set
             {
                 if (!IsNotNull) throw new InvalidOperationException();

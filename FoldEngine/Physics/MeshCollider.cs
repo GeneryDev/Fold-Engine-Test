@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Physics {
     [Component("fold:physics.mesh_collider")]
-    [ComponentInitializer(typeof(Physics), nameof(InitializeComponent))]
+    [ComponentInitializer(typeof(MeshCollider), nameof(InitializeComponent))]
     public struct MeshCollider {
         public string MeshIdentifier;
         public Matrix Matrix;

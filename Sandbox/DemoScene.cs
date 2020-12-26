@@ -14,9 +14,9 @@ using FoldEngine.Util;
 namespace Sandbox {
     internal class DemoScene : Scene {
         public override void Initialize() {
+            Entity e2 = CreateEntity("Entity 2");
             Entity e0 = CreateEntity("Entity 0");
             Entity e1 = CreateEntity("Entity 1");
-            Entity e2 = CreateEntity("Entity 2");
 
 
             /*e0.Transform.Position = new Vector2(1, 2);
@@ -55,13 +55,15 @@ namespace Sandbox {
             Systems.Add<PhysicsSystem>();
 
             Systems.Add<LevelRenderer2D>();
-            Systems.Add<DebugRendering>();
+            // Systems.Add<DebugRendering>();
 
 
             Components.DebugPrint<Transform>();
             Components.DebugPrint<Living>();
-            
-            
+
+            // e0.Transform.LocalPosition += Vector2.UnitX * -70;
+            e0.Transform.LocalPosition += Vector2.UnitY * 256;
+            e2.Transform.LocalPosition += Vector2.UnitY * -128;
             
             
             
@@ -73,10 +75,12 @@ namespace Sandbox {
             ref MeshRenderable e1MR = ref e0.AddComponent<MeshRenderable>();
             e1MR.TextureIdentifier = "main:pixel.white";
             e1MR.MeshIdentifier = "weird";
-            e1MR.Matrix = Matrix.CreateScale(64);
+            // e1MR.Matrix = Matrix.CreateScale(64);
             e1MR.Color = Color.Black;
+            e0.Transform.LocalScale *= 32;
 
             e0.AddComponent<Physics>();
+            e0.AddComponent<MeshCollider>().MeshIdentifier = "weird";
             
             // ref MeshRenderable e0MR = ref e1.AddComponent<MeshRenderable>();
             // e0MR.TextureIdentifier = "main:soul.start";
@@ -90,6 +94,13 @@ namespace Sandbox {
             //     .Vertex(new Vector2(-0.5f, -0.5f), new Vector2(0, 1))
             //     .Vertex(new Vector2(0.5f, -0.5f), new Vector2(1, 1))
             //     .End();
+            
+            Meshes.Start("cube", MeshCollection.MeshInputType.Vertices)
+                .Vertex(new Vector2(-0.5f, -0.5f), new Vector2(0, 1))
+                .Vertex(new Vector2(-0.5f, 0.5f), new Vector2(0, 0))
+                .Vertex(new Vector2(0.5f, 0.5f), new Vector2(1, 0))
+                .Vertex(new Vector2(0.5f, -0.5f), new Vector2(1, 1))
+                .End();
 
             Meshes.Start("circle", MeshCollection.MeshInputType.Vertices);
             int segments = 90;
@@ -115,6 +126,14 @@ namespace Sandbox {
                 .Vertex(new Vector2(0, -2), Vector2.Zero)
                 .Vertex(new Vector2(-2, -1), Vector2.Zero)
                 .End();
+
+            ref MeshRenderable e2MR = ref e2.AddComponent<MeshRenderable>();
+            e2MR.MeshIdentifier = "cube";
+            e2MR.TextureIdentifier = "main:pixel.white";
+            e2.Transform.LocalScale *= 128;
+
+            e2.AddComponent<Physics>().Static = true;
+            e2.AddComponent<MeshCollider>().MeshIdentifier = "cube";
         }
     }
 }

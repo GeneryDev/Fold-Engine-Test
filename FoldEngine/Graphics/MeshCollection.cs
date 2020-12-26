@@ -170,7 +170,7 @@ namespace FoldEngine.Graphics {
             _currentMesh = null;
         }
 
-        private static bool IsPointInsidePolygon(Vector3 point, List<EarClippingNode> nodes) {
+        private static bool IsPointInsidePolygon(Vector3 point, IReadOnlyList<EarClippingNode> nodes) {
             int hits = 0;
             for(int i = 0; i < nodes.Count; i++) {
                 Vector3 a = nodes[i].Position - point;
@@ -194,10 +194,30 @@ namespace FoldEngine.Graphics {
             meshInfo.TriangleCount++;
         }
 
-        public IEnumerable<VertexPositionColorTexture> GetVerticesForMesh(string name) {
+        public IEnumerable<VertexPositionColorTexture> GetVertexInfoForMesh(string name) {
             MeshInfo meshInfo = _meshInfos[name];
             for(int i = meshInfo.VertexStartIndex; i < meshInfo.VertexStartIndex + meshInfo.VertexCount; i++) {
                 yield return _vertices[i];
+            }
+        }
+
+        public IEnumerable<Vector2> GetVerticesForMesh(string name) {
+            MeshInfo meshInfo = _meshInfos[name];
+            for(int i = meshInfo.VertexStartIndex; i < meshInfo.VertexStartIndex + meshInfo.VertexCount; i++) {
+                yield return Extensions.ToVector2(_vertices[i].Position);
+            }
+        }
+
+        public IEnumerable<Line> GetLinesForMesh(string name) {
+            MeshInfo meshInfo = _meshInfos[name];
+            for(int i = meshInfo.VertexStartIndex; i < meshInfo.VertexStartIndex + meshInfo.VertexCount; i++) {
+                yield return new Line(Extensions.ToVector2(_vertices[i].Position),
+                    Extensions.ToVector2(
+                        _vertices[
+                                i + 1 < meshInfo.VertexStartIndex + meshInfo.VertexCount
+                                    ? i + 1
+                                    : meshInfo.VertexStartIndex]
+                            .Position));
             }
         }
 
