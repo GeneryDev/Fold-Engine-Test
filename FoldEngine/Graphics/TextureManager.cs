@@ -56,5 +56,13 @@ namespace FoldEngine.Graphics
         public TextureAtlas CreateAtlas(string name) {
             return Atlases[name] = new TextureAtlas(name, this);
         }
+
+        public ITexture CreateSubTexture(string parentName, string childName, Rectangle bounds) {
+            ITexture parent = this[parentName];
+            Rectangle subBounds = parent.CreateSubBounds(bounds);
+            var subTexture = new AtlasedTexture(parent.Source, subBounds);
+            this[parentName + "." + childName] = subTexture;
+            return subTexture;
+        }
     }
 }

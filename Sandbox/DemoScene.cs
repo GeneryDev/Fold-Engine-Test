@@ -65,20 +65,19 @@ namespace Sandbox {
             Entity cam = CreateEntity("Camera");
             cam.AddComponent<Camera>().RenderToLayer = "screen";
 
-            e0.AddComponent<LevelRenderable>();
             // e1.AddComponent<LevelRenderable>();
 
-            ref MeshRenderable e1MR = ref e1.AddComponent<MeshRenderable>();
+            ref MeshRenderable e1MR = ref e0.AddComponent<MeshRenderable>();
             e1MR.TextureIdentifier = "main:end_portal_colors";
             e1MR.MeshIdentifier = "circle";
             e1MR.Matrix = Matrix.CreateScale(128);
             
-            ref MeshRenderable e2MR = ref e2.AddComponent<MeshRenderable>();
-            e2MR.TextureIdentifier = "main:bamboo_stem";
-            e2MR.MeshIdentifier = "circle";
-            e2MR.Matrix = Matrix.CreateScale(32);
-            e2MR.UVScale = new Vector2(-1, 1);
-            e2MR.UVOffset = new Vector2(1, 0);
+            ref MeshRenderable e0MR = ref e1.AddComponent<MeshRenderable>();
+            e0MR.TextureIdentifier = "main:soul.start";
+            e0MR.MeshIdentifier = "circle";
+            e0MR.Matrix = Matrix.CreateScale(32);
+            e0MR.UVScale = new Vector2(-1, 1);
+            e0MR.UVOffset = new Vector2(1, 0);
             
             Meshes.Start("triangle")
                 .Vertex(new Vector2(-0.5f, 0.5f), new Vector2(0, 0))

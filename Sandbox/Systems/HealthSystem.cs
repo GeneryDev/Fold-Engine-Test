@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using FoldEngine;
+using FoldEngine.Rendering;
 using Microsoft.Xna.Framework;
 
 namespace Sandbox.Systems {
@@ -37,9 +38,13 @@ namespace Sandbox.Systems {
 
                 if(transform.Parent.IsNotNull) {
                     // transform.LocalPosition.X += Time.DeltaTime * 0.5f;
-                    transform.LocalRotation += Time.DeltaTime;
+                    // transform.LocalRotation += Time.DeltaTime;
+                    if(_livingComponents.HasCoComponent<MeshRenderable>()) {
+                        ref MeshRenderable meshRenderable = ref _livingComponents.GetCoComponent<MeshRenderable>();
+                        meshRenderable.UVOffset.Y = ((int) (Time.TotalTime * 16)) % 11;
+                    }
                 } else {
-                    transform.LocalScale.X += Time.DeltaTime * 0.5f;
+                    // transform.LocalScale.X += Time.DeltaTime * 0.5f;
                 }
             }
 

@@ -16,6 +16,7 @@ namespace FoldEngine.Graphics
         void DrawOnto(SpriteBatch batch, Vector2 pos);
         void DrawOnto(SpriteBatch batch, Rectangle pos);
         Vector2 ToSourceUV(Vector2 uv);
+        Rectangle CreateSubBounds(Rectangle bounds);
     }
 
     public class DirectTexture : ITexture {
@@ -35,6 +36,10 @@ namespace FoldEngine.Graphics
 
         public void DrawOnto(SpriteBatch batch, Rectangle pos) {
             batch.Draw(Texture, pos, Color.White);
+        }
+
+        public Rectangle CreateSubBounds(Rectangle bounds) {
+            return bounds;
         }
 
         public Vector2 ToSourceUV(Vector2 uv) {
@@ -61,6 +66,10 @@ namespace FoldEngine.Graphics
 
         public void DrawOnto(SpriteBatch batch, Rectangle pos) {
             batch.Draw(Texture, pos, Bounds, Color.White);
+        }
+
+        public Rectangle CreateSubBounds(Rectangle bounds) {
+            return new Rectangle(Bounds.X + bounds.X, Bounds.Y + bounds.Y, bounds.Width, bounds.Height);
         }
 
         public Vector2 ToSourceUV(Vector2 uv) {

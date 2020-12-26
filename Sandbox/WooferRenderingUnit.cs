@@ -69,8 +69,9 @@ namespace Woofer
             atlas.AddTexture("campfire_smoke", Textures["campfire_smoke"]);
             atlas.AddTexture("soul", Textures["soul"]);
             atlas.AddTexture("particles", Textures["particles"]);
-            
             atlas.Pack();
+            
+            Textures.CreateSubTexture("main:soul", "start", new Rectangle(0, 0, 16, 16));
         }
     }
 }
