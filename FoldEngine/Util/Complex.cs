@@ -13,6 +13,8 @@ namespace FoldEngine.Util
         public float Magnitude => (float)Math.Sqrt(SqrMagnitude);
         public Complex Inverse => new Complex(A / SqrMagnitude, -B / SqrMagnitude);
 
+        public Complex Normalized => new Complex(this.A / Magnitude, this.B / Magnitude);
+
         public Complex(float real, float imaginary)
         {
             A = real;

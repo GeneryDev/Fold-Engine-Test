@@ -257,7 +257,7 @@ namespace FoldEngine.Graphics {
                 TriangleBatchItem item = _batchItemList[batchIndex];
 
                 if(texture != null && !ReferenceEquals(item.Texture, texture)) {
-                    FlushVertexArray(batchedThisIteration * 3, effect, texture);
+                    FlushVertexArray(batchedThisIteration * (WireframeMode ? 4 : 3), effect, texture);
                     batchedThisIteration = 0;
                     vertexIndex = 0;
                 }
@@ -267,18 +267,19 @@ namespace FoldEngine.Graphics {
                 _vertexArray[vertexIndex] = item.VertexA;
                 _vertexArray[vertexIndex+1] = item.VertexB;
                 _vertexArray[vertexIndex+2] = item.VertexC;
-                vertexIndex += 3;
+                if(WireframeMode) _vertexArray[vertexIndex+3] = item.VertexA;
+                vertexIndex += WireframeMode ? 4 : 3;
                 
                 batchedThisIteration++;
                 if(batchedThisIteration > MaxBatchSize) {
-                    FlushVertexArray(batchedThisIteration * 3, effect, texture);
+                    FlushVertexArray(batchedThisIteration * (WireframeMode ? 4 : 3), effect, texture);
                     batchedThisIteration = 0;
                     vertexIndex = 0;
                 }
             }
 
             if(batchedThisIteration > 0) {
-                FlushVertexArray(batchedThisIteration * 3, effect, texture);
+                FlushVertexArray(batchedThisIteration * (WireframeMode ? 4 : 3), effect, texture);
                 batchedThisIteration = 0;
                 vertexIndex = 0;
             }
@@ -286,7 +287,17 @@ namespace FoldEngine.Graphics {
             _batchItemCount = 0;
         }
 
+        private bool WireframeMode = false;
+
         private void FlushVertexArray(int numVertices, Effect effect, Texture texture) {
+            var primitiveType = PrimitiveType.TriangleList;
+            var primitiveCount = numVertices / 3;
+
+            if(WireframeMode) {
+                primitiveType = PrimitiveType.LineStrip;
+                primitiveCount = numVertices-1;
+            }
+            
             if (numVertices <= 0)
                 return;
             _device.Textures[0] = texture;
@@ -295,11 +306,11 @@ namespace FoldEngine.Graphics {
                 foreach (EffectPass pass in effect.CurrentTechnique.Passes)
                 {
                     pass.Apply();
-                    _device.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, _vertexArray, 0, numVertices, _index, 0, numVertices / 3, VertexPositionColorTexture.VertexDeclaration);
+                    _device.DrawUserIndexedPrimitives(primitiveType, _vertexArray, 0, numVertices, _index, 0, primitiveCount, VertexPositionColorTexture.VertexDeclaration);
                 }
             }
             else
-                _device.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, _vertexArray, 0, numVertices, _index, 0, numVertices / 3, VertexPositionColorTexture.VertexDeclaration);
+                _device.DrawUserIndexedPrimitives(primitiveType, _vertexArray, 0, numVertices, _index, 0, primitiveCount, VertexPositionColorTexture.VertexDeclaration);
         }
     }
 

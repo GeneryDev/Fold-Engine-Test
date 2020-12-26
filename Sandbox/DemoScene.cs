@@ -68,35 +68,48 @@ namespace Sandbox {
             // e1.AddComponent<LevelRenderable>();
 
             ref MeshRenderable e1MR = ref e0.AddComponent<MeshRenderable>();
-            e1MR.TextureIdentifier = "main:ancient_debris_side";
-            e1MR.MeshIdentifier = "circle";
-            e1MR.Matrix = Matrix.CreateScale(128*2);
-            e1MR.Color = Color.Aqua;
+            e1MR.TextureIdentifier = "main:pixel.white";
+            e1MR.MeshIdentifier = "weird";
+            e1MR.Matrix = Matrix.CreateScale(64);
+            e1MR.Color = Color.PaleTurquoise;
             
-            ref MeshRenderable e0MR = ref e1.AddComponent<MeshRenderable>();
-            e0MR.TextureIdentifier = "main:soul.start";
-            e0MR.MeshIdentifier = "circle";
-            e0MR.Matrix = Matrix.CreateScale(32);
-            e0MR.UVScale = new Vector2(-1, 1);
-            e0MR.UVOffset = new Vector2(1, 0);
+            // ref MeshRenderable e0MR = ref e1.AddComponent<MeshRenderable>();
+            // e0MR.TextureIdentifier = "main:soul.start";
+            // e0MR.MeshIdentifier = "weird";
+            // e0MR.Matrix = Matrix.CreateScale(32);
+            // e0MR.UVScale = new Vector2(-1, 1);
+            // e0MR.UVOffset = new Vector2(1, 0);
             
-            Meshes.Start("triangle")
-                .Vertex(new Vector2(-0.5f, 0.5f), new Vector2(0, 0))
-                .Vertex(new Vector2(-0.5f, -0.5f), new Vector2(0, 1))
-                .Vertex(new Vector2(0.5f, -0.5f), new Vector2(1, 1))
-                .End();
+            // Meshes.Start("triangle", MeshCollection.MeshInputType.Triangles)
+            //     .Vertex(new Vector2(-0.5f, 0.5f), new Vector2(0, 0))
+            //     .Vertex(new Vector2(-0.5f, -0.5f), new Vector2(0, 1))
+            //     .Vertex(new Vector2(0.5f, -0.5f), new Vector2(1, 1))
+            //     .End();
 
-            Meshes.Start("circle");
+            Meshes.Start("circle", MeshCollection.MeshInputType.Vertices);
             int segments = 90;
             Complex step = Complex.FromRotation((float) (Math.PI * 2 / segments));
             Complex current = new Complex(0.5f, 0);
+            // for(int i = 0; i < segments; i++) {
+            //     Meshes.Vertex(Vector2.Zero, Vector2.One*0.5f);
+            //     Meshes.Vertex(current, current + new Complex(0.5f, 0.5f));
+            //     Meshes.Vertex(current * step, current * step + new Complex(0.5f, 0.5f));
+            //     current *= step;
+            // }
             for(int i = 0; i < segments; i++) {
-                Meshes.Vertex(Vector2.Zero, Vector2.One*0.5f);
                 Meshes.Vertex(current, current + new Complex(0.5f, 0.5f));
-                Meshes.Vertex(current * step, current * step + new Complex(0.5f, 0.5f));
                 current *= step;
             }
             Meshes.End();
+
+            Meshes.Start("weird", MeshCollection.MeshInputType.Vertices)
+                .Vertex(new Vector2(-1, 0), Vector2.Zero)
+                .Vertex(new Vector2(-2, -1), Vector2.Zero)
+                .Vertex(new Vector2(0, -2), Vector2.Zero)
+                .Vertex(new Vector2(2, 0), Vector2.Zero)
+                .Vertex(new Vector2(0, 2), Vector2.Zero)
+                .Vertex(new Vector2(-2, 1), Vector2.Zero)
+                .End();
         }
     }
 }
