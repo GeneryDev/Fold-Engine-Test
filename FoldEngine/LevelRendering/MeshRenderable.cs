@@ -9,6 +9,8 @@ namespace FoldEngine.Rendering {
         public string TextureIdentifier;
         public string MeshIdentifier;
         public Matrix Matrix;
+        public Vector2 UVOffset;
+        public Vector2 UVScale;
         
         /// <summary>
         /// Returns an initialized mesh renderable component with all its correct default values.
@@ -18,7 +20,7 @@ namespace FoldEngine.Rendering {
         /// <returns>An initialized component with all its correct default values.</returns>
         public static MeshRenderable InitializeComponent(Scene scene, long entityId)
         {
-            return new MeshRenderable() { Matrix = Matrix.Identity };
+            return new MeshRenderable() { Matrix = Matrix.Identity, UVScale = Vector2.One};
         }
     }
 }

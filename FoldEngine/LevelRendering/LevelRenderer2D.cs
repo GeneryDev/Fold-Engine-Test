@@ -91,31 +91,10 @@ namespace FoldEngine.Rendering {
                             RenderingLayer.Convert(layer,
                                 (Complex) (transform.Apply(vertexC) - cameraPos)
                                 * cameraRotNegativeComplex),
-                            triangle.A.TextureCoordinate,
-                            triangle.B.TextureCoordinate,
-                            triangle.C.TextureCoordinate
+                            triangle.A.TextureCoordinate * meshRenderable.UVScale + meshRenderable.UVOffset,
+                            triangle.B.TextureCoordinate * meshRenderable.UVScale + meshRenderable.UVOffset,
+                            triangle.C.TextureCoordinate * meshRenderable.UVScale + meshRenderable.UVOffset
                         ));
-                        // layer.Surface.Draw(new DrawTriangleInstruction(
-                        //     texture,
-                        //     RenderingLayer.Convert(layer,
-                        //         (Complex) (transform.Apply(new Vector2(triangle.A.Position.X * meshRenderable.Scale.X + meshRenderable.Offset.X,
-                        //                        triangle.A.Position.Y * meshRenderable.Scale.Y + meshRenderable.Offset.Y))
-                        //                    - cameraPos)
-                        //         * cameraRotNegativeComplex),
-                        //     RenderingLayer.Convert(layer,
-                        //         (Complex) (transform.Apply(new Vector2(triangle.B.Position.X * meshRenderable.Scale.X + meshRenderable.Offset.X,
-                        //                        triangle.B.Position.Y * meshRenderable.Scale.Y + meshRenderable.Offset.Y))
-                        //                    - cameraPos)
-                        //         * cameraRotNegativeComplex),
-                        //     RenderingLayer.Convert(layer,
-                        //         (Complex) (transform.Apply(new Vector2(triangle.C.Position.X * meshRenderable.Scale.X + meshRenderable.Offset.X,
-                        //                        triangle.C.Position.Y * meshRenderable.Scale.Y + meshRenderable.Offset.Y))
-                        //                    - cameraPos)
-                        //         * cameraRotNegativeComplex),
-                        //     triangle.A.TextureCoordinate,
-                        //     triangle.B.TextureCoordinate,
-                        //     triangle.C.TextureCoordinate
-                        // ));
                     }
                 }
                 

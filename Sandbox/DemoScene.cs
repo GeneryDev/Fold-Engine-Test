@@ -72,8 +72,13 @@ namespace Sandbox {
             e1MR.TextureIdentifier = "main:end_portal_colors";
             e1MR.MeshIdentifier = "circle";
             e1MR.Matrix = Matrix.CreateScale(128);
-            // e1MR.Offset += Vector3.Up * 15;
-            // e1MR.Scale *= 8;
+            
+            ref MeshRenderable e2MR = ref e2.AddComponent<MeshRenderable>();
+            e2MR.TextureIdentifier = "main:bamboo_stem";
+            e2MR.MeshIdentifier = "circle";
+            e2MR.Matrix = Matrix.CreateScale(32);
+            e2MR.UVScale = new Vector2(-1, 1);
+            e2MR.UVOffset = new Vector2(1, 0);
             
             Meshes.Start("triangle")
                 .Vertex(new Vector2(-0.5f, 0.5f), new Vector2(0, 0))
@@ -82,7 +87,7 @@ namespace Sandbox {
                 .End();
 
             Meshes.Start("circle");
-            int segments = 180;
+            int segments = 90;
             Complex step = Complex.FromRotation((float) (Math.PI * 2 / segments));
             Complex current = new Complex(0.5f, 0);
             for(int i = 0; i < segments; i++) {
