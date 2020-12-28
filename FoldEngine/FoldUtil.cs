@@ -14,5 +14,9 @@ namespace FoldEngine
                 throw new Exception("Assertion Failed: " + message);
             }
         }
+
+        public static void Breakpoint() {
+            bool a = true;
+        }
     }
 }

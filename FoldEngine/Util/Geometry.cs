@@ -65,7 +65,7 @@ namespace EntryProject.Util {
             }
             Vector2 flat = LayFlat(this, ref other, out Complex undo);
 
-            if(otherCapped && (other.From.Y > 0) == (other.To.Y > 0)) return null;
+            if(otherCapped && Math.Sign(other.From.Y) == Math.Sign(other.To.Y)) return null;
             double xIntersect = (double) other.From.X
                                 + (-(double) other.From.Y / ((double) other.To.Y - other.From.Y))
                                 * ((double) other.To.X - other.From.X);
@@ -125,6 +125,10 @@ namespace EntryProject.Util {
             Vector2[] verticesB = meshes.GetVerticesForMesh(meshIdB).Select(transformB.Apply).ToArray();
             
             List<Intersection> intersections = new List<Intersection>();
+            int ins = 0;
+            int outs = 0;
+            Vector2? minIntersection = null;
+            Vector2? maxIntersection = null;
 
             for(int i = 0; i < verticesA.Length; i++) {
                 Line lineA = new Line(verticesA[i], verticesA[(i+1) % verticesA.Length]);
@@ -139,8 +143,15 @@ namespace EntryProject.Util {
                         };
                         Line lineACopy = lineA;
                         Line.LayFlat(lineB, ref lineACopy, out _);
-                        intersection.Type = lineACopy.To.Y > 0 ? IntersectionType.In : IntersectionType.Out;
-                        
+                        int signDelta = (Math.Sign(lineACopy.To.Y) - Math.Sign(lineACopy.From.Y));
+                        if(signDelta == 0) {
+                            // Console.WriteLine("signDelta is zero, continuing");
+                            continue;
+                        }
+                        intersection.Type = signDelta > 0 ? IntersectionType.In : IntersectionType.Out;
+
+                        if(intersection.Type == IntersectionType.In) ins++;
+                        else outs++;
                         
                         Vector2 intersectionPointFlat = intersection.Position;
                         float lengthA = Line.LayFlat(lineA, ref intersectionPointFlat, out _).X;
@@ -149,10 +160,23 @@ namespace EntryProject.Util {
                         intersectionPointFlat = intersection.Position;
                         float lengthB = Line.LayFlat(lineB, ref intersectionPointFlat, out _).X;
                         intersection.OrderB = j + intersectionPointFlat.X / lengthB;
+                        
+                        minIntersection = Vector2.Min(minIntersection ?? intersectionPoint.Value, intersectionPoint.Value);
+                        maxIntersection = Vector2.Max(maxIntersection ?? intersectionPoint.Value, intersectionPoint.Value);
 
                         intersections.Add(intersection);
                     }
                 }
+            }
+
+            if(minIntersection.HasValue && (maxIntersection.Value - minIntersection.Value).Length() <= 0) {
+                // Console.WriteLine("Single point, exiting");
+                return null;
+            }
+
+            if(ins != outs) {
+                // Console.WriteLine("Mismatching in-intersection and out-intersection count, exiting");
+                return null;
             }
 
             if(intersections.Count < 2) return null;
@@ -178,11 +202,13 @@ namespace EntryProject.Util {
                         do {
                             Intersection nextIntersection = intersections.Where(intersection =>
                                     intersection.VertexIndexA == i
+                                    && intersection.Type != current.Type
                                     && (intersection != current
                                         && (intersection.VertexIndexA != current.VertexIndexA
                                             || intersection.OrderA >= current.OrderA))
                                 )
-                                .OrderBy(intersection => intersection.OrderA)
+                                .OrderBy(intersection => intersection.VertexIndexA)
+                                .ThenBy(intersection => intersection.OrderA)
                                 .FirstOrDefault();
 
                             if(nextIntersection == firstIntersection) {
@@ -225,11 +251,13 @@ namespace EntryProject.Util {
                         do {
                             Intersection nextIntersection = intersections.Where(intersection =>
                                     intersection.VertexIndexB == i
+                                    && intersection.Type != current.Type
                                     && (intersection != current
                                         && (intersection.VertexIndexB != current.VertexIndexB
                                             || intersection.OrderB >= current.OrderB))
                                 )
-                                .OrderBy(intersection => intersection.OrderB)
+                                .OrderBy(intersection => intersection.VertexIndexB)
+                                .ThenBy(intersection => intersection.OrderB)
                                 .FirstOrDefault();
 
                             if(nextIntersection == firstIntersection) {

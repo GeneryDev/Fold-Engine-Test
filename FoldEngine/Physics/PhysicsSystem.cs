@@ -85,8 +85,8 @@ namespace FoldEngine.Physics {
                                 }
                                 
 
-                                float restitution = 0.0f; //TODO get from components
-                                float friction = 0.0f; //TODO get from components
+                                float restitution = 0.4f; //TODO get from components
+                                float friction = 0.1f; //TODO get from components
 
                                 // Console.WriteLine($"maxDisplacement = {maxDisplacement}");
                                 if(!maxDisplacement.Equals(float.NaN)) {

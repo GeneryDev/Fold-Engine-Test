@@ -61,7 +61,7 @@ namespace Sandbox {
             Components.DebugPrint<Transform>();
             Components.DebugPrint<Living>();
 
-            e0.Transform.LocalPosition += Vector2.UnitX * -80;
+            // e0.Transform.LocalPosition += Vector2.UnitX * -80;
             e0.Transform.LocalPosition += Vector2.UnitY * 256;
             e2.Transform.LocalPosition += Vector2.UnitY * -128;
             
