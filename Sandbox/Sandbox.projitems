@@ -12,7 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Components\LevelRenderable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\Living.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DemoScene.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Graphics\Sprite.cs" />
+    <Folder Include="$(MSBuildThisFileDirectory)Graphics" />
     <Compile Include="$(MSBuildThisFileDirectory)Systems\HealthSystem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WooferGameController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WooferRenderingUnit.cs" />

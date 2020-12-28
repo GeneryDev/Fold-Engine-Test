@@ -61,7 +61,7 @@ namespace Sandbox {
             Components.DebugPrint<Transform>();
             Components.DebugPrint<Living>();
 
-            // e0.Transform.LocalPosition += Vector2.UnitX * -70;
+            e0.Transform.LocalPosition += Vector2.UnitX * -80;
             e0.Transform.LocalPosition += Vector2.UnitY * 256;
             e2.Transform.LocalPosition += Vector2.UnitY * -128;
             
@@ -128,12 +128,12 @@ namespace Sandbox {
                 .End();
 
             ref MeshRenderable e2MR = ref e2.AddComponent<MeshRenderable>();
-            e2MR.MeshIdentifier = "cube";
+            e2MR.MeshIdentifier = "weird";
             e2MR.TextureIdentifier = "main:pixel.white";
             e2.Transform.LocalScale *= 128;
 
             e2.AddComponent<Physics>().Static = true;
-            e2.AddComponent<MeshCollider>().MeshIdentifier = "cube";
+            e2.AddComponent<MeshCollider>().MeshIdentifier = "weird";
         }
     }
 }

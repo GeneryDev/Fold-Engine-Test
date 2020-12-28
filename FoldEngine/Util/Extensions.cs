@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework;
 
 namespace EntryProject.Util {
-    public class Extensions {
+    public static class Extensions {
         public static Vector2 ToVector2(Vector3 vec) {
             return new Vector2(vec.X, vec.Y);
         }
@@ -13,6 +13,11 @@ namespace EntryProject.Util {
             byte b = (byte) ((color0.B * color1.B) / 255);
             byte a = (byte) ((color0.A * color1.A) / 255);
             return new Color(r, g, b, a);
+        }
+
+        public static Vector2 Normalized(this Vector2 vec) {
+            vec.Normalize();
+            return vec;
         }
     }
 }

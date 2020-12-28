@@ -221,6 +221,27 @@ namespace FoldEngine.Graphics {
             }
         }
 
+        public IEnumerable<Tuple<Vector2, Vector2, Vector2>> GetVertexTriosForMesh(string name) {
+            MeshInfo meshInfo = _meshInfos[name];
+            for(int i = meshInfo.VertexStartIndex; i < meshInfo.VertexStartIndex + meshInfo.VertexCount; i++) {
+                yield return new Tuple<Vector2, Vector2, Vector2>(
+                    Extensions.ToVector2(
+                        _vertices[
+                                i - 1 >= meshInfo.VertexStartIndex
+                                    ? i - 1
+                                    : meshInfo.VertexStartIndex + meshInfo.VertexCount - 1]
+                            .Position),
+                    Extensions.ToVector2(_vertices[i].Position),
+                    Extensions.ToVector2(
+                        _vertices[
+                                i + 1 < meshInfo.VertexStartIndex + meshInfo.VertexCount
+                                    ? i + 1
+                                    : meshInfo.VertexStartIndex]
+                            .Position)
+                );
+            }
+        }
+
         public IEnumerable<Triangle> GetTrianglesForMesh(string name) {
             MeshInfo meshInfo = _meshInfos[name];
             for(int i = meshInfo.TriangleStartIndex; i < meshInfo.TriangleStartIndex + meshInfo.TriangleCount * 3; i += 3) {
