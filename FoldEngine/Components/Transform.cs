@@ -75,14 +75,14 @@ namespace FoldEngine.Components
         /// </summary>
         public float LocalRotation
         {
-            get
-            {
-                return _localRotation;
-            }
+            get => _localRotation;
             set
             {
-                _localRotation = value;
-                RotationComplex = Complex.FromRotation(value);
+                // ReSharper disable once CompareOfFloatsByEqualityOperator
+                if(_localRotation != value) {
+                    _localRotation = value;
+                    RotationComplex = Complex.FromRotation(value);
+                }
             }
         }
 

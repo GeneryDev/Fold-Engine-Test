@@ -61,7 +61,9 @@ namespace Sandbox.Systems {
             //Console.WriteLine();
         }
 
+        private Vector2 _rightPressedPos;
         private Vector2 _previousMousePos;
+        private bool _rightPreviouslyPressed = false;
 
         public override void OnRender(IRenderingUnit renderer) {
             _livingComponents.Reset();
@@ -69,20 +71,39 @@ namespace Sandbox.Systems {
             Vector2 currentMousePos = RenderingLayer.ScreenToWorld(renderer.Layers["screen"],
                 Mouse.GetState().Position.ToVector2());
 
+            bool rightPressed = Mouse.GetState().RightButton == ButtonState.Pressed;
+
+            if(rightPressed && !_rightPreviouslyPressed) _rightPressedPos = currentMousePos;
+
             while(_livingComponents.Next()) {
                 ref Transform transform = ref _livingComponents.GetCoComponent<Transform>();
 
-                if(_livingComponents.HasCoComponent<Physics>() && Mouse.GetState().LeftButton == ButtonState.Pressed) {
+                if(_livingComponents.HasCoComponent<Physics>()) {
                     ref Physics physics = ref _livingComponents.GetCoComponent<Physics>();
-                    
-                    transform.Position = RenderingLayer.ScreenToWorld(renderer.Layers["screen"],
-                        Mouse.GetState().Position.ToVector2());
-                    
-                    physics.Velocity = (currentMousePos - _previousMousePos) * 8;
+
+                    if(rightPressed) {
+                        physics.Torque = default;
+                        physics.AccelerationFromForce = default;
+                        physics.Velocity = default;
+                        physics.AngularVelocity = default;
+                    }
+
+                    if(Mouse.GetState().LeftButton == ButtonState.Pressed) {
+                        transform.Position = currentMousePos;
+                        physics.Velocity = (currentMousePos - _previousMousePos) * 8;
+                        physics.AngularVelocity = default;
+                    }
+
+                    if(!rightPressed && _rightPreviouslyPressed) {
+                        physics.ApplyForce((currentMousePos - _rightPressedPos) * 100, currentMousePos - transform.Position);
+                        Console.WriteLine($"Torque: {physics.Torque}");
+                        Console.WriteLine($"Linear Acceleration: {physics.AccelerationFromForce}");                        
+                    }
                 }
             }
             
             _previousMousePos = currentMousePos;
+            _rightPreviouslyPressed = rightPressed;
         }
     }
 }

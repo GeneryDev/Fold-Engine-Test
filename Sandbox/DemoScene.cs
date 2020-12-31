@@ -79,7 +79,8 @@ namespace Sandbox {
             e1MR.Color = Color.Black;
             e0.Transform.LocalScale *= 32;
 
-            e0.AddComponent<Physics>();
+            e0.AddComponent<Physics>().GravityMultiplier = 1;
+            // e0.GetComponent<Physics>().AngularVelocity = (float) (Math.PI / 8);
             e0.AddComponent<MeshCollider>().MeshIdentifier = "weird";
             
             // ref MeshRenderable e0MR = ref e1.AddComponent<MeshRenderable>();

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Systems;
@@ -52,7 +51,8 @@ namespace FoldEngine.Physics {
                         if(intersections != null && intersections.Length > 0) {
 
                             if(!physics.Static) {
-                                Vector2 moveDirection = (physics.Velocity - otherPhysics.Velocity).Normalized();
+                                Vector2 relativeVelocity = physics.Velocity - otherPhysics.Velocity;
+                                Vector2 moveDirection = relativeVelocity.Normalized();
 
                                 Vector2 normalSum = Vector2.Zero;
                                 int totalNormals = 0;
@@ -62,14 +62,18 @@ namespace FoldEngine.Physics {
                                 for(int i = 0; i < intersections.Length; i++) {
                                     maxDisplacement = Math.Max(maxDisplacement,
                                         Polygon.ComputeLargestCrossSection(intersections[i], moveDirection));
+
+                                    Vector2 contactPoint = Polygon.ComputeHighestPoint(intersections[i], moveDirection);
                                     
                                     for(int j = 0; j < intersections[i].Length; j++) {
                                         var intersectionVertex = intersections[i][j];
                                         if(intersectionVertex.IsFromB) {
                                             var nextIntersectionVertex =
                                                 intersections[i][(j + 1) % intersections[i].Length];
-                                            
-                                            if(nextIntersectionVertex.IsFromB && intersectionVertex.VertexIndexA != nextIntersectionVertex.VertexIndexA) {
+
+                                            if(nextIntersectionVertex.IsFromB
+                                               && intersectionVertex.VertexIndexA
+                                               != nextIntersectionVertex.VertexIndexA) {
                                                 Line line = new Line(intersectionVertex.Position,
                                                     nextIntersectionVertex.Position);
                                                 if(line.MagnitudeSqr > 0) {
@@ -77,7 +81,9 @@ namespace FoldEngine.Physics {
                                                     if(Vector2.Dot(normal, moveDirection) <= 0) {
                                                         normalSum += normal;
                                                         totalNormals++;
+                                                        physics.ApplyForce(normal * relativeVelocity.Length() * 10 * physics.Mass, contactPoint - transform.Position);
                                                     }
+                                                    
                                                 }
                                             }
                                         }
@@ -85,23 +91,27 @@ namespace FoldEngine.Physics {
                                 }
                                 
 
-                                float restitution = 0.4f; //TODO get from components
-                                float friction = 0.1f; //TODO get from components
+                                float restitution = 0.0f; //TODO get from components
+                                float friction = 0.5f; //TODO get from components
 
                                 // Console.WriteLine($"maxDisplacement = {maxDisplacement}");
                                 if(!maxDisplacement.Equals(float.NaN)) {
-                                    transform.Position -= moveDirection * maxDisplacement;
+                                    // transform.Position -= moveDirection * maxDisplacement;
+                                    // physics.ContactDisplacement = -moveDirection * maxDisplacement;
                                 }
                                 
                                 if(totalNormals != 0 && normalSum.Length() > 0) {
                                     Vector2 surfaceNormal = (normalSum / totalNormals).Normalized();
                                     // Console.WriteLine($"surfaceNormal = {surfaceNormal}");
                                     // Console.WriteLine($"physics.Velocity (before) = {physics.Velocity}");
-                                    physics.Velocity =
+                                    Vector2 expectedVelocity =
                                         (((Complex) physics.Velocity) / (Complex) surfaceNormal).ScaleAxes(
                                             -restitution,
                                             1 - friction)
                                         * (Complex) surfaceNormal;
+                                    Vector2 velocityDelta = expectedVelocity - physics.Velocity;
+                                    Vector2 force = velocityDelta * physics.Mass / Time.DeltaTime;
+                                    physics.ApplyForce(force, -force);
                                     // Console.WriteLine($"physics.Velocity (after) = {physics.Velocity}");
                                     
                                 } else {
@@ -111,6 +121,21 @@ namespace FoldEngine.Physics {
                         }
                     }
                 }
+
+                if(!physics.Static) {
+                    physics.AngularVelocity += physics.Torque * Time.DeltaTime;
+                    physics.Velocity += physics.AccelerationFromForce * Time.DeltaTime;
+                    
+                    transform.Rotation += physics.AngularVelocity * Time.DeltaTime;
+                    
+                    // physics.Velocity += Gravity * physics.GravityMultiplier * Time.DeltaTime;
+                    // transform.Position += physics.Velocity * Time.DeltaTime + physics.ContactDisplacement;
+                    transform.Position += physics.ContactDisplacement;
+                }
+                
+                physics.AccelerationFromForce = default;
+                physics.Torque = default;
+                physics.ContactDisplacement = default;
             }
         }
     }

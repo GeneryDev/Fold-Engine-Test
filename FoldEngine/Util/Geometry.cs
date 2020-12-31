@@ -348,6 +348,37 @@ namespace EntryProject.Util {
             return largestCrossSection;
         }
 
+        [Pure]
+        public static Vector2 ComputeHighestPoint(PolygonIntersectionVertex[] polygon, Vector2 axisNormal) {
+            Complex axisNormalComplex = axisNormal;
+            
+            Vector2[] vertices = new Vector2[polygon.Length];
+            for(int i = 0; i < vertices.Length; i++) {
+                vertices[i] = (Complex) polygon[i].Position / axisNormalComplex;
+            }
+
+            float maxX = 0;
+            float minY = 0;
+            float maxY = 0;
+            
+            for(int i = 0; i < vertices.Length; i++) {
+                (float x, float y) = vertices[i];
+
+                if(i == 0 || x >= maxX) {
+                    maxX = x;
+                    if(i == 0 || Math.Abs(x - maxX) < 0.0001) {
+                        minY = Math.Min(minY, y);
+                        maxY = Math.Max(maxY, y);
+                    } else {
+                        minY = y;
+                        maxY = minY;
+                    }
+                }
+            }
+            
+            return ((Complex)new Vector2(maxX, (minY + maxY) / 2)) * axisNormalComplex;
+        }
+
         internal struct Intersection {
             public Vector2 Position;
             public IntersectionType Type;
