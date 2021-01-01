@@ -20,6 +20,11 @@ namespace Woofer
 
         public Scene ActiveScene { get; private set; }
 
+        public WooferGameController() {
+            ActiveScene = new DemoScene(this);
+            RenderingUnit = new WooferRenderingUnit(this);
+        }
+
         public void Initialize()
         {
             
@@ -28,14 +33,14 @@ namespace Woofer
         {
             ActiveScene.Input();
         }
+
         public void Update()
         {
             ActiveScene.Update();
         }
 
-        public WooferGameController() {
-            ActiveScene = new DemoScene(this);
-            RenderingUnit = new WooferRenderingUnit(this);
+        public void Render() {
+            ActiveScene?.Render(RenderingUnit);
         }
 
         public static void Main()

@@ -128,7 +128,7 @@ namespace FoldEngine
 
             //Draw the scene, across multiple sprite batches
             
-            _controller.RenderingUnit.Render();
+            _controller.Render();
 
             //Resolve each sprite batch into each layer's buffer
             foreach (IRenderingLayer layer in _controller.RenderingUnit.Layers.Values)

@@ -21,8 +21,6 @@ namespace FoldEngine.Interfaces
         ITexture WhiteTexture { get; }
 
         void LoadContent();
-
-        void Render();
         
         IRenderingLayer GizmoLayer { get; }
     }

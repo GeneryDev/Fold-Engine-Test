@@ -42,9 +42,6 @@ namespace FoldEngine.Interfaces
         /// <summary>
         /// Called when the game should draw itself
         /// </summary>
-        /// <typeparam name="TSurface">The screen renderer's Surface type</typeparam>
-        /// <typeparam name="TSource">The screen renderer's Source type</typeparam>
-        /// <param name="screenRenderer">The screen renderer onto which to draw the game</param>
-        //void Draw<TSurface, TSource>(ScreenRenderer<TSurface, TSource> screenRenderer);
+        void Render();
     }
 }
