@@ -21,6 +21,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)FoldUtil.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GraphicsContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\DrawInstruction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\GizmoBatch.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\MeshCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\RenderSurface.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\ITexture.cs" />

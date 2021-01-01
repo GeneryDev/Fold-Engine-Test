@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using FoldEngine.Interfaces;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
@@ -14,15 +14,19 @@ namespace FoldEngine.Graphics
     public class RenderSurface
     {
         internal GraphicsDevice GraphicsDevice;
+        internal IRenderingUnit RenderingUnit;
         internal RenderTarget2D Target;
         internal TriangleBatch TriBatch;
+        internal GizmoBatch GizBatch;
 
         public Point Size => new Point(Target.Width, Target.Height);
 
-        public RenderSurface(GraphicsDevice graphicsDevice, int width, int height)
+        public RenderSurface(GraphicsDevice graphicsDevice, IRenderingUnit renderingUnit, int width, int height)
         {
             GraphicsDevice = graphicsDevice;
+            RenderingUnit = renderingUnit;
             TriBatch = new TriangleBatch(graphicsDevice);
+            GizBatch = new GizmoBatch(graphicsDevice);
             Resize(width, height);
         }
 
@@ -79,13 +83,16 @@ namespace FoldEngine.Graphics
 
         internal void Begin()
         {
+            GizBatch.WhiteTexture = RenderingUnit.WhiteTexture;
             TriBatch.Begin(samplerState: SamplerState.PointClamp);
+            GizBatch.Begin(samplerState: SamplerState.PointClamp);
         }
         internal void End()
         {
             GraphicsDevice.SetRenderTarget(Target);
             GraphicsDevice.Clear(Color.Transparent);
             TriBatch.End();
+            GizBatch.End();
         }
 
         public void Resize(int newWidth, int newHeight)

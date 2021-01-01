@@ -10,6 +10,7 @@ using FoldEngine.Interfaces;
 using FoldEngine.Util;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Woofer
 {
@@ -21,6 +22,8 @@ namespace Woofer
         public Point ScreenSize { get; private set; } = new Point(1280, 720);
 
         public Dictionary<string, IRenderingLayer> Layers { get; private set; } = new Dictionary<string, IRenderingLayer>();
+
+        public ITexture WhiteTexture { get; set; }
 
         public WooferRenderingUnit(WooferGameController controller)
         {
@@ -35,6 +38,7 @@ namespace Woofer
         {
             _controller.ActiveScene?.Render(this);
         }
+        
         public void LoadContent()
         {
             Textures.LoadTexture("test");
@@ -77,7 +81,7 @@ namespace Woofer
             Textures.CreateSubTexture("main:pixel", "black_transparent", new Rectangle(0, 0, 1, 1));
             Textures.CreateSubTexture("main:pixel", "white_transparent", new Rectangle(1, 0, 1, 1));
             Textures.CreateSubTexture("main:pixel", "black", new Rectangle(0, 1, 1, 1));
-            Textures.CreateSubTexture("main:pixel", "white", new Rectangle(1, 1, 1, 1));
+            WhiteTexture = Textures.CreateSubTexture("main:pixel", "white", new Rectangle(1, 1, 1, 1));
         }
     }
 }

@@ -120,5 +120,12 @@ namespace FoldEngine.Scenes
                 sys.OnRender(renderer);
             }
         }
+
+        public T Get<T>() where T : GameSystem {
+            foreach(GameSystem sys in _all) {
+                if(sys is T system) return system;
+            }
+            return null;
+        }
     }
 }

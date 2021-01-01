@@ -1,22 +1,29 @@
 ﻿using System;
 using EntryProject.Util;
 using FoldEngine.Components;
+using FoldEngine.Interfaces;
 using FoldEngine.Systems;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 namespace FoldEngine.Physics {
-    [GameSystem("fold:physics", ProcessingCycles.Update)]
+    [GameSystem("fold:physics", ProcessingCycles.Update | ProcessingCycles.Render)]
     public class PhysicsSystem : GameSystem {
         private ComponentIterator<Physics> _physicsObjects;
         private ComponentIterator<MeshCollider> _colliders;
+
+        private IRenderingUnit _tempRenderingUnit;
 
         public Vector2 Gravity = new Vector2(0, -400f);
         
         internal override void Initialize() {
             _physicsObjects = CreateComponentIterator<Physics>(IterationFlags.None);
             _colliders = CreateComponentIterator<MeshCollider>(IterationFlags.None);
+        }
+
+        public override void OnRender(IRenderingUnit renderer) {
+            _tempRenderingUnit = renderer;
         }
 
         public override void OnUpdate() {
@@ -28,7 +35,6 @@ namespace FoldEngine.Physics {
                 ref Physics physics = ref _physicsObjects.GetComponent();
 
                 if(!physics.Static) {
-                    transform.Position += physics.Velocity * Time.DeltaTime;
                     physics.Velocity += Gravity * physics.GravityMultiplier * Time.DeltaTime;                    
                 }
 
@@ -58,12 +64,49 @@ namespace FoldEngine.Physics {
                                 int totalNormals = 0;
 
                                 float maxDisplacement = 0;
+                                Vector2 totalContactVertexVelocity = Vector2.Zero;
+                                int verticesCountedForTotalContactVertexVelocity = 0;
+
+                                Vector2 currentPos = transform.Position;
                                 
                                 for(int i = 0; i < intersections.Length; i++) {
                                     maxDisplacement = Math.Max(maxDisplacement,
                                         Polygon.ComputeLargestCrossSection(intersections[i], moveDirection));
+                                    
+                                    Vector2 totalVertexVelocity = Vector2.Zero;
+                                    int verticesCountedForVelocity = 0;
 
-                                    Vector2 contactPoint = Polygon.ComputeHighestPoint(intersections[i], moveDirection);
+                                    for(int j = 0; j < intersections[i].Length; j++) {
+                                        Polygon.PolygonIntersectionVertex vertex = intersections[i][j];
+                                        DrawGizmo(vertex.Position, intersections[i][(j + 1) % intersections[i].Length].Position, Color.Gray);
+
+                                        if(vertex.IsFromA && !vertex.IsFromB) {
+                                            Complex rotationByTorque =
+                                                Complex.FromRotation(physics.AngularVelocity * Time.DeltaTime);
+                                            Vector2 projectedNextVertexPosition =
+                                                ((Complex) (vertex.Position - currentPos) * rotationByTorque)
+                                                + (Complex) currentPos;
+                                            //TODO relativize to the other object
+                                            Vector2 vertexVelocity = physics.Velocity
+                                                                     + (projectedNextVertexPosition - vertex.Position)
+                                                                     / Time.DeltaTime;
+                                            totalVertexVelocity += vertexVelocity;
+                                            totalContactVertexVelocity += vertexVelocity;
+                                            verticesCountedForVelocity++;
+                                            verticesCountedForTotalContactVertexVelocity++;
+
+                                            DrawGizmo(vertex.Position, vertex.Position + vertexVelocity, Color.Blue);
+                                        }
+                                    }
+
+                                    if(verticesCountedForVelocity == 0) {
+                                        // Console.WriteLine("no A vertex counted for velocity");
+                                    }
+
+                                    Vector2 averageVertexVelocity = verticesCountedForVelocity == 0 ? relativeVelocity : totalVertexVelocity / verticesCountedForVelocity;
+                                    Vector2 averageVertexMoveDirection = averageVertexVelocity.Normalized();
+
+                                    Vector2 contactPoint = Polygon.ComputeHighestPoint(intersections[i], -averageVertexMoveDirection);
                                     
                                     for(int j = 0; j < intersections[i].Length; j++) {
                                         var intersectionVertex = intersections[i][j];
@@ -78,12 +121,19 @@ namespace FoldEngine.Physics {
                                                     nextIntersectionVertex.Position);
                                                 if(line.MagnitudeSqr > 0) {
                                                     Vector2 normal = line.Normal;
-                                                    if(Vector2.Dot(normal, moveDirection) <= 0) {
+                                                    if(Vector2.Dot(normal, averageVertexMoveDirection) <= 0) {
                                                         normalSum += normal;
                                                         totalNormals++;
-                                                        physics.ApplyForce(normal * relativeVelocity.Length() * 10 * physics.Mass, contactPoint - transform.Position);
+                                                        Vector2 force = normal
+                                                                        * averageVertexVelocity.Length()
+                                                                        * 10
+                                                                        * physics.Mass;
+                                                        physics.ApplyForce(
+                                                            force,
+                                                            contactPoint - transform.Position);
+                                                        // Console.WriteLine("Applying force in direction: " + normal);
+                                                        // Console.WriteLine("at location: " + contactPoint);
                                                     }
-                                                    
                                                 }
                                             }
                                         }
@@ -92,12 +142,12 @@ namespace FoldEngine.Physics {
                                 
 
                                 float restitution = 0.0f; //TODO get from components
-                                float friction = 0.5f; //TODO get from components
+                                float friction = 0.0f; //TODO get from components
 
                                 // Console.WriteLine($"maxDisplacement = {maxDisplacement}");
-                                if(!maxDisplacement.Equals(float.NaN)) {
+                                if(!maxDisplacement.Equals(float.NaN) && verticesCountedForTotalContactVertexVelocity != 0) {
                                     // transform.Position -= moveDirection * maxDisplacement;
-                                    // physics.ContactDisplacement = -moveDirection * maxDisplacement;
+                                    // physics.ContactDisplacement = -(totalContactVertexVelocity / verticesCountedForTotalContactVertexVelocity).Normalized() * maxDisplacement;
                                 }
                                 
                                 if(totalNormals != 0 && normalSum.Length() > 0) {
@@ -111,11 +161,11 @@ namespace FoldEngine.Physics {
                                         * (Complex) surfaceNormal;
                                     Vector2 velocityDelta = expectedVelocity - physics.Velocity;
                                     Vector2 force = velocityDelta * physics.Mass / Time.DeltaTime;
-                                    physics.ApplyForce(force, -force);
+                                    physics.ApplyForce(force, Vector2.Zero);
                                     // Console.WriteLine($"physics.Velocity (after) = {physics.Velocity}");
                                     
                                 } else {
-                                    Console.WriteLine("No surface normals?");
+                                    // Console.WriteLine("No surface normals?");
                                 }
                             }
                         }
@@ -127,15 +177,25 @@ namespace FoldEngine.Physics {
                     physics.Velocity += physics.AccelerationFromForce * Time.DeltaTime;
                     
                     transform.Rotation += physics.AngularVelocity * Time.DeltaTime;
-                    
-                    // physics.Velocity += Gravity * physics.GravityMultiplier * Time.DeltaTime;
-                    // transform.Position += physics.Velocity * Time.DeltaTime + physics.ContactDisplacement;
+                    transform.Position += physics.Velocity * Time.DeltaTime;
                     transform.Position += physics.ContactDisplacement;
                 }
                 
                 physics.AccelerationFromForce = default;
                 physics.Torque = default;
                 physics.ContactDisplacement = default;
+            }
+        }
+
+        public void DrawGizmo(Vector2 from, Vector2 to, Color color, Color? colorTo = null) {
+            if(_tempRenderingUnit != null) {
+                Vector2 fromScreen =
+                    RenderingLayer.WorldToScreen(
+                        _tempRenderingUnit.Layers["screen"], from);
+                Vector2 toScreen = RenderingLayer.WorldToScreen(
+                    _tempRenderingUnit.Layers["screen"],
+                    to);
+                _tempRenderingUnit.Layers["screen"].Surface.GizBatch.DrawLine(fromScreen, toScreen, color, colorTo);
             }
         }
     }

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using FoldEngine.Graphics;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace FoldEngine.Interfaces
 {
@@ -16,6 +17,8 @@ namespace FoldEngine.Interfaces
 
         Point ScreenSize { get; }
         Dictionary<string, IRenderingLayer> Layers { get; }
+        
+        ITexture WhiteTexture { get; }
 
         void LoadContent();
 

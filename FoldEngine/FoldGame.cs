@@ -63,7 +63,7 @@ namespace FoldEngine
 
             foreach (IRenderingLayer layer in _controller.RenderingUnit.Layers.Values)
             {
-                layer.Surface = new RenderSurface(_graphics.GraphicsDevice, layer.LayerSize.X, layer.LayerSize.Y);
+                layer.Surface = new RenderSurface(_graphics.GraphicsDevice, _controller.RenderingUnit, layer.LayerSize.X, layer.LayerSize.Y);
             }
 
             // TODO: use this.Content to load your game content here

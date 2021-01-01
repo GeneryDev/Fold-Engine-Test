@@ -3,9 +3,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace FoldEngine.Graphics {
-    public class TriangleBatch {
+    public class GizmoBatch {
         private readonly GraphicsDevice _device;
-        private readonly TriangleBatcher _batcher;
+        private readonly GizmoBatcher _batcher;
         private BlendState _blendState;
         private SamplerState _samplerState;
         private DepthStencilState _depthStencilState;
@@ -20,14 +20,19 @@ namespace FoldEngine.Graphics {
         private Matrix _projection;
         private Rectangle _tempRect = new Rectangle(0, 0, 0, 0);
         public bool NeedsHalfPixelOffset { get; set; } = true;
+
+        public ITexture WhiteTexture {
+            get => _batcher.WhiteTexture;
+            set => _batcher.WhiteTexture = value;
+        }
         
-        public TriangleBatch(GraphicsDevice graphicsDevice)
+        public GizmoBatch(GraphicsDevice graphicsDevice)
         {
             this._device = graphicsDevice ?? throw new ArgumentNullException(nameof (graphicsDevice), "The GraphicsDevice must not be null when creating new resources.");
             this._spriteEffect = new CustomSpriteEffect(graphicsDevice);
             this._matrixTransform = this._spriteEffect.Parameters["MatrixTransform"];
             this._spritePass = this._spriteEffect.CurrentTechnique.Passes[0];
-            this._batcher = new TriangleBatcher(graphicsDevice);
+            this._batcher = new GizmoBatcher(graphicsDevice);
             this._beginCalled = false;
         }
 
@@ -100,115 +105,47 @@ namespace FoldEngine.Graphics {
                 throw new InvalidOperationException("Draw was called, but Begin has not yet been called. Begin must be called successfully before you can call Draw.");
         }
 
-        public void DrawTriangle(
-            Texture2D texture,
-            Vector2 a,
-            Vector2 b,
-            Vector2 c,
-            Vector2 texA,
-            Vector2 texB,
-            Vector2 texC,
-            Color? colorA = null,
-            Color? colorB = null,
-            Color? colorC = null) {
-            
-            CheckValid(texture);
-            
+        public void DrawLine(Vector2 a, Vector2 b, Color? colorA = null, Color? colorB = null) {
             colorA = colorA ?? Color.White;
             colorB = colorB ?? colorA;
-            colorC = colorC ?? colorA;
-
-            ref TriangleBatchItem item = ref _batcher.CreateBatchItem();
             
-            item.Texture = texture;
-            item.VertexA.Color = colorA.Value;
-            item.VertexB.Color = colorB.Value;
-            item.VertexC.Color = colorC.Value;
+            ref GizmoBatchItem item = ref _batcher.CreateBatchItem();
 
             item.VertexA.Position = new Vector3(a, 0);
             item.VertexB.Position = new Vector3(b, 0);
-            item.VertexC.Position = new Vector3(c, 0);
-
-            item.VertexA.TextureCoordinate = texA;
-            item.VertexB.TextureCoordinate = texB;
-            item.VertexC.TextureCoordinate = texC;
-        }
-
-        public void DrawQuad(
-            Texture2D texture,
-            Vector2 a,
-            Vector2 b,
-            Vector2 c,
-            Vector2 d,
-            Vector2 texA,
-            Vector2 texB,
-            Vector2 texC,
-            Vector2 texD,
-            Color? colorA = null,
-            Color? colorB = null,
-            Color? colorC = null,
-            Color? colorD = null) {
             
-            CheckValid(texture);
-            
-            colorA = colorA ?? Color.White;
-            colorB = colorB ?? colorA;
-            colorC = colorC ?? colorA;
-            colorD = colorD ?? colorA;
+            item.VertexA.Color = colorA.Value;
+            item.VertexB.Color = colorB.Value;
 
-            ref TriangleBatchItem item0 = ref _batcher.CreateBatchItem();
-            ref TriangleBatchItem item1 = ref _batcher.CreateBatchItem();
-            
-            item0.Texture = texture;
-            item0.VertexA.Color = colorA.Value;
-            item0.VertexB.Color = colorB.Value;
-            item0.VertexC.Color = colorC.Value;
-
-            item0.VertexA.Position = new Vector3(a, 0);
-            item0.VertexB.Position = new Vector3(b, 0);
-            item0.VertexC.Position = new Vector3(c, 0);
-
-            item0.VertexA.TextureCoordinate = texA;
-            item0.VertexB.TextureCoordinate = texB;
-            item0.VertexC.TextureCoordinate = texC;
-            
-            item1.Texture = texture;
-            item1.VertexA.Color = colorB.Value;
-            item1.VertexB.Color = colorD.Value;
-            item1.VertexC.Color = colorC.Value;
-
-            item1.VertexA.Position = new Vector3(b, 0);
-            item1.VertexB.Position = new Vector3(d, 0);
-            item1.VertexC.Position = new Vector3(c, 0);
-
-            item1.VertexA.TextureCoordinate = texB;
-            item1.VertexB.TextureCoordinate = texD;
-            item1.VertexC.TextureCoordinate = texC;
+            item.VertexA.TextureCoordinate = WhiteTexture?.ToSourceUV(Vector2.Zero) ?? Vector2.Zero;
+            item.VertexB.TextureCoordinate = WhiteTexture?.ToSourceUV(Vector2.One) ?? Vector2.One;
         }
     }
 
-    public class TriangleBatcher {
+    public class GizmoBatcher {
         private const int InitialBatchSize = 256;
         private const int MaxBatchSize = 5461;
         private const int InitialVertexArraySize = 256;
         
-        private TriangleBatchItem[] _batchItemList;
+        private GizmoBatchItem[] _batchItemList;
         private int _batchItemCount;
         private readonly GraphicsDevice _device;
         private short[] _index;
         private VertexPositionColorTexture[] _vertexArray;
         
-        public TriangleBatcher(GraphicsDevice device)
+        public ITexture WhiteTexture { get; set; }
+        
+        public GizmoBatcher(GraphicsDevice device)
         {
             _device = device;
-            _batchItemList = new TriangleBatchItem[InitialBatchSize];
+            _batchItemList = new GizmoBatchItem[InitialBatchSize];
             _batchItemCount = 0;
             for (int index = 0; index < InitialBatchSize; ++index)
-                _batchItemList[index] = new TriangleBatchItem();
+                _batchItemList[index] = new GizmoBatchItem();
             EnsureArrayCapacity(InitialBatchSize);
         }
 
-        public ref TriangleBatchItem CreateBatchItem()
+        public ref GizmoBatchItem CreateBatchItem()
         {
             if (_batchItemCount >= _batchItemList.Length)
             {
@@ -222,7 +159,7 @@ namespace FoldEngine.Graphics {
         }
 
         private void EnsureArrayCapacity(int numBatchItems) {
-            int indexCount = 3 * numBatchItems;
+            int indexCount = 2 * numBatchItems;
             if (_index != null && indexCount <= _index.Length)
                 return;
             short[] newIndexArray = new short[indexCount];
@@ -230,18 +167,17 @@ namespace FoldEngine.Graphics {
             if (_index != null)
             {
                 _index.CopyTo(newIndexArray, 0);
-                batchIndex = _index.Length / 3;
+                batchIndex = _index.Length / 2;
             }
 
             for(int i = batchIndex; i < numBatchItems; i++) {
-                int vertexArrayIndex = (short) (i * 3);
-                newIndexArray[i * 3] = (short) vertexArrayIndex;
-                newIndexArray[i * 3 + 1] = (short) (vertexArrayIndex + 1);
-                newIndexArray[i * 3 + 2] = (short) (vertexArrayIndex + 2);
+                int vertexArrayIndex = (short) (i * 2);
+                newIndexArray[i * 2] = (short) vertexArrayIndex;
+                newIndexArray[i * 2 + 1] = (short) (vertexArrayIndex + 1);
             }
       
             _index = newIndexArray;
-            _vertexArray = new VertexPositionColorTexture[3 * numBatchItems];
+            _vertexArray = new VertexPositionColorTexture[2 * numBatchItems];
         }
 
         public void DrawBatch(Effect effect) {
@@ -249,37 +185,29 @@ namespace FoldEngine.Graphics {
                 throw new ObjectDisposedException(nameof (effect));
             if (_batchItemCount == 0)
                 return;
+            if(WhiteTexture == null) {
+                throw new Exception("Cannot draw GizmoBatch without a texture");
+            }
 
             int batchedThisIteration = 0;
             int vertexIndex = 0;
-            Texture2D texture = null;
             for(int batchIndex = 0; batchIndex < _batchItemCount; batchIndex++) {
-                TriangleBatchItem item = _batchItemList[batchIndex];
-
-                if(texture != null && !ReferenceEquals(item.Texture, texture)) {
-                    FlushVertexArray(batchedThisIteration * (WireframeMode ? 4 : 3), effect, texture);
-                    batchedThisIteration = 0;
-                    vertexIndex = 0;
-                }
-
-                texture = item.Texture;
+                GizmoBatchItem item = _batchItemList[batchIndex];
 
                 _vertexArray[vertexIndex] = item.VertexA;
                 _vertexArray[vertexIndex+1] = item.VertexB;
-                _vertexArray[vertexIndex+2] = item.VertexC;
-                if(WireframeMode) _vertexArray[vertexIndex+3] = item.VertexA;
-                vertexIndex += WireframeMode ? 4 : 3;
+                vertexIndex += 2;
                 
                 batchedThisIteration++;
                 if(batchedThisIteration > MaxBatchSize) {
-                    FlushVertexArray(batchedThisIteration * (WireframeMode ? 4 : 3), effect, texture);
+                    FlushVertexArray(batchedThisIteration * 2, effect);
                     batchedThisIteration = 0;
                     vertexIndex = 0;
                 }
             }
 
             if(batchedThisIteration > 0) {
-                FlushVertexArray(batchedThisIteration * (WireframeMode ? 4 : 3), effect, texture);
+                FlushVertexArray(batchedThisIteration * 2, effect);
                 batchedThisIteration = 0;
                 vertexIndex = 0;
             }
@@ -287,20 +215,13 @@ namespace FoldEngine.Graphics {
             _batchItemCount = 0;
         }
 
-        private bool WireframeMode = false;
+        private void FlushVertexArray(int numVertices, Effect effect) {
+            var primitiveType = PrimitiveType.LineList;
+            var primitiveCount = numVertices / 2;
 
-        private void FlushVertexArray(int numVertices, Effect effect, Texture texture) {
-            var primitiveType = PrimitiveType.TriangleList;
-            var primitiveCount = numVertices / 3;
-
-            if(WireframeMode) {
-                primitiveType = PrimitiveType.LineStrip;
-                primitiveCount = numVertices-1;
-            }
-            
             if (numVertices <= 0)
                 return;
-            _device.Textures[0] = texture;
+            _device.Textures[0] = this.WhiteTexture.Source;
             if (effect != null)
             {
                 foreach (EffectPass pass in effect.CurrentTechnique.Passes)
@@ -314,19 +235,8 @@ namespace FoldEngine.Graphics {
         }
     }
 
-    public struct TriangleBatchItem {
-        public Texture2D Texture;
+    public struct GizmoBatchItem {
         public VertexPositionColorTexture VertexA;
         public VertexPositionColorTexture VertexB;
-        public VertexPositionColorTexture VertexC;
-    }
-
-    public class CustomSpriteEffect : SpriteEffect {
-        public CustomSpriteEffect(GraphicsDevice device) : base(device) { }
-        protected CustomSpriteEffect(SpriteEffect cloneSource) : base(cloneSource) { }
-
-        protected override void OnApply() {
-            
-        }
     }
 }

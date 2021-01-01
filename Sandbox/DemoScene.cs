@@ -38,7 +38,6 @@ namespace Sandbox {
             e1.Transform.LocalScale = Vector2.One * 0.5f;
             Console.WriteLine(e1.Transform.LocalScale);*/
 
-            e1.Transform.LocalPosition = new Vector2(0, 0);
             // e0.Transform.Rotation = (float) Math.PI / 4f;
 
             Console.WriteLine(e1.Transform.Position);
@@ -46,7 +45,7 @@ namespace Sandbox {
             e0.AddComponent<Living>();
             e1.AddComponent<Living>();
 
-            e1.Transform.SetParent(e0);
+            // e1.Transform.SetParent(e0);
 
 
             ComponentReference<Transform>[] e0Children = e0.Transform.Children;
@@ -70,13 +69,22 @@ namespace Sandbox {
             Entity cam = CreateEntity("Camera");
             cam.AddComponent<Camera>().RenderToLayer = "screen";
 
-            // e1.AddComponent<LevelRenderable>();
-
-            ref MeshRenderable e1MR = ref e0.AddComponent<MeshRenderable>();
+            e1.AddComponent<LevelRenderable>();
+            e1.Transform.LocalPosition += Vector2.UnitX * 400;
+            e1.Transform.LocalScale *= 128;
+            ref MeshRenderable e1MR = ref e1.AddComponent<MeshRenderable>();
             e1MR.TextureIdentifier = "main:pixel.white";
-            e1MR.MeshIdentifier = "weird";
+            e1MR.MeshIdentifier = "square";
+
+            e1.AddComponent<Physics>().GravityMultiplier = 0;
+            e1.GetComponent<Physics>().Static = true;
+            e1.AddComponent<MeshCollider>().MeshIdentifier = "square";
+
+            ref MeshRenderable e0MR = ref e0.AddComponent<MeshRenderable>();
+            e0MR.TextureIdentifier = "main:pixel.white";
+            e0MR.MeshIdentifier = "weird";
             // e1MR.Matrix = Matrix.CreateScale(64);
-            e1MR.Color = Color.Black;
+            e0MR.Color = Color.Black;
             e0.Transform.LocalScale *= 32;
 
             e0.AddComponent<Physics>().GravityMultiplier = 1;
@@ -96,7 +104,7 @@ namespace Sandbox {
             //     .Vertex(new Vector2(0.5f, -0.5f), new Vector2(1, 1))
             //     .End();
             
-            Meshes.Start("cube", MeshCollection.MeshInputType.Vertices)
+            Meshes.Start("square", MeshCollection.MeshInputType.Vertices)
                 .Vertex(new Vector2(-0.5f, -0.5f), new Vector2(0, 1))
                 .Vertex(new Vector2(-0.5f, 0.5f), new Vector2(0, 0))
                 .Vertex(new Vector2(0.5f, 0.5f), new Vector2(1, 0))

@@ -364,14 +364,21 @@ namespace EntryProject.Util {
             for(int i = 0; i < vertices.Length; i++) {
                 (float x, float y) = vertices[i];
 
-                if(i == 0 || x >= maxX) {
+                if(i == 0) {
                     maxX = x;
-                    if(i == 0 || Math.Abs(x - maxX) < 0.0001) {
-                        minY = Math.Min(minY, y);
-                        maxY = Math.Max(maxY, y);
-                    } else {
-                        minY = y;
-                        maxY = minY;
+                    minY = y;
+                    maxY = y;
+                } else {
+                    if(x >= maxX) {
+                        // minY = maxY = y;
+                        if(Math.Abs(x - maxX) < 0.0000001) {
+                            minY = Math.Min(minY, y);
+                            maxY = Math.Max(maxY, y);
+                        } else {
+                            minY = y;
+                            maxY = minY;
+                        }
+                        maxX = x;
                     }
                 }
             }
