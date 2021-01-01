@@ -25,6 +25,8 @@ namespace Woofer
 
         public ITexture WhiteTexture { get; set; }
 
+        public IRenderingLayer GizmoLayer => Layers["screen"];
+
         public WooferRenderingUnit(WooferGameController controller)
         {
             _controller = controller;

@@ -8,22 +8,16 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 namespace FoldEngine.Physics {
-    [GameSystem("fold:physics", ProcessingCycles.Update | ProcessingCycles.Render)]
-    public class PhysicsSystem : GameSystem {
+    [GameSystem("fold:physics.advanced", ProcessingCycles.Update)]
+    public class AdvancedPhysicsSystem : GameSystem {
         private ComponentIterator<Physics> _physicsObjects;
         private ComponentIterator<MeshCollider> _colliders;
-
-        private IRenderingUnit _tempRenderingUnit;
 
         public Vector2 Gravity = new Vector2(0, -400f);
         
         internal override void Initialize() {
             _physicsObjects = CreateComponentIterator<Physics>(IterationFlags.None);
             _colliders = CreateComponentIterator<MeshCollider>(IterationFlags.None);
-        }
-
-        public override void OnRender(IRenderingUnit renderer) {
-            _tempRenderingUnit = renderer;
         }
 
         public override void OnUpdate() {
@@ -184,18 +178,6 @@ namespace FoldEngine.Physics {
                 physics.AccelerationFromForce = default;
                 physics.Torque = default;
                 physics.ContactDisplacement = default;
-            }
-        }
-
-        public void DrawGizmo(Vector2 from, Vector2 to, Color color, Color? colorTo = null) {
-            if(_tempRenderingUnit != null) {
-                Vector2 fromScreen =
-                    RenderingLayer.WorldToScreen(
-                        _tempRenderingUnit.Layers["screen"], from);
-                Vector2 toScreen = RenderingLayer.WorldToScreen(
-                    _tempRenderingUnit.Layers["screen"],
-                    to);
-                _tempRenderingUnit.Layers["screen"].Surface.GizBatch.DrawLine(fromScreen, toScreen, color, colorTo);
             }
         }
     }

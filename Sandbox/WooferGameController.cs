@@ -16,13 +16,13 @@ namespace Woofer
     {
         public IRenderingUnit RenderingUnit { get; private set; }
 
-        public float TimeScale { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public float TimeScale => 1;
 
-        public Scene ActiveScene { get; private set; } = new DemoScene();
+        public Scene ActiveScene { get; private set; }
 
         public void Initialize()
         {
-
+            
         }
         public void Input()
         {
@@ -33,8 +33,8 @@ namespace Woofer
             ActiveScene.Update();
         }
 
-        public WooferGameController()
-        {
+        public WooferGameController() {
+            ActiveScene = new DemoScene(this);
             RenderingUnit = new WooferRenderingUnit(this);
         }
 

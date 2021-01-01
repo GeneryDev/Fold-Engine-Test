@@ -32,8 +32,8 @@ namespace FoldEngine.Scenes
         /// </summary>
         public float TimeScale { get; set; }
 
-        public Scene()
-        {
+        public Scene(IGameController controller) {
+            Controller = controller;
             Components = new ComponentMap(this);
             Systems = new SystemMap(this);
             EntityObjectPool = new EntityObjectPool(this);
@@ -53,6 +53,7 @@ namespace FoldEngine.Scenes
         {
             return EntityObjectPool.GetOrCreateEntityObject(CreateEntityId(name));
         }
+        
 
         bool _initialized = false;
 

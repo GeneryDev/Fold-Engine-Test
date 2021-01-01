@@ -50,7 +50,7 @@ namespace FoldEngine.Physics {
 
 
             Vector2 ownerPos = _scene.Components.GetComponent<Transform>(_entityId).Position;
-            _scene.Systems.Get<PhysicsSystem>()?.DrawGizmo(ownerPos + point, ownerPos + point + force / 10, Color.Red);
+            _scene.Systems.Get<AdvancedPhysicsSystem>()?.DrawGizmo(ownerPos + point, ownerPos + point + force / 10, Color.Red);
         }
     }
 }

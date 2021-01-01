@@ -7,12 +7,15 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using FoldEngine.Graphics;
+using FoldEngine.Interfaces;
 using FoldEngine.Physics;
 using FoldEngine.Rendering;
 using FoldEngine.Util;
+using Woofer;
 
 namespace Sandbox {
     internal class DemoScene : Scene {
+
         public override void Initialize() {
             Entity e2 = CreateEntity("Entity 2");
             Entity e0 = CreateEntity("Entity 0");
@@ -51,7 +54,7 @@ namespace Sandbox {
             ComponentReference<Transform>[] e0Children = e0.Transform.Children;
 
             Systems.Add<HealthSystem>();
-            Systems.Add<PhysicsSystem>();
+            Systems.Add<AdvancedPhysicsSystem>();
 
             Systems.Add<LevelRenderer2D>();
             // Systems.Add<DebugRendering>();
@@ -144,5 +147,7 @@ namespace Sandbox {
             e2.AddComponent<Physics>().Static = true;
             e2.AddComponent<MeshCollider>().MeshIdentifier = "weird";
         }
+
+        public DemoScene(IGameController controller) : base(controller) { }
     }
 }

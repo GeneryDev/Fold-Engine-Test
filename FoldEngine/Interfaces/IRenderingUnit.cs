@@ -23,5 +23,7 @@ namespace FoldEngine.Interfaces
         void LoadContent();
 
         void Render();
+        
+        IRenderingLayer GizmoLayer { get; }
     }
 }

@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using FoldEngine.Interfaces;
+using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Systems {
     public abstract class GameSystem {
@@ -35,6 +37,15 @@ namespace FoldEngine.Systems {
         }
 
         internal virtual void Initialize() { }
+
+        public void DrawGizmo(Vector2 from, Vector2 to, Color color, Color? colorTo = null) {
+            IRenderingLayer gizmoLayer = Owner.Controller.RenderingUnit.GizmoLayer;
+            if(gizmoLayer != null) {
+                Vector2 fromScreen = RenderingLayer.WorldToScreen(gizmoLayer, from);
+                Vector2 toScreen = RenderingLayer.WorldToScreen(gizmoLayer, to);
+                gizmoLayer.Surface.GizBatch.DrawLine(fromScreen, toScreen, color, colorTo);
+            }
+        }
     }
 
 
