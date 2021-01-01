@@ -21,8 +21,8 @@ namespace Woofer
         public Scene ActiveScene { get; private set; }
 
         public WooferGameController() {
-            ActiveScene = new DemoScene(this);
             RenderingUnit = new WooferRenderingUnit(this);
+            ActiveScene = new DemoScene(this);
         }
 
         public void Initialize()

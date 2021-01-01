@@ -15,12 +15,10 @@ namespace FoldEngine.Rendering {
     [GameSystem("fold:level_renderer.2d", ProcessingCycles.Render)]
     public class LevelRenderer2D : GameSystem {
         private ComponentIterator<Camera> _cameras;
-        private ComponentIterator<LevelRenderable> _renderables;
         private ComponentIterator<MeshRenderable> _meshRenderables;
 
         internal override void Initialize() {
             _cameras = CreateComponentIterator<Camera>(IterationFlags.None);
-            _renderables = CreateComponentIterator<LevelRenderable>(IterationFlags.Ordered);
             _meshRenderables = CreateComponentIterator<MeshRenderable>(IterationFlags.Ordered);
         }
 
@@ -37,30 +35,11 @@ namespace FoldEngine.Rendering {
                 
                 Vector2 cameraPos = view.Position;
                 Complex cameraRotNegativeComplex = Complex.FromRotation(-view.Rotation);
+                
+                Vector2 cameraScale = view.LocalScale;
 
                 IRenderingLayer layer = renderer.Layers[camera.RenderToLayer];
-                
-                _renderables.Reset();
 
-                while(_renderables.Next()) {
-                    ref Transform transform = ref _renderables.GetCoComponent<Transform>();
-
-                    float w = 4f;
-                    float h = 4f;
-                    
-                    layer.Surface.Draw(new DrawQuadInstruction(
-                        renderer.Textures["main:beacon"],
-                        RenderingLayer.WorldToScreen(layer, (Complex)(transform.Apply(new Vector2(-w/2, h/2)) - cameraPos) * cameraRotNegativeComplex),
-                        RenderingLayer.WorldToScreen(layer, (Complex)(transform.Apply(new Vector2(-w/2, -h/2)) - cameraPos) * cameraRotNegativeComplex),
-                        RenderingLayer.WorldToScreen(layer, (Complex)(transform.Apply(new Vector2(w/2, h/2)) - cameraPos) * cameraRotNegativeComplex),
-                        RenderingLayer.WorldToScreen(layer, (Complex)(transform.Apply(new Vector2(w/2, -h/2)) - cameraPos) * cameraRotNegativeComplex),
-                        new Vector2(0, 0),
-                        new Vector2(0, 1),
-                        new Vector2(1, 0),
-                        new Vector2(1, 1)
-                    ));
-                }
-                
                 _meshRenderables.Reset();
 
                 while(_meshRenderables.Next()) {
@@ -84,14 +63,14 @@ namespace FoldEngine.Rendering {
                         layer.Surface.Draw(new DrawTriangleInstruction(
                             texture,
                             RenderingLayer.WorldToScreen(layer,
-                                (Complex) (transform.Apply(vertexA) - cameraPos)
-                                * cameraRotNegativeComplex),
+                                (Vector2)((Complex) (transform.Apply(vertexA) - cameraPos)
+                                          * cameraRotNegativeComplex) / cameraScale),
                             RenderingLayer.WorldToScreen(layer,
-                                (Complex) (transform.Apply(vertexB) - cameraPos)
-                                * cameraRotNegativeComplex),
+                                (Vector2)((Complex) (transform.Apply(vertexB) - cameraPos)
+                                          * cameraRotNegativeComplex) / cameraScale),
                             RenderingLayer.WorldToScreen(layer,
-                                (Complex) (transform.Apply(vertexC) - cameraPos)
-                                * cameraRotNegativeComplex),
+                                (Vector2)((Complex) (transform.Apply(vertexC) - cameraPos)
+                                          * cameraRotNegativeComplex) / cameraScale),
                             triangle.A.TextureCoordinate * meshRenderable.UVScale + meshRenderable.UVOffset,
                             triangle.B.TextureCoordinate * meshRenderable.UVScale + meshRenderable.UVOffset,
                             triangle.C.TextureCoordinate * meshRenderable.UVScale + meshRenderable.UVOffset,

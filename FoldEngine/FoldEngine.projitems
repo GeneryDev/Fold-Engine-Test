@@ -37,6 +37,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)LevelRendering\LevelRenderer2D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LevelRendering\MeshRenderable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Physics\BoxCollider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Physics\ColliderGizmoRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Physics\MeshCollider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Physics\Physics.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Physics\Systems\AdvancedPhysicsSystem.cs" />

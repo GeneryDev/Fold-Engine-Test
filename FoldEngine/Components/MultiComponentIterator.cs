@@ -8,8 +8,8 @@ using System.Text;
 
 namespace FoldEngine.Components
 {
-    public class MultiComponentIterator : ComponentIterator
-    {
+    public class MultiComponentIterator : ComponentIterator {
+        private Scene _scene;
         private ComponentGrouping _grouping = ComponentGrouping.And;
         private Type[] _componentTypes;
         private ComponentIterator[] _iterators;
@@ -22,8 +22,8 @@ namespace FoldEngine.Components
         public override bool Started => _started;
         public override bool Finished => _finished;
 
-        public MultiComponentIterator(Scene scene, params Type[] componentTypes)
-        {
+        public MultiComponentIterator(Scene scene, params Type[] componentTypes) {
+            _scene = scene;
             foreach(Type type in componentTypes)
             {
                 if(!type.IsValueType || type.IsPrimitive)
@@ -142,6 +142,14 @@ namespace FoldEngine.Components
                 }
             }
             throw new ArgumentException("This MultiComponentIterator does not track components of type " + type);
+        }
+
+        public ref TO GetCoComponent<TO>() where TO : struct {
+            return ref _scene.Components.GetComponent<TO>(GetEntityId());
+        }
+
+        public bool HasCoComponent<TO>() where TO : struct {
+            return _scene.Components.HasComponent<TO>(GetEntityId());
         }
 
         public MultiComponentIterator SetGrouping(ComponentGrouping grouping)
