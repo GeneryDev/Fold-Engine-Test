@@ -24,6 +24,7 @@ namespace FoldEngine.Physics {
         public float Torque;
 
         public Vector2 ContactDisplacement;
+        public Vector2 PreviousPosition;
 
         public static Physics InitializeComponent(Scene scene, long entityId) {
             return new Physics() {
@@ -36,6 +37,7 @@ namespace FoldEngine.Physics {
 
         public void ApplyForce(Vector2 force, Vector2 point) {
             if(force == default) return;
+            if(Static) return;
             Complex diff = ((((Complex) force.Normalized()) / (Complex) point.Normalized())).Normalized;
             if(point == Vector2.Zero) diff = force.Normalized();
             
@@ -45,12 +47,8 @@ namespace FoldEngine.Physics {
             AccelerationFromForce += accel;
             Torque += torque;
 
-
-
-
-
             Vector2 ownerPos = _scene.Components.GetComponent<Transform>(_entityId).Position;
-            _scene.Systems.Get<AdvancedPhysicsSystem>()?.DrawGizmo(ownerPos + point, ownerPos + point + force / 10, Color.Red);
+            _scene.DrawGizmo(ownerPos + point, ownerPos + point + force / 10, Color.Red);
         }
     }
 }

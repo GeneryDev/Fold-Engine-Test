@@ -19,7 +19,10 @@ namespace Sandbox {
         public override void Initialize() {
             BuildMeshes();
             
+            Systems.Add<ColliderGizmoRenderer>();
             Systems.Add<LevelRenderer2D>();
+            Systems.Add<SimplePhysicsSystem>();
+            Systems.Add<DebugSystem>();
             
             Entity e0 = CreateEntity("Entity 0");
             Entity e1 = CreateEntity("Entity 1");
@@ -29,12 +32,29 @@ namespace Sandbox {
             cam.Transform.LocalScale *= 1 / 32f;
             cam.AddComponent<Camera>().RenderToLayer = "screen";
 
-            e1.AddComponent<LevelRenderable>();
             {
                 ref MeshRenderable mr = ref e1.AddComponent<MeshRenderable>();
                 mr.MeshIdentifier = "square";
-                mr.TextureIdentifier = "beacon";
+                mr.TextureIdentifier = "main:beacon";
             }
+            e1.AddComponent<Physics>().GravityMultiplier = 1;
+            e1.AddComponent<BoxCollider>();
+            e1.AddComponent<Living>();
+            
+            
+            {
+                ref MeshRenderable mr = ref e2.AddComponent<MeshRenderable>();
+                mr.MeshIdentifier = "square";
+                mr.TextureIdentifier = "main:pixel.white";
+            }
+            e2.Transform.Position += Vector2.UnitY * -9;
+            e2.Transform.LocalScale = new Vector2(9, 4);
+            e2.AddComponent<Physics>().Static = true;
+            e2.AddComponent<BoxCollider>();
+
+
+            
+            
 
 
 

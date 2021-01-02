@@ -137,12 +137,12 @@ namespace FoldEngine.Graphics {
 
                             // int orientation = 1;
 
-                            Complex nextRotatedByPrevious = ((Complex) Extensions.ToVector2(nodes[nextIndex]
-                                                                     .Position
-                                                                 - current.Position)
-                                                             / (Complex) Extensions.ToVector2(nodes[prevIndex]
-                                                                     .Position
-                                                                 - current.Position));
+                            Complex nextRotatedByPrevious = ((Complex) (nodes[nextIndex]
+                                                                            .Position
+                                                                        - current.Position).ToVector2()
+                                                             / (Complex) (nodes[prevIndex]
+                                                                              .Position
+                                                                          - current.Position).ToVector2());
                             
                             if(nextRotatedByPrevious.B <= 0) {
                                 if(IsPointInsidePolygon(
@@ -204,20 +204,19 @@ namespace FoldEngine.Graphics {
         public IEnumerable<Vector2> GetVerticesForMesh(string name) {
             MeshInfo meshInfo = _meshInfos[name];
             for(int i = meshInfo.VertexStartIndex; i < meshInfo.VertexStartIndex + meshInfo.VertexCount; i++) {
-                yield return Extensions.ToVector2(_vertices[i].Position);
+                yield return _vertices[i].Position.ToVector2();
             }
         }
 
         public IEnumerable<Line> GetLinesForMesh(string name) {
             MeshInfo meshInfo = _meshInfos[name];
             for(int i = meshInfo.VertexStartIndex; i < meshInfo.VertexStartIndex + meshInfo.VertexCount; i++) {
-                yield return new Line(Extensions.ToVector2(_vertices[i].Position),
-                    Extensions.ToVector2(
-                        _vertices[
-                                i + 1 < meshInfo.VertexStartIndex + meshInfo.VertexCount
-                                    ? i + 1
-                                    : meshInfo.VertexStartIndex]
-                            .Position));
+                yield return new Line(_vertices[i].Position.ToVector2(),
+                    _vertices[
+                            i + 1 < meshInfo.VertexStartIndex + meshInfo.VertexCount
+                                ? i + 1
+                                : meshInfo.VertexStartIndex]
+                        .Position.ToVector2());
             }
         }
 
@@ -225,19 +224,17 @@ namespace FoldEngine.Graphics {
             MeshInfo meshInfo = _meshInfos[name];
             for(int i = meshInfo.VertexStartIndex; i < meshInfo.VertexStartIndex + meshInfo.VertexCount; i++) {
                 yield return new Tuple<Vector2, Vector2, Vector2>(
-                    Extensions.ToVector2(
-                        _vertices[
-                                i - 1 >= meshInfo.VertexStartIndex
-                                    ? i - 1
-                                    : meshInfo.VertexStartIndex + meshInfo.VertexCount - 1]
-                            .Position),
-                    Extensions.ToVector2(_vertices[i].Position),
-                    Extensions.ToVector2(
-                        _vertices[
-                                i + 1 < meshInfo.VertexStartIndex + meshInfo.VertexCount
-                                    ? i + 1
-                                    : meshInfo.VertexStartIndex]
-                            .Position)
+                    _vertices[
+                            i - 1 >= meshInfo.VertexStartIndex
+                                ? i - 1
+                                : meshInfo.VertexStartIndex + meshInfo.VertexCount - 1]
+                        .Position.ToVector2(),
+                    _vertices[i].Position.ToVector2(),
+                    _vertices[
+                            i + 1 < meshInfo.VertexStartIndex + meshInfo.VertexCount
+                                ? i + 1
+                                : meshInfo.VertexStartIndex]
+                        .Position.ToVector2()
                 );
             }
         }
@@ -247,6 +244,10 @@ namespace FoldEngine.Graphics {
             for(int i = meshInfo.TriangleStartIndex; i < meshInfo.TriangleStartIndex + meshInfo.TriangleCount * 3; i += 3) {
                 yield return new Triangle(_vertices[_indices[i]], _vertices[_indices[i+1]], _vertices[_indices[i+2]]);
             }
+        }
+
+        public int GetVertexCountForMesh(string name) {
+            return _meshInfos[name].VertexCount;
         }
 
         private struct MeshInfo {

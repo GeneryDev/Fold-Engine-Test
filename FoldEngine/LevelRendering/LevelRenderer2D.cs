@@ -33,10 +33,18 @@ namespace FoldEngine.Rendering {
                 ref Camera camera = ref _cameras.GetComponent();
                 ref Transform view = ref _cameras.GetCoComponent<Transform>();
                 
-                Vector2 cameraPos = view.Position;
-                Complex cameraRotNegativeComplex = Complex.FromRotation(-view.Rotation);
+                (float viewX, float viewY) = view.Position;
+                Complex cameraRotateScale = Complex.FromRotation(-view.Rotation).ScaleAxes(1 / view.LocalScale.X, 1 / view.LocalScale.Y);
                 
-                Vector2 cameraScale = view.LocalScale;
+                var viewMatrix = new Matrix(
+                    cameraRotateScale.A,                     cameraRotateScale.B,                     0, 0,
+                    (cameraRotateScale*Complex.Imaginary).A, (cameraRotateScale*Complex.Imaginary).B, 0, 0,
+                    0,                                       0,                                       1, 0,
+                    -viewX,                                  -viewY,                                  0, 1
+                );
+
+                Owner.GizmoTransformMatrix = viewMatrix;
+                Owner.MainCameraId = _cameras.GetEntityId();
 
                 IRenderingLayer layer = renderer.Layers[camera.RenderToLayer];
 
@@ -50,27 +58,21 @@ namespace FoldEngine.Rendering {
                     
                     foreach(MeshCollection.Triangle triangle in Owner.Meshes.GetTrianglesForMesh(meshRenderable.MeshIdentifier)) {
 
-                        var vertexA = Extensions.ToVector2(
-                            (Matrix.CreateTranslation(triangle.A.Position) * meshRenderable.Matrix)
-                            .Translation);
-                        var vertexB = Extensions.ToVector2(
-                            (Matrix.CreateTranslation(triangle.B.Position) * meshRenderable.Matrix)
-                            .Translation);
-                        var vertexC = Extensions.ToVector2(
-                            (Matrix.CreateTranslation(triangle.C.Position) * meshRenderable.Matrix)
-                            .Translation);
+                        var vertexA = (Matrix.CreateTranslation(triangle.A.Position) * meshRenderable.Matrix)
+                            .Translation.ToVector2();
+                        var vertexB = (Matrix.CreateTranslation(triangle.B.Position) * meshRenderable.Matrix)
+                            .Translation.ToVector2();
+                        var vertexC = (Matrix.CreateTranslation(triangle.C.Position) * meshRenderable.Matrix)
+                            .Translation.ToVector2();
 
                         layer.Surface.Draw(new DrawTriangleInstruction(
                             texture,
                             RenderingLayer.WorldToScreen(layer,
-                                (Vector2)((Complex) (transform.Apply(vertexA) - cameraPos)
-                                          * cameraRotNegativeComplex) / cameraScale),
+                                transform.Apply(vertexA).ApplyMatrixTransform(viewMatrix)),
                             RenderingLayer.WorldToScreen(layer,
-                                (Vector2)((Complex) (transform.Apply(vertexB) - cameraPos)
-                                          * cameraRotNegativeComplex) / cameraScale),
+                                transform.Apply(vertexB).ApplyMatrixTransform(viewMatrix)),
                             RenderingLayer.WorldToScreen(layer,
-                                (Vector2)((Complex) (transform.Apply(vertexC) - cameraPos)
-                                          * cameraRotNegativeComplex) / cameraScale),
+                                transform.Apply(vertexC).ApplyMatrixTransform(viewMatrix)),
                             triangle.A.TextureCoordinate * meshRenderable.UVScale + meshRenderable.UVOffset,
                             triangle.B.TextureCoordinate * meshRenderable.UVScale + meshRenderable.UVOffset,
                             triangle.C.TextureCoordinate * meshRenderable.UVScale + meshRenderable.UVOffset,

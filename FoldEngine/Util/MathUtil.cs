@@ -4,7 +4,7 @@ using System.Text;
 
 namespace FoldEngine.Util
 {
-    public class MathUtil
+    public static class MathUtil
     {
         public const double Ln2 = 0.69314718055994529;
         public static int NearestPowerOfTwo(int n)

@@ -3,8 +3,11 @@ using Microsoft.Xna.Framework;
 
 namespace EntryProject.Util {
     public static class Extensions {
-        public static Vector2 ToVector2(Vector3 vec) {
+        public static Vector2 ToVector2(this Vector3 vec) {
             return new Vector2(vec.X, vec.Y);
+        }
+        public static Vector2 ApplyMatrixTransform(this Vector2 vec, Matrix matrix) {
+            return (Matrix.CreateTranslation(new Vector3(vec, 0)) * matrix).Translation.ToVector2();
         }
 
         public static Color MultiplyColor(Color color0, Color color1) {

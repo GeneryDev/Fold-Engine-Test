@@ -1,9 +1,65 @@
-﻿using FoldEngine.Components;
+﻿using System;
+using EntryProject.Util;
+using FoldEngine.Components;
+using FoldEngine.Scenes;
+using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Physics {
+    public interface ICollider {
+        Vector2[] GetVertices(ref Transform transform);
+        Line[] GetFaces(ref Transform transform);
+        bool Contains(Vector2 point, ref Transform transform);
+        Vector2 GetFarthestVertexFromOrigin();
+        float GetReach(ref Transform transform);
+    }
+
     [Component("fold:physics.box_collider")]
-    public struct BoxCollider {
+    [ComponentInitializer(typeof(BoxCollider), nameof(InitializeComponent))]
+    public struct BoxCollider : ICollider {
         public float Width;
         public float Height;
+
+        public static BoxCollider InitializeComponent(Scene scene, long entityId) {
+            return new BoxCollider() {
+                Width = 1,
+                Height = 1
+            };
+        }
+
+        public Vector2[] GetVertices(ref Transform transform) {
+            return new[] {
+                transform.Apply(new Vector2(-Width/2, -Height/2)),
+                transform.Apply(new Vector2(-Width/2, Height/2)),
+                transform.Apply(new Vector2(Width/2, Height/2)),
+                transform.Apply(new Vector2(Width/2, -Height/2))
+            };
+        }
+
+        public Line[] GetFaces(ref Transform transform) {
+            Vector2[] vertices = GetVertices(ref transform);
+            return new[] {
+                new Line(vertices[0], vertices[1]),
+                new Line(vertices[1], vertices[2]),
+                new Line(vertices[2], vertices[3]),
+                new Line(vertices[3], vertices[0]),
+            };
+        }
+
+        public bool Contains(Vector2 point, ref Transform transform) {
+            foreach(Line line in GetFaces(ref transform)) {
+                Vector2 pointCopy = point;
+                Line.LayFlat(line, ref pointCopy, out _);
+                if(pointCopy.Y > 0) return false;
+            }
+            return true;
+        }
+
+        public float GetReach(ref Transform transform) {
+            return (transform.Apply(GetFarthestVertexFromOrigin()) - transform.Position).Length();
+        }
+
+        public Vector2 GetFarthestVertexFromOrigin() {
+            return new Vector2(Width / 2, Height / 2);
+        }
     }
 }

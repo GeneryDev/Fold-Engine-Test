@@ -72,7 +72,7 @@ namespace FoldEngine.Physics {
 
                                     for(int j = 0; j < intersections[i].Length; j++) {
                                         Polygon.PolygonIntersectionVertex vertex = intersections[i][j];
-                                        DrawGizmo(vertex.Position, intersections[i][(j + 1) % intersections[i].Length].Position, Color.Gray);
+                                        Owner.DrawGizmo(vertex.Position, intersections[i][(j + 1) % intersections[i].Length].Position, Color.Gray);
 
                                         if(vertex.IsFromA && !vertex.IsFromB) {
                                             Complex rotationByTorque =
@@ -89,7 +89,7 @@ namespace FoldEngine.Physics {
                                             verticesCountedForVelocity++;
                                             verticesCountedForTotalContactVertexVelocity++;
 
-                                            DrawGizmo(vertex.Position, vertex.Position + vertexVelocity, Color.Blue);
+                                            Owner.DrawGizmo(vertex.Position, vertex.Position + vertexVelocity, Color.Blue);
                                         }
                                     }
 

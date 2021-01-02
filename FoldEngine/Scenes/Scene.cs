@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
-
+using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
 using Woofer;
@@ -26,6 +26,11 @@ namespace FoldEngine.Scenes
         public readonly MeshCollection Meshes;
 
         private long _nextEntityId = 0;
+        
+        public Matrix GizmoTransformMatrix { get; set; }
+        public long MainCameraId { get; set; }
+        
+        public ref Transform MainCameraTransform => ref Components.GetComponent<Transform>(MainCameraId);
 
         /// <summary>
         /// The speed at which the game is simulated
@@ -130,6 +135,29 @@ namespace FoldEngine.Scenes
             Console.Write("\t");
             Console.Write(mat.M44);
             Console.Write("\t |\n\n");
+        }
+
+        public void DrawGizmo(Vector2 from, Vector2 to, Color color, Color? colorTo = null) {
+            IRenderingLayer gizmoLayer = Controller.RenderingUnit.GizmoLayer;
+            if(gizmoLayer != null) {
+                Vector2 fromScreen = RenderingLayer.WorldToScreen(gizmoLayer, from.ApplyMatrixTransform(GizmoTransformMatrix));
+                Vector2 toScreen = RenderingLayer.WorldToScreen(gizmoLayer, to.ApplyMatrixTransform(GizmoTransformMatrix));
+                gizmoLayer.Surface.GizBatch.DrawLine(fromScreen, toScreen, color, colorTo);
+            }
+        }
+        public void DrawGizmo(Vector2 center, float radius, Color color, int sides = 24) {
+            IRenderingLayer gizmoLayer = Controller.RenderingUnit.GizmoLayer;
+            if(gizmoLayer != null) {
+                Vector2 centerScreen = RenderingLayer.WorldToScreen(gizmoLayer, center.ApplyMatrixTransform(GizmoTransformMatrix));
+                Vector2 rightScreen = RenderingLayer.WorldToScreen(gizmoLayer, (center + Vector2.UnitX*radius).ApplyMatrixTransform(GizmoTransformMatrix));
+
+                Complex current = rightScreen - centerScreen;
+                Complex delta = Complex.FromRotation((float) (Math.PI * 2 / sides));
+                for(int i = 0; i < sides; i++) {
+                    gizmoLayer.Surface.GizBatch.DrawLine((Complex) centerScreen + current, (Complex) centerScreen + current*delta , color, color);
+                    current *= delta;
+                }
+            }
         }
     }
 }

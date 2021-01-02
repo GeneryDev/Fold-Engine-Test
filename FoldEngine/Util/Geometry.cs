@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Security.Cryptography;
 using FoldEngine;
 using FoldEngine.Components;
 using FoldEngine.Graphics;
@@ -117,14 +115,40 @@ namespace EntryProject.Util {
 
     public static class Polygon {
         [Pure]
-        public static PolygonIntersectionVertex[][] ComputePolygonIntersection(MeshCollection meshes, string meshIdA, Transform transformA, string meshIdB, Transform transformB) {
+        public static PolygonIntersectionVertex[][] ComputePolygonIntersection(
+            MeshCollection meshes,
+            string meshIdA,
+            Transform transformA,
+            string meshIdB,
+            Transform transformB) {
+            Vector2[] verticesA = new Vector2[meshes.GetVertexCountForMesh(meshIdA)];
+            Vector2[] verticesB = new Vector2[meshes.GetVertexCountForMesh(meshIdA)];
+
+            int i = 0;
+            foreach(Vector2 vertex in meshes.GetVerticesForMesh(meshIdA)) {
+                verticesA[i] = transformA.Apply(vertex);
+                i++;
+            }
+            i = 0;
+            foreach(Vector2 vertex in meshes.GetVerticesForMesh(meshIdB)) {
+                verticesB[i] = transformB.Apply(vertex);
+                i++;
+            }
+            return ComputePolygonIntersection(verticesA, verticesB);
+        }
+        
+        private static readonly OrderedList<float, Intersection> Intersections = new OrderedList<float, Intersection>(v => v.OrderA);
+        
+        [Pure]
+        public static PolygonIntersectionVertex[][] ComputePolygonIntersection(
+            Vector2[] verticesA,
+            Vector2[] verticesB) {
             //A is the black polygon
             //B is the red polygon
             //(reference images)
-            Vector2[] verticesA = meshes.GetVerticesForMesh(meshIdA).Select(transformA.Apply).ToArray();
-            Vector2[] verticesB = meshes.GetVerticesForMesh(meshIdB).Select(transformB.Apply).ToArray();
             
-            List<Intersection> intersections = new List<Intersection>();
+            Intersections.Clear();
+            
             int ins = 0;
             int outs = 0;
             Vector2? minIntersection = null;
@@ -149,9 +173,6 @@ namespace EntryProject.Util {
                             continue;
                         }
                         intersection.Type = signDelta > 0 ? IntersectionType.In : IntersectionType.Out;
-
-                        if(intersection.Type == IntersectionType.In) ins++;
-                        else outs++;
                         
                         Vector2 intersectionPointFlat = intersection.Position;
                         float lengthA = Line.LayFlat(lineA, ref intersectionPointFlat, out _).X;
@@ -160,11 +181,17 @@ namespace EntryProject.Util {
                         intersectionPointFlat = intersection.Position;
                         float lengthB = Line.LayFlat(lineB, ref intersectionPointFlat, out _).X;
                         intersection.OrderB = j + intersectionPointFlat.X / lengthB;
+
+                        if((int) intersection.OrderA != i || (int) intersection.OrderB != j) continue;
+                        if(intersection.OrderA == i || intersection.OrderB == j) continue;
                         
                         minIntersection = Vector2.Min(minIntersection ?? intersectionPoint.Value, intersectionPoint.Value);
                         maxIntersection = Vector2.Max(maxIntersection ?? intersectionPoint.Value, intersectionPoint.Value);
-
-                        intersections.Add(intersection);
+                        
+                        if(intersection.Type == IntersectionType.In) ins++;
+                        else outs++;
+                        
+                        Intersections.Add(intersection);
                     }
                 }
             }
@@ -175,19 +202,19 @@ namespace EntryProject.Util {
             }
 
             if(ins != outs) {
-                // Console.WriteLine("Mismatching in-intersection and out-intersection count, exiting");
+                Console.WriteLine("Mismatching in-intersection and out-intersection count, exiting");
                 return null;
             }
 
-            if(intersections.Count < 2) return null;
+            if(Intersections.Count < 2) return null;
             
             List<List<PolygonIntersectionVertex>> polygons = new List<List<PolygonIntersectionVertex>>();
 
-            while(intersections.Count >= 2) {
+            while(Intersections.Count >= 2) {
                 List<PolygonIntersectionVertex> polygon = new List<PolygonIntersectionVertex>();
                 // polygons.Add(polygon);
                 
-                Intersection firstIntersection = intersections.OrderBy(t => t.OrderA).First();
+                Intersection firstIntersection = Intersections[0];
 
                 Intersection current = firstIntersection;
                 bool polygonComplete = false;
@@ -200,7 +227,7 @@ namespace EntryProject.Util {
                         int i = startIndex;
                         bool doneFullLoop = false;
                         do {
-                            Intersection nextIntersection = intersections.Where(intersection =>
+                            Intersection nextIntersection = Intersections.Where(intersection =>
                                     intersection.VertexIndexA == i
                                     && intersection.Type != current.Type
                                     && (intersection != current
@@ -215,7 +242,7 @@ namespace EntryProject.Util {
                                 //Completed the polygon
                                 polygon.Add(new PolygonIntersectionVertex(nextIntersection));
 
-                                intersections.Remove(nextIntersection);
+                                Intersections.Remove(nextIntersection);
 
                                 polygonComplete = true;
 
@@ -226,7 +253,7 @@ namespace EntryProject.Util {
                                 polygon.Add(new PolygonIntersectionVertex(nextIntersection));
                                 //Wrap up and get ready to switch to traversing polygon B
 
-                                intersections.Remove(nextIntersection);
+                                Intersections.Remove(nextIntersection);
 
                                 current = nextIntersection;
                                 break;
@@ -249,7 +276,7 @@ namespace EntryProject.Util {
                         int i = startIndex;
                         bool doneFullLoop = false;
                         do {
-                            Intersection nextIntersection = intersections.Where(intersection =>
+                            Intersection nextIntersection = Intersections.Where(intersection =>
                                     intersection.VertexIndexB == i
                                     && intersection.Type != current.Type
                                     && (intersection != current
@@ -264,7 +291,7 @@ namespace EntryProject.Util {
                                 //Completed the polygon
                                 polygon.Add(new PolygonIntersectionVertex(nextIntersection));
                                 
-                                intersections.Remove(nextIntersection);
+                                Intersections.Remove(nextIntersection);
 
                                 polygonComplete = true;
 
@@ -275,7 +302,7 @@ namespace EntryProject.Util {
                                 polygon.Add(new PolygonIntersectionVertex(nextIntersection));
                                 //Wrap up and get ready to switch to traversing polygon A
 
-                                intersections.Remove(nextIntersection);
+                                Intersections.Remove(nextIntersection);
                                 
                                 current = nextIntersection;
                                 break;

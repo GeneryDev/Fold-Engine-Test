@@ -19,7 +19,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)FoldGame.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FoldGameEntry.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FoldUtil.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)GraphicsContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\DrawInstruction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\GizmoBatch.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\MeshCollection.cs" />
@@ -44,6 +43,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Physics\Systems\SimplePhysicsSystem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Extensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Geometry.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\OrderedList.cs" />
     <Folder Include="$(MSBuildThisFileDirectory)LevelRendering\2d" />
     <Compile Include="$(MSBuildThisFileDirectory)Scenes\Entity.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scenes\EntityObjectPool.cs" />
@@ -51,12 +51,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Scenes\SystemMap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Systems\GameSystem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Time.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Util\Color.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Complex.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\MathUtil.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Util\Rectangle.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Util\Vector2.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Util\VectorInt2.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Content\" />
