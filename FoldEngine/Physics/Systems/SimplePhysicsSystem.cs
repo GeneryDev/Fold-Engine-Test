@@ -12,7 +12,7 @@ namespace FoldEngine.Physics {
         private ComponentIterator<Physics> _physicsObjects;
         private ComponentIterator<BoxCollider> _colliders;
         
-        public Vector2 Gravity = new Vector2(0, -18f);
+        public Vector2 Gravity = new Vector2(0, -9f);
         
         internal override void Initialize() {
             _physicsObjects = CreateComponentIterator<Physics>(IterationFlags.None);
@@ -67,13 +67,14 @@ namespace FoldEngine.Physics {
                         if(!physics.Static && Mouse.GetState().RightButton == ButtonState.Pressed) {
                             FoldUtil.Breakpoint();
                         }
-                        Polygon.PolygonIntersectionVertex[][] intersections =
-                            Polygon.ComputePolygonIntersection(collider.GetVertices(ref transform),
-                                otherCollider.GetVertices(ref otherTransform));
                         
                         Vector2 relativeVelocity = physics.Velocity - otherPhysics.Velocity;
 
                         if(relativeVelocity != default) {
+                            Polygon.PolygonIntersectionVertex[][] intersections =
+                                Polygon.ComputePolygonIntersection(collider.GetVertices(ref transform),
+                                    otherCollider.GetVertices(ref otherTransform));
+                            
                             Vector2 moveDirection = relativeVelocity.Normalized();
                             float largestCrossSection = 0;
                             Vector2 surfaceNormal = default;
@@ -103,7 +104,7 @@ namespace FoldEngine.Physics {
 
                                             if(otherCollider.ThickFaces) validFace = true;
                                             else {
-                                                float positionDeltaAlongNormal = -((Complex) positionDelta / (Complex) normal).A;
+                                                float positionDeltaAlongNormal = positionDelta.Length();
                                                 float crossSection = Polygon.ComputeLargestCrossSection(intersection, normal);
                                                 validFace = positionDeltaAlongNormal >= crossSection - 0.00001;
                                             }
@@ -133,25 +134,27 @@ namespace FoldEngine.Physics {
                             
                                 Line gizmoLine = new Line(transformPosition, otherTransform.Position);
                                 Owner.DrawGizmo(gizmoLine.From + gizmoLine.Normal * 0.1f, gizmoLine.To + gizmoLine.Normal * 0.1f, Color.Red, Color.Black);
-                            }
-
-                            float restitution = 0.0f; //TODO get from components
-                            float friction = 0.2f; //TODO get from components
+                                
+                                float restitution = 0.0f; //TODO get from components
+                                float friction = 0.2f; //TODO get from components
                             
-                            if(!largestCrossSection.Equals(float.NaN) && surfaceNormal != default) {
-                                if(!physics.Static) {
-                                    Owner.DrawGizmo(tempNormalStart, tempNormalStart + surfaceNormal, Color.Gold);
-                                }
+                                if(!largestCrossSection.Equals(float.NaN) && surfaceNormal != default) {
+                                    if(!physics.Static) {
+                                        Owner.DrawGizmo(tempNormalStart, tempNormalStart + surfaceNormal, Color.Gold);
+                                    }
                                     
-                                Complex surfaceNormalComplex = surfaceNormal;
+                                    Complex surfaceNormalComplex = surfaceNormal;
                                     
-                                physics.ContactDisplacement = surfaceNormal * largestCrossSection;
+                                    physics.ContactDisplacement = surfaceNormal * largestCrossSection;
 
-                                physics.Velocity =
-                                    (((Complex) physics.Velocity) / surfaceNormalComplex).ScaleAxes(
-                                        -restitution,
-                                        1 - friction)
-                                    * surfaceNormalComplex;
+                                    physics.Velocity =
+                                        (((Complex) physics.Velocity) / surfaceNormalComplex).ScaleAxes(
+                                            -restitution,
+                                            1 - friction)
+                                        * surfaceNormalComplex;
+                                } else {
+                                    FoldUtil.Breakpoint();
+                                }
                             }
                         }
                     }

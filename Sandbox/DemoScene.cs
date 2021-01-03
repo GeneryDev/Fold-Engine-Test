@@ -54,7 +54,8 @@ namespace Sandbox {
             e2.AddComponent<Physics>().Static = true;
             e2.AddComponent<BoxCollider>().ThickFaces = false;
 
-
+            //TODO: Now broken:
+            // Throwing a hexagon onto the edge of the top face of the rectangle fails the full loop assertion.
 
 
 

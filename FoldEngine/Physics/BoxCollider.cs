@@ -58,11 +58,11 @@ namespace FoldEngine.Physics {
         }
 
         public Vector2 GetFarthestVertexFromOrigin(ref Transform transform) {
-            return new Vector2(Width / 2, Height / 2);
+            return transform.Apply(new Vector2(Width / 2, Height / 2));
         }
 
         public float GetReach(ref Transform transform) {
-            return (GetFarthestVertexFromOrigin(ref transform) - transform.Position).Length();
+            return (GetFarthestVertexFromOrigin(ref transform) - transform.Position).Length() + 2;
         }
     }
 }
