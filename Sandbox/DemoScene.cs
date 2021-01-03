@@ -164,7 +164,7 @@ namespace Sandbox {
                 .End();
             
             Meshes.Start("circle", MeshCollection.MeshInputType.Vertices);
-            const int segments = 4;
+            const int segments = 6;
             Complex step = Complex.FromRotation(-(float) (Math.PI * 2 / segments));
             Complex current = new Complex(0.5f, 0);
             for(int i = 0; i < segments; i++) {

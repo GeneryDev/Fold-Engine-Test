@@ -72,7 +72,7 @@ namespace FoldEngine.Physics {
                             Vector2 moveDirection = relativeVelocity.Normalized();
                             float largestCrossSection = 0;
                             Vector2 surfaceNormal = default;
-                            float largestOtherFaceLengthSquared = 0;
+                            float smallestNormalMoveDot = 1;
 
                             Vector2 tempNormalStart = default;
                             
@@ -84,20 +84,24 @@ namespace FoldEngine.Physics {
 
                                         var face = new Line(current.Position, next.Position);
                                         Vector2 normal = face.Normal;
+
+                                        float normalMoveDot = Vector2.Dot(normal, moveDirection);
+
+                                        Console.WriteLine(normalMoveDot);
                                         
                                         if(next.IsFromB
                                            && current.VertexIndexA != next.VertexIndexA
-                                           && Vector2.Dot(normal, moveDirection) <= 0
-                                           && face.MagnitudeSqr >= largestOtherFaceLengthSquared) {
-                                            if(face.MagnitudeSqr == largestOtherFaceLengthSquared) {
+                                           && normalMoveDot <= 0
+                                           && normalMoveDot <= smallestNormalMoveDot) {
+                                            if(normalMoveDot == smallestNormalMoveDot) {
                                                 surfaceNormal = (surfaceNormal + normal) / 2;
                                                 tempNormalStart = current.Position;
                                             } else {
                                                 surfaceNormal = normal;
-                                                tempNormalStart = face.Center;                                                
+                                                tempNormalStart = face.Center;                                          
                                             }
 
-                                            largestOtherFaceLengthSquared = face.MagnitudeSqr;
+                                            smallestNormalMoveDot = normalMoveDot;
                                             
                                         }
                                         //Draw gizmos
