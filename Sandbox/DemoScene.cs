@@ -19,9 +19,9 @@ namespace Sandbox {
         public override void Initialize() {
             BuildMeshes();
             
-            Systems.Add<ColliderGizmoRenderer>();
-            Systems.Add<LevelRenderer2D>();
             Systems.Add<SimplePhysicsSystem>();
+            Systems.Add<LevelRenderer2D>();
+            Systems.Add<ColliderGizmoRenderer>();
             Systems.Add<DebugSystem>();
             
             Entity e0 = CreateEntity("Entity 0");
@@ -37,7 +37,7 @@ namespace Sandbox {
                 mr.MeshIdentifier = "square";
                 mr.TextureIdentifier = "main:beacon";
             }
-            e1.AddComponent<Physics>().GravityMultiplier = 1;
+            e1.AddComponent<Physics>();
             e1.AddComponent<BoxCollider>();
             e1.AddComponent<Living>();
             
@@ -50,11 +50,11 @@ namespace Sandbox {
             e2.Transform.Position += Vector2.UnitY * -9;
             e2.Transform.LocalScale = new Vector2(9, 4);
             e2.AddComponent<Physics>().Static = true;
-            e2.AddComponent<BoxCollider>();
+            e2.AddComponent<BoxCollider>().ThickFaces = false;
 
 
-            
-            
+
+
 
 
 

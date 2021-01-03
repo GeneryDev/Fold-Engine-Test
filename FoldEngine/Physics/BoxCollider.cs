@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Physics {
     public interface ICollider {
+        bool ThickFaces { get; }
         Vector2[] GetVertices(ref Transform transform);
         Line[] GetFaces(ref Transform transform);
         bool Contains(Vector2 point, ref Transform transform);
@@ -18,6 +19,8 @@ namespace FoldEngine.Physics {
     public struct BoxCollider : ICollider {
         public float Width;
         public float Height;
+
+        public bool ThickFaces { get; set; }
 
         public static BoxCollider InitializeComponent(Scene scene, long entityId) {
             return new BoxCollider() {
