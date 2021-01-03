@@ -21,8 +21,8 @@ namespace Sandbox {
             
             Systems.Add<SimplePhysicsSystem>();
             Systems.Add<LevelRenderer2D>();
-            Systems.Add<DebugSystem>();
             Systems.Add<ColliderGizmoRenderer>();
+            Systems.Add<DebugSystem>();
             
             Entity e0 = CreateEntity("Entity 0");
             Entity e1 = CreateEntity("Entity 1");

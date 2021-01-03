@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Input;
 using Sandbox.Components;
 
 namespace Sandbox.Systems {
-    [GameSystem("sandbox:test", ProcessingCycles.Update | ProcessingCycles.Render)]
+    [GameSystem("sandbox:test", ProcessingCycles.Input)]
     public class DebugSystem : GameSystem {
         private ComponentIterator<Living> _livingComponents;
 
@@ -19,7 +19,7 @@ namespace Sandbox.Systems {
 
         private Vector2 _previousMouseWorldPos;
         
-        public override void OnUpdate() {
+        public override void OnInput() {
             if(Mouse.GetState().LeftButton == ButtonState.Pressed) {
                 _livingComponents.Reset();
                 
