@@ -51,6 +51,8 @@ namespace EntryProject.Util {
             return new Complex(point.X, 0) * undo + (Complex) this.From;
         }
 
+        private const float EdgeTolerance = 0.00000004f;
+
         public Vector2? Intersect(Line other, bool thisCapped, bool otherCapped) {
             if(this.MagnitudeSqr == 0) {
                 if(other.MagnitudeSqr == 0) {
@@ -63,12 +65,19 @@ namespace EntryProject.Util {
             }
             Vector2 flat = LayFlat(this, ref other, out Complex undo);
 
-            if(otherCapped && Math.Sign(other.From.Y) == Math.Sign(other.To.Y)) return null;
+            if(otherCapped) {
+                if(Math.Sign(other.From.Y) == Math.Sign(other.To.Y)
+                   && Math.Sign(other.From.Y - EdgeTolerance) == Math.Sign(other.To.Y - EdgeTolerance)
+                   && Math.Sign(other.From.Y + EdgeTolerance) == Math.Sign(other.To.Y + EdgeTolerance)) {
+                    return null;
+                }
+            }
             double xIntersect = (double) other.From.X
                                 + (-(double) other.From.Y / ((double) other.To.Y - other.From.Y))
                                 * ((double) other.To.X - other.From.X);
             if(thisCapped) {
-                if(xIntersect < 0 || xIntersect > flat.X) return null;
+                if(xIntersect < -EdgeTolerance) return null;
+                if(xIntersect > flat.X + EdgeTolerance) return null;
             }
             return new Complex((float) xIntersect, 0) * undo + (Complex) this.From;
         }
@@ -169,7 +178,7 @@ namespace EntryProject.Util {
                         Line.LayFlat(lineB, ref lineACopy, out _);
                         int signDelta = (Math.Sign(lineACopy.To.Y) - Math.Sign(lineACopy.From.Y));
                         if(signDelta == 0) {
-                            // Console.WriteLine("signDelta is zero, continuing");
+                            Console.WriteLine("signDelta is zero, continuing");
                             continue;
                         }
                         intersection.Type = signDelta > 0 ? IntersectionType.In : IntersectionType.Out;
@@ -182,8 +191,8 @@ namespace EntryProject.Util {
                         float lengthB = Line.LayFlat(lineB, ref intersectionPointFlat, out _).X;
                         intersection.OrderB = j + intersectionPointFlat.X / lengthB;
 
-                        if((int) intersection.OrderA != i || (int) intersection.OrderB != j) continue;
-                        if(intersection.OrderA == i || intersection.OrderB == j) continue;
+                        // if((int) intersection.OrderA != i || (int) intersection.OrderB != j) continue;
+                        // if(intersection.OrderA == i || intersection.OrderB == j) continue;
                         
                         minIntersection = Vector2.Min(minIntersection ?? intersectionPoint.Value, intersectionPoint.Value);
                         maxIntersection = Vector2.Max(maxIntersection ?? intersectionPoint.Value, intersectionPoint.Value);
@@ -202,8 +211,27 @@ namespace EntryProject.Util {
             }
 
             if(ins != outs) {
-                Console.WriteLine("Mismatching in-intersection and out-intersection count, exiting");
-                return null;
+                for(int i = 0; i < Intersections.Count; i++) {
+                    Intersection intersection = Intersections[i];
+
+                    bool remove = (int) intersection.OrderA != intersection.VertexIndexA
+                                  || (int) intersection.OrderB != intersection.VertexIndexB
+                                  // || intersection.OrderA == intersection.VertexIndexA
+                                  // || intersection.OrderB == intersection.VertexIndexB
+                        ;
+
+                    if(remove) {
+                        Intersections.RemoveAt(i);
+                        if(intersection.Type == IntersectionType.In) ins--;
+                        else outs--;
+                        i--;
+                    }
+                }
+
+                if(ins != outs) {
+                    Console.WriteLine("Mismatching in-intersection and out-intersection count, exiting");
+                    return null;                    
+                }
             }
 
             if(Intersections.Count < 2) return null;

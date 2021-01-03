@@ -62,6 +62,9 @@ namespace FoldEngine.Physics {
                            > Math.Pow(colliderReach + otherColliderReach, 2)) continue;
 
                         //Compute intersections
+                        if(!physics.Static && Mouse.GetState().RightButton == ButtonState.Pressed) {
+                            FoldUtil.Breakpoint();
+                        }
                         Polygon.PolygonIntersectionVertex[][] intersections =
                             Polygon.ComputePolygonIntersection(collider.GetVertices(ref transform),
                                 otherCollider.GetVertices(ref otherTransform));
@@ -87,7 +90,7 @@ namespace FoldEngine.Physics {
 
                                         float normalMoveDot = Vector2.Dot(normal, moveDirection);
 
-                                        Console.WriteLine(normalMoveDot);
+                                        // Console.WriteLine(normalMoveDot);
                                         
                                         if(next.IsFromB
                                            && current.VertexIndexA != next.VertexIndexA
@@ -109,9 +112,6 @@ namespace FoldEngine.Physics {
                                     }
 
                                     if(surfaceNormal != default) {
-                                        if(Mouse.GetState().LeftButton != ButtonState.Pressed) {
-                                            FoldUtil.Breakpoint();
-                                        }
                                         float crossSection = Polygon.ComputeLargestCrossSection(intersection, surfaceNormal);
                                         largestCrossSection = Math.Max(crossSection, largestCrossSection);
                                     }

@@ -34,13 +34,13 @@ namespace FoldEngine.Rendering {
                 ref Transform view = ref _cameras.GetCoComponent<Transform>();
                 
                 (float viewX, float viewY) = view.Position;
-                Complex cameraRotateScale = Complex.FromRotation(-view.Rotation).ScaleAxes(1 / view.LocalScale.X, 1 / view.LocalScale.Y);
+                Complex cameraRotateScale = Complex.FromRotation(-view.Rotation);
                 
                 var viewMatrix = new Matrix(
-                    cameraRotateScale.A,                     cameraRotateScale.B,                     0, 0,
-                    (cameraRotateScale*Complex.Imaginary).A, (cameraRotateScale*Complex.Imaginary).B, 0, 0,
+                    cameraRotateScale.A / view.LocalScale.X,                     cameraRotateScale.B / view.LocalScale.Y,                     0, 0,
+                    (cameraRotateScale*Complex.Imaginary).A / view.LocalScale.X, (cameraRotateScale*Complex.Imaginary).B / view.LocalScale.Y, 0, 0,
                     0,                                       0,                                       1, 0,
-                    -viewX,                                  -viewY,                                  0, 1
+                    -viewX / view.LocalScale.X,            -viewY / view.LocalScale.Y,            0, 1
                 );
 
                 Owner.GizmoTransformMatrix = viewMatrix;
@@ -57,13 +57,9 @@ namespace FoldEngine.Rendering {
                     ITexture texture = renderer.Textures[meshRenderable.TextureIdentifier];
                     
                     foreach(MeshCollection.Triangle triangle in Owner.Meshes.GetTrianglesForMesh(meshRenderable.MeshIdentifier)) {
-
-                        var vertexA = (Matrix.CreateTranslation(triangle.A.Position) * meshRenderable.Matrix)
-                            .Translation.ToVector2();
-                        var vertexB = (Matrix.CreateTranslation(triangle.B.Position) * meshRenderable.Matrix)
-                            .Translation.ToVector2();
-                        var vertexC = (Matrix.CreateTranslation(triangle.C.Position) * meshRenderable.Matrix)
-                            .Translation.ToVector2();
+                        Vector2 vertexA = triangle.A.Position.ToVector2().ApplyMatrixTransform(meshRenderable.Matrix);
+                        Vector2 vertexB = triangle.B.Position.ToVector2().ApplyMatrixTransform(meshRenderable.Matrix);
+                        Vector2 vertexC = triangle.C.Position.ToVector2().ApplyMatrixTransform(meshRenderable.Matrix);
 
                         layer.Surface.Draw(new DrawTriangleInstruction(
                             texture,

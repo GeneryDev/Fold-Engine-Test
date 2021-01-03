@@ -29,7 +29,8 @@ namespace Sandbox {
             Entity e2 = CreateEntity("Entity 2");
 
             Entity cam = CreateEntity("Main Camera");
-            cam.Transform.LocalScale *= 1 / 32f;
+            cam.Transform.LocalScale *= 1 / 64f;
+            cam.Transform.LocalPosition = Vector2.UnitY * -8;
             cam.AddComponent<Camera>().RenderToLayer = "screen";
 
             {
@@ -37,6 +38,7 @@ namespace Sandbox {
                 mr.MeshIdentifier = "square";
                 mr.TextureIdentifier = "main:beacon";
             }
+            e1.Transform.Position += Vector2.UnitY * 64;
             e1.AddComponent<Physics>();
             e1.AddComponent<MeshCollider>().MeshIdentifier = "circle";
             e1.AddComponent<Living>();
@@ -50,7 +52,7 @@ namespace Sandbox {
             e2.Transform.Position += Vector2.UnitY * -9;
             e2.Transform.LocalScale = new Vector2(9, 4);
             e2.AddComponent<Physics>().Static = true;
-            e2.AddComponent<BoxCollider>().ThickFaces = false;
+            e2.AddComponent<BoxCollider>().ThickFaces = true;
 
 
 
