@@ -358,11 +358,11 @@ namespace EntryProject.Util {
                     }
                     
                     Line line = new Line(vertices[j], vertices[(j+1) % vertices.Length]);
-                    Vector2? intersection = line.Intersect(new Line(vertex, vertex + Vector2.UnitX), true, false);
-                    //TODO verify that the line this is checking against is facing away from this vertex (for concave shapes)
+                    if(Vector2.Dot(line.Normal, vertexNormal) <= 0) {
+                        Vector2? intersection = line.Intersect(new Line(vertex, vertex + Vector2.UnitX), true, false);
+                        //TODO verify that the line this is checking against is facing away from this vertex (for concave shapes)
 
-                    if(intersection.HasValue) {
-                        if(Vector2.Dot(intersection.Value, vertexNormal) < 0) {
+                        if(intersection.HasValue) {
                             minX = Math.Min(minX, intersection.Value.X);
                             maxX = Math.Max(maxX, intersection.Value.X);
                         }

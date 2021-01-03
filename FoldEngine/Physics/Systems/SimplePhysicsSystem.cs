@@ -4,6 +4,7 @@ using FoldEngine.Components;
 using FoldEngine.Systems;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 
 namespace FoldEngine.Physics {
     [GameSystem("fold:physics.simple", ProcessingCycles.Update)]
@@ -87,19 +88,28 @@ namespace FoldEngine.Physics {
                                         if(next.IsFromB
                                            && current.VertexIndexA != next.VertexIndexA
                                            && Vector2.Dot(normal, moveDirection) <= 0
-                                           && face.MagnitudeSqr > largestOtherFaceLengthSquared) {
-                                            surfaceNormal = normal;
-
-                                            tempNormalStart = face.Center;
+                                           && face.MagnitudeSqr >= largestOtherFaceLengthSquared) {
+                                            if(face.MagnitudeSqr == largestOtherFaceLengthSquared) {
+                                                surfaceNormal = (surfaceNormal + normal) / 2;
+                                                tempNormalStart = current.Position;
+                                            } else {
+                                                surfaceNormal = normal;
+                                                tempNormalStart = face.Center;                                                
+                                            }
 
                                             largestOtherFaceLengthSquared = face.MagnitudeSqr;
                                             
-                                            float crossSection = Polygon.ComputeLargestCrossSection(intersection, normal);
-
-                                            largestCrossSection = crossSection;
                                         }
                                         //Draw gizmos
                                         Owner.DrawGizmo(current.Position, next.Position, Color.Fuchsia);
+                                    }
+
+                                    if(surfaceNormal != default) {
+                                        if(Mouse.GetState().LeftButton != ButtonState.Pressed) {
+                                            FoldUtil.Breakpoint();
+                                        }
+                                        float crossSection = Polygon.ComputeLargestCrossSection(intersection, surfaceNormal);
+                                        largestCrossSection = Math.Max(crossSection, largestCrossSection);
                                     }
                                 }
                             
