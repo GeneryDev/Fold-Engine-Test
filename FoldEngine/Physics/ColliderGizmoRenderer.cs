@@ -1,4 +1,5 @@
-﻿using FoldEngine.Components;
+﻿using System;
+using FoldEngine.Components;
 using FoldEngine.Interfaces;
 using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
@@ -9,7 +10,7 @@ namespace FoldEngine.Physics {
         private MultiComponentIterator _colliders;
 
         internal override void Initialize() {
-            _colliders = Owner.Components.CreateMultiIterator(typeof(MeshCollider), typeof(BoxCollider))
+            _colliders = Owner.Components.CreateMultiIterator(typeof(BoxCollider), typeof(MeshCollider))
                 .SetGrouping(ComponentGrouping.Or);
         }
 
@@ -32,6 +33,27 @@ namespace FoldEngine.Physics {
                     Owner.DrawGizmo(d, a, Color.Blue);
                     
                     Owner.DrawGizmo(transform.Position, collider.GetReach(ref transform), Color.Lime);
+                }
+                if(_colliders.Has<MeshCollider>()) {
+                    ref MeshCollider collider = ref _colliders.Get<MeshCollider>();
+
+                    Vector2 firstVertex = default;
+                    Vector2 prevVertex = default;
+                    bool first = true;
+                    foreach(var localVertex in Owner.Meshes.GetVerticesForMesh(collider.MeshIdentifier)) {
+                        Vector2 vertex = transform.Apply(localVertex);
+                        if(first) {
+                            firstVertex = vertex;
+                        } else {
+                            Owner.DrawGizmo(prevVertex, vertex, Color.Blue);
+                        }
+
+                        first = false;
+                        prevVertex = vertex;
+                    }
+                    Owner.DrawGizmo(prevVertex, firstVertex, Color.Blue);
+                    
+                    // Owner.DrawGizmo(transform.Position, collider.GetReach(ref transform), Color.Lime);
                 }
             }
         }

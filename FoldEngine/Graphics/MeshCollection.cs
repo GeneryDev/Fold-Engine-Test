@@ -37,6 +37,11 @@ namespace FoldEngine.Graphics {
             
             MeshInfo meshInfo = _meshInfos[_currentMesh];
             meshInfo.VertexCount++;
+            float distanceSquared = pos.LengthSquared();
+            if(meshInfo.RadiusSquared < distanceSquared) {
+                meshInfo.RadiusSquared = distanceSquared;
+                meshInfo.FarthestVertexFromOrigin = pos.ToVector2();
+            }
             _meshInfos[_currentMesh] = meshInfo;
             
             _nextVertexIndex++;
@@ -50,7 +55,13 @@ namespace FoldEngine.Graphics {
             
             MeshInfo meshInfo = _meshInfos[_currentMesh];
             meshInfo.VertexCount++;
+            float distanceSquared = pos.LengthSquared();
+            if(meshInfo.RadiusSquared < distanceSquared) {
+                meshInfo.RadiusSquared = distanceSquared;
+                meshInfo.FarthestVertexFromOrigin = pos;
+            }
             _meshInfos[_currentMesh] = meshInfo;
+
             
             _nextVertexIndex++;
             
@@ -194,6 +205,19 @@ namespace FoldEngine.Graphics {
             meshInfo.TriangleCount++;
         }
 
+        public bool IsPointInsidePolygon(Vector2 point, string name) {
+            int hits = 0;
+            foreach(Line face in GetLinesForMesh(name)) {
+                if(face.From.Y < 0 != face.To.Y < 0) {
+                    double xIntersect = (double)face.From.X + (-(double)face.From.Y / ((double)face.To.Y - face.From.Y)) * ((double)face.To.X - face.From.X);
+                    if(xIntersect >= 0) {
+                        hits++;
+                    }
+                }
+            }
+            return hits % 2 != 0;
+        }
+
         public IEnumerable<VertexPositionColorTexture> GetVertexInfoForMesh(string name) {
             MeshInfo meshInfo = _meshInfos[name];
             for(int i = meshInfo.VertexStartIndex; i < meshInfo.VertexStartIndex + meshInfo.VertexCount; i++) {
@@ -250,11 +274,26 @@ namespace FoldEngine.Graphics {
             return _meshInfos[name].VertexCount;
         }
 
+        public float GetRadiusSquaredForMesh(string name) {
+            return _meshInfos[name].RadiusSquared;
+        }
+
+        public float GetRadiusForMesh(string name) {
+            return _meshInfos[name].Radius;
+        }
+
+        public Vector2 GetFarthestVertexFromOrigin(string name) {
+            return _meshInfos[name].FarthestVertexFromOrigin;
+        }
+
         private struct MeshInfo {
             public int VertexStartIndex;
             public int TriangleStartIndex;
             public int VertexCount;
             public int TriangleCount;
+            public Vector2 FarthestVertexFromOrigin;
+            public float RadiusSquared;
+            public float Radius => (float) Math.Sqrt(RadiusSquared);
             public MeshInputType InputType;
         }
 

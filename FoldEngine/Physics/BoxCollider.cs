@@ -10,7 +10,7 @@ namespace FoldEngine.Physics {
         Vector2[] GetVertices(ref Transform transform);
         Line[] GetFaces(ref Transform transform);
         bool Contains(Vector2 point, ref Transform transform);
-        Vector2 GetFarthestVertexFromOrigin();
+        Vector2 GetFarthestVertexFromOrigin(ref Transform transform);
         float GetReach(ref Transform transform);
     }
 
@@ -57,12 +57,12 @@ namespace FoldEngine.Physics {
             return true;
         }
 
-        public float GetReach(ref Transform transform) {
-            return (transform.Apply(GetFarthestVertexFromOrigin()) - transform.Position).Length();
+        public Vector2 GetFarthestVertexFromOrigin(ref Transform transform) {
+            return new Vector2(Width / 2, Height / 2);
         }
 
-        public Vector2 GetFarthestVertexFromOrigin() {
-            return new Vector2(Width / 2, Height / 2);
+        public float GetReach(ref Transform transform) {
+            return (GetFarthestVertexFromOrigin(ref transform) - transform.Position).Length();
         }
     }
 }

@@ -297,9 +297,23 @@ namespace FoldEngine.Components
             return point;
         }
 
+        /// <summary>
+        /// Undoes this transformation from the given point in 2D space.
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        [Pure]
+        public Vector2 ApplyReverse(Vector2 point)
+        {
+            if (!IsNotNull) return point;
+            ref readonly Transform current = ref this;
+
+            return (Vector2) ((Complex) (Parent.ApplyReverse(point) - current.LocalPosition) / current.RotationComplex) / current.LocalScale;
+        }
+
         public override string ToString()
         {
-            return IsNotNull ? $"fold:transform_2d|{LocalPosition}" : $"fold:transform_2d|NULL";
+            return IsNotNull ? $"fold:transform_2d|{LocalPosition}" : "fold:transform_2d|NULL";
         }
     }
 }

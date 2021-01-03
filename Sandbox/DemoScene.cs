@@ -19,9 +19,9 @@ namespace Sandbox {
         public override void Initialize() {
             BuildMeshes();
             
+            Systems.Add<ColliderGizmoRenderer>();
             Systems.Add<SimplePhysicsSystem>();
             Systems.Add<LevelRenderer2D>();
-            Systems.Add<ColliderGizmoRenderer>();
             Systems.Add<DebugSystem>();
             
             Entity e0 = CreateEntity("Entity 0");
@@ -38,7 +38,7 @@ namespace Sandbox {
                 mr.TextureIdentifier = "main:beacon";
             }
             e1.AddComponent<Physics>();
-            e1.AddComponent<BoxCollider>();
+            e1.AddComponent<MeshCollider>().MeshIdentifier = "circle";
             e1.AddComponent<Living>();
             
             
@@ -50,7 +50,7 @@ namespace Sandbox {
             e2.Transform.Position += Vector2.UnitY * -9;
             e2.Transform.LocalScale = new Vector2(9, 4);
             e2.AddComponent<Physics>().Static = true;
-            e2.AddComponent<BoxCollider>().ThickFaces = false;
+            e2.AddComponent<BoxCollider>().ThickFaces = true;
 
 
 
@@ -164,8 +164,8 @@ namespace Sandbox {
                 .End();
             
             Meshes.Start("circle", MeshCollection.MeshInputType.Vertices);
-            const int segments = 90;
-            Complex step = Complex.FromRotation((float) (Math.PI * 2 / segments));
+            const int segments = 8;
+            Complex step = Complex.FromRotation(-(float) (Math.PI * 2 / segments));
             Complex current = new Complex(0.5f, 0);
             for(int i = 0; i < segments; i++) {
                 Meshes.Vertex(current, current + new Complex(0.5f, 0.5f));

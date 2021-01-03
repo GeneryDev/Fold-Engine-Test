@@ -87,9 +87,12 @@ namespace FoldEngine.Components
                 foreach (ComponentIterator iterator in _iterators)
                 {
                     bool active = false;
-                    if(!iterator.Started || (!iterator.Finished && iterator.GetEntityId() <= _currentEntityId))
-                    {
+                    if(!iterator.Started) {
                         active = iterator.Next();
+                    } else if(!iterator.Finished && iterator.GetEntityId() <= _currentEntityId) {
+                        active = iterator.Next();
+                    } else if(!iterator.Finished) {
+                        active = true;
                     }
 
                     if(active) lowestId = Math.Min(lowestId, iterator.GetEntityId());
