@@ -78,7 +78,8 @@ namespace FoldEngine.Physics {
                             
                             Vector2 moveDirection = relativeVelocity.Normalized();
                             float largestCrossSection = 0;
-                            Vector2 surfaceNormal = default;
+                            Vector2 surfaceNormalSum = default;
+                            float totalSurfaceNormalFaceLength = 0;
                             float smallestNormalMoveDot = 1;
 
                             Vector2 tempNormalStart = default;
@@ -90,6 +91,7 @@ namespace FoldEngine.Physics {
                                         Polygon.PolygonIntersectionVertex next = intersection[(i+1) % intersection.Length];
 
                                         var face = new Line(current.Position, next.Position);
+                                        float faceLength = face.Magnitude;
                                         Vector2 normal = face.Normal;
 
                                         float normalMoveDot = Vector2.Dot(normal, moveDirection);
@@ -110,15 +112,21 @@ namespace FoldEngine.Physics {
                                             }
 
                                             if(validFace) {
-                                                if(normalMoveDot == smallestNormalMoveDot) {
-                                                    surfaceNormal = (surfaceNormal + normal) / 2;
-                                                    tempNormalStart = current.Position;
-                                                } else {
-                                                    surfaceNormal = normal;
-                                                    tempNormalStart = face.Center;                                          
-                                                }
+                                                // if(normalMoveDot == smallestNormalMoveDot) {
+                                                //     surfaceNormal = (surfaceNormal + normal) / 2;
+                                                //     tempNormalStart = current.Position;
+                                                // } else {
+                                                //     surfaceNormal = normal;
+                                                //     tempNormalStart = face.Center;                                          
+                                                // }
 
-                                                smallestNormalMoveDot = normalMoveDot;
+                                                surfaceNormalSum += normal * faceLength;
+                                                totalSurfaceNormalFaceLength += faceLength;
+                                                
+                                                // surfaceNormal = (surfaceNormal + normal) / 2;
+                                                tempNormalStart = current.Position;
+
+                                                // smallestNormalMoveDot = normalMoveDot;
                                             }
                                             
                                         }
@@ -126,8 +134,8 @@ namespace FoldEngine.Physics {
                                         Owner.DrawGizmo(current.Position, next.Position, Color.Fuchsia, zOrder: 1);
                                     }
 
-                                    if(surfaceNormal != default) {
-                                        float crossSection = Polygon.ComputeLargestCrossSection(intersection, surfaceNormal);
+                                    if(totalSurfaceNormalFaceLength != 0) {
+                                        float crossSection = Polygon.ComputeLargestCrossSection(intersection, surfaceNormalSum / totalSurfaceNormalFaceLength);
                                         largestCrossSection = Math.Max(crossSection, largestCrossSection);
                                     }
                                 }
@@ -136,16 +144,16 @@ namespace FoldEngine.Physics {
                                 Owner.DrawGizmo(gizmoLine.From + gizmoLine.Normal * 0.1f, gizmoLine.To + gizmoLine.Normal * 0.1f, Color.Red, Color.Black);
                                 
                                 float restitution = 0.0f; //TODO get from components
-                                float friction = 0.2f; //TODO get from components
+                                float friction = 0.05f; //TODO get from components
                             
-                                if(!largestCrossSection.Equals(float.NaN) && surfaceNormal != default) {
+                                if(!largestCrossSection.Equals(float.NaN) && totalSurfaceNormalFaceLength > 0) {
                                     if(!physics.Static) {
-                                        Owner.DrawGizmo(tempNormalStart, tempNormalStart + surfaceNormal, Color.Gold);
+                                        Owner.DrawGizmo(tempNormalStart, tempNormalStart + surfaceNormalSum / totalSurfaceNormalFaceLength, Color.Gold);
                                     }
                                     
-                                    Complex surfaceNormalComplex = surfaceNormal;
+                                    Complex surfaceNormalComplex = surfaceNormalSum / totalSurfaceNormalFaceLength;
                                     
-                                    physics.ContactDisplacement = surfaceNormal * largestCrossSection;
+                                    physics.ContactDisplacement = surfaceNormalSum / totalSurfaceNormalFaceLength * largestCrossSection;
 
                                     physics.Velocity =
                                         (((Complex) physics.Velocity) / surfaceNormalComplex).ScaleAxes(
