@@ -105,11 +105,13 @@ namespace FoldEngine.Graphics {
                 throw new InvalidOperationException("Draw was called, but Begin has not yet been called. Begin must be called successfully before you can call Draw.");
         }
 
-        public void DrawLine(Vector2 a, Vector2 b, Color? colorA = null, Color? colorB = null) {
+        public void DrawLine(Vector2 a, Vector2 b, Color? colorA = null, Color? colorB = null, float zOrder = 0) {
             colorA = colorA ?? Color.White;
             colorB = colorB ?? colorA;
             
             ref GizmoBatchItem item = ref _batcher.CreateBatchItem();
+
+            item.SortKey = zOrder;
 
             item.VertexA.Position = new Vector3(a, 0);
             item.VertexB.Position = new Vector3(b, 0);
@@ -188,6 +190,7 @@ namespace FoldEngine.Graphics {
             if(WhiteTexture == null) {
                 throw new Exception("Cannot draw GizmoBatch without a texture");
             }
+            Array.Sort(this._batchItemList, 0, this._batchItemCount);
 
             int batchedThisIteration = 0;
             int vertexIndex = 0;
@@ -235,8 +238,13 @@ namespace FoldEngine.Graphics {
         }
     }
 
-    public struct GizmoBatchItem {
+    public struct GizmoBatchItem : IComparable<GizmoBatchItem> {
+        public float SortKey;
         public VertexPositionColorTexture VertexA;
         public VertexPositionColorTexture VertexB;
+
+        public int CompareTo(GizmoBatchItem other) {
+            return SortKey.CompareTo(other.SortKey);
+        }
     }
 }

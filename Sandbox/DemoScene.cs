@@ -19,10 +19,10 @@ namespace Sandbox {
         public override void Initialize() {
             BuildMeshes();
             
-            Systems.Add<ColliderGizmoRenderer>();
             Systems.Add<SimplePhysicsSystem>();
             Systems.Add<LevelRenderer2D>();
             Systems.Add<DebugSystem>();
+            Systems.Add<ColliderGizmoRenderer>();
             
             Entity e0 = CreateEntity("Entity 0");
             Entity e1 = CreateEntity("Entity 1");

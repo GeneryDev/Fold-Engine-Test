@@ -137,12 +137,12 @@ namespace FoldEngine.Scenes
             Console.Write("\t |\n\n");
         }
 
-        public void DrawGizmo(Vector2 from, Vector2 to, Color color, Color? colorTo = null) {
+        public void DrawGizmo(Vector2 from, Vector2 to, Color color, Color? colorTo = null, float zOrder = 0) {
             IRenderingLayer gizmoLayer = Controller.RenderingUnit.GizmoLayer;
             if(gizmoLayer != null) {
                 Vector2 fromScreen = RenderingLayer.WorldToScreen(gizmoLayer, from.ApplyMatrixTransform(GizmoTransformMatrix));
                 Vector2 toScreen = RenderingLayer.WorldToScreen(gizmoLayer, to.ApplyMatrixTransform(GizmoTransformMatrix));
-                gizmoLayer.Surface.GizBatch.DrawLine(fromScreen, toScreen, color, colorTo);
+                gizmoLayer.Surface.GizBatch.DrawLine(fromScreen, toScreen, color, colorTo, zOrder);
             }
         }
         public void DrawGizmo(Vector2 center, float radius, Color color, int sides = 24) {

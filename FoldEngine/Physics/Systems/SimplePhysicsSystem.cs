@@ -32,7 +32,7 @@ namespace FoldEngine.Physics {
                 ref Physics physics = ref _physicsObjects.GetComponent();
 
                 Vector2 transformPosition = transform.Position;
-                Vector2 positionDelta = transform.Position - physics.PreviousPosition;
+                float positionDelta = (transform.Position - physics.PreviousPosition).Length();
 
                 if(!physics.Static) {
                     physics.Velocity += Gravity * physics.GravityMultiplier * Time.DeltaTime;                    
@@ -47,6 +47,7 @@ namespace FoldEngine.Physics {
                 }
 
                 if(collider != null) {
+                    Vector2[] colliderVertices = collider.GetVertices(ref transform);
                     float colliderReach = collider.GetReach(ref transform);
 
                     _colliders.Reset();
@@ -72,7 +73,7 @@ namespace FoldEngine.Physics {
 
                         if(relativeVelocity != default) {
                             Polygon.PolygonIntersectionVertex[][] intersections =
-                                Polygon.ComputePolygonIntersection(collider.GetVertices(ref transform),
+                                Polygon.ComputePolygonIntersection(colliderVertices,
                                     otherCollider.GetVertices(ref otherTransform));
                             
                             Vector2 moveDirection = relativeVelocity.Normalized();
@@ -104,9 +105,8 @@ namespace FoldEngine.Physics {
 
                                             if(otherCollider.ThickFaces) validFace = true;
                                             else {
-                                                float positionDeltaAlongNormal = positionDelta.Length();
                                                 float crossSection = Polygon.ComputeLargestCrossSection(intersection, normal);
-                                                validFace = positionDeltaAlongNormal >= crossSection - 0.00001;
+                                                validFace = positionDelta >= crossSection - 0.00001;
                                             }
 
                                             if(validFace) {
@@ -123,7 +123,7 @@ namespace FoldEngine.Physics {
                                             
                                         }
                                         //Draw gizmos
-                                        Owner.DrawGizmo(current.Position, next.Position, Color.Fuchsia);
+                                        Owner.DrawGizmo(current.Position, next.Position, Color.Fuchsia, zOrder: 1);
                                     }
 
                                     if(surfaceNormal != default) {
