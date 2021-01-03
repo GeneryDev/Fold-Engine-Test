@@ -20,8 +20,9 @@ namespace FoldEngine.Physics {
         }
         
         public override void OnUpdate() {
+            ApplyDynamics();
             CalculateForcesAndCollision();
-            SubmitDynamics();
+            ApplyContactDisplacement();
         }
 
         private void CalculateForcesAndCollision() {
@@ -31,6 +32,7 @@ namespace FoldEngine.Physics {
                 ref Physics physics = ref _physicsObjects.GetComponent();
 
                 Vector2 transformPosition = transform.Position;
+                Vector2 positionDelta = transform.Position - physics.PreviousPosition;
 
                 if(!physics.Static) {
                     physics.Velocity += Gravity * physics.GravityMultiplier * Time.DeltaTime;                    
@@ -96,15 +98,27 @@ namespace FoldEngine.Physics {
                                            && current.VertexIndexA != next.VertexIndexA
                                            && normalMoveDot <= 0
                                            && normalMoveDot <= smallestNormalMoveDot) {
-                                            if(normalMoveDot == smallestNormalMoveDot) {
-                                                surfaceNormal = (surfaceNormal + normal) / 2;
-                                                tempNormalStart = current.Position;
-                                            } else {
-                                                surfaceNormal = normal;
-                                                tempNormalStart = face.Center;                                          
+                                            
+                                            bool validFace;
+
+                                            if(otherCollider.ThickFaces) validFace = true;
+                                            else {
+                                                float positionDeltaAlongNormal = -((Complex) positionDelta / (Complex) normal).A;
+                                                float crossSection = Polygon.ComputeLargestCrossSection(intersection, normal);
+                                                validFace = positionDeltaAlongNormal >= crossSection - 0.00001;
                                             }
 
-                                            smallestNormalMoveDot = normalMoveDot;
+                                            if(validFace) {
+                                                if(normalMoveDot == smallestNormalMoveDot) {
+                                                    surfaceNormal = (surfaceNormal + normal) / 2;
+                                                    tempNormalStart = current.Position;
+                                                } else {
+                                                    surfaceNormal = normal;
+                                                    tempNormalStart = face.Center;                                          
+                                                }
+
+                                                smallestNormalMoveDot = normalMoveDot;
+                                            }
                                             
                                         }
                                         //Draw gizmos
@@ -121,7 +135,7 @@ namespace FoldEngine.Physics {
                                 Owner.DrawGizmo(gizmoLine.From + gizmoLine.Normal * 0.1f, gizmoLine.To + gizmoLine.Normal * 0.1f, Color.Red, Color.Black);
                             }
 
-                            float restitution = 0.4f; //TODO get from components
+                            float restitution = 0.0f; //TODO get from components
                             float friction = 0.2f; //TODO get from components
                             
                             if(!largestCrossSection.Equals(float.NaN) && surfaceNormal != default) {
@@ -130,22 +144,14 @@ namespace FoldEngine.Physics {
                                 }
                                     
                                 Complex surfaceNormalComplex = surfaceNormal;
-
-                                float positionDelta = -((Complex) (transformPosition - physics.PreviousPosition)
-                                                        / (Complex) surfaceNormal).A;
                                     
-                                if(otherCollider.ThickFaces || positionDelta >= largestCrossSection - 0.00001) {
-                                    physics.ContactDisplacement = surfaceNormal * largestCrossSection;
+                                physics.ContactDisplacement = surfaceNormal * largestCrossSection;
 
-                                    Vector2 expectedVelocity =
-                                        (((Complex) physics.Velocity) / surfaceNormalComplex).ScaleAxes(
-                                            -restitution,
-                                            1 - friction)
-                                        * surfaceNormalComplex;
-                                    Vector2 velocityDelta = expectedVelocity - physics.Velocity;
-                                    Vector2 force = velocityDelta * physics.Mass / Time.DeltaTime;
-                                    physics.ApplyForce(force, Vector2.Zero);
-                                }
+                                physics.Velocity =
+                                    (((Complex) physics.Velocity) / surfaceNormalComplex).ScaleAxes(
+                                        -restitution,
+                                        1 - friction)
+                                    * surfaceNormalComplex;
                             }
                         }
                     }
@@ -153,7 +159,7 @@ namespace FoldEngine.Physics {
             }
         }
 
-        private void SubmitDynamics() {
+        private void ApplyDynamics() {
             _physicsObjects.Reset();
             while(_physicsObjects.Next()) {
                 ref Transform transform = ref _physicsObjects.GetCoComponent<Transform>();
@@ -163,13 +169,25 @@ namespace FoldEngine.Physics {
                 
                 if(!physics.Static) {
                     physics.Velocity += physics.AccelerationFromForce * Time.DeltaTime;
-                    transform.Position = oldPos + physics.Velocity * Time.DeltaTime + physics.ContactDisplacement;
+                    transform.Position = oldPos + physics.Velocity * Time.DeltaTime;
                 }
-                physics.ContactDisplacement = default;
                 physics.AccelerationFromForce = default;
                 physics.Torque = default;
 
                 physics.PreviousPosition = oldPos;
+            }
+        }
+
+        private void ApplyContactDisplacement() {
+            _physicsObjects.Reset();
+            while(_physicsObjects.Next()) {
+                ref Transform transform = ref _physicsObjects.GetCoComponent<Transform>();
+                ref Physics physics = ref _physicsObjects.GetComponent();
+
+                if(!physics.Static) {
+                    transform.Position += physics.ContactDisplacement;
+                }
+                physics.ContactDisplacement = default;
             }
         }
     }
