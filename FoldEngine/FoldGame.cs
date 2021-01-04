@@ -18,6 +18,8 @@ namespace FoldEngine
         private SpriteBatch _spriteBatch;
 
         private readonly IGameController _controller;
+        
+        private FixedSizeFloatBuffer FrameTimes = new FixedSizeFloatBuffer(60);
 
         public FoldGame()
         {
@@ -33,6 +35,9 @@ namespace FoldEngine
 
             (_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight) = _controller.RenderingUnit.ScreenSize;
             this.IsMouseVisible = true;
+            
+            IsFixedTimeStep = false;
+            _graphics.SynchronizeWithVerticalRetrace = false;
         }
 
         /// <summary>
@@ -115,6 +120,8 @@ namespace FoldEngine
         protected override void Draw(GameTime gameTime)
         {
             Time.Update(gameTime);
+            FrameTimes.Put(Time.DeltaTime);
+            Console.WriteLine("FPS: " + (1 / FrameTimes.Average()));
             // TODO: Add your drawing code here
 
             GraphicsDevice.SetRenderTarget(null);

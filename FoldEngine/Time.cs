@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FoldEngine
 {
-    public class Time
+    public static class Time
     {
         public static float DeltaTime { get; internal set; }
         public static float TotalTime { get; internal set; }

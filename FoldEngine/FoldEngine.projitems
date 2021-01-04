@@ -43,6 +43,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Physics\Systems\SimplePhysicsSystem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Debug\DebugViews.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Extensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\FixedSizeBuffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Geometry.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\OrderedList.cs" />
     <Folder Include="$(MSBuildThisFileDirectory)LevelRendering\2d" />

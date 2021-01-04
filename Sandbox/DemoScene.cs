@@ -52,10 +52,7 @@ namespace Sandbox {
             e2.Transform.Position += Vector2.UnitY * -9;
             e2.Transform.LocalScale = new Vector2(9, 4);
             e2.AddComponent<Physics>().Static = true;
-            e2.AddComponent<BoxCollider>().ThickFaces = true;
-
-            //TODO: Now broken:
-            // Throwing a hexagon onto the edge of the top face of the rectangle fails the full loop assertion.
+            e2.AddComponent<BoxCollider>().ThickFaces = false;
 
 
 
@@ -167,7 +164,7 @@ namespace Sandbox {
                 .End();
             
             Meshes.Start("circle", MeshCollection.MeshInputType.Vertices);
-            const int segments = 6;
+            const int segments = 12;
             Complex step = Complex.FromRotation(-(float) (Math.PI * 2 / segments));
             Complex current = new Complex(0.5f, 0);
             for(int i = 0; i < segments; i++) {
