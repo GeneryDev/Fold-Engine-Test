@@ -63,15 +63,11 @@ namespace FoldEngine.Physics {
                         float otherColliderReach = otherCollider.GetReach(ref otherTransform);
                         if(Vector2.DistanceSquared(transformPosition, otherTransform.Position)
                            > Math.Pow(colliderReach + otherColliderReach, 2)) continue;
-
-                        //Compute intersections
-                        if(!physics.Static && Mouse.GetState().RightButton == ButtonState.Pressed) {
-                            FoldUtil.Breakpoint();
-                        }
                         
                         Vector2 relativeVelocity = physics.Velocity - otherPhysics.Velocity;
 
                         if(relativeVelocity != default) {
+                            //Compute intersections
                             Polygon.PolygonIntersectionVertex[][] intersections =
                                 Polygon.ComputePolygonIntersection(colliderVertices,
                                     otherCollider.GetVertices(ref otherTransform));
@@ -80,7 +76,6 @@ namespace FoldEngine.Physics {
                             float largestCrossSection = 0;
                             Vector2 surfaceNormalSum = default;
                             float totalSurfaceNormalFaceLength = 0;
-                            float smallestNormalMoveDot = 1;
 
                             Vector2 tempNormalStart = default;
                             
@@ -100,8 +95,7 @@ namespace FoldEngine.Physics {
                                         
                                         if(next.IsFromB
                                            && current.VertexIndexA != next.VertexIndexA
-                                           && normalMoveDot <= 0
-                                           && normalMoveDot <= smallestNormalMoveDot) {
+                                           && normalMoveDot <= 0) {
                                             
                                             bool validFace;
 
@@ -112,21 +106,10 @@ namespace FoldEngine.Physics {
                                             }
 
                                             if(validFace) {
-                                                // if(normalMoveDot == smallestNormalMoveDot) {
-                                                //     surfaceNormal = (surfaceNormal + normal) / 2;
-                                                //     tempNormalStart = current.Position;
-                                                // } else {
-                                                //     surfaceNormal = normal;
-                                                //     tempNormalStart = face.Center;                                          
-                                                // }
-
                                                 surfaceNormalSum += normal * faceLength;
                                                 totalSurfaceNormalFaceLength += faceLength;
                                                 
-                                                // surfaceNormal = (surfaceNormal + normal) / 2;
                                                 tempNormalStart = current.Position;
-
-                                                // smallestNormalMoveDot = normalMoveDot;
                                             }
                                             
                                         }

@@ -52,7 +52,7 @@ namespace Sandbox {
             e2.Transform.Position += Vector2.UnitY * -9;
             e2.Transform.LocalScale = new Vector2(9, 4);
             e2.AddComponent<Physics>().Static = true;
-            e2.AddComponent<BoxCollider>().ThickFaces = false;
+            e2.AddComponent<BoxCollider>().ThickFaces = true;
 
             //TODO: Now broken:
             // Throwing a hexagon onto the edge of the top face of the rectangle fails the full loop assertion.

@@ -147,7 +147,9 @@ namespace EntryProject.Util {
             return ComputePolygonIntersection(verticesA, verticesB);
         }
         
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
         private static readonly OrderedList<float, Intersection> Intersections = new OrderedList<float, Intersection>(v => v.OrderA);
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
         private static readonly OrderedList<float, Intersection> BackupIntersections = new OrderedList<float, Intersection>(v => v.OrderA);
         //This backup list is only here for debugging purposes. This one shouldn't have its element removed while forming the intersection polygon, only when resetting to compute a new one.
         
@@ -161,8 +163,9 @@ namespace EntryProject.Util {
             //A is the black polygon
             //B is the red polygon
             //(reference images)
-            
+
             Intersections.Clear();
+            BackupIntersections.Clear();
             
             int ins = 0;
             int outs = 0;
@@ -199,7 +202,19 @@ namespace EntryProject.Util {
 
                         // if((int) intersection.OrderA != i || (int) intersection.OrderB != j) continue;
                         // if(intersection.OrderA == i || intersection.OrderB == j) continue;
+
+                        //Clamp values between VertexIndex and VertexIndex+1 due to floating point errors
+                        // if(intersection.OrderA < intersection.VertexIndexA)
+                        //     intersection.OrderA = intersection.VertexIndexA;
+                        // if(intersection.OrderA > intersection.VertexIndexA + 1)
+                        //     intersection.OrderA = intersection.VertexIndexA + 1;
+                        //
+                        // if(intersection.OrderB < intersection.VertexIndexB)
+                        //     intersection.OrderB = intersection.VertexIndexB;
+                        // if(intersection.OrderB > intersection.VertexIndexB + 1)
+                        //     intersection.OrderB = intersection.VertexIndexB + 1;
                         
+                        //Update min/max intersection points
                         minIntersection = Vector2.Min(minIntersection ?? intersectionPoint.Value, intersectionPoint.Value);
                         maxIntersection = Vector2.Max(maxIntersection ?? intersectionPoint.Value, intersectionPoint.Value);
                         
@@ -267,7 +282,8 @@ namespace EntryProject.Util {
                                    && intersection.Type != current.Type
                                    && (intersection != current
                                        && (intersection.VertexIndexA != current.VertexIndexA
-                                           || intersection.OrderA >= current.OrderA))) {
+                                           || intersection.OrderA >= current.OrderA
+                                           || Intersections.Count == 1))) {
                                     if(!nextIntersection.HasValue) {
                                         nextIntersection = intersection;
                                     } else {
@@ -323,7 +339,8 @@ namespace EntryProject.Util {
                                    && intersection.Type != current.Type
                                    && (intersection != current
                                        && (intersection.VertexIndexB != current.VertexIndexB
-                                           || intersection.OrderB >= current.OrderB))) {
+                                           || intersection.OrderB >= current.OrderB
+                                           || Intersections.Count == 1))) {
                                     if(!nextIntersection.HasValue) {
                                         nextIntersection = intersection;
                                     } else {
@@ -344,7 +361,7 @@ namespace EntryProject.Util {
                                 polygonComplete = true;
 
                                 break;
-                            } else if(nextIntersection != default) {
+                            } else if(nextIntersection.HasValue) {
                                 FoldUtil.Assert(nextIntersection.Value.Type != current.Type,
                                     "Found two out-type intersections in a row!!!");
                                 ComputingPolygon.Add(new PolygonIntersectionVertex(nextIntersection.Value));
@@ -456,6 +473,7 @@ namespace EntryProject.Util {
             return ((Complex)new Vector2(maxX, (minY + maxY) / 2)) * axisNormalComplex;
         }
 
+        [DebuggerTypeProxy(typeof(IntersectionDebugView))]
         internal struct Intersection {
             public Vector2 Position;
             public IntersectionType Type;
@@ -492,7 +510,21 @@ namespace EntryProject.Util {
 
             public static bool operator !=(Intersection a, Intersection b) {
                 return !a.Equals(b);
-            } 
+            }
+
+            private sealed class IntersectionDebugView {
+                public Vector2 Position;
+                public string WhereInA;
+                public string WhereInB;
+                public string Type;
+
+                public IntersectionDebugView(Intersection source) {
+                    Position = source.Position;
+                    WhereInA = $"{source.VertexIndexA} ({source.OrderA})";
+                    WhereInB = $"{source.VertexIndexB} ({source.OrderB})";
+                    Type = $"{source.Type}";
+                }
+            }
         }
 
         internal enum IntersectionType {
