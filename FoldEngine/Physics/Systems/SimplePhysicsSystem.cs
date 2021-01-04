@@ -160,8 +160,6 @@ namespace FoldEngine.Physics {
                                             -restitution,
                                             1 - friction)
                                         * surfaceNormalComplex;
-                                } else {
-                                    FoldUtil.Breakpoint();
                                 }
                             }
                         }

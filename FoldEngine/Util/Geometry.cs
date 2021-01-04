@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Linq;
 using FoldEngine;
 using FoldEngine.Components;
 using FoldEngine.Graphics;
@@ -122,6 +122,7 @@ namespace EntryProject.Util {
         } 
     }
 
+    [SuppressMessage("ReSharper", "ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator")]
     public static class Polygon {
         [Pure]
         public static PolygonIntersectionVertex[][] ComputePolygonIntersection(
@@ -147,6 +148,11 @@ namespace EntryProject.Util {
         }
         
         private static readonly OrderedList<float, Intersection> Intersections = new OrderedList<float, Intersection>(v => v.OrderA);
+        private static readonly OrderedList<float, Intersection> BackupIntersections = new OrderedList<float, Intersection>(v => v.OrderA);
+        //This backup list is only here for debugging purposes. This one shouldn't have its element removed while forming the intersection polygon, only when resetting to compute a new one.
+        
+        private static readonly List<PolygonIntersectionVertex> ComputingPolygon = new List<PolygonIntersectionVertex>();
+        private static readonly List<PolygonIntersectionVertex[]> ComputingPolygons = new List<PolygonIntersectionVertex[]>();
         
         [Pure]
         public static PolygonIntersectionVertex[][] ComputePolygonIntersection(
@@ -201,6 +207,7 @@ namespace EntryProject.Util {
                         else outs++;
                         
                         Intersections.Add(intersection);
+                        BackupIntersections.Add(intersection);
                     }
                 }
             }
@@ -236,11 +243,10 @@ namespace EntryProject.Util {
 
             if(Intersections.Count < 2) return null;
             
-            List<List<PolygonIntersectionVertex>> polygons = new List<List<PolygonIntersectionVertex>>();
+            ComputingPolygons.Clear();
 
             while(Intersections.Count >= 2) {
-                List<PolygonIntersectionVertex> polygon = new List<PolygonIntersectionVertex>();
-                // polygons.Add(polygon);
+                ComputingPolygon.Clear();
                 
                 Intersection firstIntersection = Intersections[0];
 
@@ -255,40 +261,47 @@ namespace EntryProject.Util {
                         int i = startIndex;
                         bool doneFullLoop = false;
                         do {
-                            Intersection nextIntersection = Intersections.Where(intersection =>
-                                    intersection.VertexIndexA == i
-                                    && intersection.Type != current.Type
-                                    && (intersection != current
-                                        && (intersection.VertexIndexA != current.VertexIndexA
-                                            || intersection.OrderA >= current.OrderA))
-                                )
-                                .OrderBy(intersection => intersection.VertexIndexA)
-                                .ThenBy(intersection => intersection.OrderA)
-                                .FirstOrDefault();
+                            Intersection? nextIntersection = default;
+                            foreach(Intersection intersection in Intersections) {
+                                if(intersection.VertexIndexA == i
+                                   && intersection.Type != current.Type
+                                   && (intersection != current
+                                       && (intersection.VertexIndexA != current.VertexIndexA
+                                           || intersection.OrderA >= current.OrderA))) {
+                                    if(!nextIntersection.HasValue) {
+                                        nextIntersection = intersection;
+                                    } else {
+                                        if(intersection.VertexIndexA < nextIntersection.Value.VertexIndexA
+                                           || intersection.OrderA < nextIntersection.Value.OrderA) {
+                                            nextIntersection = intersection;
+                                        }
+                                    }
+                                }
+                            }
 
                             if(nextIntersection == firstIntersection) {
                                 //Completed the polygon
-                                polygon.Add(new PolygonIntersectionVertex(nextIntersection));
+                                ComputingPolygon.Add(new PolygonIntersectionVertex(nextIntersection.Value));
 
-                                Intersections.Remove(nextIntersection);
+                                Intersections.Remove(nextIntersection.Value);
 
                                 polygonComplete = true;
 
                                 break;
-                            } else if(nextIntersection != default) {
-                                FoldUtil.Assert(nextIntersection.Type != current.Type,
+                            } else if(nextIntersection.HasValue) {
+                                FoldUtil.Assert(nextIntersection.Value.Type != current.Type,
                                     "Found two out-type intersections in a row!!!");
-                                polygon.Add(new PolygonIntersectionVertex(nextIntersection));
+                                ComputingPolygon.Add(new PolygonIntersectionVertex(nextIntersection.Value));
                                 //Wrap up and get ready to switch to traversing polygon B
 
-                                Intersections.Remove(nextIntersection);
+                                Intersections.Remove(nextIntersection.Value);
 
-                                current = nextIntersection;
+                                current = nextIntersection.Value;
                                 break;
                             } else {
                                 //No intersection found ahead, instead add the next vertex and repeat (until an intersection is found)
                                 i = (i + 1) % verticesA.Length;
-                                polygon.Add(new PolygonIntersectionVertex(verticesA[i], i, -1));
+                                ComputingPolygon.Add(new PolygonIntersectionVertex(verticesA[i], i, -1));
                                 if(i == startIndex) doneFullLoop = true;
                             }
 
@@ -304,40 +317,47 @@ namespace EntryProject.Util {
                         int i = startIndex;
                         bool doneFullLoop = false;
                         do {
-                            Intersection nextIntersection = Intersections.Where(intersection =>
-                                    intersection.VertexIndexB == i
-                                    && intersection.Type != current.Type
-                                    && (intersection != current
-                                        && (intersection.VertexIndexB != current.VertexIndexB
-                                            || intersection.OrderB >= current.OrderB))
-                                )
-                                .OrderBy(intersection => intersection.VertexIndexB)
-                                .ThenBy(intersection => intersection.OrderB)
-                                .FirstOrDefault();
+                            Intersection? nextIntersection = default;
+                            foreach(Intersection intersection in Intersections) {
+                                if(intersection.VertexIndexB == i
+                                   && intersection.Type != current.Type
+                                   && (intersection != current
+                                       && (intersection.VertexIndexB != current.VertexIndexB
+                                           || intersection.OrderB >= current.OrderB))) {
+                                    if(!nextIntersection.HasValue) {
+                                        nextIntersection = intersection;
+                                    } else {
+                                        if(intersection.VertexIndexB < nextIntersection.Value.VertexIndexB
+                                           || intersection.OrderB < nextIntersection.Value.OrderB) {
+                                            nextIntersection = intersection;
+                                        }
+                                    }
+                                }
+                            }
 
                             if(nextIntersection == firstIntersection) {
                                 //Completed the polygon
-                                polygon.Add(new PolygonIntersectionVertex(nextIntersection));
+                                ComputingPolygon.Add(new PolygonIntersectionVertex(nextIntersection.Value));
                                 
-                                Intersections.Remove(nextIntersection);
+                                Intersections.Remove(nextIntersection.Value);
 
                                 polygonComplete = true;
 
                                 break;
                             } else if(nextIntersection != default) {
-                                FoldUtil.Assert(nextIntersection.Type != current.Type,
+                                FoldUtil.Assert(nextIntersection.Value.Type != current.Type,
                                     "Found two out-type intersections in a row!!!");
-                                polygon.Add(new PolygonIntersectionVertex(nextIntersection));
+                                ComputingPolygon.Add(new PolygonIntersectionVertex(nextIntersection.Value));
                                 //Wrap up and get ready to switch to traversing polygon A
 
-                                Intersections.Remove(nextIntersection);
+                                Intersections.Remove(nextIntersection.Value);
                                 
-                                current = nextIntersection;
+                                current = nextIntersection.Value;
                                 break;
                             } else {
                                 //No intersection found ahead, instead add the next vertex and repeat (until an intersection is found)
                                 i = (i + 1) % verticesB.Length;
-                                polygon.Add(new PolygonIntersectionVertex(verticesB[i], -1, i));
+                                ComputingPolygon.Add(new PolygonIntersectionVertex(verticesB[i], -1, i));
                                 if(i == startIndex) doneFullLoop = true;
                             }
 
@@ -348,15 +368,10 @@ namespace EntryProject.Util {
                         FoldUtil.Assert(!doneFullLoop, "Did a full loop and found no matching intersections (B)");
                     }
                 }
-                polygons.Add(polygon);
-            }
-            
-            PolygonIntersectionVertex[][] asArrays = new PolygonIntersectionVertex[polygons.Count][];
-            for(int i = 0; i < asArrays.Length; i++) {
-                asArrays[i] = polygons[i].ToArray();
+                ComputingPolygons.Add(ComputingPolygon.ToArray());
             }
 
-            return asArrays;
+            return ComputingPolygons.ToArray();
         }
 
         [Pure]
