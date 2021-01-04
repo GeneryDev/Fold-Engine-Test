@@ -127,7 +127,7 @@ namespace FoldEngine.Physics {
                                 Owner.DrawGizmo(gizmoLine.From + gizmoLine.Normal * 0.1f, gizmoLine.To + gizmoLine.Normal * 0.1f, Color.Red, Color.Black);
                                 
                                 float restitution = 0.0f; //TODO get from components
-                                float friction = 0.05f; //TODO get from components
+                                float friction = 0.01f; //TODO get from components
                             
                                 if(!largestCrossSection.Equals(float.NaN) && totalSurfaceNormalFaceLength > 0) {
                                     if(!physics.Static) {
@@ -141,7 +141,7 @@ namespace FoldEngine.Physics {
                                     physics.Velocity =
                                         (((Complex) physics.Velocity) / surfaceNormalComplex).ScaleAxes(
                                             -restitution,
-                                            1 - friction)
+                                            1 - friction * 100 * Time.DeltaTime)
                                         * surfaceNormalComplex;
                                 }
                             }

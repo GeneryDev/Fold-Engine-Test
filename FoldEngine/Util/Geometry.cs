@@ -325,7 +325,8 @@ namespace EntryProject.Util {
                                 // || i != ((startIndex + 1) % verticesA.Length)
                                 );
                         
-                        FoldUtil.Assert(!doneFullLoop, "Did a full loop and found no matching intersections (A)");
+                        // FoldUtil.Assert(!doneFullLoop, "Did a full loop and found no matching intersections (A)");
+                        if(doneFullLoop) return null;
                     } else {
                         //traverse polygon B
                         
@@ -382,7 +383,8 @@ namespace EntryProject.Util {
                                 // || i != ((startIndex + 1) % verticesB.Length)
                                 );
 
-                        FoldUtil.Assert(!doneFullLoop, "Did a full loop and found no matching intersections (B)");
+                        // FoldUtil.Assert(!doneFullLoop, "Did a full loop and found no matching intersections (B)");
+                        if(doneFullLoop) return null;
                     }
                 }
                 ComputingPolygons.Add(ComputingPolygon.ToArray());

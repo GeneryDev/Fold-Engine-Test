@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using FoldEngine.Util.Debug;
 
 namespace FoldEngine.Util {
     [DebuggerTypeProxy(typeof(OrderedList<,>.OrderedListDebugView))]

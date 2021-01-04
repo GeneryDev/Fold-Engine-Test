@@ -145,7 +145,7 @@ namespace FoldEngine
 
             //Draw each layer's buffer onto the screen
             GraphicsDevice.SetRenderTarget(null);
-            GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.CornflowerBlue);
+            GraphicsDevice.Clear(new Color(56/255f,56/255f,56/255f));
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
             if (_controller != null)
                 foreach (IRenderingLayer layer in _controller.RenderingUnit.Layers.Values)
