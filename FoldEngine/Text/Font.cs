@@ -9,7 +9,12 @@ namespace FoldEngine.Text {
         public int LineHeight => 10;
         
         public void RenderString(string text, out RenderedText rendered) {
-            FontRenderer.Instance.Render(this, text, out rendered);
+            TextRenderer.Instance.Render(this, text, out rendered);
+        }
+
+        public void DrawString(string text, RenderSurface surface, Point start, Color color, float size = 1) {
+            TextRenderer.Instance.Start(this, text);
+            TextRenderer.Instance.DrawOnto(surface, start, color, size);
         }
     }
 

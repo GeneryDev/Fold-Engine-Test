@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
+using FoldEngine.Graphics;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Text {
     //Coordinate system where +Y is down and -Y is up
-    public class FontRenderer {
-        public static FontRenderer Instance { get; private set; } = new FontRenderer();
+    public class TextRenderer {
+        public static TextRenderer Instance { get; private set; } = new TextRenderer();
         
         private Font _font;
         private string _text;
@@ -12,17 +13,24 @@ namespace FoldEngine.Text {
         private Point _cursor;
         
         private readonly List<GlyphSource> _sources = new List<GlyphSource>();
-        private readonly List<RenderedTextGlyph> _currentLine = new List<RenderedTextGlyph>();
-        private readonly List<RenderedTextLine> _lines = new List<RenderedTextLine>();
+        private readonly List<List<RenderedTextGlyph>> _lines = new List<List<RenderedTextGlyph>>();
+        private List<RenderedTextGlyph> _currentLine;
+        private int _linesRendered;
 
-        public void Render(Font font, string text, out RenderedText output) {
+        public TextRenderer() {
+            _lines.Add(new List<RenderedTextGlyph>());
+            _currentLine = _lines[0];
+        }
+
+        public void Start(Font font, string text) {
             _font = font;
             _text = text;
             _index = 0;
             _cursor = Point.Zero;
             _sources.Clear();
+            _currentLine = _lines[0];
             _currentLine.Clear();
-            _lines.Clear();
+            _linesRendered = 0;
 
             while(_index < _text.Length) {
                 char c = _text[_index];
@@ -37,23 +45,36 @@ namespace FoldEngine.Text {
                 }
             }
             FlushLine();
-
-            CreateOutput(out output);
         }
 
-        private void CreateOutput(out RenderedText output) {
+        public void Render(Font font, string text, out RenderedText output) {
+            Start(font, text);
+            CreateResult(out output);
+        }
+
+        private void CreateResult(out RenderedText output) {
             output = default;
 
             output.GlyphSources = _sources.ToArray();
-            output.Lines = _lines.ToArray();
+            output.Lines = new RenderedTextLine[_linesRendered];
+            for(int i = 0; i < _linesRendered; i++) {
+                output.Lines[i] = new RenderedTextLine() {
+                    Glyphs = _lines[i].ToArray()
+                };
+            }
         }
 
         private void FlushLine() {
             if(_currentLine.Count > 0) {
-                _lines.Add(new RenderedTextLine() {
-                    Glyphs = _currentLine.ToArray()
-                });
+                _linesRendered++;
+
+                if(_linesRendered >= _lines.Count) {
+                    _lines.Add(new List<RenderedTextGlyph>());
+                }
+
+                _currentLine = _lines[_linesRendered];
                 _currentLine.Clear();
+                
                 _cursor.X = 0;
                 _cursor.Y += _font.LineHeight;
             }
@@ -99,6 +120,14 @@ namespace FoldEngine.Text {
                 Texture = _font.Textures[key]
             });
             return _sources.Count - 1;
+        }
+        
+        public void DrawOnto(RenderSurface surface, Point start, Color color, float size = 1) {
+            for(int i = 0; i < _linesRendered; i++) {
+                foreach(var glyph in _lines[i]) {
+                    glyph.DrawOnto(surface, start, color, size, _sources);
+                }
+            }
         }
     }
 }

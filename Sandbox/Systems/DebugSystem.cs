@@ -70,12 +70,15 @@ namespace Sandbox.Systems {
             }
         }
 
+        private RenderedText _renderedHW;
+
         public override void OnRender(IRenderingUnit renderer) {
-            renderer.Fonts["default"].RenderString("Hello World!\nBut the world doesn't say hello back", out RenderedText renderedHW);
-            renderedHW.DrawOnto(renderer.Layers["screen"].Surface, new Point(0, 2*8 * 2), Color.LightGray, 2);
+            if(!_renderedHW.HasValue) {
+                renderer.Fonts["default"].RenderString("Hello World!\nBut the world doesn't say hello back", out _renderedHW);
+            }
+            _renderedHW.DrawOnto(renderer.Layers["screen"].Surface, new Point(0, 2*8 * 3), Color.LightGray, 2);
             
-            renderer.Fonts["default"].RenderString($"FPS:{Time.FramesPerSecond}", out RenderedText renderedFPS);
-            renderedFPS.DrawOnto(renderer.Layers["screen"].Surface, new Point(0, 2*8), Color.Yellow, 2);
+            renderer.Fonts["default"].DrawString($"FPS:{Time.FramesPerSecond}", renderer.Layers["screen"].Surface, new Point(0, 2*8), Color.Yellow, 2);
         }
     }
 }

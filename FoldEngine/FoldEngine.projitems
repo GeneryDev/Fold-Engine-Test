@@ -43,7 +43,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Physics\Systems\AdvancedPhysicsSystem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Physics\Systems\SimplePhysicsSystem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\Font.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Text\FontRenderer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text\TextRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\RenderedText.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Extensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\FixedSizeBuffer.cs" />
