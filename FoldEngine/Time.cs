@@ -15,6 +15,8 @@ namespace FoldEngine
 
         public static double DeltaTimeD { get; internal set; }
         public static double TotalTimeD { get; internal set; }
+        
+        public static float FramesPerSecond { get; internal set; }
 
         internal static void Update(GameTime gameTime)
         {

@@ -19,6 +19,7 @@ namespace Woofer
         private readonly WooferGameController _controller;
 
         public TextureManager Textures { get; set; }
+        public FontManager Fonts { get; set; }
         public Point ScreenSize { get; private set; } = new Point(1280, 720);
 
         public Dictionary<string, IRenderingLayer> Layers { get; private set; } = new Dictionary<string, IRenderingLayer>();
@@ -84,6 +85,9 @@ namespace Woofer
             Textures.CreateSubTexture("main:pixel", "white_transparent", new Rectangle(1, 0, 1, 1));
             Textures.CreateSubTexture("main:pixel", "black", new Rectangle(0, 1, 1, 1));
             WhiteTexture = Textures.CreateSubTexture("main:pixel", "white", new Rectangle(1, 1, 1, 1));
+
+            Textures.LoadTexture("font/default/ascii");
+            Fonts.CreateAsciiFont("default", "font/default/ascii");
         }
     }
 }

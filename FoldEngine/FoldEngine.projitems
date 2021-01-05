@@ -20,6 +20,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)FoldGameEntry.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FoldUtil.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\DrawInstruction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\FontManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\GizmoBatch.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\MeshCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\RenderSurface.cs" />
@@ -41,6 +42,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Physics\Physics.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Physics\Systems\AdvancedPhysicsSystem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Physics\Systems\SimplePhysicsSystem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text\Font.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text\FontRenderer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text\RenderedText.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Extensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\FixedSizeBuffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Geometry.cs" />

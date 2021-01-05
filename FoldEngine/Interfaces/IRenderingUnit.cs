@@ -14,6 +14,7 @@ namespace FoldEngine.Interfaces
     public interface IRenderingUnit
     {
         TextureManager Textures { get; set; }
+        FontManager Fonts { get; set; }
 
         Point ScreenSize { get; }
         Dictionary<string, IRenderingLayer> Layers { get; }

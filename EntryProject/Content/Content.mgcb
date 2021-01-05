@@ -121,6 +121,18 @@
 /processorParam:TextureFormat=Color
 /build:Textures/end_portal_colors.png
 
+#begin Textures/font/default/ascii.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Textures/font/default/ascii.png
+
 #begin Textures/four.png
 /importer:TextureImporter
 /processor:TextureProcessor

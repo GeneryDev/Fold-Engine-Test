@@ -65,6 +65,7 @@ namespace FoldEngine
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             _controller.RenderingUnit.Textures = new TextureManager(_graphics, GraphicsDevice, _spriteBatch, Content);
+            _controller.RenderingUnit.Fonts = new FontManager(_controller.RenderingUnit.Textures);
 
             foreach (IRenderingLayer layer in _controller.RenderingUnit.Layers.Values)
             {
@@ -121,7 +122,8 @@ namespace FoldEngine
         {
             Time.Update(gameTime);
             FrameTimes.Put(Time.DeltaTime);
-            Console.WriteLine("FPS: " + (1 / FrameTimes.Average()));
+            // Console.WriteLine("FPS: ");
+            Time.FramesPerSecond = (1 / FrameTimes.Average());
             // TODO: Add your drawing code here
 
             GraphicsDevice.SetRenderTarget(null);

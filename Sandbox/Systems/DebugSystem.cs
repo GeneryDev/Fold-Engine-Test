@@ -1,14 +1,16 @@
 ﻿using System;
+using FoldEngine;
 using FoldEngine.Components;
 using FoldEngine.Interfaces;
 using FoldEngine.Physics;
 using FoldEngine.Systems;
+using FoldEngine.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Sandbox.Components;
 
 namespace Sandbox.Systems {
-    [GameSystem("sandbox:test", ProcessingCycles.Input)]
+    [GameSystem("sandbox:test", ProcessingCycles.Input | ProcessingCycles.Render)]
     public class DebugSystem : GameSystem {
         private ComponentIterator<Living> _livingComponents;
 
@@ -66,6 +68,14 @@ namespace Sandbox.Systems {
                     }
                 }
             }
+        }
+
+        public override void OnRender(IRenderingUnit renderer) {
+            renderer.Fonts["default"].RenderString("Hello World!\nBut the world doesn't say hello back", out RenderedText renderedHW);
+            renderedHW.DrawOnto(renderer.Layers["screen"].Surface, new Point(0, 2*8 * 2), Color.LightGray, 2);
+            
+            renderer.Fonts["default"].RenderString($"FPS:{Time.FramesPerSecond}", out RenderedText renderedFPS);
+            renderedFPS.DrawOnto(renderer.Layers["screen"].Surface, new Point(0, 2*8), Color.Yellow, 2);
         }
     }
 }
