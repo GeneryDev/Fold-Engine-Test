@@ -4,7 +4,17 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Text {
     public class Font {
-        public readonly Dictionary<string, ITexture> Textures = new Dictionary<string, ITexture>();
+        public readonly List<string> TextureNames = new List<string>();
+        public readonly List<ITexture> TextureSources = new List<ITexture>();
+        public readonly GlyphBlock[] GlyphBlocks = new GlyphBlock[256];
+
+        public GlyphInfo this[char c] {
+            get => GlyphBlocks[c / 256]?.Glyphs[c % 256] ?? default;
+            set {
+                if(GlyphBlocks[c / 256] == null) GlyphBlocks[c / 256] = new GlyphBlock(c / 256);
+                GlyphBlocks[c / 256].Glyphs[c % 256] = value;
+            }
+        }
 
         public int LineHeight => 10;
         
@@ -18,11 +28,27 @@ namespace FoldEngine.Text {
         }
     }
 
+    public class GlyphBlock {
+        public readonly int BlockStart;
+        public readonly GlyphInfo[] Glyphs;
+        
+        public GlyphBlock(int blockStart) {
+            BlockStart = blockStart;
+            Glyphs = new GlyphInfo[256];
+        }
+    }
+
     public struct GlyphInfo {
+        public bool NotNull;
         public int SourceIndex;
         public Rectangle Source;
-        public float Height;
-        public float Ascent;
-        public float Width;
+        public int Height;
+        public int Ascent;
+        public int Width;
+        public int Advancement;
+
+        public override string ToString() {
+            return $"{nameof(NotNull)}: {NotNull}, {nameof(SourceIndex)}: {SourceIndex}, {nameof(Source)}: {Source}, {nameof(Height)}: {Height}, {nameof(Ascent)}: {Ascent}, {nameof(Width)}: {Width}, {nameof(Advancement)}: {Advancement}";
+        }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.ObjectModel;
 using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Systems;
@@ -102,7 +104,7 @@ namespace FoldEngine.Physics {
                                             if(otherCollider.ThickFaces) validFace = true;
                                             else {
                                                 float crossSection = Polygon.ComputeLargestCrossSection(intersection, normal);
-                                                validFace = positionDelta >= crossSection - 0.00001;
+                                                validFace = positionDelta >= crossSection - 0.01; //TODO Maybe make this a variable? Thin face tolerance.
                                             }
 
                                             if(validFace) {

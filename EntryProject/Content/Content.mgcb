@@ -13,6 +13,9 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin Fonts/default.json
+/copy:Fonts/default.json
+
 #begin Textures/ancient_debris_side.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -121,7 +124,7 @@
 /processorParam:TextureFormat=Color
 /build:Textures/end_portal_colors.png
 
-#begin Textures/font/default/ascii.png
+#begin Textures/fonts/default/ascii.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -131,7 +134,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Textures/font/default/ascii.png
+/build:Textures/fonts/default/ascii.png
 
 #begin Textures/four.png
 /importer:TextureImporter

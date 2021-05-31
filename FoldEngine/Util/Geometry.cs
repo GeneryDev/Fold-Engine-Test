@@ -387,6 +387,11 @@ namespace EntryProject.Util {
                         if(doneFullLoop) return null;
                     }
                 }
+
+                // if(ComputingPolygon[0].Position == ComputingPolygon[1].Position
+                   // || ComputingPolygon[1].Position == ComputingPolygon[2].Position
+                   // || ComputingPolygon[2].Position == ComputingPolygon[0].Position) continue; //TODO temporary code to stop duplicate vertices
+                
                 ComputingPolygons.Add(ComputingPolygon.ToArray());
             }
 

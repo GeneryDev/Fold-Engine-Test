@@ -86,8 +86,8 @@ namespace Woofer
             Textures.CreateSubTexture("main:pixel", "black", new Rectangle(0, 1, 1, 1));
             WhiteTexture = Textures.CreateSubTexture("main:pixel", "white", new Rectangle(1, 1, 1, 1));
 
-            Textures.LoadTexture("font/default/ascii");
-            Fonts.CreateAsciiFont("default", "font/default/ascii");
+            Textures.LoadTexture("fonts/default/ascii");
+            Fonts.LoadFont("default");
         }
     }
 }

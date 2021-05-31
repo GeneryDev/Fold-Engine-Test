@@ -1,0 +1,23 @@
+{
+    "characters": [
+        {
+            "source": "ascii",
+
+            "height": 8,
+            "ascent": 7,
+
+            "width": "code == 32 ? 0 : auto.width(8)",
+            "advancement": "code == 32 ? 4 : auto.width(8) + 1",
+
+            "char": {
+                "from": "\u0000",
+                "to": "\u00FF"
+            },
+
+            "uv": [
+                "((code - range.from) & 0x0F) * 8",
+                "(((code - range.from) & 0xF0) >> 4) * 8"
+            ]
+        }
+    ]
+}
