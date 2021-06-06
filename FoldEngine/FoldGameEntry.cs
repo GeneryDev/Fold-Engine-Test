@@ -10,9 +10,9 @@ namespace FoldEngine
 {
     public sealed class FoldGameEntry
     {
-        public static void StartGame(IGameController controller)
+        public static void StartGame(IGameCore core)
         {
-            using (var game = new FoldGame(controller))
+            using (var game = new FoldGame(core))
                 game.Run();
         }
     }

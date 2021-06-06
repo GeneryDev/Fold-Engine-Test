@@ -16,7 +16,7 @@ namespace Woofer
 {
     public class WooferRenderingUnit : IRenderingUnit
     {
-        private readonly WooferGameController _controller;
+        private readonly WooferGameCore _core;
 
         public TextureManager Textures { get; set; }
         public FontManager Fonts { get; set; }
@@ -28,9 +28,9 @@ namespace Woofer
 
         public IRenderingLayer GizmoLayer => Layers["screen"];
 
-        public WooferRenderingUnit(WooferGameController controller)
+        public WooferRenderingUnit(WooferGameCore core)
         {
-            _controller = controller;
+            _core = core;
             Layers["level"] = new RenderingLayer() { Name = "level", LayerSize = new Point(320, 180), Destination = new Rectangle(Point.Zero, ScreenSize) };
             Layers["hud"] = new RenderingLayer() { Name = "hud", LayerSize = new Point(640, 360), Destination = new Rectangle(Point.Zero, ScreenSize) };
             Layers["screen"] = new RenderingLayer() { Name = "screen", LayerSize = ScreenSize, Destination = new Rectangle(Point.Zero, ScreenSize) };
@@ -39,7 +39,7 @@ namespace Woofer
 
         public void Render()
         {
-            _controller.ActiveScene?.Render(this);
+            _core.ActiveScene?.Render(this);
         }
         
         public void LoadContent()

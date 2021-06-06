@@ -17,6 +17,8 @@ namespace FoldEngine
         public static double TotalTimeD { get; internal set; }
         
         public static float FramesPerSecond { get; internal set; }
+        
+        public static long UnixNow { get; internal set; }
 
         internal static void Update(GameTime gameTime)
         {
@@ -25,6 +27,8 @@ namespace FoldEngine
 
             DeltaTime = (float)DeltaTimeD;
             TotalTime = (float)TotalTimeD;
+
+            UnixNow = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         }
     }
 }

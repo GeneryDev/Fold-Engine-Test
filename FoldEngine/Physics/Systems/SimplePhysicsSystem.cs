@@ -14,7 +14,7 @@ namespace FoldEngine.Physics {
         private ComponentIterator<Physics> _physicsObjects;
         private ComponentIterator<BoxCollider> _colliders;
         
-        public Vector2 Gravity = new Vector2(0, -9f);
+        public Vector2 Gravity = new Vector2(0, -27f);
         
         internal override void Initialize() {
             _physicsObjects = CreateComponentIterator<Physics>(IterationFlags.None);

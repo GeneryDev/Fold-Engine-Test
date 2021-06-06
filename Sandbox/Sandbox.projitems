@@ -15,7 +15,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Systems\DebugSystem.cs" />
     <Folder Include="$(MSBuildThisFileDirectory)Graphics" />
     <Compile Include="$(MSBuildThisFileDirectory)Systems\HealthSystem.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)WooferGameController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WooferGameCore.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WooferRenderingUnit.cs" />
   </ItemGroup>
   <ItemGroup>

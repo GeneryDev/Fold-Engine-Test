@@ -184,6 +184,6 @@ namespace Sandbox {
                 .End();
         }
 
-        public DemoScene(IGameController controller) : base(controller) { }
+        public DemoScene(IGameCore core) : base(core) { }
     }
 }

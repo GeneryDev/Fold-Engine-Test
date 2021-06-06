@@ -1,0 +1,93 @@
+﻿{
+  "players": [
+    {
+      "control_schemes": [
+        {
+          "name": "Keyboard and Mouse",
+          "devices": [
+            "keyboard",
+            "mouse"
+          ],
+          "actions": [
+            {
+              "identifier": "movement.jump",
+              "type": "button",
+              "device": "keyboard",
+
+              "button": "Space",
+              "buffer_time": 500
+            },
+            {
+              "identifier": "movement.axis.x",
+              "type": "analog",
+              "device": "keyboard",
+
+              "opposite_buttons": [
+                "A",
+                "D"
+              ]
+            },
+            {
+              "identifier": "movement.sprint",
+              "type": "button",
+              "device": "keyboard",
+
+              "button": "LeftShift"
+            }
+          ]
+        },
+        {
+          "name": "Gamepad",
+          "devices": [
+            "gamepad:0"
+          ],
+          "actions": [
+            {
+              "identifier": "movement.jump",
+              "type": "button",
+              "device": "gamepad:0",
+
+              "button": "B",
+              "buffer_time": 500
+            },
+            {
+              "identifier": "movement.axis.x",
+              "type": "analog",
+              "device": "gamepad:0",
+
+              "analog": "thumbstick.left",
+              "axis": 0
+            },
+            {
+              "identifier": "movement.sprint",
+              "type": "button",
+              "device": "gamepad:0",
+
+              "button": "Y"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "control_schemes": [
+        {
+          "name": "Gamepad",
+          "devices": [
+            "gamepad:1"
+          ],
+          "actions": [
+            {
+              "identifier": "movement.jump",
+              "type": "button",
+              "device": "gamepad:1",
+
+              "button": "B",
+              "buffer_time": 500
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

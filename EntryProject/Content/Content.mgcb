@@ -13,6 +13,9 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin Config/input.json
+/copy:Config/input.json
+
 #begin Fonts/default.json
 /copy:Fonts/default.json
 

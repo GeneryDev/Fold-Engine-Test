@@ -7,22 +7,22 @@ namespace FoldEngine.Interfaces
     /// <summary>
     /// Declares a master interface consisting of the data needed for a game to function
     /// </summary>
-    public interface IGameController
+    public interface IGameCore
     {
         /// <summary>
         /// The scene that is currently being played
         /// </summary>
         Scene ActiveScene { get; }
         /// <summary>
-        /// This Controller's rendering unit
+        /// This Core's rendering unit
         /// </summary>
         IRenderingUnit RenderingUnit { get; }
         /// <summary>
-        /// This Controller's input unit
+        /// This Core's input unit
         /// </summary>
-        //IInputUnit InputUnit { get; set; }
+        IInputUnit InputUnit { get; }
         /// <summary>
-        /// This Controller's audio unit
+        /// This Core's audio unit
         /// </summary>
         //IAudioUnit AudioUnit { get; set; }
 

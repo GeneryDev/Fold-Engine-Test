@@ -1,6 +1,7 @@
 ﻿using System;
 using FoldEngine;
 using FoldEngine.Components;
+using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Physics;
 using FoldEngine.Systems;
@@ -8,6 +9,7 @@ using FoldEngine.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Sandbox.Components;
+using Mouse = Microsoft.Xna.Framework.Input.Mouse;
 
 namespace Sandbox.Systems {
     [GameSystem("sandbox:test", ProcessingCycles.Input | ProcessingCycles.Render)]
@@ -25,6 +27,23 @@ namespace Sandbox.Systems {
         private Vector2 _leftVel;
         
         public override void OnInput() {
+            bool jump = Owner.Core.InputUnit.Players[0].Get<ButtonAction>("movement.jump").Consume();
+            float moveX = Owner.Core.InputUnit.Players[0].Get<AnalogAction>("movement.axis.x");
+            if(Owner.Core.InputUnit.Players[0].Get<ButtonAction>("movement.sprint").Pressed) {
+                moveX *= 2;
+            }
+            
+            _livingComponents.Reset();
+                
+            while(_livingComponents.Next()) {
+                if(_livingComponents.HasCoComponent<Physics>()) {
+                    if(jump) {
+                        _livingComponents.GetCoComponent<Physics>().Velocity.Y = 8;
+                    }
+                    _livingComponents.GetCoComponent<Physics>().Velocity.X = 2*moveX;
+                }
+            }
+            
             if(Mouse.GetState().LeftButton == ButtonState.Pressed) {
                 _livingComponents.Reset();
                 
@@ -32,7 +51,7 @@ namespace Sandbox.Systems {
                     ref Transform transform = ref _livingComponents.GetCoComponent<Transform>();
 
                     Vector2 currentMouseScreenPos = Mouse.GetState().Position.ToVector2();
-                    Vector2 currentMouseWorldPos = RenderingLayer.ScreenToWorld(Owner.Controller.RenderingUnit.Layers["screen"],
+                    Vector2 currentMouseWorldPos = RenderingLayer.ScreenToWorld(Owner.Core.RenderingUnit.Layers["screen"],
                         currentMouseScreenPos);
 
                     currentMouseWorldPos = Owner.MainCameraTransform.Apply(currentMouseWorldPos);

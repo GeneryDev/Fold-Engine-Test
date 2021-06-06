@@ -17,7 +17,7 @@ namespace FoldEngine
         private readonly GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        private readonly IGameController _controller;
+        private readonly IGameCore _core;
         
         private FixedSizeFloatBuffer FrameTimes = new FixedSizeFloatBuffer(60);
 
@@ -27,13 +27,13 @@ namespace FoldEngine
             Content.RootDirectory = "Content";
         }
 
-        public FoldGame(IGameController controller)
+        public FoldGame(IGameCore core)
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            this._controller = controller;
+            this._core = core;
 
-            (_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight) = _controller.RenderingUnit.ScreenSize;
+            (_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight) = _core.RenderingUnit.ScreenSize;
             this.IsMouseVisible = true;
             
             IsFixedTimeStep = false;
@@ -48,7 +48,7 @@ namespace FoldEngine
         /// </summary>
         protected override void Initialize()
         {
-            _controller.Initialize();
+            _core.Initialize();
 
             FoldEngine.Components.Component.PopulateIdentifiers();
 
@@ -64,17 +64,17 @@ namespace FoldEngine
             // Create a new SpriteBatch, which can be used to draw textures.
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            _controller.RenderingUnit.Textures = new TextureManager(_graphics, GraphicsDevice, _spriteBatch, Content);
-            _controller.RenderingUnit.Fonts = new FontManager(_controller.RenderingUnit.Textures);
+            _core.RenderingUnit.Textures = new TextureManager(_graphics, GraphicsDevice, _spriteBatch, Content);
+            _core.RenderingUnit.Fonts = new FontManager(_core.RenderingUnit.Textures);
 
-            foreach (IRenderingLayer layer in _controller.RenderingUnit.Layers.Values)
+            foreach (IRenderingLayer layer in _core.RenderingUnit.Layers.Values)
             {
-                layer.Surface = new RenderSurface(_graphics.GraphicsDevice, _controller.RenderingUnit, layer.LayerSize.X, layer.LayerSize.Y);
+                layer.Surface = new RenderSurface(_graphics.GraphicsDevice, _core.RenderingUnit, layer.LayerSize.X, layer.LayerSize.Y);
             }
 
             // TODO: use this.Content to load your game content here
 
-            _controller.RenderingUnit.LoadContent();
+            _core.RenderingUnit.LoadContent();
         }
 
         /// <summary>
@@ -106,8 +106,9 @@ namespace FoldEngine
             
             Time.Update(gameTime);
 
-            _controller.Input();
-            _controller.Update();
+            _core.InputUnit.Update();
+            _core.Input();
+            _core.Update();
 
 
 
@@ -130,17 +131,17 @@ namespace FoldEngine
 
             //Begin sprite batches
             
-            foreach (IRenderingLayer layer in _controller.RenderingUnit.Layers.Values)
+            foreach (IRenderingLayer layer in _core.RenderingUnit.Layers.Values)
             {
                 layer.Surface.Begin();
             }
 
             //Draw the scene, across multiple sprite batches
             
-            _controller.Render();
+            _core.Render();
 
             //Resolve each sprite batch into each layer's buffer
-            foreach (IRenderingLayer layer in _controller.RenderingUnit.Layers.Values)
+            foreach (IRenderingLayer layer in _core.RenderingUnit.Layers.Values)
             {
                 layer.Surface.End();
             }
@@ -149,8 +150,8 @@ namespace FoldEngine
             GraphicsDevice.SetRenderTarget(null);
             GraphicsDevice.Clear(new Color(56/255f,56/255f,56/255f));
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
-            if (_controller != null)
-                foreach (IRenderingLayer layer in _controller.RenderingUnit.Layers.Values)
+            if (_core != null)
+                foreach (IRenderingLayer layer in _core.RenderingUnit.Layers.Values)
                 {
                     _spriteBatch.Draw(layer.Surface.Target, layer.Destination, Color.White);
                 }
