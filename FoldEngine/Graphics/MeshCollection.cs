@@ -263,11 +263,8 @@ namespace FoldEngine.Graphics {
             }
         }
 
-        public IEnumerable<Triangle> GetTrianglesForMesh(string name) {
-            MeshInfo meshInfo = _meshInfos[name];
-            for(int i = meshInfo.TriangleStartIndex; i < meshInfo.TriangleStartIndex + meshInfo.TriangleCount * 3; i += 3) {
-                yield return new Triangle(_vertices[_indices[i]], _vertices[_indices[i+1]], _vertices[_indices[i+2]]);
-            }
+        public TriangleEnumerator GetTrianglesForMesh(string name) {
+            return new TriangleEnumerator(this, _meshInfos[name]);
         }
 
         public int GetVertexCountForMesh(string name) {
@@ -286,7 +283,40 @@ namespace FoldEngine.Graphics {
             return _meshInfos[name].FarthestVertexFromOrigin;
         }
 
-        private struct MeshInfo {
+        public struct TriangleEnumerator {
+            private int i;
+            private MeshCollection meshCollection;
+            private MeshInfo meshInfo;
+
+            internal TriangleEnumerator(MeshCollection meshCollection, MeshInfo meshInfo) {
+                this.meshCollection = meshCollection;
+                this.meshInfo = meshInfo;
+                i = meshInfo.TriangleStartIndex - 3;
+                // for(int i = meshInfo.TriangleStartIndex; ; i += 3) {
+                    // yield return new Triangle(_vertices[_indices[i]], _vertices[_indices[i+1]], _vertices[_indices[i+2]]);
+                // }
+            }
+
+            public bool MoveNext() {
+                i += 3;
+                return i < meshInfo.TriangleStartIndex + meshInfo.TriangleCount * 3;
+            }
+            
+            public void Reset() {
+                i = meshInfo.TriangleStartIndex;
+            }
+
+            public Triangle Current => new Triangle(meshCollection._vertices[meshCollection._indices[i]],
+                meshCollection._vertices[meshCollection._indices[i + 1]],
+                meshCollection._vertices[meshCollection._indices[i + 2]]);
+            
+
+            public TriangleEnumerator GetEnumerator() {
+                return this;
+            }
+        }
+
+        internal struct MeshInfo {
             public int VertexStartIndex;
             public int TriangleStartIndex;
             public int VertexCount;
