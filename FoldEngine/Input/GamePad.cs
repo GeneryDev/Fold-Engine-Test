@@ -22,6 +22,8 @@ namespace FoldEngine.Input {
         public void Update() {
             Buttons.Update();
             DPad.Update();
+            Thumbsticks.Update();
+            Triggers.Update();
         }
         
         
@@ -132,6 +134,11 @@ namespace FoldEngine.Input {
             }
 
             public bool IsBeingUsed => Left.MagnitudeSqr > 0 || Right.MagnitudeSqr > 0;
+
+            public void Update() {
+                Left.Update();
+                Right.Update();
+            }
         }
 
         public class GamePadDPad {
@@ -169,6 +176,11 @@ namespace FoldEngine.Input {
             }
 
             public bool IsBeingUsed => Left.MagnitudeSqr > 0 || Right.MagnitudeSqr > 0;
+
+            public void Update() {
+                Left.Update();
+                Right.Update();
+            }
         }
     }
 }

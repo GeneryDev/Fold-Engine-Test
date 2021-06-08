@@ -1,7 +1,9 @@
 ﻿using System;
 
 namespace FoldEngine.Input {
-    public interface IInputInfo { }
+    public interface IInputInfo {
+        void Update();
+    }
 
     public class ButtonInfo : IInputInfo {
         public bool Pressed;
