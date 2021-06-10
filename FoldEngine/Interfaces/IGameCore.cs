@@ -20,11 +20,11 @@ namespace FoldEngine.Interfaces
         /// <summary>
         /// This Core's input unit
         /// </summary>
-        IInputUnit InputUnit { get; }
+        InputUnit InputUnit { get; }
         /// <summary>
         /// This Core's audio unit
         /// </summary>
-        //IAudioUnit AudioUnit { get; set; }
+        AudioUnit AudioUnit { get; }
 
 
         /// <summary>
@@ -43,5 +43,10 @@ namespace FoldEngine.Interfaces
         /// Called when the game should draw itself
         /// </summary>
         void Render();
+
+        /// <summary>
+        /// Runs after Initialize to load game content
+        /// </summary>
+        void LoadContent();
     }
 }

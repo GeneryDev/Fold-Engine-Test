@@ -9,6 +9,7 @@
     <Import_RootNamespace>FoldEngine</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Audio\Sound.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentIterator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentReference.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentSet.cs" />
@@ -41,8 +42,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Input\Mouse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Input\Player.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Input\Players.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\AudioUnit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IGameCore.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IInputUnit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\InputUnit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IRenderingLayer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IRenderingUnit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentMap.cs" />

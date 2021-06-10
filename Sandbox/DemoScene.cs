@@ -6,6 +6,7 @@ using Sandbox.Systems;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using FoldEngine.Audio;
 using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
 using FoldEngine.Physics;
@@ -152,6 +153,9 @@ namespace Sandbox {
             //     .End();
 
 
+            SoundInstance music = Core.AudioUnit.CreateInstance("Audio/music");
+            music.Looping = true;
+            music.Play();
         }
 
         private void BuildMeshes() {

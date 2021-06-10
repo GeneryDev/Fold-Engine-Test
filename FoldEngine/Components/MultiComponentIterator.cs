@@ -28,7 +28,7 @@ namespace FoldEngine.Components
             {
                 if(!type.IsValueType || type.IsPrimitive)
                 {
-                    throw new ArgumentException("Types must be structs: " + type, "componentTypes");
+                    throw new ArgumentException("Types must be structs: " + type, nameof(componentTypes));
                 }
             }
 

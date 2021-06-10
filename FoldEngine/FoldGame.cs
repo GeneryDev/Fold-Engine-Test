@@ -48,6 +48,11 @@ namespace FoldEngine
         /// </summary>
         protected override void Initialize()
         {
+            _core.RenderingUnit.Textures = new TextureManager(_graphics, GraphicsDevice, _spriteBatch, Content);
+            _core.RenderingUnit.Fonts = new FontManager(_core.RenderingUnit.Textures);
+            
+            _core.AudioUnit._content = Content;
+            
             _core.Initialize();
 
             FoldEngine.Components.Component.PopulateIdentifiers();
@@ -61,11 +66,10 @@ namespace FoldEngine
         /// </summary>
         protected override void LoadContent()
         {
+            _core.LoadContent();
             // Create a new SpriteBatch, which can be used to draw textures.
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            _core.RenderingUnit.Textures = new TextureManager(_graphics, GraphicsDevice, _spriteBatch, Content);
-            _core.RenderingUnit.Fonts = new FontManager(_core.RenderingUnit.Textures);
 
             foreach (IRenderingLayer layer in _core.RenderingUnit.Layers.Values)
             {
@@ -106,8 +110,11 @@ namespace FoldEngine
             
             Time.Update(gameTime);
 
+            _core.AudioUnit.Update();
+            
             _core.InputUnit.Update();
             _core.Input();
+            
             _core.Update();
 
 

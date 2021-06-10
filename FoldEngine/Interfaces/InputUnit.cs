@@ -2,7 +2,7 @@
 using FoldEngine.Input;
 
 namespace FoldEngine.Interfaces {
-    public class IInputUnit {
+    public class InputUnit {
         public InputDevices Devices = new InputDevices();
         public Players Players = new Players();
 

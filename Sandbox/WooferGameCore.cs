@@ -19,23 +19,30 @@ namespace Woofer
 
         public Scene ActiveScene { get; private set; }
         
-        public IInputUnit InputUnit { get; private set; }
+        public InputUnit InputUnit { get; private set; }
+        
+        public AudioUnit AudioUnit { get; private set; }
 
         public float TimeScale => 1;
 
         public WooferGameCore() {
             RenderingUnit = new WooferRenderingUnit(this);
             ActiveScene = new DemoScene(this);
-            InputUnit = new IInputUnit();
+            InputUnit = new InputUnit();
+            AudioUnit = new AudioUnit();
 
             InputUnit.Setup("Content/Config/input.json");
             
         }
 
-        public void Initialize()
-        {
-            
+        public void Initialize() {
         }
+
+        public void LoadContent() {
+            AudioUnit.Load("Audio/failure");
+            AudioUnit.Load("Audio/music");
+        }
+
         public void Input()
         {
             ActiveScene.Input();

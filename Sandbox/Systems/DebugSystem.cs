@@ -1,5 +1,6 @@
 ﻿using System;
 using FoldEngine;
+using FoldEngine.Audio;
 using FoldEngine.Components;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
@@ -31,6 +32,12 @@ namespace Sandbox.Systems {
             float moveX = Owner.Core.InputUnit.Players[0].Get<AnalogAction>("movement.axis.x");
             if(Owner.Core.InputUnit.Players[0].Get<ButtonAction>("movement.sprint").Pressed) {
                 moveX *= 2;
+            }
+
+            if(jump) {
+                SoundInstance soundInstance = Owner.Core.AudioUnit.CreateInstance("Audio/failure");
+                soundInstance.Pan = MathHelper.Clamp(moveX, -1, 1);
+                soundInstance.PlayOnce();
             }
             
             _livingComponents.Reset();
