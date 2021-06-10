@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using FoldEngine.Events;
 using FoldEngine.Interfaces;
 using Microsoft.Xna.Framework;
 
@@ -15,9 +16,11 @@ namespace FoldEngine.Systems {
         private readonly GameSystemAttribute _attribute;
         public string SystemName => _attribute.SystemName;
         public ProcessingCycles ProcessingCycles => _attribute.ProcessingCycles;
+        public readonly Type[] Listening;
 
         protected GameSystem() {
             _attribute = (GameSystemAttribute) this.GetType().GetCustomAttribute(typeof(GameSystemAttribute));
+            Listening = ((ListeningAttribute) this.GetType().GetCustomAttribute(typeof(ListeningAttribute)))?.EventTypes ?? new Type[0];
         }
 
         public virtual void OnInput() { }
@@ -37,6 +40,8 @@ namespace FoldEngine.Systems {
         }
 
         internal virtual void Initialize() { }
+
+        public virtual void EventFired(object sender, Event e) {}
     }
 
 
@@ -60,12 +65,10 @@ namespace FoldEngine.Systems {
     }
 
     public sealed class ListeningAttribute : Attribute {
-        public readonly string[] Watching;
+        public readonly Type[] EventTypes;
 
-        public ListeningAttribute(params Type[] watching) {
-            //TODO event class
-            if(!watching.All(t => typeof(Component).IsAssignableFrom(t))) throw new ArgumentException("watching");
-            Watching = watching.Select(t => Component.IdentifierOf(t)).ToArray();
+        public ListeningAttribute(params Type[] eventTypes) {
+            EventTypes = eventTypes;
         }
     }
 }

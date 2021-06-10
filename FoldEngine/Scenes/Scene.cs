@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EntryProject.Util;
 using FoldEngine.Components;
+using FoldEngine.Events;
 using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
 using FoldEngine.Util;
@@ -21,6 +22,7 @@ namespace FoldEngine.Scenes
 
         public readonly ComponentMap Components;
         public readonly SystemMap Systems;
+        public readonly EventManager Events;
         internal readonly EntityObjectPool EntityObjectPool;
         
         public readonly MeshCollection Meshes;
@@ -40,6 +42,7 @@ namespace FoldEngine.Scenes
         public Scene(IGameCore core) {
             Core = core;
             Components = new ComponentMap(this);
+            Events = new EventManager(this);
             Systems = new SystemMap(this);
             EntityObjectPool = new EntityObjectPool(this);
             Meshes = new MeshCollection();

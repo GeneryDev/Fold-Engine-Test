@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,7 +28,7 @@ namespace FoldEngine.Components
             }
             if(!_typeToIdentifierMap.ContainsKey(type))
             {
-                _typeToIdentifierMap[type] = (type.GetCustomAttributes(typeof(ComponentAttribute), false).First() as ComponentAttribute).ComponentName;
+                _typeToIdentifierMap[type] = (type.GetCustomAttributes(typeof(ComponentAttribute), false)[0] as ComponentAttribute).ComponentName;
             }
             return _typeToIdentifierMap[type];
         }

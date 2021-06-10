@@ -17,6 +17,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Components\MultiComponentIterator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\NameComponent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\Transform.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Events\Event.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Events\EventManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FoldGame.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FoldGameEntry.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FoldUtil.cs" />

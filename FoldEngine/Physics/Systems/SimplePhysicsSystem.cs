@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.ObjectModel;
 using EntryProject.Util;
 using FoldEngine.Components;
+using FoldEngine.Events;
+using FoldEngine.Scenes;
 using FoldEngine.Systems;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
@@ -138,6 +140,9 @@ namespace FoldEngine.Physics {
                                     
                                     Complex surfaceNormalComplex = surfaceNormalSum / totalSurfaceNormalFaceLength;
                                     
+                                    Owner.Events.InvokeEvent(new CollisionEvent(_physicsObjects.GetEntityId(), _colliders.GetEntityId(), surfaceNormalComplex));
+                                    Owner.Events.InvokeEvent(new CollisionEvent(_colliders.GetEntityId(), _physicsObjects.GetEntityId(), -(Vector2)surfaceNormalComplex));
+                                    
                                     physics.ContactDisplacement = surfaceNormalSum / totalSurfaceNormalFaceLength * largestCrossSection;
 
                                     physics.Velocity =
@@ -183,6 +188,17 @@ namespace FoldEngine.Physics {
                 }
                 physics.ContactDisplacement = default;
             }
+        }
+    }
+
+    [Event("collision")]
+    public class CollisionEvent : Event {
+        public long Victim;
+        public Vector2 Normal;
+
+        public CollisionEvent(long sender, long victim, Vector2 normal) : base(sender) {
+            this.Victim = victim;
+            this.Normal = normal;
         }
     }
 }

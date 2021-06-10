@@ -7,8 +7,7 @@ using System.Text;
 
 namespace FoldEngine.Scenes
 {
-    public class SystemMap
-    {
+    public class SystemMap {
         private readonly Scene _owner;
 
         private readonly List<GameSystem> _all = new List<GameSystem>();
@@ -22,101 +21,96 @@ namespace FoldEngine.Scenes
 
         public SystemMap(Scene owner) => _owner = owner;
 
-        public void Add<T>() where T : GameSystem, new()
-        {
+        public void Add<T>() where T : GameSystem, new() {
             _queuedToAdd.Enqueue(new T());
         }
-        public void Remove(GameSystem sys)
-        {
+
+        public void Remove(GameSystem sys) {
             _queuedToRemove.Enqueue(sys);
         }
 
-        private void UpdateProcessingGroups()
-        {
+        private void UpdateProcessingGroups() {
             _inputSystems.Clear();
             _updateSystems.Clear();
             _renderSystems.Clear();
 
-            foreach(GameSystem sys in _all)
-            {
-                if (sys.ProcessingCycles.HasFlag(ProcessingCycles.Input))
-                {
+            foreach(GameSystem sys in _all) {
+                if(sys.ProcessingCycles.HasFlag(ProcessingCycles.Input)) {
                     _inputSystems.Add(sys);
                 }
-                if (sys.ProcessingCycles.HasFlag(ProcessingCycles.Update))
-                {
+
+                if(sys.ProcessingCycles.HasFlag(ProcessingCycles.Update)) {
                     _updateSystems.Add(sys);
                 }
-                if (sys.ProcessingCycles.HasFlag(ProcessingCycles.Render))
-                {
+
+                if(sys.ProcessingCycles.HasFlag(ProcessingCycles.Render)) {
                     _renderSystems.Add(sys);
                 }
             }
         }
 
-        private void AddDirectly(GameSystem sys)
-        {
+        private void AddDirectly(GameSystem sys) {
             _all.Add(sys);
-            if (sys.ProcessingCycles.HasFlag(ProcessingCycles.Input))
-            {
+            if(sys.ProcessingCycles.HasFlag(ProcessingCycles.Input)) {
                 _inputSystems.Add(sys);
             }
-            if (sys.ProcessingCycles.HasFlag(ProcessingCycles.Update))
-            {
+
+            if(sys.ProcessingCycles.HasFlag(ProcessingCycles.Update)) {
                 _updateSystems.Add(sys);
             }
-            if (sys.ProcessingCycles.HasFlag(ProcessingCycles.Render))
-            {
+
+            if(sys.ProcessingCycles.HasFlag(ProcessingCycles.Render)) {
                 _renderSystems.Add(sys);
+            }
+
+            foreach(Type eventType in sys.Listening) {
+                _owner.Events.RegisterEventType(eventType);
+                _owner.Events.EventDictionary[eventType] += sys.EventFired;
             }
 
             sys.Owner = _owner;
             sys.Initialize();
         }
 
-        private void RemoveDirectly(GameSystem sys)
-        {
+        private void RemoveDirectly(GameSystem sys) {
             _all.Remove(sys);
             _inputSystems.Remove(sys);
             _updateSystems.Remove(sys);
             _renderSystems.Remove(sys);
+
+            foreach(Type eventType in sys.Listening) {
+                // ReSharper disable once DelegateSubtraction
+                _owner.Events.EventDictionary[eventType] -= sys.EventFired;
+            }
+
             sys.Owner = null;
             //todo remove any listeners and disconnect any views
         }
 
-        internal void Flush()
-        {
-            while (_queuedToAdd.Count > 0)
-            {
+        internal void Flush() {
+            while(_queuedToAdd.Count > 0) {
                 AddDirectly(_queuedToAdd.Dequeue());
             }
 
-            while (_queuedToRemove.Count > 0)
-            {
+            while(_queuedToRemove.Count > 0) {
                 RemoveDirectly(_queuedToRemove.Dequeue());
             }
         }
 
-        internal void InvokeInput()
-        {
-            foreach (GameSystem sys in _inputSystems)
-            {
+        internal void InvokeInput() {
+            foreach(GameSystem sys in _inputSystems) {
                 sys.OnInput();
             }
         }
 
-        internal void InvokeUpdate()
-        {
-            foreach (GameSystem sys in _updateSystems)
-            {
+        internal void InvokeUpdate() {
+            foreach(GameSystem sys in _updateSystems) {
                 sys.OnUpdate();
             }
         }
 
-        internal void InvokeRender(IRenderingUnit renderer)
-        {
-            foreach (GameSystem sys in _renderSystems)
-            {
+        internal void InvokeRender(IRenderingUnit renderer) {
+            foreach(GameSystem sys in _renderSystems) {
                 sys.OnRender(renderer);
             }
         }
@@ -125,6 +119,7 @@ namespace FoldEngine.Scenes
             foreach(GameSystem sys in _all) {
                 if(sys is T system) return system;
             }
+
             return null;
         }
     }

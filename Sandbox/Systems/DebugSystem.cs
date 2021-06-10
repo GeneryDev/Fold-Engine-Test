@@ -2,6 +2,7 @@
 using FoldEngine;
 using FoldEngine.Audio;
 using FoldEngine.Components;
+using FoldEngine.Events;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Physics;
@@ -14,6 +15,7 @@ using Mouse = Microsoft.Xna.Framework.Input.Mouse;
 
 namespace Sandbox.Systems {
     [GameSystem("sandbox:test", ProcessingCycles.Input | ProcessingCycles.Render)]
+    [Listening(typeof(CollisionEvent))]
     public class DebugSystem : GameSystem {
         private ComponentIterator<Living> _livingComponents;
 
@@ -100,6 +102,7 @@ namespace Sandbox.Systems {
         }
 
         private RenderedText _renderedHelloWorld;
+        private Vector2 _lastNormal;
 
         public override void OnRender(IRenderingUnit renderer) {
             if(!_renderedHelloWorld.HasValue) {
@@ -108,6 +111,14 @@ namespace Sandbox.Systems {
             _renderedHelloWorld.DrawOnto(renderer.Layers["screen"].Surface, new Point(0, 2*8 * 3), Color.LightGray, 2);
             
             renderer.Fonts["default"].DrawString($"FPS:{Time.FramesPerSecond}", renderer.Layers["screen"].Surface, new Point(0, 2*8), Color.Yellow, 2);
+            renderer.Fonts["default"].DrawString($"Normal:{_lastNormal}", renderer.Layers["screen"].Surface, new Point(0, 2*8 * 6), Color.Yellow, 2);
+        }
+
+        public override void EventFired(object sender, Event e) {
+            if(e is CollisionEvent collision) {
+                _lastNormal = collision.Normal;
+                // Console.WriteLine(collision.Normal);
+            }
         }
     }
 }
