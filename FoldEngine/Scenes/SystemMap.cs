@@ -63,13 +63,9 @@ namespace FoldEngine.Scenes
                 _renderSystems.Add(sys);
             }
 
-            foreach(Type eventType in sys.Listening) {
-                _owner.Events.RegisterEventType(eventType);
-                _owner.Events.EventDictionary[eventType] += sys.EventFired;
-            }
-
             sys.Owner = _owner;
             sys.Initialize();
+            sys.SubscribeToEvents();
         }
 
         private void RemoveDirectly(GameSystem sys) {
@@ -77,11 +73,6 @@ namespace FoldEngine.Scenes
             _inputSystems.Remove(sys);
             _updateSystems.Remove(sys);
             _renderSystems.Remove(sys);
-
-            foreach(Type eventType in sys.Listening) {
-                // ReSharper disable once DelegateSubtraction
-                _owner.Events.EventDictionary[eventType] -= sys.EventFired;
-            }
 
             sys.Owner = null;
             //todo remove any listeners and disconnect any views
@@ -106,7 +97,9 @@ namespace FoldEngine.Scenes
         internal void InvokeUpdate() {
             foreach(GameSystem sys in _updateSystems) {
                 sys.OnUpdate();
+                _owner.Events.FlushAfterSystem();
             }
+            _owner.Events.FlushEnd();
         }
 
         internal void InvokeRender(IRenderingUnit renderer) {

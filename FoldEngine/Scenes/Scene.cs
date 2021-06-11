@@ -21,8 +21,8 @@ namespace FoldEngine.Scenes
         public string Name { get; set; } = "Scene";
 
         public readonly ComponentMap Components;
+        public readonly EventMap Events;
         public readonly SystemMap Systems;
-        public readonly EventManager Events;
         internal readonly EntityObjectPool EntityObjectPool;
         
         public readonly MeshCollection Meshes;
@@ -42,15 +42,27 @@ namespace FoldEngine.Scenes
         public Scene(IGameCore core) {
             Core = core;
             Components = new ComponentMap(this);
-            Events = new EventManager(this);
+            Events = new EventMap(this);
             Systems = new SystemMap(this);
             EntityObjectPool = new EntityObjectPool(this);
             Meshes = new MeshCollection();
         }
+        
+        private List<long> _recycleQueue = new List<long>();
 
-        public long CreateEntityId(string name)
-        {
-            long newEntityId = _nextEntityId++;
+        public void Recycle(long entityId) {
+            _recycleQueue.Add(entityId + (1L << 32));
+            Components.RemoveAllComponents(entityId);
+        }
+
+        public long CreateEntityId(string name) {
+            long newEntityId;
+            if(_recycleQueue.Count > 0) {
+                newEntityId = _recycleQueue[_recycleQueue.Count - 1];
+                _recycleQueue.RemoveAt(_recycleQueue.Count - 1);
+            } else {
+                newEntityId = _nextEntityId++;
+            }
             ref Transform transform = ref Components.CreateComponent<Transform>(newEntityId);
             Components.CreateComponent<EntityName>(newEntityId).Name = name;
             Console.WriteLine($"Created entity {newEntityId}");

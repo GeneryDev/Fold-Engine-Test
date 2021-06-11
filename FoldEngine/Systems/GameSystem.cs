@@ -41,7 +41,7 @@ namespace FoldEngine.Systems {
 
         internal virtual void Initialize() { }
 
-        public virtual void EventFired(object sender, Event e) {}
+        public virtual void SubscribeToEvents() {}
     }
 
 

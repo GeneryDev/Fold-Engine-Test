@@ -114,11 +114,10 @@ namespace Sandbox.Systems {
             renderer.Fonts["default"].DrawString($"Normal:{_lastNormal}", renderer.Layers["screen"].Surface, new Point(0, 2*8 * 6), Color.Yellow, 2);
         }
 
-        public override void EventFired(object sender, Event e) {
-            if(e is CollisionEvent collision) {
+        public override void SubscribeToEvents() {
+            Owner.Events.Subscribe((ref CollisionEvent collision) => {
                 _lastNormal = collision.Normal;
-                // Console.WriteLine(collision.Normal);
-            }
+            });
         }
     }
 }

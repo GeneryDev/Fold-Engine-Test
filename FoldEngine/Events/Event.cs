@@ -5,15 +5,9 @@ using System.Reflection;
 using FoldEngine.Scenes;
 
 namespace FoldEngine.Events {
-    public class Event {
-        public long Sender;
-
+    public static class Event {
         private static Dictionary<Type, string> _typeToIdentifierMap = null;
         private static Dictionary<string, Type> _identifierToTypeMap = null;
-
-        public Event(long sender) {
-            Sender = sender;
-        }
 
         public static string IdentifierOf(Type type) {
             if(_typeToIdentifierMap == null) {
@@ -28,12 +22,11 @@ namespace FoldEngine.Events {
             return _typeToIdentifierMap[type];
         }
 
-        public static string IdentifierOf<T>() where T : Event {
+        public static string IdentifierOf<T>() where T : struct {
             return IdentifierOf(typeof(T));
         }
 
-        public static Type TypeForIdentifier(string identifier)
-        {
+        public static Type TypeForIdentifier(string identifier) {
             PopulateIdentifiers();
             return _identifierToTypeMap[identifier];
         }
@@ -56,13 +49,23 @@ namespace FoldEngine.Events {
                 PopulateDictionaryWithAssembly(Assembly.GetEntryAssembly());
             }
         }
+
+        public delegate void EventListener<T>(ref T evt);
     }
 
     public sealed class EventAttribute : Attribute {
         public readonly string EventIdentifier;
+        public readonly EventFlushMode FlushMode;
 
-        public EventAttribute(string eventIdentifier) {
+        public EventAttribute(string eventIdentifier, EventFlushMode flushMode = EventFlushMode.AfterSystem) {
             EventIdentifier = eventIdentifier;
+            FlushMode = flushMode;
         }
+    }
+
+    public enum EventFlushMode {
+        Immediate,
+        AfterSystem,
+        End
     }
 }

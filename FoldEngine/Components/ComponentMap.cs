@@ -38,10 +38,10 @@ namespace FoldEngine.Components {
         public ref T CreateComponent<T>(long entityId) where T : struct {
             Type componentType = typeof(T);
             if(!Map.ContainsKey(componentType)) {
-                Map[componentType] = new ComponentSet<T>(_scene, entityId);
+                Map[componentType] = new ComponentSet<T>(_scene, (int)entityId);
             }
 
-            return ref ((ComponentSet<T>) Map[componentType]).Create(entityId);
+            return ref ((ComponentSet<T>) Map[componentType]).Create((int)entityId);
         }
 
         /// <summary>
@@ -52,9 +52,19 @@ namespace FoldEngine.Components {
         public void RemoveComponent<T>(long entityId) where T : struct {
             Type componentType = typeof(T);
             if(Map.ContainsKey(componentType)) {
-                ((ComponentSet<T>) Map[componentType]).Remove(entityId);
+                ((ComponentSet<T>) Map[componentType]).Remove((int)entityId);
             } else {
                 //Component type not registered
+            }
+        }
+
+        /// <summary>
+        /// Removes all components from the specified entity ID.
+        /// </summary>
+        /// <param name="entityId">The ID of the entity whose components should be removed</param>
+        public void RemoveAllComponents(long entityId) {
+            foreach(ComponentSet set in Map.Values) {
+                set.Remove((int)entityId);
             }
         }
 
@@ -73,7 +83,7 @@ namespace FoldEngine.Components {
                 //return null;
             }
 
-            return ref ((ComponentSet<T>) Map[componentType]).Get(entityId);
+            return ref ((ComponentSet<T>) Map[componentType]).Get((int)entityId);
         }
 
         /// <summary>
@@ -85,7 +95,7 @@ namespace FoldEngine.Components {
         /// <returns>true if the entity has the specified component type, false otherwise.</returns>
         public bool HasComponent<T>(long entityId) where T : struct {
             Type componentType = typeof(T);
-            return Map.ContainsKey(componentType) && ((ComponentSet<T>) Map[componentType]).Has(entityId);
+            return Map.ContainsKey(componentType) && ((ComponentSet<T>) Map[componentType]).Has((int)entityId);
         }
 
         public ComponentIterator<T> CreateIterator<T>(IterationFlags flags) where T : struct {

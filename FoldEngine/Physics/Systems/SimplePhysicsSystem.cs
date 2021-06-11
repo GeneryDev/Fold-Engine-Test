@@ -140,8 +140,8 @@ namespace FoldEngine.Physics {
                                     
                                     Complex surfaceNormalComplex = surfaceNormalSum / totalSurfaceNormalFaceLength;
                                     
-                                    Owner.Events.InvokeEvent(new CollisionEvent(_physicsObjects.GetEntityId(), _colliders.GetEntityId(), surfaceNormalComplex));
-                                    Owner.Events.InvokeEvent(new CollisionEvent(_colliders.GetEntityId(), _physicsObjects.GetEntityId(), -(Vector2)surfaceNormalComplex));
+                                    Owner.Events.Invoke(new CollisionEvent(_physicsObjects.GetEntityId(), _colliders.GetEntityId(), surfaceNormalComplex));
+                                    Owner.Events.Invoke(new CollisionEvent(_colliders.GetEntityId(), _physicsObjects.GetEntityId(), -(Vector2)surfaceNormalComplex));
                                     
                                     physics.ContactDisplacement = surfaceNormalSum / totalSurfaceNormalFaceLength * largestCrossSection;
 
@@ -192,12 +192,14 @@ namespace FoldEngine.Physics {
     }
 
     [Event("collision")]
-    public class CollisionEvent : Event {
-        public long Victim;
+    public struct CollisionEvent {
+        public long First;
+        public long Second;
         public Vector2 Normal;
 
-        public CollisionEvent(long sender, long victim, Vector2 normal) : base(sender) {
-            this.Victim = victim;
+        public CollisionEvent(long first, long second, Vector2 normal) {
+            this.First = first;
+            this.Second = second;
             this.Normal = normal;
         }
     }
