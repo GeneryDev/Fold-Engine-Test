@@ -11,10 +11,12 @@ namespace FoldEngine.Components {
         internal abstract void Flush();
         public abstract bool Has(int entityId);
         public abstract void Remove(int entityId);
+        public abstract void CreateFor(int entityId);
 
         public Type WorkingType => this.GetType();
         public abstract void Serialize(SaveOperation writer);
         public abstract void Deserialize(LoadOperation reader);
+
     }
 
 
@@ -68,6 +70,10 @@ namespace FoldEngine.Components {
                 return BackupSet.Has(entityId);
 
             return Dense[Sparse[entityId - MinId]].ModifiedTimestamp <= CurrentTimestamp;
+        }
+
+        public override void CreateFor(int entityId) {
+            Create(entityId);
         }
 
         public ref T Create(int entityId) {
@@ -209,15 +215,24 @@ namespace FoldEngine.Components {
                 for(int entityId = MinId; entityId < MaxId; entityId++) {
                     if(!Has(entityId)) continue;
                     arr.WriteMember(() => {
-                        // ReSharper disable once AccessToModifiedClosure
+                        // ReSharper disable twice AccessToModifiedClosure
                         writer.Write(entityId);
+                        ComponentSerializer.Serialize(Get(entityId), writer);
                     });
                 }
             }));
         }
 
         public override void Deserialize(LoadOperation reader) {
-            throw new NotImplementedException();
+            reader.ReadArray(arr => {
+                for(int i = 0; i < arr.MemberCount; i++) {
+                    arr.StartReadMember(i);
+                    int entityId = reader.ReadInt32();
+                    CreateFor(entityId);
+                    ref T component = ref Get(entityId);
+                    component = ComponentSerializer.Deserialize<T>((object) component, reader);
+                }
+            });
         }
 
         public void DebugPrint() {

@@ -203,6 +203,7 @@ namespace FoldEngine.Scenes
                 _nextEntityId = c.GetMember<long>(nameof(_nextEntityId));
                 _recycleQueue = c.GetListMember<long>(nameof(_recycleQueue));
                 c.DeserializeMember(nameof(Systems), Systems);
+                c.DeserializeMember(nameof(Components), Components);
             });
         }
     }

@@ -33,7 +33,7 @@ namespace FoldEngine.Components {
         /// <summary>
         /// Instantiates a component of type T and attaches it to the entity of the given ID.
         /// </summary>
-        /// <typeparam name="T">The type of the component to create. Must have a default constructor.</typeparam>
+        /// <typeparam name="T">The type of the component to create.</typeparam>
         /// <param name="entityId">The entity ID to attach the new component to</param>
         /// <returns>The newly created component</returns>
         public ref T CreateComponent<T>(long entityId) where T : struct {
@@ -43,6 +43,20 @@ namespace FoldEngine.Components {
             }
 
             return ref ((ComponentSet<T>) Sets[componentType]).Create((int)entityId);
+        }
+
+        /// <summary>
+        /// Instantiates a component of type componentType and attaches it to the entity of the given ID.
+        /// </summary>
+        /// <param name="componentType">The type of the component to create.</param>
+        /// <param name="entityId">The entity ID to attach the new component to</param>
+        /// <returns>The newly created component</returns>
+        public void CreateComponent(Type componentType, long entityId) {
+            if(!Sets.ContainsKey(componentType)) {
+                Sets[componentType] = Component.CreateSetForType(componentType, _scene, (int)entityId);
+            }
+
+            Sets[componentType].CreateFor((int)entityId);
         }
 
         /// <summary>
@@ -135,11 +149,11 @@ namespace FoldEngine.Components {
         public Type WorkingType => this.GetType();
         
         public void Serialize(SaveOperation writer) {
-            writer.WriteCompound(((ref SaveOperation.Compound c) => {
+            writer.WriteCompound((ref SaveOperation.Compound c) => {
                 foreach(var entry in Sets) {
                     c.WriteMember(Component.IdentifierOf(entry.Key), (ISelfSerializer) entry.Value);
                 }
-            }));
+            });
         }
 
         public void Deserialize(LoadOperation reader) {
@@ -152,9 +166,10 @@ namespace FoldEngine.Components {
                         continue;
                     }
 
-                    ComponentSet set = Component.CreateSetForType(componentType);
+                    ComponentSet set = Component.CreateSetForType(componentType, _scene, 0);
 
                     c.DeserializeMember(componentIdentifier, set);
+                    Sets[componentType] = set;
                 }
             });
         }

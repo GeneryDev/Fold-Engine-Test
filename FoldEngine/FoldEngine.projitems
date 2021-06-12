@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Audio\Sound.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentIterator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentReference.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentSet.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\Component.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\MultiComponentIterator.cs" />
@@ -62,13 +63,14 @@
     <Compile Include="$(MSBuildThisFileDirectory)Physics\Systems\AdvancedPhysicsSystem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Physics\Systems\SimplePhysicsSystem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\ISerializer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Serialization\ListSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\LoadOperation.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Serialization\PrimitiveSerializers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\SaveOperation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\SelfSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\SerializerSuite.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Serialization\StringSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Serializers\ListSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Serializers\StringSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Serializers\PrimitiveSerializers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Serializers\VectorSerializers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\Font.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\TextRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\RenderedText.cs" />

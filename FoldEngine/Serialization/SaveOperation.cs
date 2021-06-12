@@ -169,6 +169,29 @@ namespace FoldEngine.Serialization {
             SerializerSuite.Write(element, this);
         }
 
+        private SaveOperation WriteMember(string name, object value) {
+            // Write member name;
+            if(name != null) Write(name);
+            
+            // Write an int for the length in bytes (will be overwritten later)
+            long lengthPosition = Current;
+            Write(0);
+            
+            // Write the data
+            SerializerSuite.Write(value, this);
+            
+            // Calculate length in bytes
+            long endPosition = Current;
+            int length = (int) (endPosition - lengthPosition - 4);
+            
+            // Write the length and return
+            Current = lengthPosition;
+            Write(length);
+            Current = endPosition;
+
+            return this;
+        }
+
         private SaveOperation WriteMember<T>(string name, T value) {
             // Write member name;
             if(name != null) Write(name);
@@ -275,6 +298,12 @@ namespace FoldEngine.Serialization {
                 MemberCount = 0;
             }
 
+            public Compound WriteMember(string name, object value) {
+                SaveOperation.WriteMember(name, value);
+                MemberCount++;
+                return this;
+            }
+
             public Compound WriteMember<T>(string name, T value) {
                 SaveOperation.WriteMember<T>(name, value);
                 MemberCount++;
@@ -306,6 +335,12 @@ namespace FoldEngine.Serialization {
             internal Array(SaveOperation saveOperation) {
                 SaveOperation = saveOperation;
                 MemberCount = 0;
+            }
+
+            public Array WriteMember(object value) {
+                SaveOperation.WriteMember(null, value);
+                MemberCount++;
+                return this;
             }
 
             public Array WriteMember<T>(T value) {

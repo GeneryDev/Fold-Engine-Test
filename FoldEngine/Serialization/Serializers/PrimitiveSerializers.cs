@@ -1,10 +1,10 @@
 ﻿using System;
 
 namespace FoldEngine.Serialization {
-    public class PrimitiveSerializer<T> : ISerializer<T> where T : struct {
-        public Type WorkingType => typeof(T);
+    public class PrimitiveSerializer<T> : Serializer<T> where T : struct {
+        public override Type WorkingType => typeof(T);
 
-        public void Serialize(T t, SaveOperation writer) {
+        public override void Serialize(T t, SaveOperation writer) {
             switch(t) {
                 case byte v: writer.Write(v);
                     return;
@@ -39,7 +39,7 @@ namespace FoldEngine.Serialization {
             }
         }
 
-        public T Deserialize(LoadOperation reader) {
+        public override T Deserialize(LoadOperation reader) {
             switch((T) default) {
                 case byte _: return reader.ReadByte() is T b ? b : default;
                 case sbyte _: return reader.ReadSByte() is T sb ? sb : default;

@@ -114,6 +114,10 @@ namespace FoldEngine.Serialization {
             return SerializerSuite.Read<T>(this);
         }
 
+        public object Read(Type type) {
+            return SerializerSuite.Read(type, this);
+        }
+
         public void ReadCompound(CompoundReader reader) {
             int memberCount = _reader.ReadInt32();
             var compound = new Compound() {
@@ -139,7 +143,7 @@ namespace FoldEngine.Serialization {
             Current = end;
         }
 
-        public void ReadList(ArrayReader reader) {
+        public void ReadArray(ArrayReader reader) {
             int memberCount = _reader.ReadInt32();
             var array = new Array() {
                 LoadOperation = this,

@@ -28,6 +28,12 @@ namespace FoldEngine.Serialization {
             AddSerializer(new PrimitiveSerializer<bool>());
             
             AddSerializer(new StringSerializer());
+            
+            AddSerializer(new Vector2Serializer());
+            AddSerializer(new Vector3Serializer());
+            AddSerializer(new Vector4Serializer());
+            AddSerializer(new ColorSerializer());
+            AddSerializer(new MatrixSerializer());
         }
 
         public SerializerSuite AddSerializer(ISerializer serializer) {
@@ -36,17 +42,30 @@ namespace FoldEngine.Serialization {
         }
         
 
-        private ISerializer<T> GetSerializer<T>() {
-            return (ISerializer<T>) Serializers[typeof(T)];
+        private ISerializer GetSerializer(Type type) {
+            if(!Serializers.ContainsKey(type)) {
+                throw new ArgumentException($"No serializer available for type {type}");
+            }
+            return Serializers[type];
         }
-        private ISerializer<List<T>> GetListSerializer<T>() {
+        
+        private Serializer<T> GetSerializer<T>() {
+            if(!Serializers.ContainsKey(typeof(T))) {
+                throw new ArgumentException($"No serializer available for type {typeof(T)}");
+            }
+            return (Serializer<T>) Serializers[typeof(T)];
+        }
+        private Serializer<List<T>> GetListSerializer<T>() {
             if(!Serializers.ContainsKey(typeof(List<T>))) {
                 Serializers[typeof(List<T>)] = new ListSerializer<T>();
             }
-            return (ISerializer<List<T>>) Serializers[typeof(List<T>)];
+            return (Serializer<List<T>>) Serializers[typeof(List<T>)];
         }
         
 
+        public void Write(object value, SaveOperation writer) {
+            GetSerializer(value.GetType()).SerializeObject(value, writer);
+        }
         public void Write<T>(T element, SaveOperation writer) {
             GetSerializer<T>().Serialize(element, writer);
         }
@@ -60,6 +79,9 @@ namespace FoldEngine.Serialization {
         
         public T Read<T>(LoadOperation reader) {
             return GetSerializer<T>().Deserialize(reader);
+        }
+        public object Read(Type type, LoadOperation reader) {
+            return GetSerializer(type).DeserializeObject(reader);
         }
         public List<T> ReadList<T>(LoadOperation reader) {
             return GetListSerializer<T>().Deserialize(reader);

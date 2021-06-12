@@ -98,13 +98,13 @@ namespace FoldEngine.Components
             }
         }
 
-        public static ComponentSet CreateSetForType(Type componentType) {
+        public static ComponentSet CreateSetForType(Type componentType, Scene scene, int startingId) {
             if(!_componentSetConstructors.ContainsKey(componentType)) {
                 _componentSetConstructors[componentType] =
-                    typeof(ComponentSet).MakeGenericType(componentType).GetConstructor(new Type[0]);
+                    typeof(ComponentSet<>).MakeGenericType(componentType).GetConstructor(new Type[] {typeof(Scene), typeof(int)});
             }
 
-            return (ComponentSet) _componentSetConstructors[componentType].Invoke(new object[0]);
+            return (ComponentSet) _componentSetConstructors[componentType].Invoke(new object[] {scene, startingId});
         }
     }
 
