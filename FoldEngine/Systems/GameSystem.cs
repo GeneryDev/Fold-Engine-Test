@@ -42,6 +42,62 @@ namespace FoldEngine.Systems {
         internal virtual void Initialize() { }
 
         public virtual void SubscribeToEvents() {}
+        
+        
+        
+        
+        
+        private static Dictionary<Type, string> _typeToIdentifierMap = null;
+        private static Dictionary<string, Type> _identifierToTypeMap = null;
+        private static Dictionary<string, ConstructorInfo> _identifierToConstructorMap = null;
+
+        public static string IdentifierOf(Type type) {
+            if(_typeToIdentifierMap == null) {
+                _typeToIdentifierMap = new Dictionary<Type, string>();
+            }
+
+            if(!_typeToIdentifierMap.ContainsKey(type)) {
+                _typeToIdentifierMap[type] =
+                    (type.GetCustomAttributes(typeof(GameSystemAttribute), false)[0] as GameSystemAttribute).SystemName;
+            }
+
+            return _typeToIdentifierMap[type];
+        }
+
+        public static string IdentifierOf<T>() where T : struct {
+            return IdentifierOf(typeof(T));
+        }
+
+        public static Type TypeForIdentifier(string identifier) {
+            PopulateIdentifiers();
+            return _identifierToTypeMap[identifier];
+        }
+
+        public static GameSystem CreateForIdentifier(string identifier) {
+            PopulateIdentifiers();
+            return (GameSystem) _identifierToConstructorMap[identifier].Invoke(new object[0]);
+        }
+
+        public static void PopulateDictionaryWithAssembly(Assembly assembly) {
+            if(_identifierToTypeMap == null) _identifierToTypeMap = new Dictionary<string, Type>();
+            if(_identifierToConstructorMap == null) _identifierToConstructorMap = new Dictionary<string, ConstructorInfo>();
+            foreach(Type type in assembly.GetTypes()) {
+                if(type.IsSubclassOf(typeof(GameSystem))) {
+                    object[] attributes;
+                    if((attributes = type.GetCustomAttributes(typeof(GameSystemAttribute), false)).Length > 0) {
+                        string thisIdentifier = (attributes[0] as GameSystemAttribute).SystemName;
+                        _identifierToTypeMap[thisIdentifier] = type;
+                        _identifierToConstructorMap[thisIdentifier] = type.GetConstructor(new Type[0]);
+                    }
+                }
+            }
+        }
+
+        public static void PopulateIdentifiers() {
+            if(_identifierToTypeMap == null) {
+                PopulateDictionaryWithAssembly(Assembly.GetEntryAssembly());
+            }
+        }
     }
 
 

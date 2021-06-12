@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using FoldEngine;
 using FoldEngine.Audio;
 using FoldEngine.Components;
@@ -6,6 +7,8 @@ using FoldEngine.Events;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Physics;
+using FoldEngine.Scenes;
+using FoldEngine.Serialization;
 using FoldEngine.Systems;
 using FoldEngine.Text;
 using Microsoft.Xna.Framework;
@@ -29,6 +32,8 @@ namespace Sandbox.Systems {
         private Vector2 _leftPos;
         private Vector2 _leftVel;
         
+        private static readonly string TargetDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Fold", "scenes");
+        
         public override void OnInput() {
             bool jump = Owner.Core.InputUnit.Players[0].Get<ButtonAction>("movement.jump").Consume();
             float moveX = Owner.Core.InputUnit.Players[0].Get<AnalogAction>("movement.axis.x");
@@ -40,6 +45,13 @@ namespace Sandbox.Systems {
                 SoundInstance soundInstance = Owner.Core.AudioUnit.CreateInstance("Audio/failure");
                 soundInstance.Pan = MathHelper.Clamp(moveX, -1, 1);
                 soundInstance.PlayOnce();
+            }
+
+            if(Owner.Core.InputUnit.Players[0].Get<ButtonAction>("quicksave").Consume()) {
+                Directory.CreateDirectory(TargetDirectory);
+                Owner.Save(Path.Combine(TargetDirectory, "scene.foldscene"));
+            } else if(Owner.Core.InputUnit.Players[0].Get<ButtonAction>("quickload").Consume()) {
+                Owner.Load(Path.Combine(TargetDirectory, "scene.foldscene"));
             }
             
             _livingComponents.Reset();

@@ -4,10 +4,11 @@ using FoldEngine.Systems;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using FoldEngine.Serialization;
 
 namespace FoldEngine.Scenes
 {
-    public class SystemMap {
+    public class SystemMap : ISelfSerializer {
         private readonly Scene _owner;
 
         private readonly List<GameSystem> _all = new List<GameSystem>();
@@ -23,6 +24,10 @@ namespace FoldEngine.Scenes
 
         public void Add<T>() where T : GameSystem, new() {
             _queuedToAdd.Enqueue(new T());
+        }
+
+        public void Add(GameSystem sys) {
+            _queuedToAdd.Enqueue(sys);
         }
 
         public void Remove(GameSystem sys) {
@@ -114,6 +119,33 @@ namespace FoldEngine.Scenes
             }
 
             return null;
+        }
+
+        public Type WorkingType => this.GetType();
+        
+        public void Serialize(SaveOperation writer) {
+            writer.WriteOpenCompound(1);
+            writer.WriteMember(nameof(_all), () => {
+                writer.Write(_all.Count);
+                foreach(GameSystem sys in _all) {
+                    writer.Write(sys.SystemName);
+                }
+            });
+        }
+
+        public void Deserialize(LoadOperation reader) {
+            foreach(GameSystem sys in _all) {
+                Remove(sys);
+            }
+            reader.ReadCompound(c => {
+                c.StartReadMember(nameof(_all));
+                int count = reader.ReadInt32();
+                for(int i = 0; i < count; i++) {
+                    string sysName = reader.ReadString();
+                    Add(GameSystem.CreateForIdentifier(sysName));
+                    Console.WriteLine("System: " + sysName);
+                }
+            });
         }
     }
 }

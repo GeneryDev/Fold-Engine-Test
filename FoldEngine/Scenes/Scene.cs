@@ -8,6 +8,7 @@ using FoldEngine.Components;
 using FoldEngine.Events;
 using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
+using FoldEngine.Serialization;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
@@ -15,8 +16,7 @@ using Woofer;
 
 namespace FoldEngine.Scenes
 {
-    public class Scene
-    {
+    public class Scene {
         public readonly IGameCore Core;
         public string Name { get; set; } = "Scene";
 
@@ -24,14 +24,14 @@ namespace FoldEngine.Scenes
         public readonly EventMap Events;
         public readonly SystemMap Systems;
         internal readonly EntityObjectPool EntityObjectPool;
-        
+
         public readonly MeshCollection Meshes;
 
         private long _nextEntityId = 0;
-        
+
         public Matrix GizmoTransformMatrix { get; set; }
         public long MainCameraId { get; set; }
-        
+
         public ref Transform MainCameraTransform => ref Components.GetComponent<Transform>(MainCameraId);
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace FoldEngine.Scenes
             EntityObjectPool = new EntityObjectPool(this);
             Meshes = new MeshCollection();
         }
-        
+
         private List<long> _recycleQueue = new List<long>();
 
         public void Recycle(long entityId) {
@@ -63,37 +63,31 @@ namespace FoldEngine.Scenes
             } else {
                 newEntityId = _nextEntityId++;
             }
+
             ref Transform transform = ref Components.CreateComponent<Transform>(newEntityId);
             Components.CreateComponent<EntityName>(newEntityId).Name = name;
             Console.WriteLine($"Created entity {newEntityId}");
             return newEntityId;
         }
 
-        public Entity CreateEntity(string name = "Unnamed Entity")
-        {
+        public Entity CreateEntity(string name = "Unnamed Entity") {
             return EntityObjectPool.GetOrCreateEntityObject(CreateEntityId(name));
         }
-        
+
 
         bool _initialized = false;
 
-        public virtual void Initialize()
-        {
-            
-        }
+        public virtual void Initialize() { }
 
-        public virtual void Input()
-        {
+        public virtual void Input() {
             Systems.InvokeInput();
 
             Systems.Flush();
             Components.Flush();
         }
 
-        public virtual void Update()
-        {
-            if(!_initialized)
-            {
+        public virtual void Update() {
+            if(!_initialized) {
                 Initialize();
                 _initialized = true;
             }
@@ -104,13 +98,11 @@ namespace FoldEngine.Scenes
             Components.Flush();
         }
 
-        public void Render(IRenderingUnit renderer)
-        {
+        public void Render(IRenderingUnit renderer) {
             Systems.InvokeRender(renderer);
         }
 
-        private static void WriteMatrix(Matrix mat)
-        {
+        private static void WriteMatrix(Matrix mat) {
             Console.Write("| \t");
             Console.Write(mat.M11);
             Console.Write("\t");
@@ -155,24 +147,61 @@ namespace FoldEngine.Scenes
         public void DrawGizmo(Vector2 from, Vector2 to, Color color, Color? colorTo = null, float zOrder = 0) {
             IRenderingLayer gizmoLayer = Core.RenderingUnit.GizmoLayer;
             if(gizmoLayer != null) {
-                Vector2 fromScreen = RenderingLayer.WorldToScreen(gizmoLayer, from.ApplyMatrixTransform(GizmoTransformMatrix));
-                Vector2 toScreen = RenderingLayer.WorldToScreen(gizmoLayer, to.ApplyMatrixTransform(GizmoTransformMatrix));
+                Vector2 fromScreen =
+                    RenderingLayer.WorldToScreen(gizmoLayer, from.ApplyMatrixTransform(GizmoTransformMatrix));
+                Vector2 toScreen =
+                    RenderingLayer.WorldToScreen(gizmoLayer, to.ApplyMatrixTransform(GizmoTransformMatrix));
                 gizmoLayer.Surface.GizBatch.DrawLine(fromScreen, toScreen, color, colorTo, zOrder);
             }
         }
+
         public void DrawGizmo(Vector2 center, float radius, Color color, int sides = 24) {
             IRenderingLayer gizmoLayer = Core.RenderingUnit.GizmoLayer;
             if(gizmoLayer != null) {
-                Vector2 centerScreen = RenderingLayer.WorldToScreen(gizmoLayer, center.ApplyMatrixTransform(GizmoTransformMatrix));
-                Vector2 rightScreen = RenderingLayer.WorldToScreen(gizmoLayer, (center + Vector2.UnitX*radius).ApplyMatrixTransform(GizmoTransformMatrix));
+                Vector2 centerScreen =
+                    RenderingLayer.WorldToScreen(gizmoLayer, center.ApplyMatrixTransform(GizmoTransformMatrix));
+                Vector2 rightScreen = RenderingLayer.WorldToScreen(gizmoLayer,
+                    (center + Vector2.UnitX * radius).ApplyMatrixTransform(GizmoTransformMatrix));
 
                 Complex current = rightScreen - centerScreen;
                 Complex delta = Complex.FromRotation((float) (Math.PI * 2 / sides));
                 for(int i = 0; i < sides; i++) {
-                    gizmoLayer.Surface.GizBatch.DrawLine((Complex) centerScreen + current, (Complex) centerScreen + current*delta , color, color);
+                    gizmoLayer.Surface.GizBatch.DrawLine((Complex) centerScreen + current,
+                        (Complex) centerScreen + current * delta, color, color);
                     current *= delta;
                 }
             }
+        }
+
+        public void Save(string path) {
+            var saveOp = new SaveOperation(path);
+            Save(saveOp);
+            saveOp.Close();
+            saveOp.Dispose();
+        }
+
+        public void Save(SaveOperation writer) {
+            writer.WriteOpenCompound(4);
+            writer.WriteMember(nameof(Name), Name);
+            writer.WriteMember(nameof(_nextEntityId), _nextEntityId);
+            writer.WriteMember(nameof(_recycleQueue), _recycleQueue);
+            writer.WriteMember(nameof(Systems), (ISelfSerializer) Systems);
+        }
+
+        public void Load(string path) {
+            var loadOp = new LoadOperation(path);
+            Load(loadOp);
+            loadOp.Close();
+            loadOp.Dispose();
+        }
+
+        public void Load(LoadOperation reader) {
+            reader.ReadCompound(c => {
+                Name = c.GetMember<string>(nameof(Name));
+                _nextEntityId = c.GetMember<long>(nameof(_nextEntityId));
+                _recycleQueue = c.GetListMember<long>(nameof(_recycleQueue));
+                c.DeserializeMember(nameof(Systems), Systems);
+            });
         }
     }
 }

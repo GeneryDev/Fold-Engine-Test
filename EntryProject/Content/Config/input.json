@@ -33,6 +33,20 @@
               "device": "keyboard",
 
               "button": "LeftShift"
+            },
+            {
+              "identifier": "quicksave",
+              "type": "button",
+              "device": "keyboard",
+
+              "button": "F5"
+            },
+            {
+              "identifier": "quickload",
+              "type": "button",
+              "device": "keyboard",
+
+              "button": "F7"
             }
           ]
         },

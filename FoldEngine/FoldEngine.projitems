@@ -61,6 +61,14 @@
     <Compile Include="$(MSBuildThisFileDirectory)Physics\Physics.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Physics\Systems\AdvancedPhysicsSystem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Physics\Systems\SimplePhysicsSystem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\ISerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\ListSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\LoadOperation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\PrimitiveSerializers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\SaveOperation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\SelfSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\SerializerSuite.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\StringSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\Font.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\TextRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\RenderedText.cs" />
