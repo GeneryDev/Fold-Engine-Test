@@ -116,8 +116,8 @@ namespace FoldEngine.Components {
         public override void Reset() {
             _sparseIndex = -1;
             _denseIndex = -1;
-            if(_set == null && _scene.Components.Map.ContainsKey(typeof(T))) {
-                _set = (ComponentSet<T>) _scene.Components.Map[typeof(T)];
+            if(_set == null && _scene.Components.Sets.ContainsKey(typeof(T))) {
+                _set = (ComponentSet<T>) _scene.Components.Sets[typeof(T)];
             }
 
             if(_set != null) _iterationTimestamp = _set.CurrentTimestamp;

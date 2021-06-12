@@ -124,13 +124,15 @@ namespace FoldEngine.Scenes
         public Type WorkingType => this.GetType();
         
         public void Serialize(SaveOperation writer) {
-            writer.WriteOpenCompound(1);
-            writer.WriteMember(nameof(_all), () => {
-                writer.Write(_all.Count);
-                foreach(GameSystem sys in _all) {
-                    writer.Write(sys.SystemName);
-                }
+            writer.WriteCompound((ref SaveOperation.Compound c) => {
+                c.WriteMember(nameof(_all), () => {
+                    writer.Write(_all.Count);
+                    foreach(GameSystem sys in _all) {
+                        writer.Write(sys.SystemName);
+                    }
+                });
             });
+            
         }
 
         public void Deserialize(LoadOperation reader) {

@@ -4,12 +4,17 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using FoldEngine.Scenes;
+using FoldEngine.Serialization;
 
 namespace FoldEngine.Components {
-    public abstract class ComponentSet {
+    public abstract class ComponentSet : ISelfSerializer {
         internal abstract void Flush();
         public abstract bool Has(int entityId);
         public abstract void Remove(int entityId);
+
+        public Type WorkingType => this.GetType();
+        public abstract void Serialize(SaveOperation writer);
+        public abstract void Deserialize(LoadOperation reader);
     }
 
 
@@ -197,6 +202,22 @@ namespace FoldEngine.Components {
             if(CurrentTimestamp < 0) {
                 //oops it's been over 2 years since the game started running what the heck (assuming the game runs at 60 updates per second)
             }
+        }
+
+        public override void Serialize(SaveOperation writer) {
+            writer.WriteArray(((ref SaveOperation.Array arr) => {
+                for(int entityId = MinId; entityId < MaxId; entityId++) {
+                    if(!Has(entityId)) continue;
+                    arr.WriteMember(() => {
+                        // ReSharper disable once AccessToModifiedClosure
+                        writer.Write(entityId);
+                    });
+                }
+            }));
+        }
+
+        public override void Deserialize(LoadOperation reader) {
+            throw new NotImplementedException();
         }
 
         public void DebugPrint() {

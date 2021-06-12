@@ -15,8 +15,10 @@ namespace FoldEngine.Events {
             }
 
             if(!_typeToIdentifierMap.ContainsKey(type)) {
+                object[] matchingAttributes = type.GetCustomAttributes(typeof(EventAttribute), false);
+                if(matchingAttributes.Length == 0) throw new ArgumentException($"Type '{type}' is not an event type");
                 _typeToIdentifierMap[type] =
-                    (type.GetCustomAttributes(typeof(EventAttribute), false)[0] as EventAttribute).EventIdentifier;
+                    (matchingAttributes[0] as EventAttribute).EventIdentifier;
             }
 
             return _typeToIdentifierMap[type];

@@ -181,11 +181,13 @@ namespace FoldEngine.Scenes
         }
 
         public void Save(SaveOperation writer) {
-            writer.WriteOpenCompound(4);
-            writer.WriteMember(nameof(Name), Name);
-            writer.WriteMember(nameof(_nextEntityId), _nextEntityId);
-            writer.WriteMember(nameof(_recycleQueue), _recycleQueue);
-            writer.WriteMember(nameof(Systems), (ISelfSerializer) Systems);
+            writer.WriteCompound((ref SaveOperation.Compound c) => {
+                c.WriteMember(nameof(Name), Name);
+                c.WriteMember(nameof(_nextEntityId), _nextEntityId);
+                c.WriteMember(nameof(_recycleQueue), _recycleQueue);
+                c.WriteMember(nameof(Systems), (ISelfSerializer) Systems);
+                c.WriteMember(nameof(Components), (ISelfSerializer) Components);
+            });
         }
 
         public void Load(string path) {

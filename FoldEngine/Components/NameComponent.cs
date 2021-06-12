@@ -4,8 +4,8 @@ using System.Text;
 
 namespace FoldEngine.Components
 {
-    struct EntityName
-    {
+    [Component("name")]
+    public struct EntityName {
         public string Name;
     }
 }

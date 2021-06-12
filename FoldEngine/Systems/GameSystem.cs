@@ -57,8 +57,10 @@ namespace FoldEngine.Systems {
             }
 
             if(!_typeToIdentifierMap.ContainsKey(type)) {
+                object[] matchingAttributes = type.GetCustomAttributes(typeof(GameSystemAttribute), false);
+                if(matchingAttributes.Length == 0) throw new ArgumentException($"Type '{type}' is not a game system type");
                 _typeToIdentifierMap[type] =
-                    (type.GetCustomAttributes(typeof(GameSystemAttribute), false)[0] as GameSystemAttribute).SystemName;
+                    (matchingAttributes[0] as GameSystemAttribute).SystemName;
             }
 
             return _typeToIdentifierMap[type];

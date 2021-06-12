@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FoldEngine.Scenes;
+using FoldEngine.Serialization;
 
 namespace FoldEngine.Components {
     /// <summary>
@@ -11,7 +12,7 @@ namespace FoldEngine.Components {
     /// It stores components in lists of their type, sorted on insertion for O(lg n) insertion, retrieval and removal.
     /// Component Maps also handle Component Views, updating them with components added or removed, whenever Flush() is called, usually at the end of the update cycle.
     /// </summary>
-    public class ComponentMap {
+    public class ComponentMap : ISelfSerializer {
         /// <summary>
         /// The scene this component map belongs to
         /// </summary>
@@ -21,7 +22,7 @@ namespace FoldEngine.Components {
         /// The map containing the component sets.<br></br>
         /// The set may not exist if there are no entities with components of said type.<br></br>
         /// </summary>
-        internal readonly Dictionary<Type, ComponentSet> Map = new Dictionary<Type, ComponentSet>();
+        internal readonly Dictionary<Type, ComponentSet> Sets = new Dictionary<Type, ComponentSet>();
 
         /// <summary>
         /// Creates a ComponentMap attached to the given scene.
@@ -37,11 +38,11 @@ namespace FoldEngine.Components {
         /// <returns>The newly created component</returns>
         public ref T CreateComponent<T>(long entityId) where T : struct {
             Type componentType = typeof(T);
-            if(!Map.ContainsKey(componentType)) {
-                Map[componentType] = new ComponentSet<T>(_scene, (int)entityId);
+            if(!Sets.ContainsKey(componentType)) {
+                Sets[componentType] = new ComponentSet<T>(_scene, (int)entityId);
             }
 
-            return ref ((ComponentSet<T>) Map[componentType]).Create((int)entityId);
+            return ref ((ComponentSet<T>) Sets[componentType]).Create((int)entityId);
         }
 
         /// <summary>
@@ -51,8 +52,8 @@ namespace FoldEngine.Components {
         /// <param name="entityId">The ID of the entity whose component should be removed</param>
         public void RemoveComponent<T>(long entityId) where T : struct {
             Type componentType = typeof(T);
-            if(Map.ContainsKey(componentType)) {
-                ((ComponentSet<T>) Map[componentType]).Remove((int)entityId);
+            if(Sets.ContainsKey(componentType)) {
+                ((ComponentSet<T>) Sets[componentType]).Remove((int)entityId);
             } else {
                 //Component type not registered
             }
@@ -63,7 +64,7 @@ namespace FoldEngine.Components {
         /// </summary>
         /// <param name="entityId">The ID of the entity whose components should be removed</param>
         public void RemoveAllComponents(long entityId) {
-            foreach(ComponentSet set in Map.Values) {
+            foreach(ComponentSet set in Sets.Values) {
                 set.Remove((int)entityId);
             }
         }
@@ -78,12 +79,12 @@ namespace FoldEngine.Components {
         /// <returns>The component of type T belonging to the entity of the given ID. Will throw a ComponentRegistryException if such a component or entity does not exist.</returns>
         public ref T GetComponent<T>(long entityId) where T : struct {
             Type componentType = typeof(T);
-            if(!Map.ContainsKey(componentType)) {
+            if(!Sets.ContainsKey(componentType)) {
                 throw new ComponentRegistryException($"Component {componentType} not found for entity ID {entityId}");
                 //return null;
             }
 
-            return ref ((ComponentSet<T>) Map[componentType]).Get((int)entityId);
+            return ref ((ComponentSet<T>) Sets[componentType]).Get((int)entityId);
         }
 
         /// <summary>
@@ -95,7 +96,7 @@ namespace FoldEngine.Components {
         /// <returns>true if the entity has the specified component type, false otherwise.</returns>
         public bool HasComponent<T>(long entityId) where T : struct {
             Type componentType = typeof(T);
-            return Map.ContainsKey(componentType) && ((ComponentSet<T>) Map[componentType]).Has((int)entityId);
+            return Sets.ContainsKey(componentType) && ((ComponentSet<T>) Sets[componentType]).Has((int)entityId);
         }
 
         public ComponentIterator<T> CreateIterator<T>(IterationFlags flags) where T : struct {
@@ -117,18 +118,45 @@ namespace FoldEngine.Components {
         /// TODO
         /// </summary>
         internal void Flush() {
-            foreach(ComponentSet set in Map.Values) {
+            foreach(ComponentSet set in Sets.Values) {
                 set.Flush();
             }
         }
 
         public void DebugPrint<T>() where T : struct {
             Type componentType = typeof(T);
-            if(Map.ContainsKey(componentType)) {
-                ((ComponentSet<T>) Map[componentType]).DebugPrint();
+            if(Sets.ContainsKey(componentType)) {
+                ((ComponentSet<T>) Sets[componentType]).DebugPrint();
             } else {
                 //Component type not registered
             }
+        }
+        
+        public Type WorkingType => this.GetType();
+        
+        public void Serialize(SaveOperation writer) {
+            writer.WriteCompound(((ref SaveOperation.Compound c) => {
+                foreach(var entry in Sets) {
+                    c.WriteMember(Component.IdentifierOf(entry.Key), (ISelfSerializer) entry.Value);
+                }
+            }));
+        }
+
+        public void Deserialize(LoadOperation reader) {
+            Sets.Clear();
+            reader.ReadCompound(c => {
+                foreach(string componentIdentifier in c.MemberNames) {
+                    Type componentType = Component.TypeForIdentifier(componentIdentifier);
+                    if(componentType == null) {
+                        Console.WriteLine($"Warning: Component identifier '{componentIdentifier}' not recognized");
+                        continue;
+                    }
+
+                    ComponentSet set = Component.CreateSetForType(componentType);
+
+                    c.DeserializeMember(componentIdentifier, set);
+                }
+            });
         }
     }
 }
