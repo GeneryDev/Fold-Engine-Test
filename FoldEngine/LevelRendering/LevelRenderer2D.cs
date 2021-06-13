@@ -63,12 +63,9 @@ namespace FoldEngine.Rendering {
 
                         layer.Surface.Draw(new DrawTriangleInstruction(
                             texture,
-                            RenderingLayer.WorldToScreen(layer,
-                                transform.Apply(vertexA).ApplyMatrixTransform(viewMatrix)),
-                            RenderingLayer.WorldToScreen(layer,
-                                transform.Apply(vertexB).ApplyMatrixTransform(viewMatrix)),
-                            RenderingLayer.WorldToScreen(layer,
-                                transform.Apply(vertexC).ApplyMatrixTransform(viewMatrix)),
+                            layer.CameraToLayer(transform.Apply(vertexA).ApplyMatrixTransform(viewMatrix)),
+                            layer.CameraToLayer(transform.Apply(vertexB).ApplyMatrixTransform(viewMatrix)),
+                            layer.CameraToLayer(transform.Apply(vertexC).ApplyMatrixTransform(viewMatrix)),
                             triangle.A.TextureCoordinate * meshRenderable.UVScale + meshRenderable.UVOffset,
                             triangle.B.TextureCoordinate * meshRenderable.UVScale + meshRenderable.UVOffset,
                             triangle.C.TextureCoordinate * meshRenderable.UVScale + meshRenderable.UVOffset,

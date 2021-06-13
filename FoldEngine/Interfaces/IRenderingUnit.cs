@@ -23,6 +23,8 @@ namespace FoldEngine.Interfaces
 
         void LoadContent();
         
+        IRenderingLayer WorldLayer { get; }
+        IRenderingLayer ScreenLayer { get; }
         IRenderingLayer GizmoLayer { get; }
     }
 }

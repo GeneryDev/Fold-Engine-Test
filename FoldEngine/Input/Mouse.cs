@@ -12,6 +12,8 @@ namespace FoldEngine.Input {
         
         public readonly ButtonInfo RightButton = new ButtonInfo(() =>
             Microsoft.Xna.Framework.Input.Mouse.GetState().RightButton == ButtonState.Pressed);
+        
+        public readonly AnalogInfo1 ScrollWheel = new AnalogInfo1(() => Microsoft.Xna.Framework.Input.Mouse.GetState().ScrollWheelValue);
 
         public bool IsBeingUsed => LeftButton.Pressed || MiddleButton.Pressed || RightButton.Pressed;
 
@@ -19,6 +21,7 @@ namespace FoldEngine.Input {
             LeftButton.Update();
             MiddleButton.Update();
             RightButton.Update();
+            ScrollWheel.Update();
         }
 
         public T Get<T>(string name) where T : IInputInfo {

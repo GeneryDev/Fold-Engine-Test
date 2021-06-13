@@ -41,16 +41,16 @@ namespace FoldEngine.Rendering {
 
                 layer.Surface.Draw(new DrawQuadInstruction(
                     renderer.Textures["main:pixel.white"],
-                    RenderingLayer.WorldToScreen(layer,
+                    layer.CameraToLayer(
                         (Complex) (lineA.From - perpendicularA - cameraPos)
                         * cameraRotNegativeComplex),
-                    RenderingLayer.WorldToScreen(layer,
+                    layer.CameraToLayer(
                         (Complex) (lineA.From + perpendicularA - cameraPos)
                         * cameraRotNegativeComplex),
-                    RenderingLayer.WorldToScreen(layer,
+                    layer.CameraToLayer(
                         (Complex) (lineA.To - perpendicularA - cameraPos)
                         * cameraRotNegativeComplex),
-                    RenderingLayer.WorldToScreen(layer,
+                    layer.CameraToLayer(
                         (Complex) (lineA.To + perpendicularA - cameraPos)
                         * cameraRotNegativeComplex),
                     Vector2.Zero,
@@ -61,21 +61,21 @@ namespace FoldEngine.Rendering {
 
 
                 if(LineIntersection) {
-                    Line lineB = new Line(new Vector2(12, 120), RenderingLayer.ScreenToWorld(layer, Mouse.GetState().Position.ToVector2()));
+                    Line lineB = new Line(new Vector2(12, 120), renderer.ScreenLayer.LayerToCamera(Mouse.GetState().Position.ToVector2()));
                     Vector2 perpendicularB = (Vector2)(((Complex) (lineB.To - lineB.From)).Normalized * Complex.Imaginary) * thickness/2;
 
                     layer.Surface.Draw(new DrawQuadInstruction(
                         renderer.Textures["main:pixel.white"],
-                        RenderingLayer.WorldToScreen(layer,
+                        layer.CameraToLayer(
                             (Complex) (lineB.From - perpendicularB - cameraPos)
                             * cameraRotNegativeComplex),
-                        RenderingLayer.WorldToScreen(layer,
+                        layer.CameraToLayer(
                             (Complex) (lineB.From + perpendicularB - cameraPos)
                             * cameraRotNegativeComplex),
-                        RenderingLayer.WorldToScreen(layer,
+                        layer.CameraToLayer(
                             (Complex) (lineB.To - perpendicularB - cameraPos)
                             * cameraRotNegativeComplex),
-                        RenderingLayer.WorldToScreen(layer,
+                        layer.CameraToLayer(
                             (Complex) (lineB.To + perpendicularB - cameraPos)
                             * cameraRotNegativeComplex),
                         Vector2.Zero,
@@ -96,16 +96,16 @@ namespace FoldEngine.Rendering {
 
                     layer.Surface.Draw(new DrawQuadInstruction(
                         renderer.Textures["main:pixel.white"],
-                        RenderingLayer.WorldToScreen(layer,
+                        layer.CameraToLayer(
                             (Complex) (intersection + new Vector2(1,-1)*thickness - cameraPos)
                             * cameraRotNegativeComplex),
-                        RenderingLayer.WorldToScreen(layer,
+                        layer.CameraToLayer(
                             (Complex) (intersection + new Vector2(-1,-1)*thickness - cameraPos)
                             * cameraRotNegativeComplex),
-                        RenderingLayer.WorldToScreen(layer,
+                        layer.CameraToLayer(
                             (Complex) (intersection + new Vector2(1,1)*thickness - cameraPos)
                             * cameraRotNegativeComplex),
-                        RenderingLayer.WorldToScreen(layer,
+                        layer.CameraToLayer(
                             (Complex) (intersection + new Vector2(-1,1)*thickness - cameraPos)
                             * cameraRotNegativeComplex),
                         Vector2.Zero,
@@ -121,20 +121,20 @@ namespace FoldEngine.Rendering {
                 if(SnapToLine) {
                     Vector2 snapped =
                         lineA.SnapPointToLine(
-                            RenderingLayer.ScreenToWorld(layer, Mouse.GetState().Position.ToVector2()), true);
+                            renderer.ScreenLayer.LayerToCamera(Mouse.GetState().Position.ToVector2()), true);
                     
                     layer.Surface.Draw(new DrawQuadInstruction(
                         renderer.Textures["main:pixel.white"],
-                        RenderingLayer.WorldToScreen(layer,
+                        layer.CameraToLayer(
                             (Complex) (snapped + new Vector2(1,-1)*thickness - cameraPos)
                             * cameraRotNegativeComplex),
-                        RenderingLayer.WorldToScreen(layer,
+                        layer.CameraToLayer(
                             (Complex) (snapped + new Vector2(-1,-1)*thickness - cameraPos)
                             * cameraRotNegativeComplex),
-                        RenderingLayer.WorldToScreen(layer,
+                        layer.CameraToLayer(
                             (Complex) (snapped + new Vector2(1,1)*thickness - cameraPos)
                             * cameraRotNegativeComplex),
-                        RenderingLayer.WorldToScreen(layer,
+                        layer.CameraToLayer(
                             (Complex) (snapped + new Vector2(-1,1)*thickness - cameraPos)
                             * cameraRotNegativeComplex),
                         Vector2.Zero,

@@ -147,10 +147,12 @@ namespace FoldEngine.Scenes
         public void DrawGizmo(Vector2 from, Vector2 to, Color color, Color? colorTo = null, float zOrder = 0) {
             IRenderingLayer gizmoLayer = Core.RenderingUnit.GizmoLayer;
             if(gizmoLayer != null) {
-                Vector2 fromScreen =
-                    RenderingLayer.WorldToScreen(gizmoLayer, from.ApplyMatrixTransform(GizmoTransformMatrix));
-                Vector2 toScreen =
-                    RenderingLayer.WorldToScreen(gizmoLayer, to.ApplyMatrixTransform(GizmoTransformMatrix));
+                Vector2 fromScreen = Core.RenderingUnit.WorldLayer.LayerToLayer(
+                    Core.RenderingUnit.WorldLayer.CameraToLayer(from.ApplyMatrixTransform(GizmoTransformMatrix)),
+                    Core.RenderingUnit.GizmoLayer);
+                Vector2 toScreen = Core.RenderingUnit.WorldLayer.LayerToLayer(
+                    Core.RenderingUnit.WorldLayer.CameraToLayer(to.ApplyMatrixTransform(GizmoTransformMatrix)),
+                    Core.RenderingUnit.GizmoLayer);
                 gizmoLayer.Surface.GizBatch.DrawLine(fromScreen, toScreen, color, colorTo, zOrder);
             }
         }
@@ -158,10 +160,12 @@ namespace FoldEngine.Scenes
         public void DrawGizmo(Vector2 center, float radius, Color color, int sides = 24) {
             IRenderingLayer gizmoLayer = Core.RenderingUnit.GizmoLayer;
             if(gizmoLayer != null) {
-                Vector2 centerScreen =
-                    RenderingLayer.WorldToScreen(gizmoLayer, center.ApplyMatrixTransform(GizmoTransformMatrix));
-                Vector2 rightScreen = RenderingLayer.WorldToScreen(gizmoLayer,
-                    (center + Vector2.UnitX * radius).ApplyMatrixTransform(GizmoTransformMatrix));
+                Vector2 centerScreen = Core.RenderingUnit.WorldLayer.LayerToLayer(
+                    Core.RenderingUnit.WorldLayer.CameraToLayer(center.ApplyMatrixTransform(GizmoTransformMatrix)),
+                    Core.RenderingUnit.GizmoLayer);
+                Vector2 rightScreen = Core.RenderingUnit.WorldLayer.LayerToLayer(
+                    Core.RenderingUnit.WorldLayer.CameraToLayer((center + Vector2.UnitX * radius).ApplyMatrixTransform(GizmoTransformMatrix)),
+                    Core.RenderingUnit.GizmoLayer);
 
                 Complex current = rightScreen - centerScreen;
                 Complex delta = Complex.FromRotation((float) (Math.PI * 2 / sides));

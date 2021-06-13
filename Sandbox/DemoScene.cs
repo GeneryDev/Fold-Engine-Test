@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using FoldEngine.Audio;
+using FoldEngine.Editor;
 using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
 using FoldEngine.Physics;
@@ -30,9 +31,9 @@ namespace Sandbox {
             Entity e2 = CreateEntity("Entity 2");
 
             Entity cam = CreateEntity("Main Camera");
-            cam.Transform.LocalScale *= 1 / 64f;
+            cam.Transform.LocalScale *= 1 / 4f;
             cam.Transform.LocalPosition = Vector2.UnitY * -8;
-            cam.AddComponent<Camera>().RenderToLayer = "screen";
+            cam.AddComponent<Camera>().RenderToLayer = "world";
 
             {
                 ref MeshRenderable mr = ref e1.AddComponent<MeshRenderable>();
@@ -152,6 +153,7 @@ namespace Sandbox {
             //     .Vertex(new Vector2(0.5f, -0.5f), new Vector2(1, 1))
             //     .End();
 
+            SceneEditor.AttachEditor(this);
 
             SoundInstance music = Core.AudioUnit.CreateInstance("Audio/music");
             music.Looping = true;

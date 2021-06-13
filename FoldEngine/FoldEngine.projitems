@@ -18,6 +18,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Components\MultiComponentIterator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\NameComponent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\Transform.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\SceneEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\EditorRendering.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Events\Event.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Events\EventMap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Events\EventQueue.cs" />

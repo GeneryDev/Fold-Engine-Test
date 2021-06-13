@@ -5,6 +5,8 @@ namespace FoldEngine.Input {
     }
 
     public class ButtonAction : IAction {
+        public static readonly ButtonAction Default = new ButtonAction(new ButtonInfo(() => false));
+        
         private ButtonInfo _buttonInfo;
         
         public bool Consumed => _buttonInfo.Pressed && ConsumeTime >= _buttonInfo.Since;
@@ -29,6 +31,8 @@ namespace FoldEngine.Input {
     }
 
     public class AnalogAction : IAction {
+        public static readonly AnalogAction Default = new AnalogAction(() => 0); 
+        
         private Func<float> _provider;
         
         public AnalogAction(Func<float> provider) {

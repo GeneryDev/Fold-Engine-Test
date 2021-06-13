@@ -20,6 +20,10 @@ namespace FoldEngine.Interfaces
         SamplerState Sampling { get; }
 
         RenderSurface Surface { get; set; }
+
+        Vector2 CameraToLayer(Vector2 point);
+        Vector2 LayerToCamera(Vector2 point);
+        Vector2 LayerToLayer(Vector2 point, IRenderingLayer other);
     }
 
     public class RenderingLayer : IRenderingLayer
@@ -32,38 +36,34 @@ namespace FoldEngine.Interfaces
         public RenderSurface Surface { get; set; }
 
 
+        public Vector2 CameraToLayer(Vector2 point) {
+            // (int x, int y, int width, int height) = Destination;
+            //
+            // double scaleX = (double) width / LayerSize.X;
+            // double scaleY = (double) height / LayerSize.Y;
+            //
+            // point.X = (int) Math.Round(x + point.X * scaleX) + LayerSize.X / 2;
+            // point.Y = (int) Math.Round(y - point.Y * scaleY) + LayerSize.Y / 2;
 
-        public static Rectangle WorldToScreen(IRenderingLayer layer, Rectangle rect)
-        {
-            (int x, int y, int width, int height) = layer.Destination;
+            point.Y *= -1;
+            
+            point *= LayerSize.ToVector2() / Destination.Size.ToVector2();
 
-            double scaleX = (double)width / layer.LayerSize.X;
-            double scaleY = (double)height / layer.LayerSize.Y;
-
-            rect.X = (int)Math.Floor(x + rect.X * scaleX);
-            rect.Y = (int)Math.Floor(y - rect.Y * scaleY);
-            rect.Width = (int)Math.Round(rect.Width * scaleX);
-            rect.Height = (int)Math.Round(rect.Height * scaleY);
-
-            return rect;
-        }
-
-        //TODO
-        public static Vector2 WorldToScreen(IRenderingLayer layer, Vector2 point)
-        {
-            (int x, int y, int width, int height) = layer.Destination;
-
-            double scaleX = (double)width / layer.LayerSize.X;
-            double scaleY = (double)height / layer.LayerSize.Y;
-
-            point.X = (int)Math.Round(x + point.X * scaleX) + layer.LayerSize.X/2;
-            point.Y = (int)Math.Round(y - point.Y * scaleY) + layer.LayerSize.Y/2;
+            point += LayerSize.ToVector2() / 2f;
 
             return point;
         }
 
-        public static Vector2 ScreenToWorld(IRenderingLayer layer, Vector2 point) {
-            return new Vector2(1, -1) * (point - (layer.Destination.Center.ToVector2())) * (layer.LayerSize.ToVector2() / layer.Destination.Size.ToVector2());
+
+        public Vector2 LayerToLayer(Vector2 point, IRenderingLayer to) {
+            Vector2 relativeScale = to.LayerSize.ToVector2() / this.LayerSize.ToVector2();
+
+            return ((point - new Vector2(this.LayerSize.X / 2f, this.LayerSize.Y / 2f)) * relativeScale)
+                   + new Vector2(to.LayerSize.X / 2f, to.LayerSize.Y / 2f);
+        }
+
+        public Vector2 LayerToCamera(Vector2 point) {
+            return new Vector2(1, -1) * (point - LayerSize.ToVector2() / 2f) * (Destination.Size.ToVector2() / LayerSize.ToVector2());
         }
     }
 }

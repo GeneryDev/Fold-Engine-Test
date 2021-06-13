@@ -70,8 +70,7 @@ namespace Sandbox.Systems {
             _livingComponents.Reset();
 
             Vector2 currentMouseScreenPos = Mouse.GetState().Position.ToVector2();
-            Vector2 currentMouseWorldPos = RenderingLayer.ScreenToWorld(renderer.Layers["screen"],
-                currentMouseScreenPos);
+            Vector2 currentMouseWorldPos = renderer.ScreenLayer.LayerToCamera(currentMouseScreenPos);
 
             bool rightPressed = Mouse.GetState().RightButton == ButtonState.Pressed;
 
@@ -93,7 +92,7 @@ namespace Sandbox.Systems {
                         physics.Velocity = default;
                         physics.AngularVelocity = default;
                         
-                        renderer.Layers["screen"].Surface.GizBatch.DrawLine(currentMouseScreenPos, _rightPressedScreenPos, Color.Lime);
+                        renderer.Layers["gizmos"].Surface.GizBatch.DrawLine(currentMouseScreenPos, _rightPressedScreenPos, Color.Lime);
                     }
 
                     if(Mouse.GetState().LeftButton == ButtonState.Pressed) {

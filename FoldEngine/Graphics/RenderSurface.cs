@@ -42,7 +42,7 @@ namespace FoldEngine.Graphics
                 instruction.Texture.ToSourceUV(new Vector2(instruction.SourceRectangle?.Left ?? 0, instruction.SourceRectangle?.Top ?? 0)),
                 instruction.Texture.ToSourceUV(new Vector2(instruction.SourceRectangle?.Right ?? 1, instruction.SourceRectangle?.Bottom ?? 1)),
                 instruction.Texture.ToSourceUV(new Vector2(instruction.SourceRectangle?.Right ?? 1, instruction.SourceRectangle?.Top ?? 0)),
-                Color.White
+                instruction.Color
             );
         }
 

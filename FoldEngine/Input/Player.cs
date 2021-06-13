@@ -6,7 +6,7 @@ namespace FoldEngine.Input {
         private List<ControlScheme> _controlSchemes = new List<ControlScheme>();
         public ControlScheme ActiveScheme { get; private set; }
         
-        public T Get<T>(string identifier) where T : IAction {
+        public T Get<T>(string identifier) where T : class, IAction {
             return ActiveScheme.Get<T>(identifier);
         }
 

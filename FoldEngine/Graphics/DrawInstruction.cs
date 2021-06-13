@@ -12,6 +12,7 @@ namespace FoldEngine.Graphics
         public ITexture Texture;
         public Rectangle DestinationRectangle;
         public Rectangle? SourceRectangle;
+        public Color? Color;
 
         public DrawRectInstruction(ITexture texture, Vector2 destination, Rectangle? sourceRectangle = null) {
             Texture = texture;
@@ -19,12 +20,14 @@ namespace FoldEngine.Graphics
                 new Point(sourceRectangle?.Width ?? texture.Width,
                     sourceRectangle?.Height ?? texture.Height));
             SourceRectangle = sourceRectangle;
+            Color = null;
         }
 
         public DrawRectInstruction(ITexture texture, Rectangle destinationRectangle, Rectangle? sourceRectangle = null) {
             Texture = texture;
             DestinationRectangle = destinationRectangle;
             SourceRectangle = sourceRectangle;
+            Color = null;
         }
     }
 

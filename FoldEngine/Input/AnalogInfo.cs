@@ -5,14 +5,15 @@ namespace FoldEngine.Input {
     public interface IAnalogInfo : IInputInfo {
         float this[int axis] { get; }
         int Grade { get; }
-        
+
         float MagnitudeSqr { get; }
         float Magnitude { get; }
     }
 
     public class AnalogInfo1 : IAnalogInfo {
         private float _value = 0;
-        private bool _upToDate = false;
+        private long _lastChangedTime = Time.UnixNow;
+        private float _change;
         private Func<float> _getter;
 
         public float this[int axis] {
@@ -22,15 +23,9 @@ namespace FoldEngine.Input {
             }
         }
 
-        private float Value {
-            get {
-                if(!_upToDate) {
-                    _value = _getter();
-                    _upToDate = true;
-                }
-                return _value;
-            }
-        }
+        private float Value => _value;
+        public long LastChangedTime => _lastChangedTime;
+        public float Change => _change;
 
         public int Grade => 1;
         
@@ -46,24 +41,24 @@ namespace FoldEngine.Input {
         }
 
         public void Update() {
-            _upToDate = false;
+            float oldValue = _value;
+            _value = _getter();
+            if(_value != oldValue) {
+                _lastChangedTime = Time.UnixNow;
+                _change = _value - oldValue;
+            }
         }
     }
 
     public class AnalogInfo2 : IAnalogInfo {
         private Func<Vector2> _getter;
         private Vector2 _value = Vector2.Zero;
-        private bool _upToDate = false;
+        private long _lastChangedTime = Time.UnixNow;
+        private Vector2 _change;
 
-        private Vector2 Value {
-            get {
-                if(!_upToDate) {
-                    _value = _getter();
-                    _upToDate = true;
-                }
-                return _value;
-            }
-        }
+        private Vector2 Value => _value;
+        public long LastChangedTime => _lastChangedTime;
+        public Vector2 Change => _change;
 
         public float this[int axis] {
             get {
@@ -91,7 +86,12 @@ namespace FoldEngine.Input {
         }
 
         public void Update() {
-            _upToDate = false;
+            Vector2 oldValue = _value;
+            _value = _getter();
+            if(_value != oldValue) {
+                _lastChangedTime = Time.UnixNow;
+                _change = _value - oldValue;
+            }
         }
     }
 }

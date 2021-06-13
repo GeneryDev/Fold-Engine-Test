@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace FoldEngine.Input {
     public class ControlScheme {
@@ -20,13 +21,20 @@ namespace FoldEngine.Input {
             }
         }
 
-        public T Get<T>(string identifier) where T : IAction {
+        public T Get<T>(string identifier) where T : class, IAction {
             if(_actions.ContainsKey(identifier)) {
                 IAction action = _actions[identifier];
                 if(action is T actionT) return actionT;
             }
 
-            return default;
+            return GetDefaultAction<T>();
+        }
+
+        private T GetDefaultAction<T>() where T : class, IAction {
+            IAction defaultAction = null;
+            if(typeof(T) == typeof(ButtonAction)) defaultAction = ButtonAction.Default as T;
+            if(typeof(T) == typeof(AnalogAction)) defaultAction = AnalogAction.Default as T;
+            return (T) defaultAction;
         }
 
         public void AddDevice(IInputDevice device) {

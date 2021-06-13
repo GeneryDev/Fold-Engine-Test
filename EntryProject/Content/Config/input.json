@@ -47,6 +47,20 @@
               "device": "keyboard",
 
               "button": "F7"
+            },
+            {
+              "identifier": "zoom.in",
+              "type": "button",
+              "device": "keyboard",
+
+              "button": "I"
+            },
+            {
+              "identifier": "zoom.out",
+              "type": "button",
+              "device": "keyboard",
+
+              "button": "K"
             }
           ]
         },

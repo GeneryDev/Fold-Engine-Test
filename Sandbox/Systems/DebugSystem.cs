@@ -40,6 +40,14 @@ namespace Sandbox.Systems {
             if(Owner.Core.InputUnit.Players[0].Get<ButtonAction>("movement.sprint").Pressed) {
                 moveX *= 2;
             }
+            
+            if(Owner.Core.InputUnit.Players[0].Get<ButtonAction>("zoom.in").Consume()) {
+                Owner.MainCameraTransform.LocalScale /= 2;
+                Console.WriteLine("Scale is now: " + Owner.MainCameraTransform.LocalScale);
+            } else if(Owner.Core.InputUnit.Players[0].Get<ButtonAction>("zoom.out").Consume()) {
+                Owner.MainCameraTransform.LocalScale *= 2;
+                Console.WriteLine("Scale is now: " + Owner.MainCameraTransform.LocalScale);
+            }
 
             if(jump) {
                 SoundInstance soundInstance = Owner.Core.AudioUnit.CreateInstance("Audio/failure");
@@ -72,8 +80,7 @@ namespace Sandbox.Systems {
                     ref Transform transform = ref _livingComponents.GetCoComponent<Transform>();
 
                     Vector2 currentMouseScreenPos = Mouse.GetState().Position.ToVector2();
-                    Vector2 currentMouseWorldPos = RenderingLayer.ScreenToWorld(Owner.Core.RenderingUnit.Layers["screen"],
-                        currentMouseScreenPos);
+                    Vector2 currentMouseWorldPos = Owner.Core.RenderingUnit.ScreenLayer.LayerToCamera(currentMouseScreenPos);
 
                     currentMouseWorldPos = Owner.MainCameraTransform.Apply(currentMouseWorldPos);
 
