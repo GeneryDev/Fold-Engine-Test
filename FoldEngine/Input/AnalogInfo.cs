@@ -8,6 +8,9 @@ namespace FoldEngine.Input {
 
         float MagnitudeSqr { get; }
         float Magnitude { get; }
+
+        long LastChangedTime { get; }
+        float GetChange(int axis);
     }
 
     public class AnalogInfo1 : IAnalogInfo {
@@ -48,6 +51,10 @@ namespace FoldEngine.Input {
                 _change = _value - oldValue;
             }
         }
+
+        public float GetChange(int axis) {
+            return Change;
+        }
     }
 
     public class AnalogInfo2 : IAnalogInfo {
@@ -81,10 +88,6 @@ namespace FoldEngine.Input {
             this._getter = getter;
         }
 
-        public static implicit operator Vector2(AnalogInfo2 info) {
-            return info.Value;
-        }
-
         public void Update() {
             Vector2 oldValue = _value;
             _value = _getter();
@@ -92,6 +95,21 @@ namespace FoldEngine.Input {
                 _lastChangedTime = Time.UnixNow;
                 _change = _value - oldValue;
             }
+        }
+
+        public float GetChange(int axis) {
+            switch(axis) {
+                case 0:
+                    return Change.X;
+                case 1:
+                    return Change.Y;
+                default:
+                    throw new ArgumentException(nameof(axis));
+            }
+        }
+
+        public static implicit operator Vector2(AnalogInfo2 info) {
+            return info.Value;
         }
     }
 }

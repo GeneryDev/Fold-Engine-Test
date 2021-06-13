@@ -31,6 +31,10 @@ namespace FoldEngine.Input {
                     case "middle": return (T)(IInputInfo)MiddleButton;
                     case "right": return (T)(IInputInfo)RightButton;
                 }
+            } else if(typeof(T) == typeof(IAnalogInfo)) {
+                switch(name.ToLowerInvariant()) {
+                    case "wheel": return (T)(IInputInfo)ScrollWheel;
+                }
             }
             throw new ArgumentException(name);
         }

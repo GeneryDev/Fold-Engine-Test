@@ -41,11 +41,11 @@ namespace Sandbox.Systems {
                 moveX *= 2;
             }
             
-            if(Owner.Core.InputUnit.Players[0].Get<ButtonAction>("zoom.in").Consume()) {
-                Owner.MainCameraTransform.LocalScale /= 2;
+            if(Owner.Core.InputUnit.Players[0].Get<ChangeAction>("zoom.in")) {
+                Owner.MainCameraTransform.LocalScale /= 1.2f;
                 Console.WriteLine("Scale is now: " + Owner.MainCameraTransform.LocalScale);
-            } else if(Owner.Core.InputUnit.Players[0].Get<ButtonAction>("zoom.out").Consume()) {
-                Owner.MainCameraTransform.LocalScale *= 2;
+            } else if(Owner.Core.InputUnit.Players[0].Get<ChangeAction>("zoom.out")) {
+                Owner.MainCameraTransform.LocalScale *= 1.2f;
                 Console.WriteLine("Scale is now: " + Owner.MainCameraTransform.LocalScale);
             }
 

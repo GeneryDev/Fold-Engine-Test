@@ -92,6 +92,18 @@ namespace FoldEngine.Input {
                     rawAction.Get<string>("analog"); //throw an exception for missing key
                     return null;
                 }
+                case "change": {
+                    int axis = rawAction.Get<int>("axis", true, 0);
+                    var analog = device.Get<IAnalogInfo>(rawAction.Get<string>("analog"));
+                    
+                    float? min = null;
+                    if(rawAction.ContainsKey("min")) min = (float)rawAction.Get<double>("min", false);
+                    float? max = null;
+                    if(rawAction.ContainsKey("max")) max = (float)rawAction.Get<double>("max", false);
+                    
+                    action = new ChangeAction(analog, min, max, axis);
+                    break;
+                }
                 default: throw new ArgumentException($"Unknown action type {type}");
             }
             

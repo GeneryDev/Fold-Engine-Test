@@ -43,4 +43,28 @@ namespace FoldEngine.Input {
             return action._provider();
         }
     }
+
+    public class ChangeAction : IAction {
+        public static readonly ChangeAction Default = new ChangeAction(new AnalogInfo1(() => 0), 1, 1);
+
+        private IAnalogInfo _analog;
+        private float? _min;
+        private float? _max;
+        private int _axis;
+        
+        public ChangeAction(IAnalogInfo analog, float? min, float? max, int axis = 0) {
+            this._analog = analog;
+            this._min = min;
+            this._max = max;
+            this._axis = axis;
+        }
+        
+        public static implicit operator bool(ChangeAction action) {
+            if(action._analog.LastChangedTime != Time.UnixNow) return false;
+            float change = action._analog.GetChange(action._axis);
+            if(action._min.HasValue && change < action._min) return false;
+            if(action._max.HasValue && change > action._max) return false;
+            return true;
+        }
+    }
 }

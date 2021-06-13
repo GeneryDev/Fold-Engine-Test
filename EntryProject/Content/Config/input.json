@@ -50,17 +50,21 @@
             },
             {
               "identifier": "zoom.in",
-              "type": "button",
-              "device": "keyboard",
+              "type": "change",
+              "device": "mouse",
 
-              "button": "I"
+              "analog": "wheel",
+              
+              "min": 0.5
             },
             {
               "identifier": "zoom.out",
-              "type": "button",
-              "device": "keyboard",
+              "type": "change",
+              "device": "mouse",
 
-              "button": "K"
+              "analog": "wheel",
+              
+              "max": -1.5
             }
           ]
         },

@@ -34,6 +34,7 @@ namespace FoldEngine.Input {
             IAction defaultAction = null;
             if(typeof(T) == typeof(ButtonAction)) defaultAction = ButtonAction.Default as T;
             if(typeof(T) == typeof(AnalogAction)) defaultAction = AnalogAction.Default as T;
+            if(typeof(T) == typeof(ChangeAction)) defaultAction = ChangeAction.Default as T;
             return (T) defaultAction;
         }
 

@@ -34,10 +34,10 @@ namespace Woofer
             _core = core;
             Layers["world"] = new RenderingLayer()
                 {Name = "world", LayerSize = new Point(320, 180), Destination = new Rectangle(Point.Zero, ScreenSize)};
-            Layers["screen"] = new RenderingLayer()
-                {Name = "screen", LayerSize = ScreenSize, Destination = new Rectangle(Point.Zero, ScreenSize)};
             Layers["gizmos"] = new RenderingLayer()
                 {Name = "gizmos", LayerSize = ScreenSize, Destination = new Rectangle(Point.Zero, ScreenSize)};
+            Layers["screen"] = new RenderingLayer()
+                {Name = "screen", LayerSize = ScreenSize, Destination = new Rectangle(Point.Zero, ScreenSize)};
             Layers["hud"] = new RenderingLayer()
                 {Name = "hud", LayerSize = new Point(640, 360), Destination = new Rectangle(Point.Zero, ScreenSize)};
         }
