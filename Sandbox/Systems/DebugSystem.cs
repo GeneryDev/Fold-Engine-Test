@@ -35,7 +35,6 @@ namespace Sandbox.Systems {
         private static readonly string TargetDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Fold", "scenes");
         
         public override void OnInput() {
-            bool jump = Owner.Core.InputUnit.Players[0].Get<ButtonAction>("movement.jump").Consume();
             float moveX = Owner.Core.InputUnit.Players[0].Get<AnalogAction>("movement.axis.x");
             if(Owner.Core.InputUnit.Players[0].Get<ButtonAction>("movement.sprint").Pressed) {
                 moveX *= 2;
@@ -43,17 +42,12 @@ namespace Sandbox.Systems {
             
             if(Owner.Core.InputUnit.Players[0].Get<ChangeAction>("zoom.in")) {
                 Owner.MainCameraTransform.LocalScale /= 1.2f;
-                Console.WriteLine("Scale is now: " + Owner.MainCameraTransform.LocalScale);
+                Console.WriteLine("Scale is now: " + Owner.MainCameraTransform.LocalScale.X);
             } else if(Owner.Core.InputUnit.Players[0].Get<ChangeAction>("zoom.out")) {
                 Owner.MainCameraTransform.LocalScale *= 1.2f;
-                Console.WriteLine("Scale is now: " + Owner.MainCameraTransform.LocalScale);
+                Console.WriteLine("Scale is now: " + Owner.MainCameraTransform.LocalScale.X);
             }
 
-            if(jump) {
-                SoundInstance soundInstance = Owner.Core.AudioUnit.CreateInstance("Audio/failure");
-                soundInstance.Pan = MathHelper.Clamp(moveX, -1, 1);
-                soundInstance.PlayOnce();
-            }
 
             if(Owner.Core.InputUnit.Players[0].Get<ButtonAction>("quicksave").Consume()) {
                 Directory.CreateDirectory(TargetDirectory);
@@ -66,11 +60,15 @@ namespace Sandbox.Systems {
                 
             while(_livingComponents.Next()) {
                 if(_livingComponents.HasCoComponent<Physics>()) {
-                    if(jump) {
+                    if(_livingComponents.GetComponent().Grounded && Owner.Core.InputUnit.Players[0].Get<ButtonAction>("movement.jump").Consume()) {
+                        SoundInstance soundInstance = Owner.Core.AudioUnit.CreateInstance("Audio/failure");
+                        soundInstance.Pan = MathHelper.Clamp(moveX, -1, 1);
+                        soundInstance.PlayOnce();
                         _livingComponents.GetCoComponent<Physics>().Velocity.Y = 8;
                     }
                     _livingComponents.GetCoComponent<Physics>().Velocity.X = 2*moveX;
                 }
+                _livingComponents.GetComponent().Grounded = false;
             }
             
             if(Mouse.GetState().LeftButton == ButtonState.Pressed) {
@@ -134,8 +132,11 @@ namespace Sandbox.Systems {
         }
 
         public override void SubscribeToEvents() {
-            Owner.Events.Subscribe((ref CollisionEvent collision) => {
-                _lastNormal = collision.Normal;
+            Subscribe((ref CollisionEvent collision) => {
+                if(Owner.Components.HasComponent<Living>(collision.First) && Vector2.Dot(collision.Normal, Vector2.UnitY) > 0) {
+                    Owner.Components.GetComponent<Living>(collision.First).Grounded = true;
+                    _lastNormal = collision.Normal;
+                }
             });
         }
     }

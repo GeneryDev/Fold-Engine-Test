@@ -2,6 +2,7 @@
 using FoldEngine.Scenes;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -42,7 +43,19 @@ namespace FoldEngine.Systems {
         internal virtual void Initialize() { }
 
         public virtual void SubscribeToEvents() {}
+
+        private List<EventUnsubscriber> EventUnsubscribers = new List<EventUnsubscriber>();
+
+        internal void UnsubscribeFromEvents() {
+            foreach(EventUnsubscriber obj in EventUnsubscribers) {
+                obj.Unsubscribe();
+            }
+            EventUnsubscribers.Clear();
+        }
         
+        protected void Subscribe<T>(Event.EventListener<T> action) where T : struct {
+            EventUnsubscribers.Add(Owner.Events.Subscribe(action));
+        }
         
         
         

@@ -5,6 +5,7 @@ using System.Reflection;
 namespace FoldEngine.Events {
     public interface IEventQueue {
         void Flush();
+        void Unsubscribe(object listener);
     }
 
     public class EventQueue<T> : IEventQueue where T : struct {
@@ -35,6 +36,10 @@ namespace FoldEngine.Events {
                 _flushIndex++;
             }
             _insertionIndex = 0;
+        }
+
+        public void Unsubscribe(object listener) {
+            _listeners.Remove(listener as Event.EventListener<T>);
         }
 
         public ref T Enqueue(T evt) {
@@ -69,8 +74,21 @@ namespace FoldEngine.Events {
             return queue;
         }
 
-        public void Subscribe(Event.EventListener<T> listener) {
+        public EventUnsubscriber Subscribe(Event.EventListener<T> listener) {
             _listeners.Add(listener);
+            return new EventUnsubscriber() {
+                EventQueue = this,
+                Listener = listener
+            };
+        }
+    }
+    
+    public struct EventUnsubscriber {
+        internal IEventQueue EventQueue;
+        internal object Listener;
+
+        public void Unsubscribe() {
+            EventQueue.Unsubscribe(Listener);
         }
     }
 }

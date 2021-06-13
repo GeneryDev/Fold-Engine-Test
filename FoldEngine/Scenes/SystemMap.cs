@@ -79,8 +79,8 @@ namespace FoldEngine.Scenes
             _updateSystems.Remove(sys);
             _renderSystems.Remove(sys);
 
+            sys.UnsubscribeFromEvents();
             sys.Owner = null;
-            //todo remove any listeners and disconnect any views
         }
 
         internal void Flush() {

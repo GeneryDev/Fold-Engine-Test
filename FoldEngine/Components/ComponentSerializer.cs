@@ -15,9 +15,11 @@ namespace FoldEngine.Components {
         public static T Deserialize<T>(object boxed, LoadOperation reader) where T : struct {
             reader.ReadCompound(c => {
                 foreach(FieldInfo fieldInfo in typeof(T).GetFields()) {
-                    c.StartReadMember(fieldInfo.Name);
-                    object value = reader.Read(fieldInfo.FieldType);
-                    fieldInfo.SetValue(boxed, value);
+                    if(c.HasMember(fieldInfo.Name)) {
+                        c.StartReadMember(fieldInfo.Name);
+                        object value = reader.Read(fieldInfo.FieldType);
+                        fieldInfo.SetValue(boxed, value);
+                    }
                     // Console.WriteLine($"Set field {fieldInfo.Name} to value {value}");
                 }
             });

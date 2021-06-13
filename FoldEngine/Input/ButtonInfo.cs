@@ -10,7 +10,7 @@ namespace FoldEngine.Input {
         public long Since;
         public Func<bool> Lookup;
 
-        public long MillisecondsElapsed => Since - Time.UnixNow;
+        public long MillisecondsElapsed => Time.UnixNow - Since;
 
         public ButtonInfo(Func<bool> lookup) {
             Lookup = lookup;

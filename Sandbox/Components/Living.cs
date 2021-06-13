@@ -11,6 +11,7 @@ namespace Sandbox.Components
     {
         public int Health;
         public int MaxHealth;
+        public bool Grounded;
 
         public override string ToString()
         {

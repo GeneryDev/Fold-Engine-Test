@@ -26,7 +26,7 @@ namespace FoldEngine.Editor.Systems {
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.Textures["main:pixel.white"],
                 DestinationRectangle = new Rectangle(sidebar.X + SidebarMargin, sidebar.Y + SidebarMargin, sidebar.Width - SidebarMargin*2, sidebar.Height - SidebarMargin*2),
-                Color = new Color(45, 45, 48)
+                Color = new Color(37, 37, 38)
             });
         }
     }

@@ -49,8 +49,8 @@ namespace FoldEngine.Events {
             Get<T>().Enqueue(evt);
         }
 
-        public void Subscribe<T>(Event.EventListener<T> listener) where T : struct {
-            Get<T>().Subscribe(listener);
+        public EventUnsubscriber Subscribe<T>(Event.EventListener<T> listener) where T : struct {
+            return Get<T>().Subscribe(listener);
         }
 
         public void FlushAfterSystem() {
