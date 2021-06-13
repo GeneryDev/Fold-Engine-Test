@@ -17,11 +17,10 @@ namespace FoldEngine.Systems {
         private readonly GameSystemAttribute _attribute;
         public string SystemName => _attribute.SystemName;
         public ProcessingCycles ProcessingCycles => _attribute.ProcessingCycles;
-        public readonly Type[] Listening;
+        private List<EventUnsubscriber> EventUnsubscribers = new List<EventUnsubscriber>();
 
         protected GameSystem() {
             _attribute = (GameSystemAttribute) this.GetType().GetCustomAttribute(typeof(GameSystemAttribute));
-            Listening = ((ListeningAttribute) this.GetType().GetCustomAttribute(typeof(ListeningAttribute)))?.EventTypes ?? new Type[0];
         }
 
         public virtual void OnInput() { }
@@ -44,7 +43,6 @@ namespace FoldEngine.Systems {
 
         public virtual void SubscribeToEvents() {}
 
-        private List<EventUnsubscriber> EventUnsubscribers = new List<EventUnsubscriber>();
 
         internal void UnsubscribeFromEvents() {
             foreach(EventUnsubscriber obj in EventUnsubscribers) {

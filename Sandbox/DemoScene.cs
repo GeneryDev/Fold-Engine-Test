@@ -31,9 +31,9 @@ namespace Sandbox {
             Entity e2 = CreateEntity("Entity 2");
 
             Entity cam = CreateEntity("Main Camera");
-            cam.Transform.LocalScale *= 1 / 4f;
+            cam.Transform.LocalScale *= 1 / 64f;
             cam.Transform.LocalPosition = Vector2.UnitY * -8;
-            cam.AddComponent<Camera>().RenderToLayer = "world";
+            cam.AddComponent<Camera>();
 
             {
                 ref MeshRenderable mr = ref e1.AddComponent<MeshRenderable>();

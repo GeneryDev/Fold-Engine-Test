@@ -7,6 +7,7 @@ namespace FoldEngine.Editor {
             // scene.Core.Paused = true;
 
             scene.Systems.Add<EditorRendering>();
+            scene.Systems.Add<EditorMenu>();
         }
     }
 }
