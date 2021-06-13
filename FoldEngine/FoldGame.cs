@@ -109,6 +109,7 @@ namespace FoldEngine
 
             
             Time.Update(gameTime);
+            Time.Frame++;
 
             _core.AudioUnit.Update();
             

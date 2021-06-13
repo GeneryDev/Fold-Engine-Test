@@ -36,7 +36,7 @@ namespace Sandbox.Systems {
         
         public override void OnInput() {
             float moveX = Owner.Core.InputUnit.Players[0].Get<AnalogAction>("movement.axis.x");
-            if(Owner.Core.InputUnit.Players[0].Get<ButtonAction>("movement.sprint").Pressed) {
+            if(Owner.Core.InputUnit.Players[0].Get<ButtonAction>("movement.sprint").Down) {
                 moveX *= 2;
             }
             
@@ -71,34 +71,34 @@ namespace Sandbox.Systems {
                 _livingComponents.GetComponent().Grounded = false;
             }
             
-            if(Mouse.GetState().LeftButton == ButtonState.Pressed) {
-                _livingComponents.Reset();
-                
-                while(_livingComponents.Next()) {
-                    ref Transform transform = ref _livingComponents.GetCoComponent<Transform>();
-
-                    Vector2 currentMouseScreenPos = Mouse.GetState().Position.ToVector2();
-                    Vector2 currentMouseWorldPos = Owner.Core.RenderingUnit.ScreenLayer.LayerToCamera(currentMouseScreenPos);
-
-                    currentMouseWorldPos = Owner.MainCameraTransform.Apply(currentMouseWorldPos);
-
-                    _leftPos = currentMouseWorldPos;
-                    transform.Position = currentMouseWorldPos;
-
-                    if(_livingComponents.HasCoComponent<Physics>()) {
-                        _leftVel = (currentMouseWorldPos - _previousMouseWorldPos) * 4;
-                        _livingComponents.GetCoComponent<Physics>().Velocity = _leftVel;
-                    }
-                    // Console.WriteLine(currentMouseWorldPos);
-
-                    _previousMouseWorldPos = currentMouseWorldPos;
-                }
-
-                _previouslyPressed = true;
-            } else if(_previouslyPressed) {
-                Console.WriteLine($"Released at {_leftPos} with velocity {_leftVel}");
-                _previouslyPressed = false;
-            }
+            // if(Mouse.GetState().LeftButton == ButtonState.Pressed) {
+            //     _livingComponents.Reset();
+            //     
+            //     while(_livingComponents.Next()) {
+            //         ref Transform transform = ref _livingComponents.GetCoComponent<Transform>();
+            //
+            //         Vector2 currentMouseScreenPos = Mouse.GetState().Position.ToVector2();
+            //         Vector2 currentMouseWorldPos = Owner.Core.RenderingUnit.ScreenLayer.LayerToCamera(currentMouseScreenPos);
+            //
+            //         currentMouseWorldPos = Owner.MainCameraTransform.Apply(currentMouseWorldPos);
+            //
+            //         _leftPos = currentMouseWorldPos;
+            //         transform.Position = currentMouseWorldPos;
+            //
+            //         if(_livingComponents.HasCoComponent<Physics>()) {
+            //             _leftVel = (currentMouseWorldPos - _previousMouseWorldPos) * 4;
+            //             _livingComponents.GetCoComponent<Physics>().Velocity = _leftVel;
+            //         }
+            //         // Console.WriteLine(currentMouseWorldPos);
+            //
+            //         _previousMouseWorldPos = currentMouseWorldPos;
+            //     }
+            //
+            //     _previouslyPressed = true;
+            // } else if(_previouslyPressed) {
+            //     Console.WriteLine($"Released at {_leftPos} with velocity {_leftVel}");
+            //     _previouslyPressed = false;
+            // }
 
             if(Mouse.GetState().RightButton == ButtonState.Pressed) {
                 _livingComponents.Reset();

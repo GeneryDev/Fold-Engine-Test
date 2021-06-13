@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using EntryProject.Util.JsonSerialization;
+using Microsoft.Xna.Framework.Input;
 
 namespace FoldEngine.Input {
     public class InputBuilder {
@@ -59,9 +60,22 @@ namespace FoldEngine.Input {
             switch(type) {
                 case "button": {
                     string buttonName = rawAction.Get<string>("button");
+
+                    string whenRaw = rawAction.Get<string>("when", true, "down");
+                    bool down = true;
+                    switch(whenRaw.ToLowerInvariant()) {
+                        case "down": 
+                        case "pressed": down = true;
+                            break;
+                        case "up": 
+                        case "released": down = false;
+                            break;
+                        default: throw new ArgumentException($"Unknown 'when' {whenRaw}"); 
+                    }
                     
                     action = new ButtonAction(device.Get<ButtonInfo>(buttonName)) {
-                        BufferTime = rawAction.Get<int>("buffer_time", true, 32)
+                        BufferTime = rawAction.Get<int>("buffer_time", true, 32),
+                        WhenDown = down
                     };
                     break;
                 }
@@ -85,7 +99,7 @@ namespace FoldEngine.Input {
                         if(rawAction.Get<bool>("invert", true)) {
                             factor = -1;
                         }
-                        action = new AnalogAction(() => factor * ((negative.Pressed ? -1 : 0) + (positive.Pressed ? 1 : 0)));
+                        action = new AnalogAction(() => factor * ((negative.Down ? -1 : 0) + (positive.Down ? 1 : 0)));
                         break;
                     }
 

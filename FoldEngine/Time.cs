@@ -18,17 +18,17 @@ namespace FoldEngine
         
         public static float FramesPerSecond { get; internal set; }
         
-        public static long UnixNow { get; internal set; }
+        public static long Now { get; internal set; }
+        public static long Frame { get; internal set; }
 
-        internal static void Update(GameTime gameTime)
-        {
+        internal static void Update(GameTime gameTime) {
             Time.DeltaTimeD = gameTime.ElapsedGameTime.TotalSeconds;
             Time.TotalTimeD = gameTime.TotalGameTime.TotalSeconds;
 
-            DeltaTime = (float)DeltaTimeD;
-            TotalTime = (float)TotalTimeD;
+            DeltaTime = (float) DeltaTimeD;
+            TotalTime = (float) TotalTimeD;
 
-            UnixNow = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            Now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         }
     }
 }

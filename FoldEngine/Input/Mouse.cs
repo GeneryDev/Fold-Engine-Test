@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 namespace FoldEngine.Input {
@@ -15,7 +16,7 @@ namespace FoldEngine.Input {
         
         public readonly AnalogInfo1 ScrollWheel = new AnalogInfo1(() => Microsoft.Xna.Framework.Input.Mouse.GetState().ScrollWheelValue);
 
-        public bool IsBeingUsed => LeftButton.Pressed || MiddleButton.Pressed || RightButton.Pressed;
+        public bool IsBeingUsed => LeftButton.Down || MiddleButton.Down || RightButton.Down;
 
         public void Update() {
             LeftButton.Update();

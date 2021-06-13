@@ -32,7 +32,8 @@ namespace Sandbox {
 
             Entity cam = CreateEntity("Main Camera");
             cam.Transform.LocalScale *= 1 / 64f;
-            cam.Transform.LocalPosition = Vector2.UnitY * -8;
+            // cam.Transform.LocalPosition = Vector2.UnitY * -8;
+            cam.Transform.SetParent(e1);
             cam.AddComponent<Camera>();
 
             {

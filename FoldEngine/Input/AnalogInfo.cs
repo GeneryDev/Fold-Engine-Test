@@ -15,7 +15,7 @@ namespace FoldEngine.Input {
 
     public class AnalogInfo1 : IAnalogInfo {
         private float _value = 0;
-        private long _lastChangedTime = Time.UnixNow;
+        private long _lastChangedTime = Time.Now;
         private float _change;
         private Func<float> _getter;
 
@@ -47,7 +47,7 @@ namespace FoldEngine.Input {
             float oldValue = _value;
             _value = _getter();
             if(_value != oldValue) {
-                _lastChangedTime = Time.UnixNow;
+                _lastChangedTime = Time.Now;
                 _change = _value - oldValue;
             }
         }
@@ -60,7 +60,7 @@ namespace FoldEngine.Input {
     public class AnalogInfo2 : IAnalogInfo {
         private Func<Vector2> _getter;
         private Vector2 _value = Vector2.Zero;
-        private long _lastChangedTime = Time.UnixNow;
+        private long _lastChangedTime = Time.Now;
         private Vector2 _change;
 
         private Vector2 Value => _value;
@@ -92,7 +92,7 @@ namespace FoldEngine.Input {
             Vector2 oldValue = _value;
             _value = _getter();
             if(_value != oldValue) {
-                _lastChangedTime = Time.UnixNow;
+                _lastChangedTime = Time.Now;
                 _change = _value - oldValue;
             }
         }

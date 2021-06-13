@@ -7,7 +7,7 @@
             "ascent": 7,
 
             "width": "code == 32 ? 0 : auto.width(8)",
-            "advancement": "code == 32 ? 4 : auto.width(8) + 1",
+            "advancement": "code == 32 ? 4 : (code == 46 || code == 58) ? 3 : (auto.width(8) + 1)",
 
             "char": {
                 "from": "\u0000",

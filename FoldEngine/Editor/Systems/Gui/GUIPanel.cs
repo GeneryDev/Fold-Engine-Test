@@ -1,17 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using FoldEngine.Graphics;
+using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Text;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
+using Mouse = Microsoft.Xna.Framework.Input.Mouse;
 
 namespace FoldEngine.Editor.Systems {
     public class GuiPanel {
+        public GuiEnvironment Environment;
         public Dictionary<string, RenderedText> RenderedStrings = new Dictionary<string,RenderedText>();
-        
         public bool Focused = true;
-        public Point MousePos => Mouse.GetState().Position;
+        
+        private long _lastFrameRendered;
+        public bool Visible => _lastFrameRendered >= Time.Frame-1;
+        
+        public ButtonAction MouseLeft = ButtonAction.Default;
+        public ButtonAction MouseRight = ButtonAction.Default;
 
         private List<GuiElement> _children = new List<GuiElement>();
         private List<GuiElement> _objectPool = new List<GuiElement>();
@@ -21,6 +27,10 @@ namespace FoldEngine.Editor.Systems {
         
         private int x = 0;
         private int y = 0;
+
+        public GuiPanel(GuiEnvironment environment) {
+            Environment = environment;
+        }
 
         public void Reset() {
             _children.Clear();
@@ -41,6 +51,7 @@ namespace FoldEngine.Editor.Systems {
 
             if(element == null) {
                 element = new T();
+                element.Parent = this;
                 _objectPool.Add(element);
             }
 
@@ -102,8 +113,6 @@ namespace FoldEngine.Editor.Systems {
             EndPreviousElement();
         }
 
-
-
         public RenderedText RenderString(string str, IRenderingUnit renderer) {
             if(!RenderedStrings.ContainsKey(str)) {
                 renderer.Fonts["default"].RenderString(str, out RenderedText rendered);
@@ -114,14 +123,40 @@ namespace FoldEngine.Editor.Systems {
         }
 
         public void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+            _lastFrameRendered = Time.Frame;
             foreach(GuiElement element in _children) {
-                element.Render(renderer, layer, this);
+                element.Render(renderer, layer);
             }
+        }
+
+        private GuiElement _pressedElement;
+
+        protected internal void OnMousePressed(Point pos) {
+            for(int i = _children.Count - 1; i >= 0; i--) {
+                GuiElement element = _children[i];
+                if(element.Bounds.Contains(pos)) {
+                    _pressedElement = element;
+                    _pressedElement.OnMousePressed(pos);
+                    break;
+                }
+            }
+        }
+
+        public void OnMouseReleased(Point pos) {
+            _pressedElement?.OnMouseReleased(pos);
+            _pressedElement = null;
+        }
+
+        public bool IsPressed(GuiElement guiElement) {
+            return guiElement == _pressedElement;
         }
     }
 
     public abstract class GuiElement {
+        internal GuiPanel Parent;
         internal int Generation;
+
+        public bool Pressed => Parent.IsPressed(this);
         
         public Rectangle Bounds;
         public int Margin = 8;
@@ -129,7 +164,10 @@ namespace FoldEngine.Editor.Systems {
         public abstract void Reset(GuiPanel parent);
         public abstract void AdjustSpacing(GuiPanel parent);
 
-        public abstract void Render(IRenderingUnit renderer, IRenderingLayer layer, GuiPanel parent);
+        public abstract void Render(IRenderingUnit renderer, IRenderingLayer layer);
+        
+        public virtual void OnMousePressed(Point pos) {}
+        public virtual void OnMouseReleased(Point pos) {}
     }
 
     public class GuiLabel : GuiElement {
@@ -152,8 +190,8 @@ namespace FoldEngine.Editor.Systems {
             Margin = 0;
         }
         
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, GuiPanel parent) {
-            RenderedText rendered = parent.RenderString(Text, renderer);
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+            RenderedText rendered = Parent.RenderString(Text, renderer);
 
             int totalWidth = (int) (rendered.Width*_fontSize);
             if(_icon != null) {
@@ -211,18 +249,68 @@ namespace FoldEngine.Editor.Systems {
 
     public class GuiButton : GuiLabel {
 
+        private int _actionId;
+        private long _data;
+
         public override void AdjustSpacing(GuiPanel parent) {
             base.AdjustSpacing(parent);
             Margin = 4;
         }
-        
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, GuiPanel parent) {
+
+        public override void Reset(GuiPanel parent) {
+            base.Reset(parent);
+            _actionId = 0;
+            _data = 0;
+        }
+
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+            
+            
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
-                Color = Bounds.Contains(parent.MousePos) ? Color.CornflowerBlue : new Color(37, 37, 38),
+                Color = Pressed ? new Color(63, 63, 70) : Bounds.Contains(Parent.Environment.MousePos) ? Color.CornflowerBlue : new Color(37, 37, 38),
                 DestinationRectangle = Bounds
             });
-            base.Render(renderer, layer, parent);
+            base.Render(renderer, layer);
+        }
+
+        public override void OnMouseReleased(Point pos) {
+            if(Bounds.Contains(pos)) {
+                Console.WriteLine(Text);
+                if(_actionId != 0) {
+                    Parent.Environment.PerformAction(_actionId, _data);
+                }
+            }
+        }
+        
+        public GuiButton Action(int actionId, long data) {
+            _actionId = actionId;
+            _data = data;
+            return this;
+        }
+        
+        
+        
+        
+
+        public new GuiButton FontSize(int fontSize) {
+            base.FontSize(fontSize);
+            return this;
+        }
+
+        public new GuiButton TextAlignment(int alignment) {
+            base.TextAlignment(alignment);
+            return this;
+        }
+
+        public new GuiButton TextMargin(int textMargin) {
+            base.TextMargin(textMargin);
+            return this;
+        }
+
+        public new GuiButton Icon(ITexture icon) {
+            base.Icon(icon);
+            return this;
         }
     }
 
@@ -239,7 +327,7 @@ namespace FoldEngine.Editor.Systems {
             Margin = 0;
         }
         
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, GuiPanel parent) {
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
         }
     }
 
@@ -261,10 +349,10 @@ namespace FoldEngine.Editor.Systems {
             Margin = 4;
         }
         
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, GuiPanel parent) {
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
             var color = new Color(45, 45, 48);
             if(_label != null) {
-                RenderedText rendered = parent.RenderString(_label, renderer);
+                RenderedText rendered = Parent.RenderString(_label, renderer);
 
                 int lineWidth = (int) ((Bounds.Width - rendered.Width * _fontSize) / 2) - 2 * _fontSize;
                 

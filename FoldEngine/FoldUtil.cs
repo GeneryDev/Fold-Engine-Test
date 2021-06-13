@@ -18,5 +18,17 @@ namespace FoldEngine
         public static void Breakpoint() {
             bool a = true;
         }
+        
+        public static string EnumerableToString<T>(IEnumerable<T> enumerable) {
+            StringBuilder sb = new StringBuilder("{");
+            foreach(T t in enumerable) {
+                sb.Append(t);
+                sb.Append(", ");
+            }
+
+            if(sb.Length > 1) sb.Length -= 2;
+            sb.Append("}");
+            return sb.ToString();
+        }
     }
 }

@@ -91,6 +91,19 @@ namespace Woofer
             Textures.CreateSubTexture("main:pixel", "white_transparent", new Rectangle(1, 0, 1, 1));
             Textures.CreateSubTexture("main:pixel", "black", new Rectangle(0, 1, 1, 1));
             WhiteTexture = Textures.CreateSubTexture("main:pixel", "white", new Rectangle(1, 1, 1, 1));
+            
+            
+            
+            
+            TextureAtlas editorAtlas = Textures.CreateAtlas("editor");
+            editorAtlas.AddTexture("cog", "editor/cog");
+            editorAtlas.AddTexture("blank", "editor/blank");
+            editorAtlas.AddTexture("triangle.right", "editor/triangle.right");
+            editorAtlas.AddTexture("triangle.down", "editor/triangle.down");
+            editorAtlas.Pack();
+            
+            
+            
 
             Textures.LoadTexture("fonts/default/ascii");
             Fonts.LoadFont("default");

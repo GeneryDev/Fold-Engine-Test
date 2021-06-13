@@ -122,7 +122,8 @@ namespace FoldEngine.Scenes
         }
 
         public Type WorkingType => this.GetType();
-        
+        public IEnumerable<GameSystem> AllSystems => _all;
+
         public void Serialize(SaveOperation writer) {
             writer.WriteCompound((ref SaveOperation.Compound c) => {
                 c.WriteMember(nameof(_all), () => {

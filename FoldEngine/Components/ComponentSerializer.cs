@@ -7,7 +7,10 @@ namespace FoldEngine.Components {
         public static void Serialize<T>(T component, SaveOperation writer) where T : struct {
             writer.WriteCompound((ref SaveOperation.Compound c) => {
                 foreach(FieldInfo fieldInfo in typeof(T).GetFields()) {
-                    c.WriteMember(fieldInfo.Name, fieldInfo.GetValue(component));
+                    object value = fieldInfo.GetValue(component);
+                    if(value != null) {
+                        c.WriteMember(fieldInfo.Name, value);
+                    }
                     // Console.WriteLine($"{fieldInfo.Name} = {fieldInfo.GetValue(component)}");
                 }
             });

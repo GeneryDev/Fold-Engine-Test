@@ -93,17 +93,17 @@ namespace FoldEngine.Input {
                 RightTrigger = new ButtonInfo(() => Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Triggers.Right >= TriggerThreshold);
             }
 
-            public bool IsBeingUsed => A.Pressed
-                                       || B.Pressed
-                                       || X.Pressed
-                                       || Y.Pressed
-                                       || Start.Pressed
-                                       || Back.Pressed
-                                       || Home.Pressed
-                                       || LeftBumper.Pressed
-                                       || RightBumper.Pressed
-                                       || LeftStick.Pressed
-                                       || RightStick.Pressed;
+            public bool IsBeingUsed => A.Down
+                                       || B.Down
+                                       || X.Down
+                                       || Y.Down
+                                       || Start.Down
+                                       || Back.Down
+                                       || Home.Down
+                                       || LeftBumper.Down
+                                       || RightBumper.Down
+                                       || LeftStick.Down
+                                       || RightStick.Down;
 
 
             public void Update() {
@@ -154,7 +154,7 @@ namespace FoldEngine.Input {
                 Right = new ButtonInfo(() => Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).DPad.Right == ButtonState.Pressed);
             }
 
-            public bool IsBeingUsed => Up.Pressed || Down.Pressed || Left.Pressed || Right.Pressed;
+            public bool IsBeingUsed => Up.Down || Down.Down || Left.Down || Right.Down;
 
             public void Update() {
                 Up.Update();

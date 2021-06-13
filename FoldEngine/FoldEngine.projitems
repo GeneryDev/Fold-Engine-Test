@@ -20,8 +20,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Components\Transform.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\SceneEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\EditorMenu.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\EditorRendering.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\GUIPanel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\EditorBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\EditorModal.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\EditorEntitiesList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\EditorSystemsList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\Gui\GUIPanel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\Gui\GuiEnvironment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Events\Event.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Events\EventMap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Events\EventQueue.cs" />

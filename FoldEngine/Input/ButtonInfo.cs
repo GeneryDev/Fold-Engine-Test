@@ -6,11 +6,12 @@ namespace FoldEngine.Input {
     }
 
     public class ButtonInfo : IInputInfo {
-        public bool Pressed;
+        public bool Down;
         public long Since;
+        public long SinceFrame;
         public Func<bool> Lookup;
 
-        public long MillisecondsElapsed => Time.UnixNow - Since;
+        public long MillisecondsElapsed => Time.Now - Since;
 
         public ButtonInfo(Func<bool> lookup) {
             Lookup = lookup;
@@ -18,10 +19,11 @@ namespace FoldEngine.Input {
         }
 
         public void Update() {
-            bool nowPressed = Lookup();
-            if(nowPressed != Pressed) {
-                Since = Time.UnixNow;
-                Pressed = nowPressed;
+            bool nowDown = Lookup();
+            if(nowDown != Down) {
+                Since = Time.Now;
+                SinceFrame = Time.Frame;
+                Down = nowDown;
             }
         }
     }

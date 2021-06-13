@@ -1,19 +1,18 @@
-﻿using FoldEngine.Interfaces;
+﻿using System;
+using FoldEngine.Interfaces;
 using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Systems {
-    [GameSystem("fold:editor.menu", ProcessingCycles.Render)]
-    public class EditorMenu : GameSystem {
-        private bool ModalActive = false;
-        private bool ModalVisible = true;
+    [GameSystem("fold:editor.menu", ProcessingCycles.All)]
+    public class EditorMenu : EditorModal {
         
-        private GuiPanel _panel = new GuiPanel() {
-            Bounds = new Rectangle(EditorRendering.SidebarX + EditorRendering.SidebarMargin*2,
-                EditorRendering.SidebarMargin,
-                EditorRendering.SidebarWidth - EditorRendering.SidebarMargin * 2 * 2,
-                720 - EditorRendering.SidebarMargin * 2)
-        };
+        private GuiPanel _panel;
+
+        internal override void Initialize() {
+            _panel = NewSidebarPanel();
+            Console.WriteLine("Initialized menu");
+        }
 
         public override void OnRender(IRenderingUnit renderer) {
             if(!ModalVisible) return;
@@ -21,11 +20,11 @@ namespace FoldEngine.Editor.Systems {
             IRenderingLayer layer = renderer.ScreenLayer;
             
             _panel.Reset();
-            _panel.Label(Owner.Name, 2).TextAlignment(-1).Icon(renderer.Textures["beacon"]);
+            _panel.Label(Owner.Name, 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
             _panel.Button("Save");
             _panel.Separator();
-            _panel.Button("Entities");
-            _panel.Button("Systems");
+            _panel.Button("Entities").Action(SceneEditor.Actions.ChangeToMenu, 1);
+            _panel.Button("Systems").Action(SceneEditor.Actions.ChangeToMenu, 2);
             _panel.Button("Edit Save Data");
             _panel.Button("Quit");
             _panel.End();

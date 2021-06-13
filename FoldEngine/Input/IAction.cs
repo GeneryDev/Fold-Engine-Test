@@ -9,20 +9,23 @@ namespace FoldEngine.Input {
         
         private ButtonInfo _buttonInfo;
         
-        public bool Consumed => _buttonInfo.Pressed && ConsumeTime >= _buttonInfo.Since;
+        public bool Consumed => _buttonInfo.Down == WhenDown && ConsumeTime >= _buttonInfo.Since;
         public long ConsumeTime;
         
-        public bool Pressed => _buttonInfo.Pressed;
+        public bool Pressed => _buttonInfo.Down && _buttonInfo.SinceFrame == Time.Frame;
+        public bool Down => _buttonInfo.Down;
+        public bool Released => !_buttonInfo.Down && _buttonInfo.SinceFrame == Time.Frame;
 
         public int BufferTime = 16; // ms
+        public bool WhenDown = true;
 
         public ButtonAction(ButtonInfo buttonInfo) {
             _buttonInfo = buttonInfo;
         }
 
         public bool Consume() {
-            if(_buttonInfo.Pressed && _buttonInfo.MillisecondsElapsed <= BufferTime && !Consumed) {
-                ConsumeTime = Time.UnixNow;
+            if(_buttonInfo.Down && _buttonInfo.MillisecondsElapsed <= BufferTime && !Consumed) {
+                ConsumeTime = Time.Now;
                 return true;
             }
 
@@ -60,7 +63,7 @@ namespace FoldEngine.Input {
         }
         
         public static implicit operator bool(ChangeAction action) {
-            if(action._analog.LastChangedTime != Time.UnixNow) return false;
+            if(action._analog.LastChangedTime != Time.Now) return false;
             float change = action._analog.GetChange(action._axis);
             if(action._min.HasValue && change < action._min) return false;
             if(action._max.HasValue && change > action._max) return false;

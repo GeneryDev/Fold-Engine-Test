@@ -21,6 +21,10 @@ namespace FoldEngine.Graphics {
             _batch = new SpriteBatch(parent._device);
         }
 
+        public void AddTexture(string identifier, string path) {
+            _containedTextures.Add(new KeyValuePair<string, ITexture>(identifier, _parent.LoadTexture(path)));
+        }
+
         public void AddTexture(string identifier, ITexture texture) {
             _containedTextures.Add(new KeyValuePair<string, ITexture>(identifier, texture));
         }
