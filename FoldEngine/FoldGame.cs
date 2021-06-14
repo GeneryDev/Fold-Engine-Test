@@ -33,7 +33,7 @@ namespace FoldEngine
             Content.RootDirectory = "Content";
             this._core = core;
 
-            (_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight) = _core.RenderingUnit.ScreenSize;
+            (_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight) = _core.RenderingUnit.WindowSize;
             this.IsMouseVisible = true;
             
             IsFixedTimeStep = false;

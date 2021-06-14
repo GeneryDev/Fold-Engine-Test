@@ -14,15 +14,15 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Woofer
 {
-    public class WooferRenderingUnit : IRenderingUnit
-    {
+    public class WooferRenderingUnit : IRenderingUnit {
         private readonly WooferGameCore _core;
 
         public TextureManager Textures { get; set; }
         public FontManager Fonts { get; set; }
-        public Point ScreenSize { get; private set; } = new Point(1280, 720);
+        public Point WindowSize { get; private set; } = new Point(1280, 720);
 
-        public Dictionary<string, IRenderingLayer> Layers { get; private set; } = new Dictionary<string, IRenderingLayer>();
+        public Dictionary<string, IRenderingLayer> Layers { get; private set; } =
+            new Dictionary<string, IRenderingLayer>();
 
         public ITexture WhiteTexture { get; set; }
 
@@ -32,24 +32,25 @@ namespace Woofer
 
         public WooferRenderingUnit(WooferGameCore core) {
             _core = core;
-            Layers["world"] = new RenderingLayer()
-                {Name = "world", LayerSize = new Point(320, 180), Destination = new Rectangle(Point.Zero, ScreenSize)};
-            Layers["gizmos"] = new RenderingLayer()
-                {Name = "gizmos", LayerSize = ScreenSize, Destination = new Rectangle(Point.Zero, ScreenSize)};
-            Layers["screen"] = new RenderingLayer()
-                {Name = "screen", LayerSize = ScreenSize, Destination = new Rectangle(Point.Zero, ScreenSize)};
-            Layers["hud"] = new RenderingLayer()
-                {Name = "hud", LayerSize = new Point(640, 360), Destination = new Rectangle(Point.Zero, ScreenSize)};
+            Layers["world"] = new RenderingLayer() {
+                Name = "world", LayerSize = new Point(320, 180), Destination = new Rectangle(Point.Zero, WindowSize),
+                LogicalSize = WindowSize.ToVector2()
+            };
+            Layers["gizmos"] = new RenderingLayer() {
+                Name = "gizmos", LayerSize = WindowSize, Destination = new Rectangle(Point.Zero, WindowSize),
+                LogicalSize = WindowSize.ToVector2()
+            };
+            Layers["screen"] = new RenderingLayer() {
+                Name = "screen", LayerSize = WindowSize, Destination = new Rectangle(Point.Zero, WindowSize),
+                LogicalSize = WindowSize.ToVector2()
+            };
+            Layers["hud"] = new RenderingLayer() {
+                Name = "hud", LayerSize = new Point(640, 360), Destination = new Rectangle(Point.Zero, WindowSize),
+                LogicalSize = WindowSize.ToVector2()
+            };
         }
 
-
-        public void Render()
-        {
-            _core.ActiveScene?.Render(this);
-        }
-        
-        public void LoadContent()
-        {
+        public void LoadContent() {
             Textures.LoadTexture("test");
             Textures.LoadTexture("ancient_debris_side");
             Textures.LoadTexture("armor_stand");
@@ -66,7 +67,7 @@ namespace Woofer
             Textures.LoadTexture("soul");
             Textures.LoadTexture("particles");
             Textures.LoadTexture("four");
-            
+
             TextureAtlas atlas = Textures.CreateAtlas("main");
             atlas.AddTexture("test", Textures["test"]);
             atlas.AddTexture("ancient_debris_side", Textures["ancient_debris_side"]);
@@ -85,25 +86,25 @@ namespace Woofer
             atlas.AddTexture("particles", Textures["particles"]);
             atlas.AddTexture("pixel", Textures["four"]);
             atlas.Pack();
-            
+
             Textures.CreateSubTexture("main:soul", "start", new Rectangle(0, 0, 16, 16));
             Textures.CreateSubTexture("main:pixel", "black_transparent", new Rectangle(0, 0, 1, 1));
             Textures.CreateSubTexture("main:pixel", "white_transparent", new Rectangle(1, 0, 1, 1));
             Textures.CreateSubTexture("main:pixel", "black", new Rectangle(0, 1, 1, 1));
             WhiteTexture = Textures.CreateSubTexture("main:pixel", "white", new Rectangle(1, 1, 1, 1));
-            
-            
-            
-            
+
+
+
+
             TextureAtlas editorAtlas = Textures.CreateAtlas("editor");
             editorAtlas.AddTexture("cog", "editor/cog");
             editorAtlas.AddTexture("blank", "editor/blank");
             editorAtlas.AddTexture("triangle.right", "editor/triangle.right");
             editorAtlas.AddTexture("triangle.down", "editor/triangle.down");
             editorAtlas.Pack();
-            
-            
-            
+
+
+
 
             Textures.LoadTexture("fonts/default/ascii");
             Fonts.LoadFont("default");

@@ -16,6 +16,7 @@ namespace FoldEngine.Interfaces
     {
         string Name { get; }
         Point LayerSize { get; }
+        Vector2 LogicalSize { get; }
         Rectangle Destination { get; }
         SamplerState Sampling { get; }
 
@@ -30,6 +31,7 @@ namespace FoldEngine.Interfaces
     {
         public string Name { get; set; }
         public Point LayerSize { get; set; }
+        public Vector2 LogicalSize { get; set; }
         public Rectangle Destination { get; set; }
         public SamplerState Sampling { get; set; } = SamplerState.PointClamp;
 
@@ -47,7 +49,7 @@ namespace FoldEngine.Interfaces
 
             point.Y *= -1;
             
-            point *= LayerSize.ToVector2() / Destination.Size.ToVector2();
+            point *= LayerSize.ToVector2() / LogicalSize;
 
             point += LayerSize.ToVector2() / 2f;
 
@@ -63,7 +65,7 @@ namespace FoldEngine.Interfaces
         }
 
         public Vector2 LayerToCamera(Vector2 point) {
-            return new Vector2(1, -1) * (point - LayerSize.ToVector2() / 2f) * (Destination.Size.ToVector2() / LayerSize.ToVector2());
+            return new Vector2(1, -1) * (point - LayerSize.ToVector2() / 2f) * (LogicalSize / LayerSize.ToVector2());
         }
     }
 }
