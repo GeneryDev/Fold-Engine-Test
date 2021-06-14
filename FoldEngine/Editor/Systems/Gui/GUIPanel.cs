@@ -202,13 +202,13 @@ namespace FoldEngine.Editor.Systems {
             int x = Margin;
             switch(_textAlignment) {
                 case -1:
-                    x = Bounds.Left + _textMargin;
+                    x = Bounds.X + _textMargin;
                     break;
                 case 0:
                     x = (int) (Bounds.Center.X - totalWidth / 2);
                     break;
                 case 1:
-                    x = (int) (Bounds.Right - totalWidth - _textMargin);
+                    x = (int) (Bounds.X + Bounds.Width - totalWidth - _textMargin);
                     break;
                 default:
                     break;

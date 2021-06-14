@@ -70,7 +70,7 @@ namespace Sandbox.Systems {
             _livingComponents.Reset();
 
             Vector2 currentMouseScreenPos = Mouse.GetState().Position.ToVector2();
-            Vector2 currentMouseWorldPos = renderer.ScreenLayer.LayerToCamera(currentMouseScreenPos);
+            Vector2 currentMouseWorldPos = renderer.WindowLayer.LayerToCamera(currentMouseScreenPos);
 
             bool rightPressed = Mouse.GetState().RightButton == ButtonState.Pressed;
 

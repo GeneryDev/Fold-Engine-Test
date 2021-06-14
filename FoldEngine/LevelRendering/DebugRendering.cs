@@ -61,7 +61,7 @@ namespace FoldEngine.Rendering {
 
 
                 if(LineIntersection) {
-                    Line lineB = new Line(new Vector2(12, 120), renderer.ScreenLayer.LayerToCamera(Mouse.GetState().Position.ToVector2()));
+                    Line lineB = new Line(new Vector2(12, 120), renderer.WindowLayer.LayerToCamera(Mouse.GetState().Position.ToVector2()));
                     Vector2 perpendicularB = (Vector2)(((Complex) (lineB.To - lineB.From)).Normalized * Complex.Imaginary) * thickness/2;
 
                     layer.Surface.Draw(new DrawQuadInstruction(
@@ -121,7 +121,7 @@ namespace FoldEngine.Rendering {
                 if(SnapToLine) {
                     Vector2 snapped =
                         lineA.SnapPointToLine(
-                            renderer.ScreenLayer.LayerToCamera(Mouse.GetState().Position.ToVector2()), true);
+                            renderer.WindowLayer.LayerToCamera(Mouse.GetState().Position.ToVector2()), true);
                     
                     layer.Surface.Draw(new DrawQuadInstruction(
                         renderer.Textures["main:pixel.white"],

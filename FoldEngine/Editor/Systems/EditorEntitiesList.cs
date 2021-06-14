@@ -15,15 +15,14 @@ namespace FoldEngine.Editor.Systems {
         private List<long> _expandedEntities = new List<long>();
         
         internal override void Initialize() {
-            _panel = NewSidebarPanel();
             _transforms = Owner.Components.CreateIterator<Transform>(IterationFlags.None);
         }
-        
 
         public override void OnRender(IRenderingUnit renderer) {
             if(!ModalVisible) return;
+            if(_panel == null) _panel = NewSidebarPanel();
 
-            IRenderingLayer layer = renderer.ScreenLayer;
+            IRenderingLayer layer = renderer.WindowLayer;
             
             _panel.Reset();
             _panel.Label("Entities", 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);

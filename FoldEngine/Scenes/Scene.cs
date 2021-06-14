@@ -94,6 +94,8 @@ namespace FoldEngine.Scenes
 
             Systems.InvokeUpdate();
 
+            Core.CommandQueue.ExecuteAll();
+            
             Systems.Flush();
             Components.Flush();
         }

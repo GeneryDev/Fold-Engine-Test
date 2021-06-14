@@ -2,6 +2,7 @@
 using System.IO;
 using FoldEngine;
 using FoldEngine.Audio;
+using FoldEngine.Commands;
 using FoldEngine.Components;
 using FoldEngine.Events;
 using FoldEngine.Input;
@@ -50,10 +51,9 @@ namespace Sandbox.Systems {
 
 
             if(Owner.Core.InputUnit.Players[0].Get<ButtonAction>("quicksave").Consume()) {
-                Directory.CreateDirectory(TargetDirectory);
-                Owner.Save(Path.Combine(TargetDirectory, "scene.foldscene"));
+                Owner.Core.CommandQueue.Enqueue(new SaveSceneCommand(Path.Combine(TargetDirectory, "scene.foldscene")));
             } else if(Owner.Core.InputUnit.Players[0].Get<ButtonAction>("quickload").Consume()) {
-                Owner.Load(Path.Combine(TargetDirectory, "scene.foldscene"));
+                Owner.Core.CommandQueue.Enqueue(new LoadSceneCommand(Path.Combine(TargetDirectory, "scene.foldscene")));
             }
             
             _livingComponents.Reset();

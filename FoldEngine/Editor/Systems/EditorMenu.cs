@@ -10,14 +10,14 @@ namespace FoldEngine.Editor.Systems {
         private GuiPanel _panel;
 
         internal override void Initialize() {
-            _panel = NewSidebarPanel();
-            Console.WriteLine("Initialized menu");
+            ModalVisible = true;
         }
 
         public override void OnRender(IRenderingUnit renderer) {
             if(!ModalVisible) return;
+            if(_panel == null) _panel = NewSidebarPanel();
 
-            IRenderingLayer layer = renderer.ScreenLayer;
+            IRenderingLayer layer = renderer.WindowLayer;
             
             _panel.Reset();
             _panel.Label(Owner.Name, 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
@@ -25,7 +25,7 @@ namespace FoldEngine.Editor.Systems {
             _panel.Separator();
             _panel.Button("Entities").Action(SceneEditor.Actions.ChangeToMenu, 1);
             _panel.Button("Systems").Action(SceneEditor.Actions.ChangeToMenu, 2);
-            _panel.Button("Edit Save Data");
+            _panel.Button("Edit Save Data").Action(SceneEditor.Actions.Test, 0);
             _panel.Button("Quit");
             _panel.End();
 

@@ -27,24 +27,24 @@ namespace Woofer
         public ITexture WhiteTexture { get; set; }
 
         public IRenderingLayer WorldLayer => Layers["world"];
-        public IRenderingLayer ScreenLayer => Layers["screen"];
+        public IRenderingLayer WindowLayer => Layers["screen"];
         public IRenderingLayer GizmoLayer => Layers["gizmos"];
 
         public WooferRenderingUnit(WooferGameCore core) {
             _core = core;
-            Layers["world"] = new RenderingLayer() {
+            Layers["world"] = new RenderingLayer(this) {
                 Name = "world", LayerSize = new Point(320, 180), Destination = new Rectangle(Point.Zero, WindowSize),
                 LogicalSize = WindowSize.ToVector2()
             };
-            Layers["gizmos"] = new RenderingLayer() {
+            Layers["gizmos"] = new RenderingLayer(this) {
                 Name = "gizmos", LayerSize = WindowSize, Destination = new Rectangle(Point.Zero, WindowSize),
                 LogicalSize = WindowSize.ToVector2()
             };
-            Layers["screen"] = new RenderingLayer() {
+            Layers["screen"] = new RenderingLayer(this) {
                 Name = "screen", LayerSize = WindowSize, Destination = new Rectangle(Point.Zero, WindowSize),
                 LogicalSize = WindowSize.ToVector2()
             };
-            Layers["hud"] = new RenderingLayer() {
+            Layers["hud"] = new RenderingLayer(this) {
                 Name = "hud", LayerSize = new Point(640, 360), Destination = new Rectangle(Point.Zero, WindowSize),
                 LogicalSize = WindowSize.ToVector2()
             };

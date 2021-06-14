@@ -10,6 +10,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Audio\Sound.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Commands\CommandQueue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Commands\ICommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Commands\SceneCommands.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Commands\WindowCommands.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentIterator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentReference.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentSerializer.cs" />

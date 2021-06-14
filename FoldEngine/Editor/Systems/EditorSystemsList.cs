@@ -8,14 +8,11 @@ namespace FoldEngine.Editor.Systems {
         
         private GuiPanel _panel;
 
-        internal override void Initialize() {
-            _panel = NewSidebarPanel();
-        }
-
         public override void OnRender(IRenderingUnit renderer) {
             if(!ModalVisible) return;
+            if(_panel == null) _panel = NewSidebarPanel();
 
-            IRenderingLayer layer = renderer.ScreenLayer;
+            IRenderingLayer layer = renderer.WindowLayer;
             
             _panel.Reset();
             _panel.Label("Systems", 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
