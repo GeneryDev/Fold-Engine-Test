@@ -10,12 +10,13 @@ namespace FoldEngine.Editor.Systems {
         public Point MousePos;
         public ButtonAction MouseLeft = ButtonAction.Default;
         public ButtonAction MouseRight = ButtonAction.Default;
-        
+            
         private List<GuiPanel> _allPanels = new List<GuiPanel>();
 
         private GuiPanel _pressedPanel;
         
         public ActionPerformer PerformAction;
+        public IRenderingLayer Layer { get; set; }
 
         public void Input(InputUnit inputUnit) {
             if(MouseLeft == ButtonAction.Default) {
@@ -24,6 +25,7 @@ namespace FoldEngine.Editor.Systems {
             }
 
             MousePos = Mouse.GetState().Position;
+            if(Layer != null) MousePos = Layer.WindowToLayer(MousePos.ToVector2()).ToPoint();
             if(MouseLeft.Pressed) {
                 for(int i = _allPanels.Count - 1; i >= 0; i--) {
                     GuiPanel panel = _allPanels[i];

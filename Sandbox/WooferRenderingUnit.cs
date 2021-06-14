@@ -19,7 +19,7 @@ namespace Woofer
 
         public TextureManager Textures { get; set; }
         public FontManager Fonts { get; set; }
-        public Point WindowSize { get; private set; } = new Point(1280, 720);
+        public Point WindowSize { get; set; } = new Point(1280, 720);
 
         public Dictionary<string, IRenderingLayer> Layers { get; private set; } =
             new Dictionary<string, IRenderingLayer>();
@@ -27,24 +27,24 @@ namespace Woofer
         public ITexture WhiteTexture { get; set; }
 
         public IRenderingLayer WorldLayer => Layers["world"];
-        public IRenderingLayer ScreenLayer => Layers["screen"];
+        public IRenderingLayer WindowLayer => Layers["screen"];
         public IRenderingLayer GizmoLayer => Layers["gizmos"];
 
         public WooferRenderingUnit(WooferGameCore core) {
             _core = core;
-            Layers["world"] = new RenderingLayer() {
+            Layers["world"] = new RenderingLayer(this) {
                 Name = "world", LayerSize = new Point(320, 180), Destination = new Rectangle(Point.Zero, WindowSize),
                 LogicalSize = WindowSize.ToVector2()
             };
-            Layers["gizmos"] = new RenderingLayer() {
+            Layers["gizmos"] = new RenderingLayer(this) {
                 Name = "gizmos", LayerSize = WindowSize, Destination = new Rectangle(Point.Zero, WindowSize),
                 LogicalSize = WindowSize.ToVector2()
             };
-            Layers["screen"] = new RenderingLayer() {
+            Layers["screen"] = new RenderingLayer(this) {
                 Name = "screen", LayerSize = WindowSize, Destination = new Rectangle(Point.Zero, WindowSize),
                 LogicalSize = WindowSize.ToVector2()
             };
-            Layers["hud"] = new RenderingLayer() {
+            Layers["hud"] = new RenderingLayer(this) {
                 Name = "hud", LayerSize = new Point(640, 360), Destination = new Rectangle(Point.Zero, WindowSize),
                 LogicalSize = WindowSize.ToVector2()
             };

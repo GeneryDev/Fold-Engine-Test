@@ -1,4 +1,5 @@
 ﻿using System;
+using FoldEngine.Commands;
 using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
 using FoldEngine.Systems;
@@ -36,6 +37,10 @@ namespace FoldEngine.Editor.Systems {
                             Owner.Systems.Get<EditorEntitiesList>().ExpandCollapseEntity(data);
                             break;
                         }
+                        case SceneEditor.Actions.Test: {
+                            Owner.Core.CommandQueue.Enqueue(new SetWindowSizeCommand(new Point(1920, 1040)));
+                            break;
+                        }
                     }
                 }
             };
@@ -51,6 +56,7 @@ namespace FoldEngine.Editor.Systems {
 
         public override void OnRender(IRenderingUnit renderer) {
             IRenderingLayer layer = renderer.Layers["screen"];
+            Environment.Layer = layer;
             Rectangle sidebar = new Rectangle(SidebarX, 0, SidebarWidth, 720);
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,

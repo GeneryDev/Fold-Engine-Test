@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 namespace FoldEngine.Editor.Systems {
     public class EditorModal : GameSystem {
         public bool ModalActive = false;
-        public bool ModalVisible = true;
+        public bool ModalVisible = false;
 
         public override void SubscribeToEvents() {
             Subscribe<ForceModalChangeEvent>((ref ForceModalChangeEvent evt) => {

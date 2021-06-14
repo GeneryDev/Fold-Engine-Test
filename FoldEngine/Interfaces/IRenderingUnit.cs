@@ -16,7 +16,7 @@ namespace FoldEngine.Interfaces
         TextureManager Textures { get; set; }
         FontManager Fonts { get; set; }
 
-        Point WindowSize { get; }
+        Point WindowSize { get; set; }
         Dictionary<string, IRenderingLayer> Layers { get; }
         
         ITexture WhiteTexture { get; }
@@ -24,7 +24,7 @@ namespace FoldEngine.Interfaces
         void LoadContent();
         
         IRenderingLayer WorldLayer { get; }
-        IRenderingLayer ScreenLayer { get; }
+        IRenderingLayer WindowLayer { get; }
         IRenderingLayer GizmoLayer { get; }
     }
 }

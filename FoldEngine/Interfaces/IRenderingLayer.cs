@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using FoldEngine.Graphics;
+using Woofer;
 
 namespace FoldEngine.Interfaces
 {
@@ -17,7 +18,7 @@ namespace FoldEngine.Interfaces
         string Name { get; }
         Point LayerSize { get; }
         Vector2 LogicalSize { get; }
-        Rectangle Destination { get; }
+        Rectangle Destination { get; set; }
         SamplerState Sampling { get; }
 
         RenderSurface Surface { get; set; }
@@ -25,10 +26,18 @@ namespace FoldEngine.Interfaces
         Vector2 CameraToLayer(Vector2 point);
         Vector2 LayerToCamera(Vector2 point);
         Vector2 LayerToLayer(Vector2 point, IRenderingLayer other);
+        
+        Vector2 WindowToLayer(Vector2 point);
+        Vector2 LayerToWindow(Vector2 point);
     }
 
-    public class RenderingLayer : IRenderingLayer
-    {
+    public class RenderingLayer : IRenderingLayer {
+        public readonly IRenderingUnit RenderingUnit;
+        
+        public RenderingLayer(IRenderingUnit renderer) {
+            this.RenderingUnit = renderer;
+        }
+
         public string Name { get; set; }
         public Point LayerSize { get; set; }
         public Vector2 LogicalSize { get; set; }
@@ -66,6 +75,14 @@ namespace FoldEngine.Interfaces
 
         public Vector2 LayerToCamera(Vector2 point) {
             return new Vector2(1, -1) * (point - LayerSize.ToVector2() / 2f) * (LogicalSize / LayerSize.ToVector2());
+        }
+
+        public Vector2 WindowToLayer(Vector2 point) {
+            return (point - Destination.Location.ToVector2()) * LayerSize.ToVector2() / Destination.Size.ToVector2();
+        }
+
+        public Vector2 LayerToWindow(Vector2 point) {
+            return Destination.Location.ToVector2() + point / LayerSize.ToVector2() * Destination.Size.ToVector2();
         }
     }
 }
