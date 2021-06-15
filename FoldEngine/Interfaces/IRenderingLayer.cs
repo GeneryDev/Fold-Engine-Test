@@ -13,8 +13,9 @@ using Woofer;
 
 namespace FoldEngine.Interfaces
 {
-    public interface IRenderingLayer
-    {
+    public interface IRenderingLayer {
+        RenderGroup Group { get; set; }
+        
         string Name { get; }
         Point LayerSize { get; }
         Vector2 LogicalSize { get; }
@@ -26,20 +27,32 @@ namespace FoldEngine.Interfaces
         Vector2 CameraToLayer(Vector2 point);
         Vector2 LayerToCamera(Vector2 point);
         Vector2 LayerToLayer(Vector2 point, IRenderingLayer other);
-        
+
         Vector2 WindowToLayer(Vector2 point);
         Vector2 LayerToWindow(Vector2 point);
     }
 
     public class RenderingLayer : IRenderingLayer {
-        public readonly IRenderingUnit RenderingUnit;
-        
+        private readonly IRenderingUnit _renderingUnit;
+        public RenderGroup Group { get; set; }
+        private Point _layerSize;
+
         public RenderingLayer(IRenderingUnit renderer) {
-            this.RenderingUnit = renderer;
+            this._renderingUnit = renderer;
         }
 
         public string Name { get; set; }
-        public Point LayerSize { get; set; }
+
+        public Point LayerSize {
+            get => _layerSize;
+            set {
+                Surface?.Target.Dispose();
+                Surface = null;
+                _layerSize = value;
+                Surface = new RenderSurface(_renderingUnit.Core.FoldGame.GraphicsDevice, _renderingUnit, value.X, value.Y);
+            }
+        }
+
         public Vector2 LogicalSize { get; set; }
         public Rectangle Destination { get; set; }
         public SamplerState Sampling { get; set; } = SamplerState.PointClamp;
@@ -78,11 +91,27 @@ namespace FoldEngine.Interfaces
         }
 
         public Vector2 WindowToLayer(Vector2 point) {
-            return (point - Destination.Location.ToVector2()) * LayerSize.ToVector2() / Destination.Size.ToVector2();
+            Rectangle groupBounds = Group.Bounds;
+            
+            point -= groupBounds.Location.ToVector2();
+            point /= groupBounds.Size.ToVector2();
+            point *= Group.Size.ToVector2();
+            point -= Destination.Location.ToVector2();
+            point /= Destination.Size.ToVector2();
+            point *= LayerSize.ToVector2();
+            return point;
         }
 
         public Vector2 LayerToWindow(Vector2 point) {
-            return Destination.Location.ToVector2() + point / LayerSize.ToVector2() * Destination.Size.ToVector2();
+            Rectangle groupBounds = Group.Bounds;
+            
+            point /= LayerSize.ToVector2();
+            point *= Destination.Size.ToVector2();
+            point += Destination.Location.ToVector2();
+            point /= Group.Size.ToVector2();
+            point *= groupBounds.Size.ToVector2();
+            point += groupBounds.Location.ToVector2();
+            return point;
         }
     }
 }

@@ -32,7 +32,7 @@ namespace FoldEngine.Rendering {
                 Vector2 cameraPos = view.Position;
                 Complex cameraRotNegativeComplex = Complex.FromRotation(-view.Rotation);
 
-                IRenderingLayer layer = renderer.Layers[camera.RenderToLayer];
+                IRenderingLayer layer = renderer.MainGroup[camera.RenderToLayer];
                 
                 float thickness = 6;
 

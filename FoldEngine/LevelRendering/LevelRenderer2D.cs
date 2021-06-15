@@ -46,7 +46,7 @@ namespace FoldEngine.Rendering {
                 Owner.GizmoTransformMatrix = viewMatrix;
                 Owner.MainCameraId = _cameras.GetEntityId();
 
-                IRenderingLayer layer = camera.RenderToLayer != null ? renderer.Layers[camera.RenderToLayer] : renderer.WorldLayer;
+                IRenderingLayer layer = camera.RenderToLayer != null ? renderer.MainGroup[camera.RenderToLayer] : renderer.WorldLayer;
 
                 _meshRenderables.Reset();
 

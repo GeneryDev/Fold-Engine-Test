@@ -92,7 +92,7 @@ namespace Sandbox.Systems {
                         physics.Velocity = default;
                         physics.AngularVelocity = default;
                         
-                        renderer.Layers["gizmos"].Surface.GizBatch.DrawLine(currentMouseScreenPos, _rightPressedScreenPos, Color.Lime);
+                        renderer.MainGroup["gizmos"].Surface.GizBatch.DrawLine(currentMouseScreenPos, _rightPressedScreenPos, Color.Lime);
                     }
 
                     if(Mouse.GetState().LeftButton == ButtonState.Pressed) {

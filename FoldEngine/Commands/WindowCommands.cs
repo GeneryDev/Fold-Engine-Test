@@ -23,13 +23,11 @@ namespace FoldEngine.Commands {
 
         public void Execute(IGameCore core) {
             Console.WriteLine("setting window size: " + _size);
-            (core.FoldGame.Graphics.PreferredBackBufferWidth, core.FoldGame.Graphics.PreferredBackBufferHeight) = _size;
-            core.FoldGame.Graphics.ApplyChanges();
-            foreach(IRenderingLayer layer in core.RenderingUnit.Layers.Values) {
-                Rectangle newDestination = layer.Destination;
-                newDestination.Offset(((_size - core.RenderingUnit.WindowSize).ToVector2() / 2).ToPoint());
-                layer.Destination = newDestination;
-            }
+            // foreach(IRenderingLayer layer in core.RenderingUnit.Layers.Values) {
+            //     Rectangle newDestination = layer.Destination;
+            //     newDestination.Offset(((_size - core.RenderingUnit.WindowSize).ToVector2() / 2).ToPoint());
+            //     layer.Destination = newDestination;
+            // }
             core.RenderingUnit.WindowSize = _size;
         }
     }

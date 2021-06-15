@@ -64,6 +64,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IRenderingLayer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IRenderingUnit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentMap.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\RenderGroup.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LevelRendering\Camera.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LevelRendering\DebugRendering.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LevelRendering\LevelRenderer2D.cs" />

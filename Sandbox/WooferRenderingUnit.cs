@@ -15,39 +15,73 @@ using Microsoft.Xna.Framework.Graphics;
 namespace Woofer
 {
     public class WooferRenderingUnit : IRenderingUnit {
-        private readonly WooferGameCore _core;
+        public IGameCore Core { get; private set; }
+        private Point _windowSize = new Point(1280, 720);
 
         public TextureManager Textures { get; set; }
         public FontManager Fonts { get; set; }
-        public Point WindowSize { get; set; } = new Point(1280, 720);
 
-        public Dictionary<string, IRenderingLayer> Layers { get; private set; } =
-            new Dictionary<string, IRenderingLayer>();
+        public Point WindowSize {
+            get => _windowSize;
+            set {
+                _windowSize = value;
+                if(Core.FoldGame != null) {
+                    (Core.FoldGame.Graphics.PreferredBackBufferWidth, Core.FoldGame.Graphics.PreferredBackBufferHeight) =
+                        value;
+                    Core.FoldGame.Graphics.ApplyChanges();
+                }
+            }
+        }
 
-        public ITexture WhiteTexture { get; set; }
+        public ITexture WhiteTexture { get; private set; }
+        
+        public Dictionary<string, RenderGroup> Groups { get; private set; } = new Dictionary<string, RenderGroup>();
 
-        public IRenderingLayer WorldLayer => Layers["world"];
-        public IRenderingLayer WindowLayer => Layers["screen"];
-        public IRenderingLayer GizmoLayer => Layers["gizmos"];
+        public RenderGroup RootGroup { get; set; }
+        public RenderGroup MainGroup { get; set; }
+
+        public IRenderingLayer WindowLayer => MainGroup["screen"];
+        public IRenderingLayer WorldLayer => MainGroup["world"];
+        public IRenderingLayer GizmoLayer => MainGroup["gizmos"];
 
         public WooferRenderingUnit(WooferGameCore core) {
-            _core = core;
-            Layers["world"] = new RenderingLayer(this) {
-                Name = "world", LayerSize = new Point(320, 180), Destination = new Rectangle(Point.Zero, WindowSize),
-                LogicalSize = WindowSize.ToVector2()
+            Core = core;
+        }
+
+        public void Initialize() {
+            var mainSize = new Point(1280, 720); 
+            
+            Groups["main"] = RootGroup = MainGroup = new RenderGroup(this) {
+                Size = mainSize,
+                ["world"] = new RenderingLayer(this) {
+                    Name = "world", LayerSize = new Point(320, 180), Destination = new Rectangle(Point.Zero, mainSize),
+                    LogicalSize = mainSize.ToVector2()
+                },
+                ["gizmos"] = new RenderingLayer(this) {
+                    Name = "gizmos", LayerSize = mainSize, Destination = new Rectangle(Point.Zero, mainSize),
+                    LogicalSize = mainSize.ToVector2()
+                },
+                ["screen"] = new RenderingLayer(this) {
+                    Name = "screen", LayerSize = mainSize, Destination = new Rectangle(Point.Zero, mainSize),
+                    LogicalSize = mainSize.ToVector2()
+                },
+                ["hud"] = new RenderingLayer(this) {
+                    Name = "hud", LayerSize = new Point(640, 360), Destination = new Rectangle(Point.Zero, mainSize),
+                    LogicalSize = mainSize.ToVector2()
+                }
             };
-            Layers["gizmos"] = new RenderingLayer(this) {
-                Name = "gizmos", LayerSize = WindowSize, Destination = new Rectangle(Point.Zero, WindowSize),
-                LogicalSize = WindowSize.ToVector2()
+
+            var fullSize = new Point(1920, 1040);
+
+            Groups["editor"] = RootGroup = new RenderGroup(this) {
+                Size = fullSize
             };
-            Layers["screen"] = new RenderingLayer(this) {
-                Name = "screen", LayerSize = WindowSize, Destination = new Rectangle(Point.Zero, WindowSize),
-                LogicalSize = WindowSize.ToVector2()
-            };
-            Layers["hud"] = new RenderingLayer(this) {
-                Name = "hud", LayerSize = new Point(640, 360), Destination = new Rectangle(Point.Zero, WindowSize),
-                LogicalSize = WindowSize.ToVector2()
-            };
+            RootGroup.Dependencies.Add(new RenderGroup.Dependency() {
+                Group = MainGroup,
+                Destination = new Rectangle(new Point(50, 50), mainSize)
+            });
+
+            WindowSize = RootGroup.Size;
         }
 
         public void LoadContent() {
@@ -108,6 +142,12 @@ namespace Woofer
 
             Textures.LoadTexture("fonts/default/ascii");
             Fonts.LoadFont("default");
+        }
+
+        public Rectangle GetGroupBounds(RenderGroup renderGroup) {
+            Rectangle? bounds = RootGroup.GetBounds(renderGroup);
+            if(bounds.HasValue) return bounds.Value;
+            throw new ArgumentException($"RenderGroup {renderGroup} is not present in the current RenderGroup hierarchy.");
         }
     }
 }

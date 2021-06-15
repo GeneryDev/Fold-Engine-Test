@@ -4,6 +4,7 @@ using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
 using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 
 namespace FoldEngine.Editor.Systems {
 
@@ -48,6 +49,12 @@ namespace FoldEngine.Editor.Systems {
 
         public override void OnInput() {
             Environment.Input(Owner.Core.InputUnit);
+            
+
+            if(Environment.MouseRight.Down) {
+                
+                Owner.Core.RenderingUnit.RootGroup.Dependencies[0].Destination.Location = Mouse.GetState().Position;
+            }
         }
 
         public override void OnUpdate() {
@@ -55,7 +62,7 @@ namespace FoldEngine.Editor.Systems {
         }
 
         public override void OnRender(IRenderingUnit renderer) {
-            IRenderingLayer layer = renderer.Layers["screen"];
+            IRenderingLayer layer = renderer.MainGroup["screen"];
             Environment.Layer = layer;
             Rectangle sidebar = new Rectangle(SidebarX, 0, SidebarWidth, 720);
             layer.Surface.Draw(new DrawRectInstruction() {

@@ -29,6 +29,8 @@ namespace Woofer {
         public float TimeScale => 1;
 
         public WooferGameCore() {
+            FoldGame = new FoldGame(this);
+            
             RenderingUnit = new WooferRenderingUnit(this);
             ActiveScene = new DemoScene(this);
             InputUnit = new InputUnit();
@@ -39,7 +41,9 @@ namespace Woofer {
 
         }
 
-        public void Initialize() { }
+        public void Initialize() {
+            RenderingUnit.Initialize();
+        }
 
         public void LoadContent() {
             AudioUnit.Load("Audio/failure");

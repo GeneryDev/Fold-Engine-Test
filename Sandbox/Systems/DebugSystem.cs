@@ -125,10 +125,10 @@ namespace Sandbox.Systems {
             if(!_renderedHelloWorld.HasValue) {
                 renderer.Fonts["default"].RenderString("Hello World!\nBut the world doesn't say hello back", out _renderedHelloWorld);
             }
-            _renderedHelloWorld.DrawOnto(renderer.Layers["screen"].Surface, new Point(0, 2*8 * 3), Color.LightGray, 2);
+            _renderedHelloWorld.DrawOnto(renderer.MainGroup["screen"].Surface, new Point(0, 2*8 * 3), Color.LightGray, 2);
             
-            renderer.Fonts["default"].DrawString($"FPS:{Time.FramesPerSecond}", renderer.Layers["screen"].Surface, new Point(0, 2*8), Color.Yellow, 2);
-            renderer.Fonts["default"].DrawString($"Normal:{_lastNormal}", renderer.Layers["screen"].Surface, new Point(0, 2*8 * 6), Color.Yellow, 2);
+            renderer.Fonts["default"].DrawString($"FPS:{Time.FramesPerSecond}", renderer.MainGroup["screen"].Surface, new Point(0, 2*8), Color.Yellow, 2);
+            renderer.Fonts["default"].DrawString($"Normal:{_lastNormal}", renderer.MainGroup["screen"].Surface, new Point(0, 2*8 * 6), Color.Yellow, 2);
         }
 
         public override void SubscribeToEvents() {
