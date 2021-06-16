@@ -18,6 +18,8 @@ namespace FoldEngine {
         private readonly IGameCore _core;
 
         private FixedSizeFloatBuffer FrameTimes = new FixedSizeFloatBuffer(60);
+        
+        private Point _lastKnownWindowSize = Point.Zero;
 
         public FoldGame() {
             Graphics = new GraphicsDeviceManager(this);
@@ -51,6 +53,16 @@ namespace FoldEngine {
             _core.Initialize();
             
             (Graphics.PreferredBackBufferWidth, Graphics.PreferredBackBufferHeight) = _core.RenderingUnit.WindowSize;
+            _lastKnownWindowSize = _core.RenderingUnit.WindowSize;
+            
+            Window.AllowUserResizing = true;
+            Window.ClientSizeChanged += (sender, args) => {
+                Point newSize = Window.ClientBounds.Size;
+                if(_lastKnownWindowSize != newSize) {
+                    _lastKnownWindowSize = newSize;
+                    _core.RenderingUnit.WindowSize = newSize;
+                }
+            };
 
             FoldEngine.Components.Component.PopulateIdentifiers();
 
@@ -141,7 +153,7 @@ namespace FoldEngine {
             
             //Draw each layer's buffer onto the screen
             GraphicsDevice.SetRenderTarget(null);
-            GraphicsDevice.Clear(new Color(56, 56, 56));
+            GraphicsDevice.Clear(new Color(0, 0, 0));
             
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
             

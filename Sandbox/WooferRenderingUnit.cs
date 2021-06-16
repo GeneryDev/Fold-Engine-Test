@@ -24,10 +24,16 @@ namespace Woofer
         public Point WindowSize {
             get => _windowSize;
             set {
+                Point oldSize = _windowSize;
                 _windowSize = value;
                 if(Core.FoldGame != null) {
                     (Core.FoldGame.Graphics.PreferredBackBufferWidth, Core.FoldGame.Graphics.PreferredBackBufferHeight) =
                         value;
+                    if(value != oldSize) {
+                        foreach(RenderGroup group in Groups.Values) {
+                            group.WindowSizeChanged(oldSize, value);
+                        }
+                    }
                     Core.FoldGame.Graphics.ApplyChanges();
                 }
             }
@@ -55,7 +61,8 @@ namespace Woofer
                 Size = mainSize,
                 ["world"] = new RenderingLayer(this) {
                     Name = "world", LayerSize = new Point(320, 180), Destination = new Rectangle(Point.Zero, mainSize),
-                    LogicalSize = mainSize.ToVector2()
+                    LogicalSize = mainSize.ToVector2(),
+                    Color = new Color(56, 56, 56)
                 },
                 ["gizmos"] = new RenderingLayer(this) {
                     Name = "gizmos", LayerSize = mainSize, Destination = new Rectangle(Point.Zero, mainSize),
@@ -73,12 +80,19 @@ namespace Woofer
 
             var fullSize = new Point(1920, 1040);
 
-            Groups["editor"] = RootGroup = new RenderGroup(this) {
-                Size = fullSize
+            // Groups["editor"] = RootGroup = new RenderGroup(this) {
+            //     Size = fullSize
+            // };
+            // RootGroup.AddDependency(new RenderGroup.Dependency() {
+            //     Group = MainGroup,
+            //     Destination = new Rectangle(new Point(50, 50), mainSize)
+            // });
+
+            Groups["root"] = RootGroup = new ResizableRenderGroup(this) {
+                Size = mainSize
             };
-            RootGroup.Dependencies.Add(new RenderGroup.Dependency() {
-                Group = MainGroup,
-                Destination = new Rectangle(new Point(50, 50), mainSize)
+            RootGroup.AddDependency(new RenderGroup.Dependency() {
+                Group = MainGroup
             });
 
             WindowSize = RootGroup.Size;

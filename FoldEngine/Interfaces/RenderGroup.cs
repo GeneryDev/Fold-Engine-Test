@@ -4,9 +4,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace FoldEngine.Interfaces {
     public class RenderGroup {
-        private readonly IRenderingUnit _renderingUnit;
-        public Point Size { get; set; } //analogous to window size
-        public Rectangle Bounds => _renderingUnit.GetGroupBounds(this);
+        public readonly IRenderingUnit RenderingUnit;
+        public virtual Point Size { get; set; } //analogous to window size
+        public Rectangle Bounds => RenderingUnit.GetGroupBounds(this);
         
         public readonly List<Dependency> Dependencies = new List<Dependency>();
 
@@ -21,7 +21,7 @@ namespace FoldEngine.Interfaces {
         }
 
         public RenderGroup(IRenderingUnit renderingUnit) {
-            _renderingUnit = renderingUnit;
+            RenderingUnit = renderingUnit;
         }
 
 
@@ -86,5 +86,11 @@ namespace FoldEngine.Interfaces {
 
             return null;
         }
+
+        public virtual void AddDependency(Dependency dependency) {
+            Dependencies.Add(dependency);
+        }
+
+        public virtual void WindowSizeChanged(Point oldSize, Point newSize) {}
     }
 }
