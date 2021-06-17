@@ -25,7 +25,7 @@ namespace FoldEngine.Systems {
 
         public virtual void OnInput() { }
         public virtual void OnUpdate() { }
-        public virtual void OnRender(Interfaces.IRenderingUnit renderer) { }
+        public virtual void OnRender(IRenderingUnit renderer) { }
 
         protected MultiComponentIterator CreateComponentIterator(params Type[] watchingTypes) {
             return Owner.Components.CreateMultiIterator(watchingTypes);

@@ -35,6 +35,7 @@ namespace FoldEngine.Interfaces {
         }
 
         public override void WindowSizeChanged(Point oldSize, Point newSize) {
+            base.WindowSizeChanged(oldSize, newSize);
             Size = newSize;
         }
     }

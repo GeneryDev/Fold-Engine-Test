@@ -1,5 +1,6 @@
 ﻿using System;
 using FoldEngine.Events;
+using FoldEngine.Interfaces;
 using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
 
@@ -14,8 +15,8 @@ namespace FoldEngine.Editor.Systems {
             });
         }
 
-        public GuiPanel NewSidebarPanel() {
-            return Owner.Systems.Get<EditorBase>().Environment.Panel(new Rectangle(EditorBase.SidebarX + EditorBase.SidebarMargin * 2,
+        public GuiPanel NewSidebarPanel(IRenderingLayer layer) {
+            return Owner.Systems.Get<EditorBase>().Environment.Panel(new Rectangle(layer.LayerSize.X - EditorBase.SidebarWidth + EditorBase.SidebarMargin * 2,
                 EditorBase.SidebarMargin,
                 EditorBase.SidebarWidth - EditorBase.SidebarMargin * 2 * 2,
                 720 - EditorBase.SidebarMargin * 2));

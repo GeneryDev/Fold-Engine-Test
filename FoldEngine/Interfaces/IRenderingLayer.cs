@@ -32,6 +32,8 @@ namespace FoldEngine.Interfaces
 
         Vector2 WindowToLayer(Vector2 point);
         Vector2 LayerToWindow(Vector2 point);
+
+        void WindowSizeChanged(Point oldSize, Point newSize);
     }
 
     public class RenderingLayer : IRenderingLayer {
@@ -56,6 +58,7 @@ namespace FoldEngine.Interfaces
                 _layerSize = value;
             }
         }
+        public bool FitToWindow { get; set; } = false;
 
         public Vector2 LogicalSize { get; set; }
         public Rectangle Destination { get; set; }
@@ -117,6 +120,14 @@ namespace FoldEngine.Interfaces
             point *= groupBounds.Size.ToVector2();
             point += groupBounds.Location.ToVector2();
             return point;
+        }
+
+        public void WindowSizeChanged(Point oldSize, Point newSize) {
+            if(FitToWindow) {
+                LayerSize = newSize;
+                Destination = new Rectangle(Point.Zero, LayerSize);
+                LogicalSize = newSize.ToVector2();
+            }
         }
     }
 }

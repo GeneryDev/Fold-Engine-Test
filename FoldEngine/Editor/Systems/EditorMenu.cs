@@ -2,6 +2,7 @@
 using FoldEngine.Interfaces;
 using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
+using Woofer;
 
 namespace FoldEngine.Editor.Systems {
     [GameSystem("fold:editor.menu", ProcessingCycles.All)]
@@ -13,11 +14,20 @@ namespace FoldEngine.Editor.Systems {
             ModalVisible = true;
         }
 
+        public override void SubscribeToEvents() {
+            base.SubscribeToEvents();
+            Subscribe<WindowSizeChangedEvent>((ref WindowSizeChangedEvent evt) => {
+                if(_panel != null) {
+                    _panel.Bounds.Height = evt.NewSize.Y;
+                    _panel.Bounds.X = evt.NewSize.X - _panel.Bounds.Width - EditorBase.SidebarMargin * 2;
+                }
+            });
+        }
+
         public override void OnRender(IRenderingUnit renderer) {
             if(!ModalVisible) return;
-            if(_panel == null) _panel = NewSidebarPanel();
-
-            IRenderingLayer layer = renderer.WindowLayer;
+            IRenderingLayer layer = renderer.RootGroup["editor_gui"];
+            if(_panel == null) _panel = NewSidebarPanel(layer);
             
             _panel.Reset();
             _panel.Label(Owner.Name, 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);

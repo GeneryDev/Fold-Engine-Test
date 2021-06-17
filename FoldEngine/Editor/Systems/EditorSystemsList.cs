@@ -1,6 +1,7 @@
 ﻿using FoldEngine.Components;
 using FoldEngine.Interfaces;
 using FoldEngine.Systems;
+using Woofer;
 
 namespace FoldEngine.Editor.Systems {
     [GameSystem("fold:editor.systems", ProcessingCycles.All)]
@@ -8,12 +9,21 @@ namespace FoldEngine.Editor.Systems {
         
         private GuiPanel _panel;
 
+        public override void SubscribeToEvents() {
+            base.SubscribeToEvents();
+            Subscribe<WindowSizeChangedEvent>((ref WindowSizeChangedEvent evt) => {
+                if(_panel != null) {
+                    _panel.Bounds.Height = evt.NewSize.Y;
+                    _panel.Bounds.X = evt.NewSize.X - _panel.Bounds.Width - EditorBase.SidebarMargin * 2;
+                }
+            });
+        }
+
         public override void OnRender(IRenderingUnit renderer) {
             if(!ModalVisible) return;
-            if(_panel == null) _panel = NewSidebarPanel();
+            IRenderingLayer layer = renderer.RootGroup["editor_gui"];
+            if(_panel == null) _panel = NewSidebarPanel(layer);
 
-            IRenderingLayer layer = renderer.WindowLayer;
-            
             _panel.Reset();
             _panel.Label("Systems", 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
             _panel.Button("Back").Action(SceneEditor.Actions.ChangeToMenu, 0);

@@ -43,6 +43,9 @@ namespace FoldEngine.Interfaces {
         }
 
         public void Present(SpriteBatch spriteBatch) {
+            foreach(Dependency dependency in Dependencies) {
+                dependency.Group.Present(spriteBatch);
+            }
             Rectangle groupBounds = Bounds;
             foreach(IRenderingLayer layer in _layers.Values) {
                 Vector2 start = layer.Destination.Location.ToVector2();
@@ -55,9 +58,6 @@ namespace FoldEngine.Interfaces {
                 end += groupBounds.Location.ToVector2();
                 
                 spriteBatch.Draw(layer.Surface.Target, new Rectangle(start.ToPoint(), (end - start).ToPoint()), Color.White);
-            }
-            foreach(Dependency dependency in Dependencies) {
-                dependency.Group.Present(spriteBatch);
             }
         }
 
@@ -91,6 +91,10 @@ namespace FoldEngine.Interfaces {
             Dependencies.Add(dependency);
         }
 
-        public virtual void WindowSizeChanged(Point oldSize, Point newSize) {}
+        public virtual void WindowSizeChanged(Point oldSize, Point newSize) {
+            foreach(IRenderingLayer layer in _layers.Values) {
+                layer.WindowSizeChanged(oldSize, newSize);
+            }
+        }
     }
 }

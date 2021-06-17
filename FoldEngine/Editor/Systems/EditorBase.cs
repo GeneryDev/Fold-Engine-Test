@@ -5,6 +5,7 @@ using FoldEngine.Interfaces;
 using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Woofer;
 
 namespace FoldEngine.Editor.Systems {
 
@@ -20,6 +21,13 @@ namespace FoldEngine.Editor.Systems {
         public GuiEnvironment Environment;
         
         private Type[] _modalTypes = new Type[] {typeof(EditorMenu), typeof(EditorEntitiesList), typeof(EditorSystemsList)};
+        private bool _readjustViewport;
+
+        public override void SubscribeToEvents() {
+            Subscribe<WindowSizeChangedEvent>((ref WindowSizeChangedEvent evt) => {
+                _readjustViewport = true;
+            });
+        }
 
         internal override void Initialize() {
             Environment = new GuiEnvironment() {
@@ -62,9 +70,9 @@ namespace FoldEngine.Editor.Systems {
         }
 
         public override void OnRender(IRenderingUnit renderer) {
-            IRenderingLayer layer = renderer.MainGroup["screen"];
+            IRenderingLayer layer = renderer.RootGroup["editor_gui"];
             Environment.Layer = layer;
-            Rectangle sidebar = new Rectangle(SidebarX, 0, SidebarWidth, 720);
+            Rectangle sidebar = new Rectangle(layer.LayerSize.X - SidebarWidth, 0, SidebarWidth, layer.LayerSize.Y);
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
                 DestinationRectangle = sidebar,
@@ -75,6 +83,12 @@ namespace FoldEngine.Editor.Systems {
                 DestinationRectangle = new Rectangle(sidebar.X + SidebarMargin, sidebar.Y + SidebarMargin, sidebar.Width - SidebarMargin*2, sidebar.Height - SidebarMargin*2),
                 Color = new Color(37, 37, 38)
             });
+
+            if(_readjustViewport) {
+                renderer.Groups["editor"].Dependencies[0].Group.Size = new Point(renderer.WindowSize.X - SidebarWidth, renderer.WindowSize.Y);
+                renderer.Groups["editor"].Dependencies[0].Destination = new Rectangle(0, 0, renderer.WindowSize.X - SidebarWidth, renderer.WindowSize.Y);
+                _readjustViewport = false;
+            }
         }
     }
 }

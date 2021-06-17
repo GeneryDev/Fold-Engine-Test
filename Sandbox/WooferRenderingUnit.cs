@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using FoldEngine;
+using FoldEngine.Events;
 using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
 using FoldEngine.Util;
@@ -33,6 +34,7 @@ namespace Woofer
                         foreach(RenderGroup group in Groups.Values) {
                             group.WindowSizeChanged(oldSize, value);
                         }
+                        Core.ActiveScene?.Events.Invoke(new WindowSizeChangedEvent(oldSize, value));
                     }
                     Core.FoldGame.Graphics.ApplyChanges();
                 }
@@ -88,9 +90,31 @@ namespace Woofer
             //     Destination = new Rectangle(new Point(50, 50), mainSize)
             // });
 
-            Groups["root"] = RootGroup = new ResizableRenderGroup(MainGroup) {
-                Size = mainSize
+            // Groups["root"] = RootGroup = new ResizableRenderGroup(MainGroup) {
+            //     Size = mainSize,
+            //     ["editor_gui"] = new RenderingLayer(this) {
+            //         Name = "editor_gui", LayerSize = mainSize, Destination = new Rectangle(Point.Zero, mainSize),
+            //         FitToWindow = true,
+            //         LogicalSize = mainSize.ToVector2()
+            //     }
+            // };
+            
+            
+            Groups["editor"] = RootGroup = new RenderGroup(this) {
+                Size = mainSize,
+                ["editor_gui"] = new RenderingLayer(this) {
+                    Name = "editor_gui", LayerSize = mainSize, Destination = new Rectangle(Point.Zero, mainSize),
+                    FitToWindow = true,
+                    LogicalSize = mainSize.ToVector2()
+                }
             };
+            Groups["editor"].AddDependency(new RenderGroup.Dependency() {
+                Group = new ResizableRenderGroup(MainGroup) {
+                    Size = mainSize
+                },
+                Destination = new Rectangle(Point.Zero, mainSize)
+            });
+            
 
             WindowSize = RootGroup.Size;
         }
@@ -159,6 +183,17 @@ namespace Woofer
             Rectangle? bounds = RootGroup.GetBounds(renderGroup);
             if(bounds.HasValue) return bounds.Value;
             throw new ArgumentException($"RenderGroup {renderGroup} is not present in the current RenderGroup hierarchy.");
+        }
+    }
+
+    [Event("fold:window.size_changed", EventFlushMode.End)]
+    public struct WindowSizeChangedEvent {
+        public Point OldSize;
+        public Point NewSize;
+        
+        public WindowSizeChangedEvent(Point oldSize, Point newSize) {
+            this.OldSize = oldSize;
+            this.NewSize = newSize;
         }
     }
 }

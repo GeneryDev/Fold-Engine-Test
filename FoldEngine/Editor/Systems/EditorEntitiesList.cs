@@ -4,6 +4,7 @@ using FoldEngine.Components;
 using FoldEngine.Interfaces;
 using FoldEngine.Systems;
 using Sandbox.Components;
+using Woofer;
 
 namespace FoldEngine.Editor.Systems {
     [GameSystem("fold:editor.entities", ProcessingCycles.All)]
@@ -13,16 +14,26 @@ namespace FoldEngine.Editor.Systems {
         private ComponentIterator<Transform> _transforms;
 
         private List<long> _expandedEntities = new List<long>();
-        
+
+        public override void SubscribeToEvents() {
+            base.SubscribeToEvents();
+            Subscribe<WindowSizeChangedEvent>((ref WindowSizeChangedEvent evt) => {
+                if(_panel != null) {
+                    _panel.Bounds.Height = evt.NewSize.Y;
+                    _panel.Bounds.X = evt.NewSize.X - _panel.Bounds.Width - EditorBase.SidebarMargin * 2;
+                }
+            });
+        }
+
         internal override void Initialize() {
             _transforms = Owner.Components.CreateIterator<Transform>(IterationFlags.None);
         }
 
         public override void OnRender(IRenderingUnit renderer) {
             if(!ModalVisible) return;
-            if(_panel == null) _panel = NewSidebarPanel();
+            IRenderingLayer layer = renderer.RootGroup["editor_gui"];
+            if(_panel == null) _panel = NewSidebarPanel(layer);
 
-            IRenderingLayer layer = renderer.WindowLayer;
             
             _panel.Reset();
             _panel.Label("Entities", 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
