@@ -88,12 +88,9 @@ namespace Woofer
             //     Destination = new Rectangle(new Point(50, 50), mainSize)
             // });
 
-            Groups["root"] = RootGroup = new ResizableRenderGroup(this) {
+            Groups["root"] = RootGroup = new ResizableRenderGroup(MainGroup) {
                 Size = mainSize
             };
-            RootGroup.AddDependency(new RenderGroup.Dependency() {
-                Group = MainGroup
-            });
 
             WindowSize = RootGroup.Size;
         }

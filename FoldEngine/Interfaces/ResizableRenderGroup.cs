@@ -3,7 +3,13 @@
 namespace FoldEngine.Interfaces {
     public class ResizableRenderGroup : RenderGroup {
         private Point _size;
-        public ResizableRenderGroup(IRenderingUnit renderingUnit) : base(renderingUnit) { }
+
+        public ResizableRenderGroup(RenderGroup group) : base(group.RenderingUnit) {
+            this.Dependencies.Add(new Dependency() {
+                Group = group
+            });
+            AdjustDependency(Dependencies[0]);
+        }
 
         public override Point Size {
             get => _size;
@@ -26,11 +32,6 @@ namespace FoldEngine.Interfaces {
                 int width = (int) (Size.Y / subAspectRatio);
                 dependency.Destination = new Rectangle(Size.X / 2 - width / 2, 0, width, Size.Y);
             }
-        }
-
-        public override void AddDependency(Dependency dependency) {
-            base.AddDependency(dependency);
-            AdjustDependency(dependency);
         }
 
         public override void WindowSizeChanged(Point oldSize, Point newSize) {

@@ -14,6 +14,7 @@ using Woofer;
 namespace FoldEngine.Interfaces
 {
     public interface IRenderingLayer {
+        IRenderingUnit RenderingUnit { get; }
         RenderGroup Group { get; set; }
         
         string Name { get; }
@@ -23,6 +24,7 @@ namespace FoldEngine.Interfaces
         SamplerState Sampling { get; }
 
         RenderSurface Surface { get; set; }
+        Color? Color { get; set; }
 
         Vector2 CameraToLayer(Vector2 point);
         Vector2 LayerToCamera(Vector2 point);
@@ -33,12 +35,12 @@ namespace FoldEngine.Interfaces
     }
 
     public class RenderingLayer : IRenderingLayer {
-        private readonly IRenderingUnit _renderingUnit;
+        public IRenderingUnit RenderingUnit { get; }
         public RenderGroup Group { get; set; }
         private Point _layerSize;
 
         public RenderingLayer(IRenderingUnit renderer) {
-            this._renderingUnit = renderer;
+            this.RenderingUnit = renderer;
         }
 
         public string Name { get; set; }
@@ -46,10 +48,12 @@ namespace FoldEngine.Interfaces
         public Point LayerSize {
             get => _layerSize;
             set {
-                Surface?.Target.Dispose();
-                Surface = null;
+                if(Surface != null) {
+                    Surface.Resize(value.X, value.Y);
+                } else {
+                    Surface = new RenderSurface(this, value.X, value.Y);
+                }
                 _layerSize = value;
-                Surface = new RenderSurface(_renderingUnit.Core.FoldGame.GraphicsDevice, _renderingUnit, value.X, value.Y);
             }
         }
 
@@ -58,6 +62,7 @@ namespace FoldEngine.Interfaces
         public SamplerState Sampling { get; set; } = SamplerState.PointClamp;
 
         public RenderSurface Surface { get; set; }
+        public Color? Color { get; set; }
 
 
         public Vector2 CameraToLayer(Vector2 point) {

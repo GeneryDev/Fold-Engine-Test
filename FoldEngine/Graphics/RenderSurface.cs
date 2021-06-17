@@ -14,12 +14,22 @@ namespace FoldEngine.Graphics
     public class RenderSurface
     {
         internal GraphicsDevice GraphicsDevice;
+        internal IRenderingLayer Layer;
         internal IRenderingUnit RenderingUnit;
         internal RenderTarget2D Target;
         internal TriangleBatch TriBatch;
         internal GizmoBatch GizBatch;
 
         public Point Size => new Point(Target.Width, Target.Height);
+
+        public RenderSurface(IRenderingLayer layer, int width, int height) {
+            Layer = layer;
+            GraphicsDevice = layer.RenderingUnit.Core.FoldGame.GraphicsDevice;
+            RenderingUnit = layer.RenderingUnit;
+            TriBatch = new TriangleBatch(GraphicsDevice);
+            GizBatch = new GizmoBatch(GraphicsDevice);
+            Resize(width, height);
+        }
 
         public RenderSurface(GraphicsDevice graphicsDevice, IRenderingUnit renderingUnit, int width, int height)
         {
@@ -90,7 +100,7 @@ namespace FoldEngine.Graphics
         internal void End()
         {
             GraphicsDevice.SetRenderTarget(Target);
-            GraphicsDevice.Clear(Color.Transparent);
+            GraphicsDevice.Clear(Layer?.Color ?? Color.Transparent);
             TriBatch.End();
             GizBatch.End();
         }
