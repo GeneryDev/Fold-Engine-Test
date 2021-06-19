@@ -156,9 +156,9 @@ namespace Sandbox {
 
             SceneEditor.AttachEditor(this);
 
-            SoundInstance music = Core.AudioUnit.CreateInstance("Audio/music");
-            music.Looping = true;
-            music.Play();
+            // SoundInstance music = Core.AudioUnit.CreateInstance("Audio/music");
+            // music.Looping = true;
+            // music.Play();
         }
 
         private void BuildMeshes() {

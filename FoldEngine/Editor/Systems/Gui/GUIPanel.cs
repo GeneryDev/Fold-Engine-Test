@@ -25,8 +25,7 @@ namespace FoldEngine.Editor.Systems {
 
         public Rectangle Bounds;
         
-        private int x = 0;
-        private int y = 0;
+        private Point pos = Point.Zero;
 
         public GuiPanel(GuiEnvironment environment) {
             Environment = environment;
@@ -35,8 +34,7 @@ namespace FoldEngine.Editor.Systems {
         public void Reset() {
             _children.Clear();
             _generation++;
-            x = Bounds.X;
-            y = Bounds.Y;
+            pos = Bounds.Location;
             _previousElement = null;
         }
 
@@ -57,8 +55,7 @@ namespace FoldEngine.Editor.Systems {
 
             element.Generation = this._generation;
             _children.Add(element);
-            element.Bounds.X = x;
-            element.Bounds.Y = y;
+            element.Bounds.Location = pos;
             element.Reset(this);
             _previousElement = element;
             return element;
@@ -69,8 +66,14 @@ namespace FoldEngine.Editor.Systems {
         private void EndPreviousElement() {
             if(_previousElement != null) {
                 _previousElement.AdjustSpacing(this);
-                y += _previousElement.Bounds.Height + _previousElement.Margin;        
+                pos += _previousElement.Displacement;
             }
+        }
+
+        public T Element<T>() where T : GuiElement, new() {
+            EndPreviousElement();
+            var element = NewElement<T>();
+            return element;
         }
 
         public GuiLabel Label(string label, int fontSize = 2) {
@@ -109,9 +112,6 @@ namespace FoldEngine.Editor.Systems {
             return element;
         }
 
-        public void End() {
-            EndPreviousElement();
-        }
 
         public RenderedText RenderString(string str, IRenderingUnit renderer) {
             if(!RenderedStrings.ContainsKey(str)) {
@@ -122,7 +122,8 @@ namespace FoldEngine.Editor.Systems {
             return RenderedStrings[str];
         }
 
-        public void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+        public virtual void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+            EndPreviousElement();
             _lastFrameRendered = Time.Frame;
             foreach(GuiElement element in _children) {
                 element.Render(renderer, layer);
@@ -157,7 +158,8 @@ namespace FoldEngine.Editor.Systems {
         internal int Generation;
 
         public bool Pressed => Parent.IsPressed(this);
-        
+        public virtual Point Displacement => new Point(0, Bounds.Height + Margin);
+
         public Rectangle Bounds;
         public int Margin = 8;
 

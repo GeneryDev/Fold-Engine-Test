@@ -29,17 +29,17 @@ namespace FoldEngine.Editor.Systems {
             IRenderingLayer layer = renderer.RootGroup["editor_gui"];
             if(_panel == null) _panel = NewSidebarPanel(layer);
             
-            _panel.Reset();
-            _panel.Label(Owner.Name, 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
-            _panel.Button("Save");
-            _panel.Separator();
-            _panel.Button("Entities").Action(SceneEditor.Actions.ChangeToMenu, 1);
-            _panel.Button("Systems").Action(SceneEditor.Actions.ChangeToMenu, 2);
-            _panel.Button("Edit Save Data").Action(SceneEditor.Actions.Test, 0);
-            _panel.Button("Quit");
-            _panel.End();
-
-            _panel.Render(renderer, layer);
+            // _panel.Reset();
+            // _panel.Label(Owner.Name, 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
+            // _panel.Button("Save");
+            // _panel.Separator();
+            // _panel.Button("Entities").Action(SceneEditor.Actions.ChangeToMenu, 1);
+            // _panel.Button("Systems").Action(SceneEditor.Actions.ChangeToMenu, 2);
+            // _panel.Button("Edit Save Data").Action(SceneEditor.Actions.Test, 0);
+            // _panel.Button("Quit");
+            // _panel.End();
+            //
+            // _panel.Render(renderer, layer);
         }
     }
 }

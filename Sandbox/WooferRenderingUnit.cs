@@ -28,15 +28,12 @@ namespace Woofer
                 Point oldSize = _windowSize;
                 _windowSize = value;
                 if(Core.FoldGame != null) {
-                    (Core.FoldGame.Graphics.PreferredBackBufferWidth, Core.FoldGame.Graphics.PreferredBackBufferHeight) =
-                        value;
                     if(value != oldSize) {
                         foreach(RenderGroup group in Groups.Values) {
                             group.WindowSizeChanged(oldSize, value);
                         }
                         Core.ActiveScene?.Events.Invoke(new WindowSizeChangedEvent(oldSize, value));
                     }
-                    Core.FoldGame.Graphics.ApplyChanges();
                 }
             }
         }
@@ -82,23 +79,6 @@ namespace Woofer
 
             var fullSize = new Point(1920, 1040);
 
-            // Groups["editor"] = RootGroup = new RenderGroup(this) {
-            //     Size = fullSize
-            // };
-            // RootGroup.AddDependency(new RenderGroup.Dependency() {
-            //     Group = MainGroup,
-            //     Destination = new Rectangle(new Point(50, 50), mainSize)
-            // });
-
-            // Groups["root"] = RootGroup = new ResizableRenderGroup(MainGroup) {
-            //     Size = mainSize,
-            //     ["editor_gui"] = new RenderingLayer(this) {
-            //         Name = "editor_gui", LayerSize = mainSize, Destination = new Rectangle(Point.Zero, mainSize),
-            //         FitToWindow = true,
-            //         LogicalSize = mainSize.ToVector2()
-            //     }
-            // };
-            
             
             Groups["editor"] = RootGroup = new RenderGroup(this) {
                 Size = mainSize,
@@ -117,6 +97,13 @@ namespace Woofer
             
 
             WindowSize = RootGroup.Size;
+            UpdateWindowSize();
+        }
+
+        public void UpdateWindowSize() {
+            (Core.FoldGame.Graphics.PreferredBackBufferWidth, Core.FoldGame.Graphics.PreferredBackBufferHeight) =
+                WindowSize;
+            Core.FoldGame.Graphics.ApplyChanges();
         }
 
         public void LoadContent() {

@@ -35,23 +35,23 @@ namespace FoldEngine.Editor.Systems {
             if(_panel == null) _panel = NewSidebarPanel(layer);
 
             
-            _panel.Reset();
-            _panel.Label("Entities", 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
-            _panel.Button("Back").Action(SceneEditor.Actions.ChangeToMenu, 0);
-            _panel.Button("New Entity");
-            _panel.Separator();
-            
-            _transforms.Reset();
-            while(_transforms.Next()) {
-                ref Transform current = ref _transforms.GetComponent();
-                if(!current.Parent.IsNotNull) {
-                    RenderEntity(ref current, renderer, layer);
-                }
-            }
-            
-            _panel.End();
-
-            _panel.Render(renderer, layer);
+            // _panel.Reset();
+            // _panel.Label("Entities", 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
+            // _panel.Button("Back").Action(SceneEditor.Actions.ChangeToMenu, 0);
+            // _panel.Button("New Entity");
+            // _panel.Separator();
+            //
+            // _transforms.Reset();
+            // while(_transforms.Next()) {
+            //     ref Transform current = ref _transforms.GetComponent();
+            //     if(!current.Parent.IsNotNull) {
+            //         RenderEntity(ref current, renderer, layer);
+            //     }
+            // }
+            //
+            // _panel.End();
+            //
+            // _panel.Render(renderer, layer);
         }
 
         private void RenderEntity(ref Transform transform, IRenderingUnit renderer, IRenderingLayer layer, int depth = 0) {

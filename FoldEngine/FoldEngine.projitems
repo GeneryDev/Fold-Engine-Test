@@ -28,6 +28,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\EditorModal.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\EditorEntitiesList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\EditorSystemsList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\Gui\EditorEnvironment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\Gui\GUIPanel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\Gui\GuiEnvironment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Events\Event.cs" />

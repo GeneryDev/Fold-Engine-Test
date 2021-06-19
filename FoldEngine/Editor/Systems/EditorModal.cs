@@ -16,10 +16,11 @@ namespace FoldEngine.Editor.Systems {
         }
 
         public GuiPanel NewSidebarPanel(IRenderingLayer layer) {
-            return Owner.Systems.Get<EditorBase>().Environment.Panel(new Rectangle(layer.LayerSize.X - EditorBase.SidebarWidth + EditorBase.SidebarMargin * 2,
-                EditorBase.SidebarMargin,
-                EditorBase.SidebarWidth - EditorBase.SidebarMargin * 2 * 2,
-                720 - EditorBase.SidebarMargin * 2));
+            return null;
+            // return Owner.Systems.Get<EditorBase>().Environment.Panel(new Rectangle(layer.LayerSize.X - EditorBase.SidebarWidth + EditorBase.SidebarMargin * 2,
+            //     EditorBase.SidebarMargin,
+            //     EditorBase.SidebarWidth - EditorBase.SidebarMargin * 2 * 2,
+            //     720 - EditorBase.SidebarMargin * 2));
         }
     }
 

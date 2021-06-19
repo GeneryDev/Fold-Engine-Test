@@ -22,5 +22,15 @@ namespace EntryProject.Util {
             vec.Normalize();
             return vec;
         }
+
+        public static Rectangle Grow(this Rectangle rectangle, int amount) {
+            (int x, int y, int width, int height) = rectangle;
+            return new Rectangle(
+                x - amount,
+                y - amount,
+                width + amount*2,
+                height + amount*2
+            );
+        }
     }
 }

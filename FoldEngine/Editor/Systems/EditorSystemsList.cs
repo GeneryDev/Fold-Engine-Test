@@ -24,19 +24,19 @@ namespace FoldEngine.Editor.Systems {
             IRenderingLayer layer = renderer.RootGroup["editor_gui"];
             if(_panel == null) _panel = NewSidebarPanel(layer);
 
-            _panel.Reset();
-            _panel.Label("Systems", 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
-            _panel.Button("Back").Action(SceneEditor.Actions.ChangeToMenu, 0);
-            _panel.Button("Add System");
-            _panel.Separator();
-
-            foreach(GameSystem sys in Owner.Systems.AllSystems) {
-                _panel.Button(sys.SystemName).TextAlignment(-1);
-            }
-            
-            _panel.End();
-
-            _panel.Render(renderer, layer);
+            // _panel.Reset();
+            // _panel.Label("Systems", 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
+            // _panel.Button("Back").Action(SceneEditor.Actions.ChangeToMenu, 0);
+            // _panel.Button("Add System");
+            // _panel.Separator();
+            //
+            // foreach(GameSystem sys in Owner.Systems.AllSystems) {
+            //     _panel.Button(sys.SystemName).TextAlignment(-1);
+            // }
+            //
+            // _panel.End();
+            //
+            // _panel.Render(renderer, layer);
         }
     }
 }
