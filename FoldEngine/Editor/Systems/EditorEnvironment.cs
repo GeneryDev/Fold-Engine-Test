@@ -14,7 +14,7 @@ namespace FoldEngine.Editor.Views {
         public const int FrameMargin = 8;
         
         public sealed override List<GuiPanel> VisiblePanels { get; } = new List<GuiPanel>();
-        private Dictionary<string, EditorView> AllViews = new Dictionary<string, EditorView>();
+        public Dictionary<Type, EditorView> AllViews = new Dictionary<Type, EditorView>();
 
         public int SizeNorth {
             get => _sizeNorth;
@@ -84,7 +84,7 @@ namespace FoldEngine.Editor.Views {
         public ViewListPanel DropTarget { get; set; }
 
         public bool LayoutValidated = false;
-        private int _sizeNorth = 50;
+        private int _sizeNorth = 96;
         private int _sizeSouth = 128;
         private int _sizeWest = 256;
         private int _sizeEast = 256;
@@ -100,27 +100,6 @@ namespace FoldEngine.Editor.Views {
         public BorderPanel EastPanel;
 
         public EditorEnvironment() {
-            PerformAction = (int actionId, long data) => {
-                switch(actionId) {
-                    case SceneEditor.Actions.ChangeToMenu: {
-                        Console.WriteLine($"Change to view {data}");
-                        // Owner.Events.Invoke(new ForceModalChangeEvent(_modalTypes[(int) data]));
-                        break;
-                    }
-                    case SceneEditor.Actions.Save: {
-                        Console.WriteLine("Save");
-                        break;
-                    }
-                    case SceneEditor.Actions.ExpandCollapseEntity: {
-                        // Owner.Systems.Get<EditorEntitiesList>().ExpandCollapseEntity(data);
-                        break;
-                    }
-                    case SceneEditor.Actions.Test: {
-                        // Owner.Core.CommandQueue.Enqueue(new SetWindowSizeCommand(new Point(1920, 1040)));
-                        break;
-                    }
-                }
-            };
             
             NorthPanel = new BorderPanel(this, -Vector2.UnitY);
             SouthPanel = new BorderPanel(this, Vector2.UnitY);
@@ -214,22 +193,18 @@ namespace FoldEngine.Editor.Views {
             });
         }
 
-        public void AddView<T>(Scene scene) where T : EditorView, new() {
+        public void AddView<T>(Scene scene, BorderPanel preferredPanel = null) where T : EditorView, new() {
             T view = new T();
             view.Scene = scene;
             view.Initialize();
 
-            AllViews[view.Name] = view;
-            // EastPanel.ViewLists[0].Views.Add(view);
-            if(NorthPanel.ViewLists[0].Views.Count == 0) {
-                NorthPanel.ViewLists[0].Views.Add(view);
-            } else if(EastPanel.ViewLists[0].Views.Count == 0) {
-                EastPanel.ViewLists[0].Views.Add(view);
-            } else if(SouthPanel.ViewLists[0].Views.Count == 0) {
-                SouthPanel.ViewLists[0].Views.Add(view);
-            } else if(WestPanel.ViewLists[0].Views.Count == 0) {
-                WestPanel.ViewLists[0].Views.Add(view);
-            }
+            AllViews[view.GetType()] = view;
+
+            preferredPanel?.ViewLists[0].AddView(view);
+        }
+
+        public T GetView<T>() where T : EditorView {
+            return AllViews[typeof(T)] as T;
         }
     }
 
@@ -246,8 +221,8 @@ namespace FoldEngine.Editor.Views {
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
             Reset();
-            Element<GuiResizer>().Side(-Side);
 
+            
             for(int i = 0; i < ViewLists.Count; i++) {
                 ViewListPanel viewList = ViewLists[i];
                 ResetLayoutPosition();
@@ -255,9 +230,13 @@ namespace FoldEngine.Editor.Views {
                 Element(viewList);
                 viewList.Bounds = Bounds;
                 viewList.Bounds.Width = Bounds.Width / ViewLists.Count;
-                viewList.Bounds = viewList.Bounds.Grow(-EditorEnvironment.FrameMargin);
+                viewList.Bounds = viewList.Bounds.Grow(-EditorEnvironment.FrameBorder);
                 viewList.Render(renderer, layer);
             }
+            
+            ResetLayoutPosition();
+            
+            Element<GuiResizer>().Side(-Side);
             
             base.Render(renderer, layer);
         }
@@ -274,6 +253,11 @@ namespace FoldEngine.Editor.Views {
             if(Environment is EditorEnvironment editorEnvironment && Bounds.Contains(Environment.MousePos)) {
                 editorEnvironment.DropTarget = this;
             }
+            layer.Surface.Draw(new DrawRectInstruction() {
+                Texture = renderer.WhiteTexture,
+                Color = new Color(45, 45, 48),
+                DestinationRectangle = new Rectangle(Bounds.X, Bounds.Y, Bounds.Width, ViewTab.TabHeight)
+            });
             
             Reset();
             foreach(EditorView view in Views) {
@@ -344,6 +328,7 @@ namespace FoldEngine.Editor.Views {
                 Bounds.Height = EditorEnvironment.FrameMargin;
                 if(_side.Y > 0) Bounds.Y += parent.Bounds.Height - Bounds.Height;
             }
+            
         }
         
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {

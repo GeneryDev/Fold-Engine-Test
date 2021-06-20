@@ -11,18 +11,10 @@ namespace FoldEngine.Editor.Views {
 
     [GameSystem("fold:editor.base", ProcessingCycles.All)]
     public class EditorBase : GameSystem {
-        public const int SidebarX = 1280 * 4 / 5;
-        public const int SidebarWidth = 1280 / 5;
-
-        public const int SidebarMargin = 4;
-
         // public override bool ShouldSave => false;
         
         public EditorEnvironment Environment;
         
-        private Type[] _modalTypes = new Type[] {typeof(EditorMenuView), typeof(EditorHierarchyView), typeof(EditorSystemsView)};
-        private bool ReadjustViewport;
-
         public override void SubscribeToEvents() {
             Subscribe<WindowSizeChangedEvent>((ref WindowSizeChangedEvent evt) => {
                 Environment.LayoutValidated = false;
@@ -32,9 +24,10 @@ namespace FoldEngine.Editor.Views {
         internal override void Initialize() {
             Environment = new EditorEnvironment();
 
-            Environment.AddView<EditorMenuView>(Owner);
-            Environment.AddView<EditorHierarchyView>(Owner);
-            Environment.AddView<EditorSystemsView>(Owner);
+            Environment.AddView<EditorMenuView>(Owner, Environment.NorthPanel);
+            Environment.AddView<EditorHierarchyView>(Owner, Environment.WestPanel);
+            Environment.AddView<EditorSystemsView>(Owner, Environment.WestPanel);
+            Environment.AddView<EditorInspectorView>(Owner, Environment.EastPanel);
         }
 
         public override void OnInput() {

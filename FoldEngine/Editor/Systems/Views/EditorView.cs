@@ -11,6 +11,6 @@ namespace FoldEngine.Editor.Views {
         public abstract string Name { get; }
 
         public virtual void Initialize() { }
-        public abstract void Render(IRenderingUnit renderingUnit);
+        public abstract void Render(IRenderingUnit renderer);
     }
 }

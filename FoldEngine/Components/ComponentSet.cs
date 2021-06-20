@@ -12,16 +12,22 @@ namespace FoldEngine.Components {
         public abstract bool Has(int entityId);
         public abstract void Remove(int entityId);
         public abstract void CreateFor(int entityId);
+        
+        public abstract object BoxedGet(int entityId);
+        public abstract void BoxedSet(int entityId, object component);
 
         public Type WorkingType => this.GetType();
         public abstract void Serialize(SaveOperation writer);
         public abstract void Deserialize(LoadOperation reader);
 
+        public abstract Type ComponentType { get; }
     }
 
 
     public class ComponentSet<T> : ComponentSet where T : struct {
         private const int StartingDenseSize = 16;
+
+        public override Type ComponentType => typeof(T);
 
         internal readonly Scene Scene;
 
@@ -74,6 +80,14 @@ namespace FoldEngine.Components {
 
         public override void CreateFor(int entityId) {
             Create(entityId);
+        }
+
+        public override object BoxedGet(int entityId) {
+            return Get(entityId);
+        }
+
+        public override void BoxedSet(int entityId, object component) {
+            throw new NotImplementedException();
         }
 
         public ref T Create(int entityId) {

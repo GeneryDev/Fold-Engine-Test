@@ -15,7 +15,6 @@ namespace FoldEngine.Editor.Views {
 
         private GuiPanel _pressedPanel;
         
-        public ActionPerformer PerformAction;
         public IRenderingUnit Renderer { get; set; }
         public IRenderingLayer Layer { get; set; }
 
@@ -50,7 +49,5 @@ namespace FoldEngine.Editor.Views {
             Renderer = renderer;
             Layer = layer;
         }
-
-        public delegate void ActionPerformer(int actionId, long data);
     }
 }

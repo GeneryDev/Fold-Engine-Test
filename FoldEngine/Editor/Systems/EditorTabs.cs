@@ -25,9 +25,9 @@ namespace FoldEngine.Editor {
 
         public override void AdjustSpacing(GuiPanel parent) {
             _renderedName = Parent.RenderString(_view.Name);
-            Bounds.Width = 16 + (int)_renderedName.Width;
-            Bounds.Height = TabHeight;
             Margin = 2;
+            Bounds.Width = 16 + (int)_renderedName.Width + Margin*2;
+            Bounds.Height = TabHeight;
         }
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
@@ -49,10 +49,12 @@ namespace FoldEngine.Editor {
             if(_dragging) {
                 renderingBounds = new Rectangle(Bounds.Location - Bounds.Center + Parent.Environment.MousePos, Bounds.Size);
             }
+
+            Color defaultColor = _viewList.ActiveView == _view ? new Color(37, 37, 38) : Color.Transparent;
             
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
-                Color = Pressed ? new Color(63, 63, 70) : Bounds.Contains(Parent.Environment.MousePos) ? Color.CornflowerBlue : new Color(37, 37, 38),
+                Color = Pressed ? new Color(63, 63, 70) : Bounds.Contains(Parent.Environment.MousePos) ? Color.CornflowerBlue : defaultColor,
                 DestinationRectangle = renderingBounds
             });
             

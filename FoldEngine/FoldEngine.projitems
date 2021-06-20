@@ -29,6 +29,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\Gui\GUIPanel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\Gui\GuiEnvironment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\Views\EditorHierarchyView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\Views\EditorInspectorView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\Views\EditorMenuView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\Views\EditorSystemsView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\Views\EditorView.cs" />
