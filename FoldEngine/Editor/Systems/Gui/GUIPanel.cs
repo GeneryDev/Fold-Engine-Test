@@ -7,8 +7,8 @@ using FoldEngine.Text;
 using Microsoft.Xna.Framework;
 using Mouse = Microsoft.Xna.Framework.Input.Mouse;
 
-namespace FoldEngine.Editor.Systems {
-    public class GuiPanel {
+namespace FoldEngine.Editor.Views {
+    public class GuiPanel : GuiElement {
         public GuiEnvironment Environment;
         public Dictionary<string, RenderedText> RenderedStrings = new Dictionary<string,RenderedText>();
         public bool Focused = true;
@@ -23,9 +23,7 @@ namespace FoldEngine.Editor.Systems {
         private List<GuiElement> _objectPool = new List<GuiElement>();
         private int _generation = 0;
 
-        public Rectangle Bounds;
-        
-        private Point pos = Point.Zero;
+        public Point LayoutPosition = Point.Zero;
 
         public GuiPanel(GuiEnvironment environment) {
             Environment = environment;
@@ -34,8 +32,12 @@ namespace FoldEngine.Editor.Systems {
         public void Reset() {
             _children.Clear();
             _generation++;
-            pos = Bounds.Location;
+            LayoutPosition = Bounds.Location;
             _previousElement = null;
+        }
+
+        public void ResetLayoutPosition() {
+            LayoutPosition = Bounds.Location;
         }
 
         private T NewElement<T>() where T : GuiElement, new() {
@@ -53,12 +55,16 @@ namespace FoldEngine.Editor.Systems {
                 _objectPool.Add(element);
             }
 
+            PrepareElement(element);
+            return element;
+        }
+
+        private void PrepareElement(GuiElement element) {
             element.Generation = this._generation;
             _children.Add(element);
-            element.Bounds.Location = pos;
+            element.Bounds.Location = LayoutPosition;
             element.Reset(this);
             _previousElement = element;
-            return element;
         }
 
         private GuiElement _previousElement;
@@ -66,7 +72,7 @@ namespace FoldEngine.Editor.Systems {
         private void EndPreviousElement() {
             if(_previousElement != null) {
                 _previousElement.AdjustSpacing(this);
-                pos += _previousElement.Displacement;
+                LayoutPosition += _previousElement.Displacement;
             }
         }
 
@@ -74,6 +80,13 @@ namespace FoldEngine.Editor.Systems {
             EndPreviousElement();
             var element = NewElement<T>();
             return element;
+        }
+
+        public T Element<T>(T existing) where T : GuiElement {
+            EndPreviousElement();
+            existing.Parent = this;
+            PrepareElement(existing);
+            return existing;
         }
 
         public GuiLabel Label(string label, int fontSize = 2) {
@@ -113,26 +126,32 @@ namespace FoldEngine.Editor.Systems {
         }
 
 
-        public RenderedText RenderString(string str, IRenderingUnit renderer) {
+        public RenderedText RenderString(string str) {
             if(!RenderedStrings.ContainsKey(str)) {
-                renderer.Fonts["default"].RenderString(str, out RenderedText rendered);
+                Environment.Renderer.Fonts["default"].RenderString(str, out RenderedText rendered);
                 RenderedStrings[str] = rendered;
                 return rendered;
             }
             return RenderedStrings[str];
         }
 
-        public virtual void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+        public override void Reset(GuiPanel parent) {
+        }
+
+        public override void AdjustSpacing(GuiPanel parent) {
+        }
+
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
             EndPreviousElement();
             _lastFrameRendered = Time.Frame;
             foreach(GuiElement element in _children) {
-                element.Render(renderer, layer);
+                if(element.Bounds.Intersects(Bounds)) element.Render(renderer, layer);
             }
         }
 
         private GuiElement _pressedElement;
 
-        protected internal void OnMousePressed(Point pos) {
+        public override void OnMousePressed(Point pos) {
             for(int i = _children.Count - 1; i >= 0; i--) {
                 GuiElement element = _children[i];
                 if(element.Bounds.Contains(pos)) {
@@ -143,7 +162,7 @@ namespace FoldEngine.Editor.Systems {
             }
         }
 
-        public void OnMouseReleased(Point pos) {
+        public override void OnMouseReleased(Point pos) {
             _pressedElement?.OnMouseReleased(pos);
             _pressedElement = null;
         }
@@ -193,7 +212,7 @@ namespace FoldEngine.Editor.Systems {
         }
         
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
-            RenderedText rendered = Parent.RenderString(Text, renderer);
+            RenderedText rendered = Parent.RenderString(Text);
 
             int totalWidth = (int) (rendered.Width*_fontSize);
             if(_icon != null) {
@@ -354,7 +373,7 @@ namespace FoldEngine.Editor.Systems {
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
             var color = new Color(45, 45, 48);
             if(_label != null) {
-                RenderedText rendered = Parent.RenderString(_label, renderer);
+                RenderedText rendered = Parent.RenderString(_label);
 
                 int lineWidth = (int) ((Bounds.Width - rendered.Width * _fontSize) / 2) - 2 * _fontSize;
                 

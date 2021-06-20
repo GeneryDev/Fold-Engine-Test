@@ -4,15 +4,17 @@ using EntryProject.Util;
 using FoldEngine.Commands;
 using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
+using FoldEngine.Scenes;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Editor.Systems {
+namespace FoldEngine.Editor.Views {
     public class EditorEnvironment : GuiEnvironment {
 
         public const int FrameBorder = 4;
         public const int FrameMargin = 8;
         
         public sealed override List<GuiPanel> VisiblePanels { get; } = new List<GuiPanel>();
+        private Dictionary<string, EditorView> AllViews = new Dictionary<string, EditorView>();
 
         public int SizeNorth {
             get => _sizeNorth;
@@ -78,6 +80,9 @@ namespace FoldEngine.Editor.Systems {
             }
         }
 
+        public ViewTab DraggingViewTab { get; set; }
+        public ViewListPanel DropTarget { get; set; }
+
         public bool LayoutValidated = false;
         private int _sizeNorth = 50;
         private int _sizeSouth = 128;
@@ -89,10 +94,10 @@ namespace FoldEngine.Editor.Systems {
         private bool _cornerBiasSouthWest = true;
         private bool _cornerBiasSouthEast = false;
         
-        public GuiPanel NorthPanel;
-        public GuiPanel SouthPanel;
-        public GuiPanel WestPanel;
-        public GuiPanel EastPanel;
+        public BorderPanel NorthPanel;
+        public BorderPanel SouthPanel;
+        public BorderPanel WestPanel;
+        public BorderPanel EastPanel;
 
         public EditorEnvironment() {
             PerformAction = (int actionId, long data) => {
@@ -130,6 +135,8 @@ namespace FoldEngine.Editor.Systems {
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
             base.Render(renderer, layer);
+
+            DropTarget = null;
 
             {
                 var bounds = new Rectangle(0, 0, layer.LayerSize.X, SizeNorth);
@@ -184,6 +191,8 @@ namespace FoldEngine.Editor.Systems {
                 RenderBackground(bounds, renderer, layer);
                 EastPanel.Render(renderer, layer);
             }
+            
+            DraggingViewTab?.Render(renderer, layer);
 
             if(!LayoutValidated) {
                 renderer.Groups["editor"].Dependencies[0].Group.Size = new Point(renderer.WindowSize.X - SizeWest - SizeEast, renderer.WindowSize.Y - SizeNorth - SizeSouth);
@@ -204,30 +213,113 @@ namespace FoldEngine.Editor.Systems {
                 Color = new Color(37, 37, 38)
             });
         }
+
+        public void AddView<T>(Scene scene) where T : EditorView, new() {
+            T view = new T();
+            view.Scene = scene;
+            view.Initialize();
+
+            AllViews[view.Name] = view;
+            // EastPanel.ViewLists[0].Views.Add(view);
+            if(NorthPanel.ViewLists[0].Views.Count == 0) {
+                NorthPanel.ViewLists[0].Views.Add(view);
+            } else if(EastPanel.ViewLists[0].Views.Count == 0) {
+                EastPanel.ViewLists[0].Views.Add(view);
+            } else if(SouthPanel.ViewLists[0].Views.Count == 0) {
+                SouthPanel.ViewLists[0].Views.Add(view);
+            } else if(WestPanel.ViewLists[0].Views.Count == 0) {
+                WestPanel.ViewLists[0].Views.Add(view);
+            }
+        }
     }
 
     public class BorderPanel : GuiPanel {
 
         public Vector2 Side;
+
+        public List<ViewListPanel> ViewLists = new List<ViewListPanel>();
         
         public BorderPanel(EditorEnvironment editorEnvironment, Vector2 side) : base(editorEnvironment) {
             this.Side = side;
+            ViewLists.Add(new ViewListPanel(editorEnvironment));
         }
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
             Reset();
             Element<GuiResizer>().Side(-Side);
-            if(Side == Vector2.UnitX) {
-                Label("Owner.Name", 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
-                Button("Save");
-                Separator();
-                Button("Entities").Action(SceneEditor.Actions.ChangeToMenu, 1);
-                Button("Systems").Action(SceneEditor.Actions.ChangeToMenu, 2);
-                Button("Edit Save Data").Action(SceneEditor.Actions.Test, 0);
-                Button("Quit");
+
+            for(int i = 0; i < ViewLists.Count; i++) {
+                ViewListPanel viewList = ViewLists[i];
+                ResetLayoutPosition();
+                LayoutPosition.X += i * Bounds.Width / ViewLists.Count;
+                Element(viewList);
+                viewList.Bounds = Bounds;
+                viewList.Bounds.Width = Bounds.Width / ViewLists.Count;
+                viewList.Bounds = viewList.Bounds.Grow(-EditorEnvironment.FrameMargin);
+                viewList.Render(renderer, layer);
             }
             
             base.Render(renderer, layer);
+        }
+    }
+
+    public class ViewListPanel : GuiPanel {
+        
+        public List<EditorView> Views = new List<EditorView>();
+        public EditorView ActiveView = null;
+        
+        public ViewListPanel(GuiEnvironment environment) : base(environment) { }
+
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+            if(Environment is EditorEnvironment editorEnvironment && Bounds.Contains(Environment.MousePos)) {
+                editorEnvironment.DropTarget = this;
+            }
+            
+            Reset();
+            foreach(EditorView view in Views) {
+                Element<ViewTab>().View(view, this);
+            }
+            ResetLayoutPosition();
+
+            if(ActiveView == null && Views.Count > 0) {
+                ActiveView = Views[0];
+            }
+
+            if(ActiveView != null) {
+                if(ActiveView.ContentPanel == null) {
+                    ActiveView.ContentPanel = new GuiPanel(Environment);
+                }
+                
+                Element(ActiveView.ContentPanel);
+
+                ActiveView.ContentPanel.Bounds = Bounds;
+                ActiveView.ContentPanel.Bounds.Y += ViewTab.TabHeight;
+                ActiveView.ContentPanel.Bounds.Height -= ViewTab.TabHeight;
+                ActiveView.ContentPanel.Bounds = ActiveView.ContentPanel.Bounds.Grow(-EditorEnvironment.FrameMargin);
+
+                
+                ActiveView.ContentPanel.Reset();
+                ActiveView.Render(renderer);
+                ActiveView.ContentPanel.Render(renderer, layer);
+            }
+            
+            base.Render(renderer, layer);
+        }
+
+        public void AddView(EditorView view) {
+            Views.Add(view);
+            ActiveView = view;
+        }
+
+        public void RemoveView(EditorView view) {
+            Views.Remove(view);
+            if(ActiveView == view) {
+                if(Views.Count > 0) {
+                    ActiveView = Views[Views.Count - 1];
+                } else {
+                    ActiveView = null;
+                }
+            }
         }
     }
 
@@ -293,9 +385,6 @@ namespace FoldEngine.Editor.Systems {
         public GuiResizer Side(Vector2 side) {
             _side = side;
             return this;
-        }
-
-        public override void OnMousePressed(Point pos) {
         }
     }
 }

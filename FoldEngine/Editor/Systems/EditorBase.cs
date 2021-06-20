@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Woofer;
 
-namespace FoldEngine.Editor.Systems {
+namespace FoldEngine.Editor.Views {
 
     [GameSystem("fold:editor.base", ProcessingCycles.All)]
     public class EditorBase : GameSystem {
@@ -20,7 +20,7 @@ namespace FoldEngine.Editor.Systems {
         
         public EditorEnvironment Environment;
         
-        private Type[] _modalTypes = new Type[] {typeof(EditorMenu), typeof(EditorEntitiesList), typeof(EditorSystemsList)};
+        private Type[] _modalTypes = new Type[] {typeof(EditorMenuView), typeof(EditorHierarchyView), typeof(EditorSystemsView)};
         private bool ReadjustViewport;
 
         public override void SubscribeToEvents() {
@@ -31,6 +31,10 @@ namespace FoldEngine.Editor.Systems {
 
         internal override void Initialize() {
             Environment = new EditorEnvironment();
+
+            Environment.AddView<EditorMenuView>(Owner);
+            Environment.AddView<EditorHierarchyView>(Owner);
+            Environment.AddView<EditorSystemsView>(Owner);
         }
 
         public override void OnInput() {

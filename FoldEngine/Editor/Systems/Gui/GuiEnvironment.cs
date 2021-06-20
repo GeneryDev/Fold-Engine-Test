@@ -5,7 +5,7 @@ using FoldEngine.Interfaces;
 using Microsoft.Xna.Framework;
 using Mouse = Microsoft.Xna.Framework.Input.Mouse;
 
-namespace FoldEngine.Editor.Systems {
+namespace FoldEngine.Editor.Views {
     public abstract class GuiEnvironment {
         public Point MousePos;
         public ButtonAction MouseLeft = ButtonAction.Default;
@@ -16,6 +16,7 @@ namespace FoldEngine.Editor.Systems {
         private GuiPanel _pressedPanel;
         
         public ActionPerformer PerformAction;
+        public IRenderingUnit Renderer { get; set; }
         public IRenderingLayer Layer { get; set; }
 
         public virtual void Input(InputUnit inputUnit) {
@@ -46,6 +47,7 @@ namespace FoldEngine.Editor.Systems {
         }
 
         public virtual void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+            Renderer = renderer;
             Layer = layer;
         }
 

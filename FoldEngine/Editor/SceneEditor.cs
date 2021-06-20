@@ -1,5 +1,5 @@
 ﻿using FoldEngine.Commands;
-using FoldEngine.Editor.Systems;
+using FoldEngine.Editor.Views;
 using FoldEngine.Scenes;
 
 namespace FoldEngine.Editor {
@@ -9,9 +9,6 @@ namespace FoldEngine.Editor {
             // scene.Core.Paused = true;
 
             scene.Systems.Add<EditorBase>();
-            scene.Systems.Add<EditorMenu>();
-            scene.Systems.Add<EditorEntitiesList>();
-            scene.Systems.Add<EditorSystemsList>();
         }
 
         public static class Actions {
