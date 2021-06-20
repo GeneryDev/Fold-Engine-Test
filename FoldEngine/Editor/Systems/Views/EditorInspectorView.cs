@@ -9,6 +9,8 @@ namespace FoldEngine.Editor.Views {
         public override string Name => "Inspector";
 
         private long _id = -1;
+
+        public static object LastObject = null;
         
         public override void Render(IRenderingUnit renderer) {
             if(_id != -1) {
@@ -23,8 +25,10 @@ namespace FoldEngine.Editor.Views {
                         ContentPanel.Label(set.ComponentType.Name, 2).TextAlignment(-1);
                         
                         foreach(FieldInfo fieldInfo in set.ComponentType.GetFields()) {
-                            object value = fieldInfo.GetValue(set.BoxedGet((int)_id));
-                            ContentPanel.Label($"{fieldInfo.Name}: {value}", 1).TextAlignment(-1);
+                            // object value = fieldInfo.GetValue(set.BoxedGet((int)_id));
+                            // LastObject = value;
+                            // Console.WriteLine();
+                            ContentPanel.Label($"{fieldInfo.Name}", 1).TextAlignment(-1).UseTextCache(false);
                         }
                     }
                 }

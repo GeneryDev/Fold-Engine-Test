@@ -136,6 +136,14 @@ namespace FoldEngine.Editor.Views {
             }
             return RenderedStrings[str];
         }
+        public RenderedText DrawString(string str, RenderSurface surface, Point start, Color color, float size = 1) {
+            Environment.Renderer.Fonts["default"].DrawString(str, surface, start, color, size);
+            // if(!RenderedStrings.ContainsKey(str)) {
+                // if(useCache) RenderedStrings[str] = rendered;
+                // return rendered;
+            // }
+            return RenderedStrings[str];
+        }
 
         public override void Reset(GuiPanel parent) {
         }
@@ -216,9 +224,12 @@ namespace FoldEngine.Editor.Views {
         }
         
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
-            RenderedText rendered = Parent.RenderString(_text, _cacheRendered);
+            RenderedText renderedText = _cacheRendered ? Parent.RenderString(_text) : default;
+            if(!renderedText.HasValue) TextRenderer.Instance.Start(renderer.Fonts["default"], _text);
 
-            int totalWidth = (int) (rendered.Width*_fontSize);
+            float textWidth = renderedText.HasValue ? renderedText.Width : TextRenderer.Instance.Width;
+
+            int totalWidth = (int) (textWidth*_fontSize);
             if(_icon != null) {
                 totalWidth += _iconSize.X;
                 totalWidth += 8;
@@ -247,7 +258,8 @@ namespace FoldEngine.Editor.Views {
                 x += _iconSize.X;
                 x += 8;
             }
-            rendered.DrawOnto(layer.Surface, new Point(x, Bounds.Center.Y + 3 * _fontSize), Color.White, _fontSize);
+            if(renderedText.HasValue) renderedText.DrawOnto(layer.Surface, new Point(x, Bounds.Center.Y + 3 * _fontSize), Color.White, _fontSize);
+            else TextRenderer.Instance.DrawOnto(layer.Surface, new Point(x, Bounds.Center.Y + 3 * _fontSize), Color.White, _fontSize);
         }
 
         public GuiLabel Text(string text) {

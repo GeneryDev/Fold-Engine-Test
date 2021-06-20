@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using FoldEngine.Graphics;
 using Microsoft.Xna.Framework;
 
@@ -15,6 +16,30 @@ namespace FoldEngine.Text {
         private readonly List<List<RenderedTextGlyph>> _lines = new List<List<RenderedTextGlyph>>();
         private List<RenderedTextGlyph> _currentLine;
         private int _linesRendered;
+        
+        public float Width {
+            get {
+                float width = 0;
+                foreach(List<RenderedTextGlyph> line in _lines) {
+                    float lineWidth = 0;
+                    float minX = float.PositiveInfinity;
+                    float maxX = float.NegativeInfinity;
+
+                    foreach(RenderedTextGlyph glyph in line) {
+                        minX = Math.Min(minX, glyph.Destination.Left);
+                        maxX = Math.Max(maxX, glyph.Destination.Right);
+                    }
+
+                    if(minX.Equals(float.PositiveInfinity)) return 0;
+
+                    lineWidth += maxX - minX;
+                    
+                    width = Math.Max(width, lineWidth);
+                }
+
+                return width;
+            }
+        }
 
         public TextRenderer() {
             _lines.Add(new List<RenderedTextGlyph>());
@@ -107,7 +132,7 @@ namespace FoldEngine.Text {
 
         public void DrawOnto(RenderSurface surface, Point start, Color color, float size = 1) {
             for(int i = 0; i < _linesRendered; i++) {
-                foreach(var glyph in _lines[i]) {
+                foreach(RenderedTextGlyph glyph in _lines[i]) {
                     glyph.DrawOnto(surface, start, color, size, _font);
                 }
             }
