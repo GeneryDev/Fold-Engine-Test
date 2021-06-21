@@ -15,7 +15,7 @@ namespace FoldEngine.Editor.Views {
 
         private long _id = -1;
 
-        
+        private static readonly StringBuilder StringBuilder = new StringBuilder();
         
         public override void Render(IRenderingUnit renderer) {
             ContentPanel.MayScroll = true;
@@ -25,24 +25,31 @@ namespace FoldEngine.Editor.Views {
                 ContentPanel.Spacing(12);
 
                 foreach(ComponentSet set in Scene.Components.Sets.Values) {
-                    if(set.ComponentType == typeof(EntityName)) continue;
+                    // if(set.ComponentType == typeof(EntityName)) continue;
                     if(set.Has((int) _id)) {
-                        ContentPanel.Separator();
-                        ContentPanel.Label(set.ComponentType.Name, 2).TextAlignment(-1);
+                        ComponentInfo componentInfo = ComponentInfo.Get(set.ComponentType);
+                        if(componentInfo.HideInInspector) continue;
                         
-                        foreach(FieldInfo fieldInfo in set.ComponentType.GetFields()) {
-                            object value = set.GetFieldValue((int) _id, fieldInfo);
+                        ContentPanel.Separator();
+                        
+
+                        ContentPanel.Label(componentInfo.Name, 2).TextAlignment(-1);
+                        
+                        foreach(ComponentMember member in componentInfo.Members) {
+                            object value = set.GetFieldValue((int) _id, member.FieldInfo);
                             ContentPanel
                                 .Label(
-                                    new StringBuilder(fieldInfo.Name)
-                                        .Append(StringUtil.Repeat(" ", Math.Max(0, 32 - fieldInfo.Name.Length)))
+                                    StringBuilder
+                                        .Clear()
+                                        .Append(member.Name)
+                                        .Append(StringUtil.Repeat(" ", Math.Max(0, 32 - member.Name.Length)))
                                         .Append(value)
                                         .ToString(),
                                     1)
                                 .TextAlignment(-1)
                                 .UseTextCache(false);
-                            if(fieldInfo.FieldType == typeof(bool)) {
-                                ContentPanel.Element<TestButton>().Id(_id).FieldInfo(fieldInfo).ComponentSet(set).Text(value.ToString());
+                            if(member.FieldInfo.FieldType == typeof(bool)) {
+                                ContentPanel.Element<TestButton>().Id(_id).FieldInfo(member.FieldInfo).ComponentSet(set).Text(value.ToString());
                             }
                             ContentPanel.Spacing(5);
                         }

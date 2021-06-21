@@ -22,12 +22,15 @@
     <Compile Include="$(MSBuildThisFileDirectory)Components\MultiComponentIterator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\NameComponent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\Transform.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Inspector\HideInInspectorAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Inspector\NameAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\SceneEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\EditorEnvironment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\EditorBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\EditorTabs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\Gui\GUIPanel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\Gui\GuiEnvironment.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\Views\ComponentInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\Views\EditorHierarchyView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\Views\EditorInspectorView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Systems\Views\EditorMenuView.cs" />

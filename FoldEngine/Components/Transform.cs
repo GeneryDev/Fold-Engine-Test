@@ -10,6 +10,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FoldEngine.Editor.Inspector;
 
 namespace FoldEngine.Components
 {
@@ -25,6 +26,7 @@ namespace FoldEngine.Components
         /// Only false for null transforms
         /// Double negative was chosen such that default transforms have this as false by default, and thus can't be considered not-null
         /// </summary>
+        [HideInInspector]
         public readonly bool IsNotNull;
 
         /// <summary>
@@ -38,38 +40,40 @@ namespace FoldEngine.Components
         /// <summary>
         /// ID of the parent entity (-1 for null and transforms without parent)
         /// </summary>
+        [HideInInspector]
         public long ParentId;
 
         /// <summary>
         /// Position in 2D space where this entity is located, relative to its parent
         /// </summary>
+        [Name("Position")]
         public Vector2 LocalPosition;
         /// <summary>
         /// Complex number used to quickly multiply coordinates for rotations.
         /// </summary>
         private Complex _rotationComplex;
-        /// <summary>
-        /// 2D vector for the scale of this entity
-        /// </summary>
-        public Vector2 LocalScale;
 
         /// <summary>
         /// Entity ID of this transform's first child (or -1 if it has no children)
         /// </summary>
+        [HideInInspector]
         public long FirstChildId;
         /// <summary>
         /// Entity ID of this transform's previous sibling (or -1 if it's the first child)
         /// </summary>
+        [HideInInspector]
         public long PreviousSiblingId;
         /// <summary>
         /// Entity ID of this transform's next sibling (or -1 if it's the last child)
         /// </summary>
+        [HideInInspector]
         public long NextSiblingId;
 
         /// <summary>
         /// Float used to save this transform's rotation in radians. Used for the LocalRotation property
         /// </summary>
-        private float _localRotation;
+        [Name("Rotation")]
+        public float _localRotation;
         /// <summary>
         /// This transform's local rotation, in radians.
         /// </summary>
@@ -85,6 +89,12 @@ namespace FoldEngine.Components
                 }
             }
         }
+        
+        /// <summary>
+        /// 2D vector for the scale of this entity
+        /// </summary>
+        [Name("Scale")]
+        public Vector2 LocalScale;
 
         /// <summary>
         /// Returns an initialized transform component with all its correct default values.
