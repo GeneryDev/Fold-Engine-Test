@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using EntryProject.Util;
 using FoldEngine.Graphics;
 using Microsoft.Xna.Framework;
 
@@ -12,48 +13,23 @@ namespace FoldEngine.Text {
         private string _text;
         private int _index;
         private Point _cursor;
+        private Point _minPoint;
+        private Point _maxPoint;
         
-        private readonly List<List<RenderedTextGlyph>> _lines = new List<List<RenderedTextGlyph>>();
-        private List<RenderedTextGlyph> _currentLine;
-        private int _linesRendered;
-        
-        public float Width {
-            get {
-                float width = 0;
-                foreach(List<RenderedTextGlyph> line in _lines) {
-                    float lineWidth = 0;
-                    float minX = float.PositiveInfinity;
-                    float maxX = float.NegativeInfinity;
+        private readonly List<RenderedTextGlyph> _glyphs = new List<RenderedTextGlyph>();
+        private int _lineStartIndex = 0;
 
-                    foreach(RenderedTextGlyph glyph in line) {
-                        minX = Math.Min(minX, glyph.Destination.Left);
-                        maxX = Math.Max(maxX, glyph.Destination.Right);
-                    }
-
-                    if(minX.Equals(float.PositiveInfinity)) return 0;
-
-                    lineWidth += maxX - minX;
-                    
-                    width = Math.Max(width, lineWidth);
-                }
-
-                return width;
-            }
-        }
-
-        public TextRenderer() {
-            _lines.Add(new List<RenderedTextGlyph>());
-            _currentLine = _lines[0];
-        }
+        public int Width => _maxPoint.X - _minPoint.X;
+        public int Height => _maxPoint.Y - _minPoint.Y;
 
         public void Start(Font font, string text) {
             _font = font;
             _text = text;
             _index = 0;
             _cursor = Point.Zero;
-            _currentLine = _lines[0];
-            _currentLine.Clear();
-            _linesRendered = 0;
+            _glyphs.Clear();
+            _lineStartIndex = 0;
+            _minPoint = _maxPoint = Point.Zero;
 
             while(_index < _text.Length) {
                 char c = _text[_index];
@@ -62,9 +38,11 @@ namespace FoldEngine.Text {
                     FlushLine();
                     _index++;
                 } else {
-                    RenderedTextGlyph? glyph = NextGlyph();
+                    RenderedTextGlyph glyph = NextGlyph();
                     if(!glyph.HasValue) break;
-                    _currentLine.Add(glyph.Value);
+                    _minPoint = _minPoint.Min(glyph.Destination.Location);
+                    _maxPoint = _maxPoint.Max(glyph.Destination.Location + glyph.Destination.Size);
+                    _glyphs.Add(glyph);
                 }
             }
             FlushLine();
@@ -79,36 +57,27 @@ namespace FoldEngine.Text {
             output = default;
 
             output.Font = _font;
-            output.Lines = new RenderedTextLine[_linesRendered];
-            for(int i = 0; i < _linesRendered; i++) {
-                output.Lines[i] = new RenderedTextLine() {
-                    Glyphs = _lines[i].ToArray()
-                };
-            }
+            output.Glyphs = _glyphs.ToArray();
+            output.Width = Width;
+            output.Height = Height;
         }
 
         private void FlushLine() {
-            if(_currentLine.Count > 0) {
-                _linesRendered++;
-
-                if(_linesRendered >= _lines.Count) {
-                    _lines.Add(new List<RenderedTextGlyph>());
-                }
-
-                _currentLine = _lines[_linesRendered];
-                _currentLine.Clear();
-                
+            if(_index > _lineStartIndex) {
                 _cursor.X = 0;
                 _cursor.Y += _font.LineHeight;
+                
+                _lineStartIndex = _index;
             }
         }
         
-        private RenderedTextGlyph? NextGlyph() {
+        private RenderedTextGlyph NextGlyph() {
             char c = _text[_index];
             GlyphInfo glyphInfo = _font[c];
             if(glyphInfo.NotNull) {
                 
-                RenderedTextGlyph glyph = new RenderedTextGlyph {
+                var glyph = new RenderedTextGlyph {
+                    HasValue = true,
                     SourceIndex = glyphInfo.SourceIndex,
                     Source = glyphInfo.Source,
                     Destination = new Rectangle(
@@ -124,14 +93,12 @@ namespace FoldEngine.Text {
                 return glyph;
             }
 
-            return null;
+            return default;
         }
 
         public void DrawOnto(RenderSurface surface, Point start, Color color, float size = 1) {
-            for(int i = 0; i < _linesRendered; i++) {
-                foreach(RenderedTextGlyph glyph in _lines[i]) {
-                    glyph.DrawOnto(surface, start, color, size, _font);
-                }
+            foreach(RenderedTextGlyph glyph in _glyphs) {
+                glyph.DrawOnto(surface, start, color, size, _font);
             }
         }
     }

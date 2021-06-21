@@ -32,5 +32,23 @@ namespace EntryProject.Util {
                 height + amount*2
             );
         }
+
+        public static Point Min(this Point a, Point b) {
+            (int x, int y) = a;
+            (int x2, int y2) = b;
+            return new Point(
+                x < x2 ? x : x2,
+                y < y2 ? y : y2
+            );
+        }
+
+        public static Point Max(this Point a, Point b) {
+            (int x, int y) = a;
+            (int x2, int y2) = b;
+            return new Point(
+                x > x2 ? x : x2,
+                y > y2 ? y : y2
+            );
+        }
     }
 }
