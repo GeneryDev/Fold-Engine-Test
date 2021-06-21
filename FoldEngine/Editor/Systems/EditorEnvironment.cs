@@ -260,7 +260,6 @@ namespace FoldEngine.Editor.Views {
                 viewList.Bounds = Bounds;
                 viewList.Bounds.Width = Bounds.Width / ViewLists.Count;
                 viewList.Bounds = viewList.Bounds.Grow(-EditorEnvironment.FrameBorder);
-                viewList.Render(renderer, layer);
             }
             
             ResetLayoutPosition();
@@ -313,7 +312,6 @@ namespace FoldEngine.Editor.Views {
                 
                 ActiveView.ContentPanel.Reset();
                 ActiveView.Render(renderer);
-                ActiveView.ContentPanel.Render(renderer, layer);
             }
             
             base.Render(renderer, layer);

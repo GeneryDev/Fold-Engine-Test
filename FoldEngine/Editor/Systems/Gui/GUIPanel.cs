@@ -243,8 +243,9 @@ namespace FoldEngine.Editor.Views {
             Bounds.Height = 12 * _fontSize;
             Margin = 0;
         }
-        
+
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+
             RenderedText renderedText = _shouldCache ? Parent.RenderString(_text) : default;
             if(!renderedText.HasValue) TextRenderer.Instance.Start(renderer.Fonts["default"], _text);
 

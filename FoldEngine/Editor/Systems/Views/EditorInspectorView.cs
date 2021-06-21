@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using FoldEngine.Components;
 using FoldEngine.Editor.Transactions;
+using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
 using Microsoft.Xna.Framework;
 using Shard.Util;

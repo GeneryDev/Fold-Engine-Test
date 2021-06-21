@@ -189,7 +189,7 @@ namespace FoldEngine.Graphics {
 
     public class TriangleBatcher {
         private const int InitialBatchSize = 256;
-        private const int MaxBatchSize = 5461;
+        private const int MaxBatchSize = short.MaxValue / 6;
         private const int InitialVertexArraySize = 256;
         
         private TriangleBatchItem[] _batchItemList;
@@ -203,8 +203,6 @@ namespace FoldEngine.Graphics {
             _device = device;
             _batchItemList = new TriangleBatchItem[InitialBatchSize];
             _batchItemCount = 0;
-            for (int index = 0; index < InitialBatchSize; ++index)
-                _batchItemList[index] = new TriangleBatchItem();
             EnsureArrayCapacity(InitialBatchSize);
         }
 
@@ -250,6 +248,7 @@ namespace FoldEngine.Graphics {
             if (_batchItemCount == 0)
                 return;
 
+            
             int batchedThisIteration = 0;
             int vertexIndex = 0;
             Texture2D texture = null;
@@ -271,7 +270,7 @@ namespace FoldEngine.Graphics {
                 vertexIndex += WireframeMode ? 4 : 3;
                 
                 batchedThisIteration++;
-                if(batchedThisIteration > MaxBatchSize) {
+                if(batchedThisIteration >= MaxBatchSize) {
                     FlushVertexArray(batchedThisIteration * (WireframeMode ? 4 : 3), effect, texture);
                     batchedThisIteration = 0;
                     vertexIndex = 0;
