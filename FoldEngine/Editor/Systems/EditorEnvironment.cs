@@ -4,6 +4,7 @@ using EntryProject.Util;
 using FoldEngine.Commands;
 using FoldEngine.Editor.Transactions;
 using FoldEngine.Graphics;
+using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
 using Microsoft.Xna.Framework;
@@ -86,13 +87,13 @@ namespace FoldEngine.Editor.Views {
         }
 
         public ViewTab DraggingViewTab { get; set; }
-        public ViewListPanel DropTarget { get; set; }
+        public HoverTarget HoverTarget;
 
         public bool LayoutValidated = false;
         private int _sizeNorth = 96;
         private int _sizeSouth = 128;
         private int _sizeWest = 256;
-        private int _sizeEast = 256;
+        private int _sizeEast = 360;
         
         private bool _cornerBiasNorthWest = true;
         private bool _cornerBiasNorthEast = true;
@@ -131,12 +132,20 @@ namespace FoldEngine.Editor.Views {
                && inputUnit.Devices.Keyboard[Keys.Y].SinceFrame == Time.Frame) {
                 TransactionManager.Redo();
             }
+
+            if(HoverTarget.ScrollablePanel != null) {
+                if(Scene.Core.InputUnit.Players[0].Get<ChangeAction>("zoom.in")) {
+                    HoverTarget.ScrollablePanel.Scroll(1);
+                } else if(Scene.Core.InputUnit.Players[0].Get<ChangeAction>("zoom.out")) {
+                    HoverTarget.ScrollablePanel.Scroll(-1);
+                }
+            }
         }
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
             base.Render(renderer, layer);
 
-            DropTarget = null;
+            HoverTarget = default;
 
             {
                 var bounds = new Rectangle(0, 0, layer.LayerSize.X, SizeNorth);
@@ -271,7 +280,7 @@ namespace FoldEngine.Editor.Views {
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
             if(Environment is EditorEnvironment editorEnvironment && Bounds.Contains(Environment.MousePos)) {
-                editorEnvironment.DropTarget = this;
+                editorEnvironment.HoverTarget.ViewListPanel = this;
             }
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
@@ -391,5 +400,10 @@ namespace FoldEngine.Editor.Views {
             _side = side;
             return this;
         }
+    }
+
+    public struct HoverTarget {
+        public ViewListPanel ViewListPanel;
+        public GuiPanel ScrollablePanel;
     }
 }

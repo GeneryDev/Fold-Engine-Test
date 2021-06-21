@@ -16,7 +16,9 @@ namespace FoldEngine.Editor.Views {
         private long _id = -1;
 
         
+        
         public override void Render(IRenderingUnit renderer) {
+            ContentPanel.MayScroll = true;
             if(_id != -1) {
                 ContentPanel.Label(Scene.Components.GetComponent<EntityName>(_id).Name, 2).TextAlignment(-1).Icon(renderer.Textures["editor:cube"]);
                 ContentPanel.Label($"ID: {_id}", 1).TextAlignment(-1);
@@ -26,17 +28,17 @@ namespace FoldEngine.Editor.Views {
                     if(set.ComponentType == typeof(EntityName)) continue;
                     if(set.Has((int) _id)) {
                         ContentPanel.Separator();
-                        ContentPanel.Label(set.ComponentType.Name, 3).TextAlignment(-1);
+                        ContentPanel.Label(set.ComponentType.Name, 2).TextAlignment(-1);
                         
                         foreach(FieldInfo fieldInfo in set.ComponentType.GetFields()) {
                             object value = set.GetFieldValue((int) _id, fieldInfo);
                             ContentPanel
                                 .Label(
-                                    new StringBuilder(fieldInfo.Name).Append(':')
+                                    new StringBuilder(fieldInfo.Name)
                                         .Append(StringUtil.Repeat(" ", Math.Max(0, 32 - fieldInfo.Name.Length)))
                                         .Append(value)
                                         .ToString(),
-                                    2)
+                                    1)
                                 .TextAlignment(-1)
                                 .UseTextCache(false);
                             if(fieldInfo.FieldType == typeof(bool)) {

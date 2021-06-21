@@ -8,6 +8,8 @@ namespace FoldEngine.Editor.Views {
         public override string Icon => "editor:cog";
         public override string Name => "Systems";
         public override void Render(IRenderingUnit renderer) {
+            ContentPanel.MayScroll = true;
+            
             ContentPanel.Button("Add System");
             ContentPanel.Separator();
             

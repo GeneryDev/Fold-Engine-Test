@@ -88,9 +88,9 @@ namespace FoldEngine.Editor {
             } else {
                 if(Parent.Environment is EditorEnvironment editorEnvironment) {
                     editorEnvironment.DraggingViewTab = null;
-                    if(editorEnvironment.DropTarget != null) {
+                    if(editorEnvironment.HoverTarget.ViewListPanel != null) {
                         _viewList.RemoveView(_view);
-                        editorEnvironment.DropTarget.AddView(_view);
+                        editorEnvironment.HoverTarget.ViewListPanel.AddView(_view);
                     }
                 }
             }

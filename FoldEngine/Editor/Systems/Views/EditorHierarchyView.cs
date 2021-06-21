@@ -22,6 +22,8 @@ namespace FoldEngine.Editor.Views {
         }
 
         public override void Render(IRenderingUnit renderer) {
+            ContentPanel.MayScroll = true;
+            
             // ContentPanel.Label("Entities", 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
             // ContentPanel.Button("Back").Action(SceneEditor.Actions.ChangeToMenu, 0);
             ContentPanel.Button("New Entity");
