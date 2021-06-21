@@ -208,13 +208,13 @@ namespace FoldEngine.Editor.Views {
         protected int _textMargin = 4;
         protected ITexture _icon = null;
         protected Point _iconSize;
-        protected bool _cacheRendered = true;
+        protected bool _shouldCache = true;
 
         public override void Reset(GuiPanel parent) {
             _fontSize = 2;
             _textAlignment = 0;
             _textMargin = 4;
-            _cacheRendered = true;
+            _shouldCache = true;
         }
 
         public override void AdjustSpacing(GuiPanel parent) {
@@ -224,7 +224,7 @@ namespace FoldEngine.Editor.Views {
         }
         
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
-            RenderedText renderedText = _cacheRendered ? Parent.RenderString(_text) : default;
+            RenderedText renderedText = _shouldCache ? Parent.RenderString(_text) : default;
             if(!renderedText.HasValue) TextRenderer.Instance.Start(renderer.Fonts["default"], _text);
 
             float textWidth = renderedText.HasValue ? renderedText.Width : TextRenderer.Instance.Width;
@@ -289,7 +289,7 @@ namespace FoldEngine.Editor.Views {
         }
 
         public GuiLabel UseTextCache(bool shouldCache) {
-            _cacheRendered = shouldCache;
+            _shouldCache = shouldCache;
             return this;
         }
     }

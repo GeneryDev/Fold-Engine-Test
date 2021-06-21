@@ -22,12 +22,12 @@ namespace FoldEngine.Editor.Views {
         }
 
         internal override void Initialize() {
-            Environment = new EditorEnvironment();
+            Environment = new EditorEnvironment(Owner);
 
-            Environment.AddView<EditorMenuView>(Owner, Environment.NorthPanel);
-            Environment.AddView<EditorHierarchyView>(Owner, Environment.WestPanel);
-            Environment.AddView<EditorSystemsView>(Owner, Environment.WestPanel);
-            Environment.AddView<EditorInspectorView>(Owner, Environment.EastPanel);
+            Environment.AddView<EditorMenuView>(Environment.NorthPanel);
+            Environment.AddView<EditorHierarchyView>(Environment.WestPanel);
+            Environment.AddView<EditorSystemsView>(Environment.WestPanel);
+            Environment.AddView<EditorInspectorView>(Environment.EastPanel);
         }
 
         public override void OnInput() {

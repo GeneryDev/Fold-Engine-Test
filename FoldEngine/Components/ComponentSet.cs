@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Reflection;
 using FoldEngine.Scenes;
 using FoldEngine.Serialization;
 
@@ -13,8 +14,8 @@ namespace FoldEngine.Components {
         public abstract void Remove(int entityId);
         public abstract void CreateFor(int entityId);
         
-        public abstract object BoxedGet(int entityId);
-        public abstract void BoxedSet(int entityId, object component);
+        public abstract object GetFieldValue(int entityId, FieldInfo fieldInfo);
+        public abstract void SetFieldValue(int entityId, FieldInfo fieldInfo, object value);
 
         public Type WorkingType => this.GetType();
         public abstract void Serialize(SaveOperation writer);
@@ -82,12 +83,12 @@ namespace FoldEngine.Components {
             Create(entityId);
         }
 
-        public override object BoxedGet(int entityId) {
-            return Get(entityId);
+        public override object GetFieldValue(int entityId, FieldInfo fieldInfo) {
+            return fieldInfo.GetValueDirect(__makeref(Get(entityId)));
         }
 
-        public override void BoxedSet(int entityId, object component) {
-            throw new NotImplementedException();
+        public override void SetFieldValue(int entityId, FieldInfo fieldInfo, object value) {
+            fieldInfo.SetValueDirect(__makeref(Get(entityId)), value);
         }
 
         public ref T Create(int entityId) {

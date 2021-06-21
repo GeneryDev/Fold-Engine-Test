@@ -107,22 +107,19 @@ namespace FoldEngine.Text {
             char c = _text[_index];
             GlyphInfo glyphInfo = _font[c];
             if(glyphInfo.NotNull) {
-                int height = glyphInfo.Height;
-                int ascent = glyphInfo.Ascent;
                 
-                int width = glyphInfo.Width;
-                int advancement = glyphInfo.Advancement;
+                RenderedTextGlyph glyph = new RenderedTextGlyph {
+                    SourceIndex = glyphInfo.SourceIndex,
+                    Source = glyphInfo.Source,
+                    Destination = new Rectangle(
+                        _cursor.X, 
+                        _cursor.Y - glyphInfo.Ascent,
+                        glyphInfo.Width,
+                        glyphInfo.Height
+                    )
+                };
 
-                RenderedTextGlyph glyph = new RenderedTextGlyph();
-                glyph.SourceIndex = glyphInfo.SourceIndex;
-                glyph.Source = glyphInfo.Source;
-
-                (glyph.Destination.X, glyph.Destination.Y) = _cursor;
-                glyph.Destination.Y -= ascent;
-                glyph.Destination.Width = width;
-                glyph.Destination.Height = height;
-
-                _cursor.X += advancement;
+                _cursor.X += glyphInfo.Advancement;
                 _index++;
                 return glyph;
             }

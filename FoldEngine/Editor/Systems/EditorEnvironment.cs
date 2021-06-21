@@ -2,19 +2,24 @@
 using System.Collections.Generic;
 using EntryProject.Util;
 using FoldEngine.Commands;
+using FoldEngine.Editor.Transactions;
 using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 
 namespace FoldEngine.Editor.Views {
     public class EditorEnvironment : GuiEnvironment {
 
         public const int FrameBorder = 4;
         public const int FrameMargin = 8;
-        
+
+        public Scene Scene;
         public sealed override List<GuiPanel> VisiblePanels { get; } = new List<GuiPanel>();
         public Dictionary<Type, EditorView> AllViews = new Dictionary<Type, EditorView>();
+        
+        public readonly TransactionManager<EditorEnvironment> TransactionManager;
 
         public int SizeNorth {
             get => _sizeNorth;
@@ -99,8 +104,10 @@ namespace FoldEngine.Editor.Views {
         public BorderPanel WestPanel;
         public BorderPanel EastPanel;
 
-        public EditorEnvironment() {
-            
+        public EditorEnvironment(Scene scene) {
+            Scene = scene;
+            TransactionManager = new TransactionManager<EditorEnvironment>(this);
+
             NorthPanel = new BorderPanel(this, -Vector2.UnitY);
             SouthPanel = new BorderPanel(this, Vector2.UnitY);
             WestPanel = new BorderPanel(this, -Vector2.UnitX);
@@ -110,6 +117,20 @@ namespace FoldEngine.Editor.Views {
             VisiblePanels.Add(SouthPanel);
             VisiblePanels.Add(WestPanel);
             VisiblePanels.Add(EastPanel);
+        }
+
+        public override void Input(InputUnit inputUnit) {
+            base.Input(inputUnit);
+            if(inputUnit.Devices.Keyboard[Keys.LeftControl].Down
+               && inputUnit.Devices.Keyboard[Keys.Z].Down
+               && inputUnit.Devices.Keyboard[Keys.Z].SinceFrame == Time.Frame) {
+                TransactionManager.Undo();
+            }
+            if(inputUnit.Devices.Keyboard[Keys.LeftControl].Down
+               && inputUnit.Devices.Keyboard[Keys.Y].Down
+               && inputUnit.Devices.Keyboard[Keys.Y].SinceFrame == Time.Frame) {
+                TransactionManager.Redo();
+            }
         }
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
@@ -193,9 +214,8 @@ namespace FoldEngine.Editor.Views {
             });
         }
 
-        public void AddView<T>(Scene scene, BorderPanel preferredPanel = null) where T : EditorView, new() {
-            T view = new T();
-            view.Scene = scene;
+        public void AddView<T>(BorderPanel preferredPanel = null) where T : EditorView, new() {
+            T view = new T {Scene = Scene};
             view.Initialize();
 
             AllViews[view.GetType()] = view;

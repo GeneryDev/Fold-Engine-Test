@@ -22,7 +22,7 @@ namespace FoldEngine.Text {
         }
 
         public void DrawOnto(RenderSurface surface, Point start, Color color, float size = 1) {
-            foreach(var line in Lines) {
+            foreach(RenderedTextLine line in Lines) {
                 line.DrawOnto(surface, start, color, size, Font);
             }
         }
