@@ -210,7 +210,7 @@ namespace FoldEngine.Graphics {
         {
             if (_batchItemCount >= _batchItemList.Length)
             {
-                Console.WriteLine("Resized batch item list");
+                Console.WriteLine("Resized TriangleBatchItem list");
                 int length = _batchItemList.Length;
                 int newLength = length + length / 2 + 63 & -64;
                 Array.Resize(ref _batchItemList, newLength);

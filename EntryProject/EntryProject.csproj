@@ -113,7 +113,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\Config\input.json" />
-    <Content Include="Content\Fonts\default.json" />
+    <Content Include="Content\Fonts\default.7.json" />
+    <Content Include="Content\Fonts\default.9.json" />
     <Content Include="Content\Textures\ancient_debris_side.png" />
     <Content Include="Content\Textures\armor_stand.png" />
     <Content Include="Content\Textures\bamboo_stem.png" />

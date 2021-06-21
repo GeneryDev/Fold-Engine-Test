@@ -165,8 +165,10 @@ namespace Woofer
 
 
 
-            Textures.LoadTexture("fonts/default/ascii");
-            Fonts.LoadFont("default");
+            Textures.LoadTexture("fonts/default.7/ascii");
+            Textures.LoadTexture("fonts/default.9/ascii");
+            Fonts.LoadFont("default.7");
+            Fonts.LoadFont("default.9");
         }
 
         public Rectangle GetGroupBounds(RenderGroup renderGroup) {

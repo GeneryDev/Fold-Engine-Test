@@ -7,6 +7,8 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor {
     public class ViewTab : GuiElement {
+        private const float LabelSize = 7;
+        
         private EditorView _view;
         private ViewListPanel _viewList;
         private RenderedText _renderedName;
@@ -24,7 +26,7 @@ namespace FoldEngine.Editor {
         }
 
         public override void AdjustSpacing(GuiPanel parent) {
-            _renderedName = Parent.RenderString(_view.Name);
+            _renderedName = Parent.RenderString(_view.Name, LabelSize);
             Margin = 2;
             Bounds.Width = 16 + (int)_renderedName.Width + Margin*2;
             Bounds.Height = TabHeight;
@@ -68,7 +70,7 @@ namespace FoldEngine.Editor {
             });
             x += iconSize.X;
             x += 4;
-            _renderedName.DrawOnto(layer.Surface, new Point(x, renderingBounds.Center.Y + 3), Color.White, 1);
+            _renderedName.DrawOnto(layer.Surface, new Point(x, renderingBounds.Center.Y + 3), Color.White);
         }
 
         public ViewTab View(EditorView view, ViewListPanel viewList) {

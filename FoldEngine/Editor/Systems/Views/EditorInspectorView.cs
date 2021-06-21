@@ -21,8 +21,8 @@ namespace FoldEngine.Editor.Views {
         public override void Render(IRenderingUnit renderer) {
             ContentPanel.MayScroll = true;
             if(_id != -1) {
-                ContentPanel.Label(Scene.Components.GetComponent<EntityName>(_id).Name, 2).TextAlignment(-1).Icon(renderer.Textures["editor:cube"]);
-                ContentPanel.Label($"ID: {_id}", 1).TextAlignment(-1);
+                ContentPanel.Label(Scene.Components.GetComponent<EntityName>(_id).Name, 14).TextAlignment(-1).Icon(renderer.Textures["editor:cube"]);
+                ContentPanel.Label($"ID: {_id}", 7).TextAlignment(-1);
                 ContentPanel.Spacing(12);
 
                 foreach(ComponentSet set in Scene.Components.Sets.Values) {
@@ -34,7 +34,7 @@ namespace FoldEngine.Editor.Views {
                         ContentPanel.Separator();
                         
 
-                        ContentPanel.Label(componentInfo.Name, 2).TextAlignment(-1);
+                        ContentPanel.Label(componentInfo.Name, 14).TextAlignment(-1);
                         
                         foreach(ComponentMember member in componentInfo.Members) {
                             object value = set.GetFieldValue((int) _id, member.FieldInfo);
@@ -46,11 +46,11 @@ namespace FoldEngine.Editor.Views {
                                         .Append(StringUtil.Repeat(" ", Math.Max(0, 32 - member.Name.Length)))
                                         .Append(value)
                                         .ToString(),
-                                    1)
+                                    9)
                                 .TextAlignment(-1)
                                 .UseTextCache(false);
                             if(member.FieldInfo.FieldType == typeof(bool)) {
-                                ContentPanel.Element<TestButton>().Id(_id).FieldInfo(member.FieldInfo).ComponentSet(set).Text(value.ToString());
+                                ContentPanel.Element<TestButton>().Id(_id).FieldInfo(member.FieldInfo).ComponentSet(set).Text(value.ToString()).FontSize(9);
                             }
                             ContentPanel.Spacing(5);
                         }

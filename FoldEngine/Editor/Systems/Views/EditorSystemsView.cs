@@ -10,11 +10,11 @@ namespace FoldEngine.Editor.Views {
         public override void Render(IRenderingUnit renderer) {
             ContentPanel.MayScroll = true;
             
-            ContentPanel.Button("Add System");
+            ContentPanel.Button("Add System", 14);
             ContentPanel.Separator();
             
             foreach(GameSystem sys in Scene.Systems.AllSystems) {
-                ContentPanel.Button(sys.SystemName).TextAlignment(-1);
+                ContentPanel.Button(sys.SystemName, 14).TextAlignment(-1);
             }
         }
     }

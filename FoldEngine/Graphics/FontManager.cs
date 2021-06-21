@@ -14,13 +14,13 @@ using Shard.Scripts.Types.Functions;
 namespace FoldEngine.Graphics {
     public class FontManager {
         private TextureManager _textureManager;
-        private Dictionary<string, Font> _fonts = new Dictionary<string, Font>();
+        private Dictionary<string, IFont> _fonts = new Dictionary<string, IFont>();
 
         public FontManager(TextureManager textureManager) {
             _textureManager = textureManager;
         }
         
-        public Font this[string name]
+        public IFont this[string name]
         {
             get
             {
@@ -34,27 +34,47 @@ namespace FoldEngine.Graphics {
             private set => _fonts[name] = value;
         }
 
-        public Font LoadFont(string name) {
-            Font font = new Font();
-            _fonts[name] = font;
+        public BitmapFont LoadFont(string name) {
+            BitmapFont bitmapFont = new BitmapFont();
+            _fonts[name] = bitmapFont;
             
-            JObject root = JObject.Parse(File.OpenText($"Content/Fonts/{name}.json").ReadToEnd());
+            JObject root = JObject.Parse(File.OpenText($"Content/Fonts/{name}.json").ReadToEnd())["font"] as JObject;
+
+            if(root == null) {
+                throw new FormatException($"Expected \"font\" object in font {name}");
+            }
+            
+            bitmapFont.LineHeight = root["line_height"]?.Value<int>() ?? bitmapFont.LineHeight;
+            bitmapFont.DefaultSize = root["default_size"]?.Value<float>() ?? 9;
+            string setName = root["font_set"]?.Value<string>();
+            if(setName != null) {
+                if(!_fonts.ContainsKey(setName)) {
+                    _fonts[setName] = new FontSet();
+                }
+
+                if(_fonts[setName] is FontSet fontSet) {
+                    fontSet.AddFont(bitmapFont, bitmapFont.DefaultSize);
+                } else {
+                    throw new InvalidOperationException($"Cannot create a font set named {setName}: another non-set font with that name already exists");
+                }
+            }
+            
             var charsArr = root["characters"] as JArray;
             if(charsArr != null) {
                 foreach(JObject rawCharEntry in charsArr) {
                     string sourceName = (string) rawCharEntry["source"];
                     int sourceIndex;
                     
-                    if(!font.TextureNames.Contains(sourceName)) {
+                    if(!bitmapFont.TextureNames.Contains(sourceName)) {
                         string sourcePath = $"fonts/{name}/{sourceName}";
-                        font.TextureSources.Add(_textureManager[sourcePath]);
-                        font.TextureNames.Add(sourceName);
-                        sourceIndex = font.TextureNames.Count - 1;
+                        bitmapFont.TextureSources.Add(_textureManager[sourcePath]);
+                        bitmapFont.TextureNames.Add(sourceName);
+                        sourceIndex = bitmapFont.TextureNames.Count - 1;
                     } else {
-                        sourceIndex = font.TextureNames.IndexOf(sourceName);
+                        sourceIndex = bitmapFont.TextureNames.IndexOf(sourceName);
                     }
 
-                    FontContextInfo.SourceTex = font.TextureSources[sourceIndex].Source;
+                    FontContextInfo.SourceTex = bitmapFont.TextureSources[sourceIndex].Source;
 
                     JToken charOrRange = rawCharEntry["char"];
                     char start;
@@ -94,14 +114,14 @@ namespace FoldEngine.Graphics {
                         glyphInfo.Width = glyphInfo.Source.Width = widthEvaluator(c);
                         glyphInfo.Advancement = advancementEvaluator(c);
 
-                        font[c] = glyphInfo;
+                        bitmapFont[c] = glyphInfo;
                     }
                     
                     FontContextInfo.Clear();
                 }
             }
             // Console.WriteLine(root);
-            return font;
+            return bitmapFont;
         }
 
         private static Func<char, int> EvaluatorInt(JToken token) {

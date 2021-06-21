@@ -100,7 +100,7 @@ namespace FoldEngine.Editor.Views {
             return existing;
         }
 
-        public GuiLabel Label(string label, int fontSize = 2) {
+        public GuiLabel Label(string label, int fontSize) {
             EndPreviousElement();
             var element = NewElement<GuiLabel>();
             element.Text(label);
@@ -108,7 +108,7 @@ namespace FoldEngine.Editor.Views {
             return element;
         }
 
-        public GuiButton Button(string label, int fontSize = 2) {
+        public GuiButton Button(string label, int fontSize) {
             EndPreviousElement();
             var element = NewElement<GuiButton>();
             element.Text(label);
@@ -116,7 +116,7 @@ namespace FoldEngine.Editor.Views {
             return element;
         }
 
-        public GuiSeparator Separator(string label, int fontSize = 2) {
+        public GuiSeparator Separator(string label, int fontSize) {
             EndPreviousElement();
             var element = NewElement<GuiSeparator>();
             element.Label(label).FontSize(fontSize);
@@ -137,15 +137,15 @@ namespace FoldEngine.Editor.Views {
         }
 
 
-        public RenderedText RenderString(string str, bool useCache = true) {
+        public RenderedText RenderString(string str, float size, bool useCache = true) {
             if(!RenderedStrings.ContainsKey(str)) {
-                Environment.Renderer.Fonts["default"].RenderString(str, out RenderedText rendered);
+                Environment.Renderer.Fonts["default"].RenderString(str, out RenderedText rendered, size);
                 if(useCache) RenderedStrings[str] = rendered;
                 return rendered;
             }
             return RenderedStrings[str];
         }
-        public RenderedText DrawString(string str, RenderSurface surface, Point start, Color color, float size = 1) {
+        public RenderedText DrawString(string str, RenderSurface surface, Point start, Color color, float size) {
             Environment.Renderer.Fonts["default"].DrawString(str, surface, start, color, size);
             // if(!RenderedStrings.ContainsKey(str)) {
                 // if(useCache) RenderedStrings[str] = rendered;
@@ -224,7 +224,7 @@ namespace FoldEngine.Editor.Views {
 
     public class GuiLabel : GuiElement {
         protected string _text;
-        protected int _fontSize = 2;
+        protected int _fontSize = 14;
         protected int _textAlignment = 0;
         protected int _textMargin = 4;
         protected ITexture _icon = null;
@@ -240,18 +240,18 @@ namespace FoldEngine.Editor.Views {
 
         public override void AdjustSpacing(GuiPanel parent) {
             Bounds.Width = parent.Bounds.Width;
-            Bounds.Height = 12 * _fontSize;
+            Bounds.Height = 12 * _fontSize / 7;
             Margin = 0;
         }
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
 
-            RenderedText renderedText = _shouldCache ? Parent.RenderString(_text) : default;
-            if(!renderedText.HasValue) TextRenderer.Instance.Start(renderer.Fonts["default"], _text);
+            RenderedText renderedText = _shouldCache ? Parent.RenderString(_text, _fontSize) : default;
+            if(!renderedText.HasValue) TextRenderer.Instance.Start(renderer.Fonts["default"], _text, _fontSize);
 
             float textWidth = renderedText.HasValue ? renderedText.Width : TextRenderer.Instance.Width;
 
-            int totalWidth = (int) (textWidth*_fontSize);
+            int totalWidth = (int) (textWidth);
             if(_icon != null) {
                 totalWidth += _iconSize.X;
                 totalWidth += 8;
@@ -280,8 +280,8 @@ namespace FoldEngine.Editor.Views {
                 x += _iconSize.X;
                 x += 8;
             }
-            if(renderedText.HasValue) renderedText.DrawOnto(layer.Surface, new Point(x, Bounds.Center.Y + 3 * _fontSize), Color.White, _fontSize);
-            else TextRenderer.Instance.DrawOnto(layer.Surface, new Point(x, Bounds.Center.Y + 3 * _fontSize), Color.White, _fontSize);
+            if(renderedText.HasValue) renderedText.DrawOnto(layer.Surface, new Point(x, Bounds.Center.Y + _fontSize / 2), Color.White);
+            else TextRenderer.Instance.DrawOnto(layer.Surface, new Point(x, Bounds.Center.Y + 3 * _fontSize / 7), Color.White);
         }
 
         public GuiLabel Text(string text) {
@@ -395,7 +395,7 @@ namespace FoldEngine.Editor.Views {
 
     public class GuiSeparator : GuiElement {
         protected string _label;
-        protected int _fontSize = 2;
+        protected int _fontSize = 7;
         protected int _thickness = 2;
         
 
@@ -407,14 +407,14 @@ namespace FoldEngine.Editor.Views {
 
         public override void AdjustSpacing(GuiPanel parent) {
             Bounds.Width = parent.Bounds.Width;
-            Bounds.Height = _label != null ? 12 * _fontSize : _thickness;
+            Bounds.Height = _label != null ? 12 * _fontSize / 7 : _thickness;
             Margin = 4;
         }
         
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
             var color = new Color(45, 45, 48);
             if(_label != null) {
-                RenderedText rendered = Parent.RenderString(_label);
+                RenderedText rendered = Parent.RenderString(_label, _fontSize);
 
                 int lineWidth = (int) ((Bounds.Width - rendered.Width * _fontSize) / 2) - 2 * _fontSize;
                 
@@ -429,7 +429,7 @@ namespace FoldEngine.Editor.Views {
                     DestinationRectangle = new Rectangle(Bounds.Right - lineWidth, Bounds.Center.Y - _thickness/2, lineWidth, _thickness)
                 });
                 
-                rendered.DrawOnto(layer.Surface, new Point((int) (Bounds.Center.X - rendered.Width * _fontSize / 2), Bounds.Center.Y + 3 * _fontSize), Color.White, _fontSize);
+                rendered.DrawOnto(layer.Surface, new Point((int) (Bounds.Center.X - rendered.Width * _fontSize / 2), Bounds.Center.Y + 3 * _fontSize), Color.White);
             } else {
                 int lineWidth = Bounds.Width;
                 layer.Surface.Draw(new DrawRectInstruction() {

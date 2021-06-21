@@ -26,7 +26,7 @@ namespace FoldEngine.Editor.Views {
             
             // ContentPanel.Label("Entities", 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
             // ContentPanel.Button("Back").Action(SceneEditor.Actions.ChangeToMenu, 0);
-            ContentPanel.Button("New Entity");
+            ContentPanel.Button("New Entity", 14);
             ContentPanel.Separator();
             
             _transforms.Reset();
@@ -50,6 +50,7 @@ namespace FoldEngine.Editor.Views {
                 .Text(Scene.Components.GetComponent<EntityName>(entityId).Name)
                 .TextAlignment(-1)
                 .Icon(renderer.Textures[hasChildren ? expanded ? "editor:triangle.down" : "editor:triangle.right" : "editor:blank"])
+                .FontSize(14)
                 ;
 
             if(hasChildren && expanded) {
