@@ -33,7 +33,7 @@ namespace FoldEngine.Editor {
         }
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
-            if(Pressed && !Bounds.Contains(Parent.Environment.MousePos)) {
+            if(Pressed(MouseEvent.LeftButton) && !Bounds.Contains(Parent.Environment.MousePos)) {
                 _dragging = true;
             }
 
@@ -56,7 +56,7 @@ namespace FoldEngine.Editor {
             
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
-                Color = Pressed ? new Color(63, 63, 70) : Bounds.Contains(Parent.Environment.MousePos) ? Color.CornflowerBlue : defaultColor,
+                Color = Pressed(MouseEvent.LeftButton) ? new Color(63, 63, 70) : Bounds.Contains(Parent.Environment.MousePos) ? Color.CornflowerBlue : defaultColor,
                 DestinationRectangle = renderingBounds
             });
             
@@ -79,24 +79,21 @@ namespace FoldEngine.Editor {
             return this;
         }
 
-        public override void OnMousePressed(Point pos) {
-            
-            base.OnMousePressed(pos);
-        }
-
-        public override void OnMouseReleased(Point pos) {
-            if(!_dragging) {
-                _viewList.ActiveView = _view;
-            } else {
-                if(Parent.Environment is EditorEnvironment editorEnvironment) {
-                    editorEnvironment.DraggingViewTab = null;
-                    if(editorEnvironment.HoverTarget.ViewListPanel != null) {
-                        _viewList.RemoveView(_view);
-                        editorEnvironment.HoverTarget.ViewListPanel.AddView(_view);
+        public override void OnMouseReleased(MouseEvent e) {
+            if(e.Button == MouseEvent.LeftButton) {
+                if(!_dragging) {
+                    _viewList.ActiveView = _view;
+                } else {
+                    if(Parent.Environment is EditorEnvironment editorEnvironment) {
+                        editorEnvironment.DraggingViewTab = null;
+                        if(editorEnvironment.HoverTarget.ViewListPanel != null) {
+                            _viewList.RemoveView(_view);
+                            editorEnvironment.HoverTarget.ViewListPanel.AddView(_view);
+                        }
                     }
                 }
+                _dragging = false;
             }
-            _dragging = false;
         }
     }
 }

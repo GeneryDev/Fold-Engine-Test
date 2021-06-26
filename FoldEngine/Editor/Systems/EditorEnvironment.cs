@@ -250,7 +250,6 @@ namespace FoldEngine.Editor.Views {
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
             Reset();
-
             
             for(int i = 0; i < ViewLists.Count; i++) {
                 ViewListPanel viewList = ViewLists[i];
@@ -360,7 +359,7 @@ namespace FoldEngine.Editor.Views {
         
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
             var color = new Color(140, 140, 145);
-            bool pressed = Pressed;
+            bool pressed = Pressed();
             if(pressed || Bounds.Contains(Parent.Environment.MousePos)) {
                 Rectangle drawBounds = Bounds;
                 if(_side.X != 0) {

@@ -100,22 +100,22 @@ namespace Sandbox.Systems {
             //     _previouslyPressed = false;
             // }
 
-            if(Mouse.GetState().RightButton == ButtonState.Pressed) {
-                _livingComponents.Reset();
-                
-                while(_livingComponents.Next()) {
-                    ref Transform transform = ref _livingComponents.GetCoComponent<Transform>();
-
-                    // transform.Position = new Vector2(6.65625f, -6.875f);
-                    // transform.Position = new Vector2(-4.734375f, -6f);
-                    transform.Position = new Vector2(-4.75f, -6.015625f);
-
-                    if(_livingComponents.HasCoComponent<Physics>()) {
-                        // _livingComponents.GetCoComponent<Physics>().Velocity = new Vector2(-2.125f, 5.125f);
-                        _livingComponents.GetCoComponent<Physics>().Velocity = new Vector2(0, 0);
-                    }
-                }
-            }
+            // if(Mouse.GetState().RightButton == ButtonState.Pressed) {
+            //     _livingComponents.Reset();
+            //     
+            //     while(_livingComponents.Next()) {
+            //         ref Transform transform = ref _livingComponents.GetCoComponent<Transform>();
+            //
+            //         // transform.Position = new Vector2(6.65625f, -6.875f);
+            //         // transform.Position = new Vector2(-4.734375f, -6f);
+            //         transform.Position = new Vector2(-4.75f, -6.015625f);
+            //
+            //         if(_livingComponents.HasCoComponent<Physics>()) {
+            //             // _livingComponents.GetCoComponent<Physics>().Velocity = new Vector2(-2.125f, 5.125f);
+            //             _livingComponents.GetCoComponent<Physics>().Velocity = new Vector2(0, 0);
+            //         }
+            //     }
+            // }
         }
 
         private RenderedText _renderedHelloWorld;

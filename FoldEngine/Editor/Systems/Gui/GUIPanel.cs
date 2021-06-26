@@ -163,26 +163,33 @@ namespace FoldEngine.Editor.Views {
             }
         }
 
-        private GuiElement _pressedElement;
+        private readonly GuiElement[] _pressedElements = new GuiElement[MouseEvent.MaxButtons];
 
-        public override void OnMousePressed(Point pos) {
+        public override void OnMousePressed(MouseEvent e) {
             for(int i = _children.Count - 1; i >= 0; i--) {
                 GuiElement element = _children[i];
-                if(element.Bounds.Contains(pos)) {
-                    _pressedElement = element;
-                    _pressedElement.OnMousePressed(pos);
+                if(element.Bounds.Contains(e.Position)) {
+                    _pressedElements[e.Button] = element;
+                    _pressedElements[e.Button].OnMousePressed(e);
                     break;
                 }
             }
         }
 
-        public override void OnMouseReleased(Point pos) {
-            _pressedElement?.OnMouseReleased(pos);
-            _pressedElement = null;
+        public override void OnMouseReleased(MouseEvent e) {
+            _pressedElements[e.Button]?.OnMouseReleased(e);
+            _pressedElements[e.Button] = null;
         }
 
-        public bool IsPressed(GuiElement guiElement) {
-            return guiElement == _pressedElement;
+        public bool IsPressed(GuiElement element, int buttonType = -1) {
+            if(buttonType == -1) {
+                foreach(GuiElement pressedElement in _pressedElements) {
+                    if(pressedElement == element) return true;
+                }
+
+                return false;
+            }
+            return element == _pressedElements[buttonType];
         }
 
         public void Scroll(int dir) {
@@ -197,7 +204,6 @@ namespace FoldEngine.Editor.Views {
     public abstract class GuiElement {
         internal GuiPanel Parent;
 
-        public bool Pressed => Parent.IsPressed(this);
         public virtual Point Displacement => new Point(0, Bounds.Height + Margin);
 
         public Rectangle Bounds;
@@ -208,8 +214,12 @@ namespace FoldEngine.Editor.Views {
 
         public abstract void Render(IRenderingUnit renderer, IRenderingLayer layer);
         
-        public virtual void OnMousePressed(Point pos) {}
-        public virtual void OnMouseReleased(Point pos) {}
+        public virtual void OnMousePressed(MouseEvent e) {}
+        public virtual void OnMouseReleased(MouseEvent e) {}
+
+        public bool Pressed(int buttonType = -1) {
+            return Parent.IsPressed(this, buttonType);
+        }
     }
 
     public class GuiLabel : GuiElement {
@@ -313,24 +323,18 @@ namespace FoldEngine.Editor.Views {
             Margin = 4;
         }
 
-        public override void Reset(GuiPanel parent) {
-            base.Reset(parent);
-        }
-
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
-            
-            
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
-                Color = Pressed ? new Color(63, 63, 70) : Bounds.Contains(Parent.Environment.MousePos) ? Color.CornflowerBlue : new Color(37, 37, 38),
+                Color = Pressed(MouseEvent.LeftButton) ? new Color(63, 63, 70) : Bounds.Contains(Parent.Environment.MousePos) ? Color.CornflowerBlue : new Color(37, 37, 38),
                 DestinationRectangle = Bounds
             });
             base.Render(renderer, layer);
         }
 
-        public override void OnMouseReleased(Point pos) {
-            if(Bounds.Contains(pos)) {
-                PerformAction(pos);
+        public override void OnMouseReleased(MouseEvent e) {
+            if(e.Button == MouseEvent.LeftButton && Bounds.Contains(e.Position)) {
+                PerformAction(e.Position);
             }
         }
 
