@@ -2,9 +2,12 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using EntryProject.Util;
 using FoldEngine.Components;
+using FoldEngine.Editor.Gui;
 using FoldEngine.Editor.Transactions;
 using FoldEngine.Graphics;
+using FoldEngine.Gui;
 using FoldEngine.Interfaces;
 using Microsoft.Xna.Framework;
 using Shard.Util;
@@ -50,7 +53,7 @@ namespace FoldEngine.Editor.Views {
                                 .TextAlignment(-1)
                                 .UseTextCache(false);
                             if(member.FieldInfo.FieldType == typeof(bool)) {
-                                ContentPanel.Element<TestButton>().Id(_id).FieldInfo(member.FieldInfo).ComponentSet(set).Text(value.ToString()).FontSize(9);
+                                ContentPanel.Button(value.ToString(), 9).LeftAction<TestAction>().Id(_id).FieldInfo(member.FieldInfo).ComponentSet(set);
                             }
                             ContentPanel.Spacing(5);
                         }
@@ -65,34 +68,32 @@ namespace FoldEngine.Editor.Views {
         }
     }
     
-    public class TestButton : GuiButton {
+    public class TestAction : IGuiAction {
         private long _id;
         private FieldInfo _fieldInfo;
         private ComponentSet _set;
 
-        public TestButton Id(long id) {
+        public TestAction Id(long id) {
             _id = id;
             return this;
         }
         
-        public TestButton FieldInfo(FieldInfo fieldInfo) {
+        public TestAction FieldInfo(FieldInfo fieldInfo) {
             _fieldInfo = fieldInfo;
             return this;
         }
 
-        public TestButton ComponentSet(ComponentSet set) {
+        public TestAction ComponentSet(ComponentSet set) {
             _set = set;
             return this;
         }
 
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
-            base.Render(renderer, layer);
-        }
-
-        public override void PerformAction(Point point) {
+        public IObjectPool Pool { get; set; }
+        
+        public void Perform(GuiElement element, MouseEvent e) {
             bool oldValue = (bool) _set.GetFieldValue((int) _id, _fieldInfo);
             bool newValue = !oldValue;
-            ((EditorEnvironment) Parent.Environment).TransactionManager.InsertTransaction(new SetComponentFieldTransaction() {
+            ((EditorEnvironment) element.Parent.Environment).TransactionManager.InsertTransaction(new SetComponentFieldTransaction() {
                 ComponentType = _set.ComponentType,
                 EntityId = _id,
                 FieldInfo = _fieldInfo,

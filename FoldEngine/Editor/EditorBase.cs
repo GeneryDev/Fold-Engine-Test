@@ -1,5 +1,7 @@
 ﻿using System;
 using FoldEngine.Commands;
+using FoldEngine.Editor.Gui;
+using FoldEngine.Editor.Views;
 using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
 using FoldEngine.Systems;
@@ -7,7 +9,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Woofer;
 
-namespace FoldEngine.Editor.Views {
+namespace FoldEngine.Editor {
 
     [GameSystem("fold:editor.base", ProcessingCycles.All)]
     public class EditorBase : GameSystem {

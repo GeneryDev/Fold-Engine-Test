@@ -6,7 +6,7 @@ using FoldEngine.Interfaces;
 using Microsoft.Xna.Framework;
 using Mouse = Microsoft.Xna.Framework.Input.Mouse;
 
-namespace FoldEngine.Editor.Views {
+namespace FoldEngine.Gui {
     public abstract class GuiEnvironment {
         public Point MousePos;
         public ButtonAction MouseLeft = ButtonAction.Default;
@@ -15,6 +15,8 @@ namespace FoldEngine.Editor.Views {
             
         public abstract List<GuiPanel> VisiblePanels { get; }
 
+        
+        public readonly ObjectPoolCollection<IGuiAction> ActionPool = new ObjectPoolCollection<IGuiAction>();
         
         public IRenderingUnit Renderer { get; set; }
         public IRenderingLayer Layer { get; set; }

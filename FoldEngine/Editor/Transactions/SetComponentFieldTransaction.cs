@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using FoldEngine.Editor.Gui;
 using FoldEngine.Editor.Views;
 
 namespace FoldEngine.Editor.Transactions {

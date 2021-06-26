@@ -1,4 +1,5 @@
-﻿using FoldEngine.Interfaces;
+﻿using FoldEngine.Gui;
+using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
 
 namespace FoldEngine.Editor.Views {

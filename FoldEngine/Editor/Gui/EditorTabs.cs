@@ -1,11 +1,12 @@
 ﻿using System;
 using FoldEngine.Editor.Views;
 using FoldEngine.Graphics;
+using FoldEngine.Gui;
 using FoldEngine.Interfaces;
 using FoldEngine.Text;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Editor {
+namespace FoldEngine.Editor.Gui {
     public class ViewTab : GuiElement {
         private const float LabelSize = 7;
         

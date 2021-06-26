@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using EntryProject.Util;
 using FoldEngine.Commands;
 using FoldEngine.Editor.Transactions;
+using FoldEngine.Editor.Views;
 using FoldEngine.Graphics;
+using FoldEngine.Gui;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
-namespace FoldEngine.Editor.Views {
+namespace FoldEngine.Editor.Gui {
     public class EditorEnvironment : GuiEnvironment {
 
         public const int FrameBorder = 4;

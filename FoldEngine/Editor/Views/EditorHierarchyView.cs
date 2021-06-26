@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using EntryProject.Util;
 using FoldEngine.Components;
+using FoldEngine.Editor.Gui;
+using FoldEngine.Gui;
 using FoldEngine.Interfaces;
 using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
@@ -43,14 +46,21 @@ namespace FoldEngine.Editor.Views {
             
             bool hasChildren = transform.FirstChildId != -1;
             bool expanded = _expandedEntities.Contains(entityId);
+
+            var button = panel.Button(Scene.Components.GetComponent<EntityName>(entityId).Name, 14)
+                .TextAlignment(-1)
+                .Icon(renderer.Textures[
+                    hasChildren ? expanded ? "editor:triangle.down" : "editor:triangle.right" : "editor:blank"])
+                ;
             
-            panel.Element<HierarchyButton>()
+            button.LeftAction<HierarchyAction>()
                 .Id(entityId)
                 .Depth(depth)
-                .Text(Scene.Components.GetComponent<EntityName>(entityId).Name)
-                .TextAlignment(-1)
-                .Icon(renderer.Textures[hasChildren ? expanded ? "editor:triangle.down" : "editor:triangle.right" : "editor:blank"])
-                .FontSize(14)
+                ;
+            
+            button.RightAction<HierarchyAction>()
+                .Id(entityId)
+                .Depth(depth)
                 ;
 
             if(hasChildren && expanded) {
@@ -65,37 +75,30 @@ namespace FoldEngine.Editor.Views {
         }
     }
 
-    public class HierarchyButton : GuiButton {
+    public class HierarchyAction : IGuiAction {
         private long _id;
         private int _depth;
 
-        public HierarchyButton Id(long id) {
+        public HierarchyAction Id(long id) {
             _id = id;
             return this;
         }
         
-        public HierarchyButton Depth(int depth) {
+        public HierarchyAction Depth(int depth) {
             _depth = depth;
             return this;
         }
 
-        public override void AdjustSpacing(GuiPanel parent) {
-            base.AdjustSpacing(parent);
-            Bounds.X += 12 * _depth;
-        }
-
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
-            base.Render(renderer, layer);
-        }
-
-        public override void PerformAction(Point point) {
-            if(Parent.Environment is EditorEnvironment editorEnvironment) {
-                if(point.X < Bounds.X + 24) {
+        public void Perform(GuiElement element, MouseEvent e) {
+            if(element.Parent.Environment is EditorEnvironment editorEnvironment) {
+                if(e.Position.X < element.Bounds.X + 24) {
                     editorEnvironment.GetView<EditorHierarchyView>().ExpandCollapseEntity(_id);
                 } else {
                     editorEnvironment.GetView<EditorInspectorView>().SetEntity(_id);
                 }
             }
         }
+
+        public IObjectPool Pool { get; set; }
     }
 }
