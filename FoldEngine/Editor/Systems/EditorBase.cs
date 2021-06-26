@@ -32,11 +32,6 @@ namespace FoldEngine.Editor.Views {
 
         public override void OnInput() {
             Environment.Input(Owner.Core.InputUnit);
-
-            if(Environment.MouseRight.Down) {
-                Environment.SizeEast = (Environment.Layer?.LayerSize.X ?? 1) - Environment.MousePos.X;
-                // Owner.Core.RenderingUnit.RootGroup.Dependencies[0].Destination.Location = Mouse.GetState().Position;
-            }
         }
 
         public override void OnUpdate() {

@@ -10,12 +10,5 @@ namespace FoldEngine.Editor {
 
             scene.Systems.Add<EditorBase>();
         }
-
-        public static class Actions {
-            public const int ChangeToMenu = 1;
-            public const int Save = 2;
-            public const int ExpandCollapseEntity = 3;
-            public const int Test = 99;
-        }
     }
 }

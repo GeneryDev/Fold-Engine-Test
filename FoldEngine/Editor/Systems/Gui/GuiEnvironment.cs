@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using EntryProject.Util;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using Microsoft.Xna.Framework;
@@ -17,7 +18,8 @@ namespace FoldEngine.Editor.Views {
         
         public IRenderingUnit Renderer { get; set; }
         public IRenderingLayer Layer { get; set; }
-
+        
+        
         public virtual void Input(InputUnit inputUnit) {
             if(MouseLeft == ButtonAction.Default) {
                 MouseLeft = new ButtonAction(inputUnit.Devices.Mouse.LeftButton);

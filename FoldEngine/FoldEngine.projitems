@@ -103,6 +103,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Util\FixedSizeBuffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Geometry.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\JsonSerialization\JsonDeserializerObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\ObjectPool.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\ObjectPoolCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\OrderedList.cs" />
     <Folder Include="$(MSBuildThisFileDirectory)Input\Builder" />
     <Folder Include="$(MSBuildThisFileDirectory)LevelRendering\2d" />

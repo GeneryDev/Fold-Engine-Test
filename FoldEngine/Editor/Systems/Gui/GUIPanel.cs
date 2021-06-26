@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using EntryProject.Util;
 using FoldEngine.Graphics;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
@@ -21,9 +22,9 @@ namespace FoldEngine.Editor.Views {
         public ButtonAction MouseLeft = ButtonAction.Default;
         public ButtonAction MouseRight = ButtonAction.Default;
 
-        private List<GuiElement> _children = new List<GuiElement>();
-        private List<GuiElement> _objectPool = new List<GuiElement>();
-        private int _generation = 0;
+        private readonly List<GuiElement> _children = new List<GuiElement>();
+        public readonly ObjectPoolCollection<GuiElement> ElementPool = new ObjectPoolCollection<GuiElement>();
+        // public readonly ObjectPoolCollection<GuiAction> ActionPool = new ObjectPoolCollection<GuiAction>();
 
         public Point LayoutPosition = Point.Zero;
         public Point ContentSize = Point.Zero;
@@ -37,7 +38,7 @@ namespace FoldEngine.Editor.Views {
 
         public void Reset() {
             _children.Clear();
-            _generation++;
+            ElementPool.FreeAll();
             LayoutPosition = Bounds.Location;
             ContentSize = Point.Zero;
             _previousElement = null;
@@ -50,25 +51,15 @@ namespace FoldEngine.Editor.Views {
 
         private T NewElement<T>() where T : GuiElement, new() {
             T element = null;
-            foreach(GuiElement existing in _objectPool) {
-                if(existing is T && existing.Generation != _generation) {
-                    element = (T) existing;
-                    break;
-                }
-            }
+            element = ElementPool.Claim<T>();
 
-            if(element == null) {
-                element = new T();
-                element.Parent = this;
-                _objectPool.Add(element);
-            }
+            element.Parent = this;
 
             PrepareElement(element);
             return element;
         }
 
         private void PrepareElement(GuiElement element) {
-            element.Generation = this._generation;
             _children.Add(element);
             element.Bounds.Location = LayoutPosition - ScrollPosition;
             element.Reset(this);
@@ -205,7 +196,6 @@ namespace FoldEngine.Editor.Views {
 
     public abstract class GuiElement {
         internal GuiPanel Parent;
-        internal int Generation;
 
         public bool Pressed => Parent.IsPressed(this);
         public virtual Point Displacement => new Point(0, Bounds.Height + Margin);
