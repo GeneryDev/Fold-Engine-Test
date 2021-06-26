@@ -109,6 +109,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Util\ObjectPool.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\ObjectPoolCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\OrderedList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\FieldCollection.cs" />
     <Folder Include="$(MSBuildThisFileDirectory)Input\Builder" />
     <Folder Include="$(MSBuildThisFileDirectory)LevelRendering\2d" />
     <Compile Include="$(MSBuildThisFileDirectory)Scenes\Entity.cs" />
