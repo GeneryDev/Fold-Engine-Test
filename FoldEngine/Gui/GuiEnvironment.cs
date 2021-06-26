@@ -101,7 +101,7 @@ namespace FoldEngine.Gui {
 
     public struct HoverTarget {
         public GuiPanel ScrollablePanel;
-        public GuiElement DeepestElement;
+        public GuiElement Element;
         public GuiPopupMenu PopupMenu;
     }
 

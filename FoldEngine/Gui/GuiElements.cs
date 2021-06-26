@@ -53,7 +53,7 @@ namespace FoldEngine.Gui {
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
             if(Bounds.Contains(Environment.MousePos)) {
-                Environment.HoverTarget.DeepestElement = this;
+                Environment.HoverTarget.Element = this;
             }
 
             RenderedText renderedText = _shouldCache ? Parent.RenderString(_text, _fontSize) : default;
@@ -144,12 +144,12 @@ namespace FoldEngine.Gui {
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
             if(Bounds.Contains(Environment.MousePos)) {
-                Environment.HoverTarget.DeepestElement = this;
+                Environment.HoverTarget.Element = this;
             }
 
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
-                Color = Pressed(MouseEvent.LeftButton) ? new Color(63, 63, 70) : Environment.HoverTargetPrevious.DeepestElement == this ? Color.CornflowerBlue : new Color(37, 37, 38),
+                Color = Pressed(MouseEvent.LeftButton) ? new Color(63, 63, 70) : Environment.HoverTargetPrevious.Element == this ? Color.CornflowerBlue : new Color(37, 37, 38),
                 DestinationRectangle = Bounds
             });
             base.Render(renderer, layer);

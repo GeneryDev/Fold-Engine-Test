@@ -156,7 +156,7 @@ namespace FoldEngine.Gui {
             EndPreviousElement();
 
             if(Bounds.Contains(Environment.MousePos) && Environment is EditorEnvironment editorEnvironment) {
-                editorEnvironment.HoverTarget.DeepestElement = this;
+                editorEnvironment.HoverTarget.Element = this;
                 if(MayScroll) editorEnvironment.HoverTarget.ScrollablePanel = this;
             }
             _lastFrameRendered = Time.Frame;
@@ -200,6 +200,16 @@ namespace FoldEngine.Gui {
                 if(ScrollPosition.Y > ContentSize.Y - Bounds.Height) ScrollPosition.Y = ContentSize.Y - Bounds.Height;
                 if(ScrollPosition.Y < 0) ScrollPosition.Y = 0;
                 Environment.DismissPopups();
+            }
+        }
+
+        public bool IsAncestorOf(GuiElement element) {
+            while(true) {
+                if(element == null) return false;
+                if(this == element) return true;
+                if(element.Parent == this) return true;
+                if(element.Parent == null) return false;
+                element = element.Parent;
             }
         }
     }

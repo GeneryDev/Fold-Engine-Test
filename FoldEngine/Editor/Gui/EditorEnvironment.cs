@@ -137,10 +137,12 @@ namespace FoldEngine.Editor.Gui {
             }
 
             if(HoverTarget.ScrollablePanel != null) {
-                if(Scene.Core.InputUnit.Players[0].Get<ChangeAction>("zoom.in")) {
-                    HoverTarget.ScrollablePanel.Scroll(1);
-                } else if(Scene.Core.InputUnit.Players[0].Get<ChangeAction>("zoom.out")) {
-                    HoverTarget.ScrollablePanel.Scroll(-1);
+                if(HoverTarget.ScrollablePanel.IsAncestorOf(HoverTarget.Element)) {
+                    if(Scene.Core.InputUnit.Players[0].Get<ChangeAction>("zoom.in")) {
+                        HoverTarget.ScrollablePanel.Scroll(1);
+                    } else if(Scene.Core.InputUnit.Players[0].Get<ChangeAction>("zoom.out")) {
+                        HoverTarget.ScrollablePanel.Scroll(-1);
+                    }
                 }
             }
         }
@@ -366,12 +368,12 @@ namespace FoldEngine.Editor.Gui {
         
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
             if(Bounds.Contains(Environment.MousePos)) {
-                Environment.HoverTarget.DeepestElement = this;
+                Environment.HoverTarget.Element = this;
             }
             
             var color = new Color(140, 140, 145);
             bool pressed = Pressed();
-            if(pressed || Environment.HoverTargetPrevious.DeepestElement == this) {
+            if(pressed || Environment.HoverTargetPrevious.Element == this) {
                 Rectangle drawBounds = Bounds;
                 if(_side.X != 0) {
                     drawBounds.Width = 2;

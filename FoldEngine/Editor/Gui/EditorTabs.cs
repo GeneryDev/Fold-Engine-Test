@@ -35,20 +35,16 @@ namespace FoldEngine.Editor.Gui {
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
             if(Bounds.Contains(Environment.MousePos)) {
-                Environment.HoverTarget.DeepestElement = this;
+                Environment.HoverTarget.Element = this;
             }
             
-            if(Pressed(MouseEvent.LeftButton) && Environment.HoverTargetPrevious.DeepestElement != this) {
+            if(Pressed(MouseEvent.LeftButton) && Environment.HoverTargetPrevious.Element != this) {
                 _dragging = true;
             }
 
             if(_dragging) {
                 if(Parent.Environment is EditorEnvironment editorEnvironment) {
                     editorEnvironment.DraggingViewTab = this;
-                    // if(editorEnvironment.DropTarget != null) {
-                    //     _viewList.RemoveView(_view);
-                    //     editorEnvironment.DropTarget.AddView(_view);
-                    // }
                 }
             }
 
@@ -61,7 +57,7 @@ namespace FoldEngine.Editor.Gui {
             
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
-                Color = Pressed(MouseEvent.LeftButton) ? new Color(63, 63, 70) : Environment.HoverTargetPrevious.DeepestElement == this ? Color.CornflowerBlue : defaultColor,
+                Color = Pressed(MouseEvent.LeftButton) ? new Color(63, 63, 70) : Environment.HoverTargetPrevious.Element == this ? Color.CornflowerBlue : defaultColor,
                 DestinationRectangle = renderingBounds
             });
             
