@@ -13,7 +13,7 @@ namespace FoldEngine.Gui {
     public class GuiPanel : GuiElement {
         private const int ScrollAmount = 18;
         
-        public GuiEnvironment Environment;
+        public GuiEnvironment Environment { get; private set; }
         public Dictionary<string, RenderedText> RenderedStrings = new Dictionary<string,RenderedText>();
         public bool Focused = true;
         
@@ -37,7 +37,7 @@ namespace FoldEngine.Gui {
             Environment = environment;
         }
 
-        public void Reset() {
+        public virtual void Reset() {
             _children.Clear();
             ElementPool.FreeAll();
             LayoutPosition = Bounds.Location;
@@ -69,11 +69,11 @@ namespace FoldEngine.Gui {
 
         private GuiElement _previousElement;
 
-        private void EndPreviousElement() {
+        protected void EndPreviousElement() {
             if(_previousElement != null) {
                 _previousElement.AdjustSpacing(this);
                 LayoutPosition += _previousElement.Displacement;
-                ContentSize.X = Math.Max(ContentSize.X, _previousElement.Bounds.Right);
+                ContentSize.X = Math.Max(ContentSize.X, _previousElement.Bounds.Right - Bounds.Location.X + ScrollPosition.X);
                 ContentSize.Y = Math.Max(ContentSize.Y, _previousElement.Bounds.Bottom - Bounds.Location.Y + ScrollPosition.Y);
                 _previousElement = null;
             }
@@ -155,8 +155,9 @@ namespace FoldEngine.Gui {
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
             EndPreviousElement();
 
-            if(MayScroll && Bounds.Contains(Environment.MousePos) && Environment is EditorEnvironment editorEnvironment) {
-                editorEnvironment.HoverTarget.ScrollablePanel = this;
+            if(Bounds.Contains(Environment.MousePos) && Environment is EditorEnvironment editorEnvironment) {
+                editorEnvironment.HoverTarget.DeepestElement = this;
+                if(MayScroll) editorEnvironment.HoverTarget.ScrollablePanel = this;
             }
             _lastFrameRendered = Time.Frame;
             foreach(GuiElement element in _children) {
@@ -198,6 +199,7 @@ namespace FoldEngine.Gui {
                 ScrollPosition.Y -= dir * ScrollAmount;
                 if(ScrollPosition.Y > ContentSize.Y - Bounds.Height) ScrollPosition.Y = ContentSize.Y - Bounds.Height;
                 if(ScrollPosition.Y < 0) ScrollPosition.Y = 0;
+                Environment.DismissPopups();
             }
         }
     }

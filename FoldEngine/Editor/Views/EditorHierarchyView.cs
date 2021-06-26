@@ -58,9 +58,8 @@ namespace FoldEngine.Editor.Views {
                 .Depth(depth)
                 ;
             
-            button.RightAction<HierarchyAction>()
+            button.RightAction<ShowEntityContextMenu>()
                 .Id(entityId)
-                .Depth(depth)
                 ;
 
             if(hasChildren && expanded) {
@@ -100,5 +99,32 @@ namespace FoldEngine.Editor.Views {
         }
 
         public IObjectPool Pool { get; set; }
+    }
+
+    public class ShowEntityContextMenu : IGuiAction {
+        private long _id;
+        
+        public ShowEntityContextMenu Id(long id) {
+            _id = id;
+            return this;
+        }
+
+        public void Perform(GuiElement element, MouseEvent e) {
+            var contextMenu = element.Parent.Environment.ContextMenu;
+            contextMenu.Reset(e.Position);
+            contextMenu.Button("Edit", 14).LeftAction<DebugAction>();
+            contextMenu.Button("Rename", 14).LeftAction<DebugAction>();
+            contextMenu.Button("Delete", 14).LeftAction<DebugAction>();
+            contextMenu.Show();
+        }
+        
+        public IObjectPool Pool { get; set; }
+    }
+
+    public class DebugAction : IGuiAction {
+        public IObjectPool Pool { get; set; }
+        public void Perform(GuiElement element, MouseEvent e) {
+            Console.WriteLine("debug action");
+        }
     }
 }

@@ -11,6 +11,8 @@ namespace FoldEngine.Gui {
 
         public virtual Point Displacement => new Point(0, Bounds.Height + Margin);
 
+        public virtual GuiEnvironment Environment => Parent.Environment;
+
         public Rectangle Bounds;
         public int Margin = 8;
 
@@ -50,6 +52,9 @@ namespace FoldEngine.Gui {
         }
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+            if(Bounds.Contains(Environment.MousePos)) {
+                Environment.HoverTarget.DeepestElement = this;
+            }
 
             RenderedText renderedText = _shouldCache ? Parent.RenderString(_text, _fontSize) : default;
             if(!renderedText.HasValue) TextRenderer.Instance.Start(renderer.Fonts["default"], _text, _fontSize);
@@ -123,8 +128,8 @@ namespace FoldEngine.Gui {
 
     public class GuiButton : GuiLabel {
 
-        private PooledObjectWrapper<IGuiAction> _leftAction;
-        private PooledObjectWrapper<IGuiAction> _rightAction;
+        private PooledValue<IGuiAction> _leftAction;
+        private PooledValue<IGuiAction> _rightAction;
 
         public override void Reset(GuiPanel parent) {
             base.Reset(parent);
@@ -138,9 +143,13 @@ namespace FoldEngine.Gui {
         }
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+            if(Bounds.Contains(Environment.MousePos)) {
+                Environment.HoverTarget.DeepestElement = this;
+            }
+
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
-                Color = Pressed(MouseEvent.LeftButton) ? new Color(63, 63, 70) : Bounds.Contains(Parent.Environment.MousePos) ? Color.CornflowerBlue : new Color(37, 37, 38),
+                Color = Pressed(MouseEvent.LeftButton) ? new Color(63, 63, 70) : Environment.HoverTargetPrevious.DeepestElement == this ? Color.CornflowerBlue : new Color(37, 37, 38),
                 DestinationRectangle = Bounds
             });
             base.Render(renderer, layer);

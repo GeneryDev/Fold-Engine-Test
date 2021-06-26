@@ -89,7 +89,8 @@ namespace FoldEngine.Editor.Gui {
         }
 
         public ViewTab DraggingViewTab { get; set; }
-        public HoverTarget HoverTarget;
+
+        public ViewListPanel HoverViewListPanel { get; set; }
 
         public bool LayoutValidated = false;
         private int _sizeNorth = 96;
@@ -147,7 +148,7 @@ namespace FoldEngine.Editor.Gui {
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
             base.Render(renderer, layer);
 
-            HoverTarget = default;
+            HoverViewListPanel = default;
 
             {
                 var bounds = new Rectangle(0, 0, layer.LayerSize.X, SizeNorth);
@@ -204,6 +205,10 @@ namespace FoldEngine.Editor.Gui {
             }
             
             DraggingViewTab?.Render(renderer, layer);
+
+            if(ContextMenu.Showing) {
+                ContextMenu.Render(renderer, layer);
+            }
 
             if(!LayoutValidated) {
                 renderer.Groups["editor"].Dependencies[0].Group.Size = new Point(renderer.WindowSize.X - SizeWest - SizeEast, renderer.WindowSize.Y - SizeNorth - SizeSouth);
@@ -280,7 +285,7 @@ namespace FoldEngine.Editor.Gui {
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
             if(Environment is EditorEnvironment editorEnvironment && Bounds.Contains(Environment.MousePos)) {
-                editorEnvironment.HoverTarget.ViewListPanel = this;
+                editorEnvironment.HoverViewListPanel = this;
             }
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
@@ -360,9 +365,13 @@ namespace FoldEngine.Editor.Gui {
         }
         
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+            if(Bounds.Contains(Environment.MousePos)) {
+                Environment.HoverTarget.DeepestElement = this;
+            }
+            
             var color = new Color(140, 140, 145);
             bool pressed = Pressed();
-            if(pressed || Bounds.Contains(Parent.Environment.MousePos)) {
+            if(pressed || Environment.HoverTargetPrevious.DeepestElement == this) {
                 Rectangle drawBounds = Bounds;
                 if(_side.X != 0) {
                     drawBounds.Width = 2;
@@ -399,10 +408,5 @@ namespace FoldEngine.Editor.Gui {
             _side = side;
             return this;
         }
-    }
-
-    public struct HoverTarget {
-        public ViewListPanel ViewListPanel;
-        public GuiPanel ScrollablePanel;
     }
 }

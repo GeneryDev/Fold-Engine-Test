@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using EntryProject.Util;
+using FoldEngine.Editor.Gui;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using Microsoft.Xna.Framework;
@@ -8,20 +9,31 @@ using Mouse = Microsoft.Xna.Framework.Input.Mouse;
 
 namespace FoldEngine.Gui {
     public abstract class GuiEnvironment {
+        
+        // Input
         public Point MousePos;
         public ButtonAction MouseLeft = ButtonAction.Default;
         public ButtonAction MouseMiddle = ButtonAction.Default;
         public ButtonAction MouseRight = ButtonAction.Default;
+        private GuiPanel[] _pressedPanels = new GuiPanel[MouseEvent.MaxButtons];
+        public HoverTarget HoverTargetPrevious;
+        public HoverTarget HoverTarget;
             
         public abstract List<GuiPanel> VisiblePanels { get; }
+        
 
+        public GuiPopupMenu ContextMenu;
         
         public readonly ObjectPoolCollection<IGuiAction> ActionPool = new ObjectPoolCollection<IGuiAction>();
         
+        // Renderer
         public IRenderingUnit Renderer { get; set; }
         public IRenderingLayer Layer { get; set; }
         
-        private GuiPanel[] _pressedPanels = new GuiPanel[MouseEvent.MaxButtons];
+
+        public GuiEnvironment() {
+            ContextMenu = new GuiPopupMenu(this);
+        }
         
         public virtual void Input(InputUnit inputUnit) {
             if(MouseLeft == ButtonAction.Default) {
@@ -40,6 +52,10 @@ namespace FoldEngine.Gui {
 
         private void HandleMouseEvents(ButtonAction mouseButton, int buttonIndex) {
             if(mouseButton.Pressed) {
+                if(HoverTarget.PopupMenu != ContextMenu) {
+                    DismissPopups();
+                }
+                
                 for(int i = VisiblePanels.Count - 1; i >= 0; i--) {
                     GuiPanel panel = VisiblePanels[i];
                     if(panel.Visible && panel.Bounds.Contains(MousePos)) {
@@ -53,12 +69,20 @@ namespace FoldEngine.Gui {
                     }
                 }
             } else if(mouseButton.Released) {
+                DismissPopups();
+                
                 _pressedPanels[buttonIndex]?.OnMouseReleased(new MouseEvent() {
                     Type = MouseEventType.RELEASED,
                     Position = MousePos,
                     Button = buttonIndex
                 });
                 _pressedPanels[buttonIndex] = null;
+            }
+        }
+
+        public void DismissPopups() {
+            if(ContextMenu.Showing) {
+                ContextMenu.Dismiss();
             }
         }
         
@@ -69,7 +93,16 @@ namespace FoldEngine.Gui {
         public virtual void Render(IRenderingUnit renderer, IRenderingLayer layer) {
             Renderer = renderer;
             Layer = layer;
+
+            HoverTargetPrevious = HoverTarget;
+            HoverTarget = default;
         }
+    }
+
+    public struct HoverTarget {
+        public GuiPanel ScrollablePanel;
+        public GuiElement DeepestElement;
+        public GuiPopupMenu PopupMenu;
     }
 
     public struct MouseEvent {

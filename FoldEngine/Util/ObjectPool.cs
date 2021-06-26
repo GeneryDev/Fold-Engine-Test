@@ -60,7 +60,7 @@ namespace EntryProject.Util {
         IObjectPool Pool { get; set; }
     }
 
-    public struct PooledObjectWrapper<T> where T : IPooledObject {
+    public struct PooledValue<T> where T : IPooledObject {
         private T _value;
 
         public T Value {

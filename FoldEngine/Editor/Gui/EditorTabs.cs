@@ -34,7 +34,11 @@ namespace FoldEngine.Editor.Gui {
         }
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
-            if(Pressed(MouseEvent.LeftButton) && !Bounds.Contains(Parent.Environment.MousePos)) {
+            if(Bounds.Contains(Environment.MousePos)) {
+                Environment.HoverTarget.DeepestElement = this;
+            }
+            
+            if(Pressed(MouseEvent.LeftButton) && Environment.HoverTargetPrevious.DeepestElement != this) {
                 _dragging = true;
             }
 
@@ -57,7 +61,7 @@ namespace FoldEngine.Editor.Gui {
             
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
-                Color = Pressed(MouseEvent.LeftButton) ? new Color(63, 63, 70) : Bounds.Contains(Parent.Environment.MousePos) ? Color.CornflowerBlue : defaultColor,
+                Color = Pressed(MouseEvent.LeftButton) ? new Color(63, 63, 70) : Environment.HoverTargetPrevious.DeepestElement == this ? Color.CornflowerBlue : defaultColor,
                 DestinationRectangle = renderingBounds
             });
             
@@ -87,9 +91,9 @@ namespace FoldEngine.Editor.Gui {
                 } else {
                     if(Parent.Environment is EditorEnvironment editorEnvironment) {
                         editorEnvironment.DraggingViewTab = null;
-                        if(editorEnvironment.HoverTarget.ViewListPanel != null) {
+                        if(editorEnvironment.HoverViewListPanel != null) {
                             _viewList.RemoveView(_view);
-                            editorEnvironment.HoverTarget.ViewListPanel.AddView(_view);
+                            editorEnvironment.HoverViewListPanel.AddView(_view);
                         }
                     }
                 }
