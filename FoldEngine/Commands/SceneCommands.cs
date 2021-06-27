@@ -1,5 +1,8 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using FoldEngine.Interfaces;
+using FoldEngine.Scenes;
+using FoldEngine.Serialization;
 
 namespace FoldEngine.Commands {
     public class SaveSceneCommand : ICommand {
@@ -11,7 +14,13 @@ namespace FoldEngine.Commands {
 
         public void Execute(IGameCore core) {
             Directory.GetParent(TargetPath).Create();
-            core.ActiveScene.Save(TargetPath);
+            var saveOp = new SaveOperation(TargetPath);
+            // saveOp.Options.Set(SerializeOnlyEntities.Instance, new List<long>() {1, 2, 3});
+            
+            core.ActiveScene.Save(saveOp);
+            
+            saveOp.Close();
+            saveOp.Dispose();
         }
     }
     public class LoadSceneCommand : ICommand {
@@ -22,7 +31,14 @@ namespace FoldEngine.Commands {
         }
 
         public void Execute(IGameCore core) {
-            core.ActiveScene.Load(SourcePath);
+            var loadOp = new LoadOperation(SourcePath);
+            
+            loadOp.Options.Set(DeserializeClearScene.Instance, true);
+            
+            core.ActiveScene.Load(loadOp);
+            
+            loadOp.Close();
+            loadOp.Dispose();
         }
     }
 }

@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using EntryProject.Util;
 using FoldEngine.Scenes;
 
 namespace FoldEngine.Serialization {
     public class SaveOperation {
         private readonly string _path;
         private readonly BinaryWriter _writer;
+        public readonly FieldCollection Options = new FieldCollection();
         
         private readonly List<string> _stringPool = new List<string>();
         

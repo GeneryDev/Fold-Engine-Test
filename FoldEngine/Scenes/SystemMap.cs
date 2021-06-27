@@ -125,6 +125,7 @@ namespace FoldEngine.Scenes
         public IEnumerable<GameSystem> AllSystems => _all;
 
         public void Serialize(SaveOperation writer) {
+            
             writer.WriteCompound((ref SaveOperation.Compound c) => {
                 c.WriteMember(nameof(_all), () => {
                     writer.Write(_all.Count);
@@ -137,16 +138,18 @@ namespace FoldEngine.Scenes
         }
 
         public void Deserialize(LoadOperation reader) {
-            foreach(GameSystem sys in _all) {
-                Remove(sys);
+            if(reader.Options.Get(DeserializeClearScene.Instance)) {
+                foreach(GameSystem sys in _all) {
+                    Remove(sys);
+                }
             }
+            
             reader.ReadCompound(c => {
                 c.StartReadMember(nameof(_all));
                 int count = reader.ReadInt32();
                 for(int i = 0; i < count; i++) {
                     string sysName = reader.ReadString();
                     Add(GameSystem.CreateForIdentifier(sysName));
-                    Console.WriteLine("System: " + sysName);
                 }
             });
         }

@@ -158,6 +158,13 @@ namespace FoldEngine.Components {
 
         public void Deserialize(LoadOperation reader) {
             reader.ReadCompound(c => {
+                if(reader.Options.Get(DeserializeClearScene.Instance)) {
+                    Console.WriteLine("Clearing sets");
+                    foreach(ComponentSet set in Sets.Values) {
+                        set.Clear();
+                    }
+                }
+                
                 foreach(string componentIdentifier in c.MemberNames) {
                     Type componentType = Component.TypeForIdentifier(componentIdentifier);
                     if(componentType == null) {
@@ -165,10 +172,16 @@ namespace FoldEngine.Components {
                         continue;
                     }
 
-                    ComponentSet set = Component.CreateSetForType(componentType, _scene, 0);
+                    ComponentSet set;
+                    
+                    if(Sets.ContainsKey(componentType)) {
+                        set = Sets[componentType];
+                    } else {
+                        set = Component.CreateSetForType(componentType, _scene, 0);
+                        Sets[componentType] = set;
+                    }
 
                     c.DeserializeMember(componentIdentifier, set);
-                    Sets[componentType] = set;
                 }
             });
         }

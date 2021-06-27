@@ -60,6 +60,7 @@ namespace Sandbox.Systems {
                 
             while(_livingComponents.Next()) {
                 if(_livingComponents.HasCoComponent<Physics>()) {
+                    // Console.WriteLine("living + physics component");
                     if(_livingComponents.GetComponent().Grounded && Owner.Core.InputUnit.Players[0].Get<ButtonAction>("movement.jump").Consume()) {
                         SoundInstance soundInstance = Owner.Core.AudioUnit.CreateInstance("Audio/failure");
                         soundInstance.Pan = MathHelper.Clamp(moveX, -1, 1);
@@ -67,6 +68,7 @@ namespace Sandbox.Systems {
                         _livingComponents.GetCoComponent<Physics>().Velocity.Y = 8;
                     }
                     _livingComponents.GetCoComponent<Physics>().Velocity.X = 2*moveX;
+                    // Console.WriteLine(_livingComponents.GetCoComponent<Physics>().Velocity);
                 }
                 _livingComponents.GetComponent().Grounded = false;
             }

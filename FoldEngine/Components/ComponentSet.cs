@@ -22,6 +22,8 @@ namespace FoldEngine.Components {
         public abstract void Deserialize(LoadOperation reader);
 
         public abstract Type ComponentType { get; }
+
+        public abstract void Clear();
     }
 
 
@@ -231,6 +233,18 @@ namespace FoldEngine.Components {
             writer.WriteArray(((ref SaveOperation.Array arr) => {
                 for(int entityId = MinId; entityId < MaxId; entityId++) {
                     if(!Has(entityId)) continue;
+                    if(writer.Options.Has(SerializeOnlyEntities.Instance)) {
+                        bool shouldSerialize = false;
+                        foreach(long filteredEntityId in writer.Options.Get(SerializeOnlyEntities.Instance)) {
+                            if((int) filteredEntityId == entityId) {
+                                shouldSerialize = true;
+                                break;
+                            }
+                        }
+
+                        if(!shouldSerialize) continue;
+                    }
+
                     arr.WriteMember(() => {
                         // ReSharper disable twice AccessToModifiedClosure
                         writer.Write(entityId);
@@ -245,11 +259,18 @@ namespace FoldEngine.Components {
                 for(int i = 0; i < arr.MemberCount; i++) {
                     arr.StartReadMember(i);
                     int entityId = reader.ReadInt32();
+                    Console.WriteLine($"{ComponentType} for entity id " + entityId);
                     CreateFor(entityId);
-                    ref T component = ref Get(entityId);
-                    component = ComponentSerializer.Deserialize<T>((object) component, reader);
+                    ComponentSerializer.Deserialize<T>(this, entityId, reader);
                 }
             });
+        }
+
+        public override void Clear() {
+            for(int i = 0; i < Sparse.Length; i++) {
+                Sparse[i] = -1;
+            }
+            N = 0;
         }
 
         public void DebugPrint() {

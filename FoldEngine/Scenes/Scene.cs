@@ -188,10 +188,14 @@ namespace FoldEngine.Scenes
 
         public void Save(SaveOperation writer) {
             writer.WriteCompound((ref SaveOperation.Compound c) => {
-                c.WriteMember(nameof(Name), Name);
-                c.WriteMember(nameof(_nextEntityId), _nextEntityId);
-                c.WriteMember(nameof(_recycleQueue), _recycleQueue);
-                c.WriteMember(nameof(Systems), (ISelfSerializer) Systems);
+
+                if(writer.Options.Has(SerializeOnlyEntities.Instance)) {
+                    c.WriteMember(nameof(Name), Name);
+                    c.WriteMember(nameof(_nextEntityId), _nextEntityId);
+                    c.WriteMember(nameof(_recycleQueue), _recycleQueue);
+                    c.WriteMember(nameof(Systems), (ISelfSerializer) Systems);
+                }
+
                 c.WriteMember(nameof(Components), (ISelfSerializer) Components);
             });
         }
@@ -205,12 +209,28 @@ namespace FoldEngine.Scenes
 
         public void Load(LoadOperation reader) {
             reader.ReadCompound(c => {
-                Name = c.GetMember<string>(nameof(Name));
-                _nextEntityId = c.GetMember<long>(nameof(_nextEntityId));
-                _recycleQueue = c.GetListMember<long>(nameof(_recycleQueue));
-                c.DeserializeMember(nameof(Systems), Systems);
-                c.DeserializeMember(nameof(Components), Components);
+
+                if(reader.Options.Has(DeserializeClearScene.Instance)) {
+                    if(c.HasMember(nameof(Name))) Name = c.GetMember<string>(nameof(Name));
+                    if(c.HasMember(nameof(_nextEntityId))) _nextEntityId = c.GetMember<long>(nameof(_nextEntityId));
+                    if(c.HasMember(nameof(_recycleQueue))) _recycleQueue = c.GetListMember<long>(nameof(_recycleQueue));
+                }
+
+                if(c.HasMember(nameof(Systems))) c.DeserializeMember(nameof(Systems), Systems);
+                if(c.HasMember(nameof(Components))) c.DeserializeMember(nameof(Components), Components);
             });
         }
+    }
+
+    public class SerializeOnlyEntities : Field<List<long>> {
+        public static SerializeOnlyEntities Instance = new SerializeOnlyEntities();
+    }
+
+    
+    public class DeserializeClearScene : Field<bool> {
+        public static DeserializeClearScene Instance = new DeserializeClearScene();
+    }
+    public class DeserializeRemapIds : Field<Dictionary<long, long>> {
+        public static DeserializeRemapIds Instance = new DeserializeRemapIds();
     }
 }

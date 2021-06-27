@@ -15,18 +15,18 @@ namespace FoldEngine.Components {
                 }
             });
         }
-        public static T Deserialize<T>(object boxed, LoadOperation reader) where T : struct {
+        public static void Deserialize<T>(ComponentSet componentSet, int entityId, LoadOperation reader) where T : struct {
             reader.ReadCompound(c => {
                 foreach(FieldInfo fieldInfo in typeof(T).GetFields()) {
                     if(c.HasMember(fieldInfo.Name)) {
                         c.StartReadMember(fieldInfo.Name);
                         object value = reader.Read(fieldInfo.FieldType);
-                        fieldInfo.SetValue(boxed, value);
+                        
+                        componentSet.SetFieldValue(entityId, fieldInfo, value);
+                        // Console.WriteLine($"Set field {fieldInfo.Name} to value {value}");
                     }
-                    // Console.WriteLine($"Set field {fieldInfo.Name} to value {value}");
                 }
             });
-            return (T) boxed;
         }
     }
 }
