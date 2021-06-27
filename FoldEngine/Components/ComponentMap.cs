@@ -157,7 +157,6 @@ namespace FoldEngine.Components {
         }
 
         public void Deserialize(LoadOperation reader) {
-            Sets.Clear();
             reader.ReadCompound(c => {
                 foreach(string componentIdentifier in c.MemberNames) {
                     Type componentType = Component.TypeForIdentifier(componentIdentifier);

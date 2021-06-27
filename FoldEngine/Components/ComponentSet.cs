@@ -58,6 +58,8 @@ namespace FoldEngine.Components {
             }
 
             BackupSet = new BackupComponentSet();
+
+            Console.WriteLine("Creating component set for type " + typeof(T));
         }
 
         public ref T Get(int entityId) {
