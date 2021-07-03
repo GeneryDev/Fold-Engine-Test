@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using FoldEngine.Scenes;
 using FoldEngine.Serialization;
 
 namespace FoldEngine.Components {
@@ -21,7 +22,15 @@ namespace FoldEngine.Components {
                     if(c.HasMember(fieldInfo.Name)) {
                         c.StartReadMember(fieldInfo.Name);
                         object value = reader.Read(fieldInfo.FieldType);
-                        
+
+                        if(reader.Options.Has(DeserializeRemapIds.Instance)
+                           && value is long id
+                           && fieldInfo.GetCustomAttribute<EntityIdAttribute>() != null
+                           && id != -1
+                        ) {
+                            value = reader.Options.Get(DeserializeRemapIds.Instance).TransformId(id);
+                        }
+
                         componentSet.SetFieldValue(entityId, fieldInfo, value);
                         // Console.WriteLine($"Set field {fieldInfo.Name} to value {value}");
                     }

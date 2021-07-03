@@ -36,11 +36,13 @@ namespace FoldEngine.Components
         /// <summary>
         /// ID of the entity that owns this transform (-1 for null)
         /// </summary>
+        [EntityId]
         private readonly long _ownerId;
         /// <summary>
         /// ID of the parent entity (-1 for null and transforms without parent)
         /// </summary>
         [HideInInspector]
+        [EntityId]
         public long ParentId;
 
         /// <summary>
@@ -57,16 +59,19 @@ namespace FoldEngine.Components
         /// Entity ID of this transform's first child (or -1 if it has no children)
         /// </summary>
         [HideInInspector]
+        [EntityId]
         public long FirstChildId;
         /// <summary>
         /// Entity ID of this transform's previous sibling (or -1 if it's the first child)
         /// </summary>
         [HideInInspector]
+        [EntityId]
         public long PreviousSiblingId;
         /// <summary>
         /// Entity ID of this transform's next sibling (or -1 if it's the last child)
         /// </summary>
         [HideInInspector]
+        [EntityId]
         public long NextSiblingId;
 
         /// <summary>

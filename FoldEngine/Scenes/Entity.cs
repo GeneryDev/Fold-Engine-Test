@@ -9,6 +9,8 @@ using FoldEngine.Components;
 
 namespace FoldEngine.Scenes
 {
+    public class EntityIdAttribute : Attribute {
+    }
     public class Entity
     {
         public readonly Scene Scene;
