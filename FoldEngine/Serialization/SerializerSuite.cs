@@ -64,7 +64,11 @@ namespace FoldEngine.Serialization {
         
 
         public void Write(object value, SaveOperation writer) {
-            GetSerializer(value.GetType()).SerializeObject(value, writer);
+            if(value.GetType().IsEnum) {
+                writer.Write(value.ToString());
+            } else {
+                GetSerializer(value.GetType()).SerializeObject(value, writer);
+            }
         }
         public void Write<T>(T element, SaveOperation writer) {
             GetSerializer<T>().Serialize(element, writer);
@@ -81,7 +85,17 @@ namespace FoldEngine.Serialization {
             return GetSerializer<T>().Deserialize(reader);
         }
         public object Read(Type type, LoadOperation reader) {
-            return GetSerializer(type).DeserializeObject(reader);
+            if(type.IsEnum) {
+                string enumValueName = reader.ReadString();
+                foreach(object enumValue in type.GetEnumValues()) {
+                    if(enumValueName == type.GetEnumName(enumValue)) {
+                        return enumValue;
+                    }
+                }
+                throw new FormatException($"Invalid enum value name '{enumValueName}'");
+            } else {
+                return GetSerializer(type).DeserializeObject(reader);
+            }
         }
         public List<T> ReadList<T>(LoadOperation reader) {
             return GetListSerializer<T>().Deserialize(reader);
