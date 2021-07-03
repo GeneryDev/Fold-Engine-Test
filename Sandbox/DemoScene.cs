@@ -44,7 +44,7 @@ namespace Sandbox {
             }
             e1.Transform.Position += Vector2.UnitY * 64;
             e1.AddComponent<Physics>();
-            e1.AddComponent<MeshCollider>().MeshIdentifier = "circle";
+            e1.AddComponent<Collider>().SetMesh("circle");
             e1.AddComponent<Living>();
             
             {
@@ -53,8 +53,9 @@ namespace Sandbox {
                 mr.TextureIdentifier = "main:beacon";
             }
             e3.Transform.Position += Vector2.UnitY * 64;
+            e3.Transform.Position += Vector2.UnitX * 0.75f;
             e3.AddComponent<Physics>();
-            e3.AddComponent<MeshCollider>().MeshIdentifier = "circle";
+            e3.AddComponent<Collider>().SetMesh("circle");
             e3.AddComponent<Living>();
             
             
@@ -66,7 +67,7 @@ namespace Sandbox {
             e2.Transform.Position += Vector2.UnitY * -9;
             e2.Transform.LocalScale = new Vector2(9, 4);
             e2.AddComponent<Physics>().Static = true;
-            e2.AddComponent<BoxCollider>().ThickFaces = false;
+            e2.AddComponent<Collider>().ThickFaces = false;
 
 
 

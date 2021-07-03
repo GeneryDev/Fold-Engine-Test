@@ -14,13 +14,13 @@ namespace FoldEngine.Physics {
     [GameSystem("fold:physics.simple", ProcessingCycles.Update)]
     public class SimplePhysicsSystem : GameSystem {
         private ComponentIterator<Physics> _physicsObjects;
-        private ComponentIterator<BoxCollider> _colliders;
+        private ComponentIterator<Collider> _colliders;
         
         public Vector2 Gravity = new Vector2(0, -27f);
         
         internal override void Initialize() {
             _physicsObjects = CreateComponentIterator<Physics>(IterationFlags.None);
-            _colliders = CreateComponentIterator<BoxCollider>(IterationFlags.None);
+            _colliders = CreateComponentIterator<Collider>(IterationFlags.None);
         }
         
         public override void OnUpdate() {
@@ -42,15 +42,13 @@ namespace FoldEngine.Physics {
                     physics.Velocity += Gravity * physics.GravityMultiplier * Time.DeltaTime;                    
                 }
 
-                ICollider collider = null;
+                Collider collider = default;
 
-                if(_physicsObjects.HasCoComponent<BoxCollider>()) {
-                    collider = _physicsObjects.GetCoComponent<BoxCollider>();
-                } else if(_physicsObjects.HasCoComponent<MeshCollider>()) {
-                    collider = _physicsObjects.GetCoComponent<MeshCollider>();
+                if(_physicsObjects.HasCoComponent<Collider>()) {
+                    collider = _physicsObjects.GetCoComponent<Collider>();
                 }
 
-                if(collider != null) {
+                if(collider.Type != ColliderType.None) {
                     Vector2[] colliderVertices = collider.GetVertices(ref transform);
                     float colliderReach = collider.GetReach(ref transform);
 
@@ -60,8 +58,7 @@ namespace FoldEngine.Physics {
                         
                         ref Transform otherTransform = ref _colliders.GetCoComponent<Transform>();
                         ref Physics otherPhysics = ref _colliders.GetCoComponent<Physics>();
-                        ref BoxCollider otherCollider = ref _colliders.GetComponent();
-                        
+                        ref Collider otherCollider = ref _colliders.GetComponent();
                         
                         //Skip if too far
                         float otherColliderReach = otherCollider.GetReach(ref otherTransform);
@@ -106,7 +103,7 @@ namespace FoldEngine.Physics {
                                             if(otherCollider.ThickFaces) validFace = true;
                                             else {
                                                 float crossSection = Polygon.ComputeLargestCrossSection(intersection, normal);
-                                                validFace = positionDelta >= crossSection - 0.01; //TODO Maybe make this a variable? Thin face tolerance.
+                                                validFace = positionDelta >= crossSection - otherCollider.ThinFaceTolerance;
                                             }
 
                                             if(validFace) {

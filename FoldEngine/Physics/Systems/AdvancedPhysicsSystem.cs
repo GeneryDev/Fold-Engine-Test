@@ -11,13 +11,13 @@ namespace FoldEngine.Physics {
     [GameSystem("fold:physics.advanced", ProcessingCycles.Update)]
     public class AdvancedPhysicsSystem : GameSystem {
         private ComponentIterator<Physics> _physicsObjects;
-        private ComponentIterator<MeshCollider> _colliders;
+        private ComponentIterator<Collider> _colliders;
 
         public Vector2 Gravity = new Vector2(0, -400f);
         
         internal override void Initialize() {
             _physicsObjects = CreateComponentIterator<Physics>(IterationFlags.None);
-            _colliders = CreateComponentIterator<MeshCollider>(IterationFlags.None);
+            _colliders = CreateComponentIterator<Collider>(IterationFlags.None);
         }
 
         public override void OnUpdate() {
@@ -32,8 +32,8 @@ namespace FoldEngine.Physics {
                     physics.Velocity += Gravity * physics.GravityMultiplier * Time.DeltaTime;                    
                 }
 
-                if(_physicsObjects.HasCoComponent<MeshCollider>()) {
-                    ref MeshCollider collider = ref _physicsObjects.GetCoComponent<MeshCollider>();
+                if(_physicsObjects.HasCoComponent<Collider>()) {
+                    ref Collider collider = ref _physicsObjects.GetCoComponent<Collider>();
 
                     _colliders.Reset();
                     
@@ -42,7 +42,7 @@ namespace FoldEngine.Physics {
                         
                         ref Transform otherTransform = ref _colliders.GetCoComponent<Transform>();
                         ref Physics otherPhysics = ref _colliders.GetCoComponent<Physics>();
-                        ref MeshCollider otherCollider = ref _colliders.GetComponent();
+                        ref Collider otherCollider = ref _colliders.GetComponent();
 
                         Polygon.PolygonIntersectionVertex[][] intersections = Polygon.ComputePolygonIntersection(
                             Owner.Meshes, collider.MeshIdentifier, transform,
