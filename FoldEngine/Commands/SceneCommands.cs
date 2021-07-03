@@ -15,7 +15,7 @@ namespace FoldEngine.Commands {
         public void Execute(IGameCore core) {
             Directory.GetParent(TargetPath).Create();
             var saveOp = new SaveOperation(TargetPath);
-            // saveOp.Options.Set(SerializeOnlyEntities.Instance, new List<long>() {1, 2, 3});
+            saveOp.Options.Set(SerializeOnlyEntities.Instance, new List<long>() {3});
             
             core.ActiveScene.Save(saveOp);
             
@@ -33,7 +33,8 @@ namespace FoldEngine.Commands {
         public void Execute(IGameCore core) {
             var loadOp = new LoadOperation(SourcePath);
             
-            loadOp.Options.Set(DeserializeClearScene.Instance, true);
+            // loadOp.Options.Set(DeserializeClearScene.Instance, true);
+            loadOp.Options.Set(DeserializeRemapIds.Instance, new EntityIdRemapper(core.ActiveScene));
             
             core.ActiveScene.Load(loadOp);
             

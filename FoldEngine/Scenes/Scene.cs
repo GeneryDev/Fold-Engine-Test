@@ -189,7 +189,7 @@ namespace FoldEngine.Scenes
         public void Save(SaveOperation writer) {
             writer.WriteCompound((ref SaveOperation.Compound c) => {
 
-                if(writer.Options.Has(SerializeOnlyEntities.Instance)) {
+                if(!writer.Options.Has(SerializeOnlyEntities.Instance)) {
                     c.WriteMember(nameof(Name), Name);
                     c.WriteMember(nameof(_nextEntityId), _nextEntityId);
                     c.WriteMember(nameof(_recycleQueue), _recycleQueue);
@@ -230,7 +230,7 @@ namespace FoldEngine.Scenes
     public class DeserializeClearScene : Field<bool> {
         public static DeserializeClearScene Instance = new DeserializeClearScene();
     }
-    public class DeserializeRemapIds : Field<Dictionary<long, long>> {
+    public class DeserializeRemapIds : Field<EntityIdRemapper> {
         public static DeserializeRemapIds Instance = new DeserializeRemapIds();
     }
 }

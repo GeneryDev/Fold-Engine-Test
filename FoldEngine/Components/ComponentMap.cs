@@ -98,7 +98,7 @@ namespace FoldEngine.Components {
                 //return null;
             }
 
-            return ref ((ComponentSet<T>) Sets[componentType]).Get((int)entityId);
+            return ref ((ComponentSet<T>) Sets[componentType]).Get(entityId);
         }
 
         /// <summary>

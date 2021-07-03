@@ -15,7 +15,7 @@ namespace FoldEngine.Components {
                 }
             });
         }
-        public static void Deserialize<T>(ComponentSet componentSet, int entityId, LoadOperation reader) where T : struct {
+        public static void Deserialize<T>(ComponentSet componentSet, long entityId, LoadOperation reader) where T : struct {
             reader.ReadCompound(c => {
                 foreach(FieldInfo fieldInfo in typeof(T).GetFields()) {
                     if(c.HasMember(fieldInfo.Name)) {

@@ -29,6 +29,7 @@ namespace Sandbox {
             Entity e0 = CreateEntity("Entity 0");
             Entity e1 = CreateEntity("Entity 1");
             Entity e2 = CreateEntity("Entity 2");
+            Entity e3 = CreateEntity("Entity 3");
 
             Entity cam = CreateEntity("Main Camera");
             cam.Transform.LocalScale *= 1 / 64f;
@@ -45,6 +46,16 @@ namespace Sandbox {
             e1.AddComponent<Physics>();
             e1.AddComponent<MeshCollider>().MeshIdentifier = "circle";
             e1.AddComponent<Living>();
+            
+            {
+                ref MeshRenderable mr = ref e3.AddComponent<MeshRenderable>();
+                mr.MeshIdentifier = "square";
+                mr.TextureIdentifier = "main:beacon";
+            }
+            e3.Transform.Position += Vector2.UnitY * 64;
+            e3.AddComponent<Physics>();
+            e3.AddComponent<MeshCollider>().MeshIdentifier = "circle";
+            e3.AddComponent<Living>();
             
             
             {
