@@ -74,9 +74,10 @@ namespace FoldEngine {
         /// all of your content.
         /// </summary>
         protected override void LoadContent() {
-            _core.LoadContent();
-            // Create a new SpriteBatch, which can be used to draw textures.
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+            _core.LoadContent();
+            _core.RenderingUnit.LoadContent();
+            // Create a new SpriteBatch, which can be used to draw textures.
 
             // foreach(IRenderingLayer layer in _core.RenderingUnit.RootGroup.Layers.Values) {
             //     layer.Surface = new RenderSurface(Graphics.GraphicsDevice, _core.RenderingUnit, layer.LayerSize.X,
@@ -84,8 +85,6 @@ namespace FoldEngine {
             // }
 
             // TODO: use this.Content to load your game content here
-
-            _core.RenderingUnit.LoadContent();
         }
 
         /// <summary>

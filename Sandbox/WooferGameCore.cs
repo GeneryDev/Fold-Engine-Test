@@ -29,6 +29,7 @@ namespace Woofer {
         public float TimeScale => 1;
 
         public WooferGameCore() {
+            Console.WriteLine("Constructing Core");
             FoldGame = new FoldGame(this);
             
             RenderingUnit = new WooferRenderingUnit(this);
@@ -42,10 +43,12 @@ namespace Woofer {
         }
 
         public void Initialize() {
+            Console.WriteLine("Initializing Core");
             RenderingUnit.Initialize();
         }
 
         public void LoadContent() {
+            Console.WriteLine("Loading Core Content");
             AudioUnit.Load("Audio/failure");
             AudioUnit.Load("Audio/music");
         }

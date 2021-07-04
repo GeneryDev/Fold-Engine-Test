@@ -54,6 +54,7 @@ namespace Woofer
         }
 
         public void Initialize() {
+            Console.WriteLine("Initializing Rendering Unit");
             var mainSize = new Point(1280, 720); 
             
             Groups["main"] = RootGroup = MainGroup = new RenderGroup(this) {
@@ -107,6 +108,7 @@ namespace Woofer
         }
 
         public void LoadContent() {
+            Console.WriteLine("Loading Rendering Unit Content");
             Textures.LoadTexture("test");
             Textures.LoadTexture("ancient_debris_side");
             Textures.LoadTexture("armor_stand");
@@ -163,12 +165,17 @@ namespace Woofer
             editorAtlas.Pack();
 
 
+            Console.WriteLine("Textures and atlases loaded");
 
 
+            Console.WriteLine("Loading Fonts");
+            
             Textures.LoadTexture("fonts/default.7/ascii");
             Textures.LoadTexture("fonts/default.9/ascii");
             Fonts.LoadFont("default.7");
             Fonts.LoadFont("default.9");
+            
+            Console.WriteLine("Fonts loaded");
         }
 
         public Rectangle GetGroupBounds(RenderGroup renderGroup) {
