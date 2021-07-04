@@ -69,8 +69,11 @@ namespace Sandbox.Systems {
                     }
                     _livingComponents.GetCoComponent<Physics>().Velocity.X = 2*moveX;
                     // Console.WriteLine(_livingComponents.GetCoComponent<Physics>().Velocity);
+
+                    if(_livingComponents.GetCoComponent<Physics>().Velocity.Y != 0) {
+                        _livingComponents.GetComponent().Grounded = false;
+                    }
                 }
-                _livingComponents.GetComponent().Grounded = false;
             }
             
             // if(Mouse.GetState().LeftButton == ButtonState.Pressed) {
@@ -135,7 +138,7 @@ namespace Sandbox.Systems {
 
         public override void SubscribeToEvents() {
             Subscribe((ref CollisionEvent collision) => {
-                if(Owner.Components.HasComponent<Living>(collision.First) && Vector2.Dot(collision.Normal, Vector2.UnitY) > 0) {
+                if(Owner.Components.HasComponent<Living>(collision.First) && Vector2.Dot(collision.Normal, Vector2.UnitY) > 0.5f) {
                     Owner.Components.GetComponent<Living>(collision.First).Grounded = true;
                     _lastNormal = collision.Normal;
                 }

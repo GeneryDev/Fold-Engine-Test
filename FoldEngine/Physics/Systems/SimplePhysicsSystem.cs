@@ -131,22 +131,22 @@ namespace FoldEngine.Physics {
                                 float friction = 0.01f; //TODO get from components
                             
                                 if(!largestCrossSection.Equals(float.NaN) && totalSurfaceNormalFaceLength > 0) {
-                                    if(!physics.Static) {
-                                        Owner.DrawGizmo(tempNormalStart, tempNormalStart + surfaceNormalSum / totalSurfaceNormalFaceLength, Color.Gold);
-                                    }
-                                    
                                     Complex surfaceNormalComplex = surfaceNormalSum / totalSurfaceNormalFaceLength;
                                     
                                     Owner.Events.Invoke(new CollisionEvent(_physicsObjects.GetEntityId(), _colliders.GetEntityId(), surfaceNormalComplex));
                                     Owner.Events.Invoke(new CollisionEvent(_colliders.GetEntityId(), _physicsObjects.GetEntityId(), -(Vector2)surfaceNormalComplex));
-                                    
-                                    physics.ContactDisplacement = surfaceNormalSum / totalSurfaceNormalFaceLength * largestCrossSection;
 
-                                    physics.Velocity =
-                                        (((Complex) physics.Velocity) / surfaceNormalComplex).ScaleAxes(
-                                            -restitution,
-                                            1 - friction * 100 * Time.DeltaTime)
-                                        * surfaceNormalComplex;
+                                    if(!physics.Static) {
+                                        Owner.DrawGizmo(tempNormalStart, tempNormalStart + surfaceNormalSum / totalSurfaceNormalFaceLength, Color.Gold);
+                                        
+                                        physics.ContactDisplacement = surfaceNormalSum / totalSurfaceNormalFaceLength * largestCrossSection;
+                                        
+                                        physics.Velocity =
+                                            (((Complex) physics.Velocity) / surfaceNormalComplex).ScaleAxes(
+                                                -restitution,
+                                                1 - friction * 100 * Time.DeltaTime)
+                                            * surfaceNormalComplex;
+                                    }
                                 }
                             }
                         }
