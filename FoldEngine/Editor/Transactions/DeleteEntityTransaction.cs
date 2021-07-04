@@ -30,13 +30,18 @@ namespace FoldEngine.Editor.Transactions {
                 saveOp.Dispose();
             }
 
-            ref Transform transform = ref target.Scene.Components.GetComponent<Transform>(_entityId);
-            _parentEntityId = transform.ParentId;
+            if(target.Scene.Components.HasComponent<Transform>(_entityId)) {
+                ref Transform transform = ref target.Scene.Components.GetComponent<Transform>(_entityId);
+                _parentEntityId = transform.ParentId;
 
-            if(_parentEntityId != -1 && target.Scene.Components.HasComponent<Transform>(_parentEntityId)) {
-                target.Scene.Components.GetComponent<Transform>(_parentEntityId).RemoveChild(_entityId);
+                if(_parentEntityId != -1 && target.Scene.Components.HasComponent<Transform>(_parentEntityId)) {
+                    target.Scene.Components.GetComponent<Transform>(_parentEntityId).RemoveChild(_entityId);
+                }
+                target.Scene.DeleteEntity(_entityId, true);
+            } else {
+                SceneEditor.ReportEditorGameConflict($"{nameof(DeleteEntityTransaction)}.{nameof(Redo)}");
             }
-            target.Scene.DeleteEntity(_entityId, true);
+
 
             return true;
         }

@@ -33,7 +33,12 @@ namespace FoldEngine.Editor.Transactions {
             if(_parentEntityId != -1 && target.Scene.Components.HasComponent<Transform>(_parentEntityId)) {
                 target.Scene.Components.GetComponent<Transform>(_parentEntityId).RemoveChild(_newEntityId);
             }
-            target.Scene.DeleteEntity(_newEntityId, true);
+
+            if(target.Scene.Components.HasComponent<Transform>(_newEntityId)) {
+                target.Scene.DeleteEntity(_newEntityId, true);
+            } else {
+                SceneEditor.ReportEditorGameConflict($"{nameof(CreateEntityTransaction)}.{nameof(Undo)}");
+            }
             return true;
         }
     }

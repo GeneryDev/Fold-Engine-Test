@@ -154,11 +154,9 @@ namespace FoldEngine.Editor.Views {
             CompoundTransaction<EditorEnvironment> transactions = new CompoundTransaction<EditorEnvironment>();
             foreach(long entityId in _entitiesToDelete) {
                 transactions.Append(() => new DeleteEntityTransaction(entityId));
-                Console.WriteLine($"deleted {entityId}");
             }
             
             ((EditorEnvironment) element.Environment).TransactionManager.InsertTransaction(transactions);
-            // element.Environment.Scene.DeleteEntity(_entityId, true);
         }
     }
 
@@ -174,7 +172,6 @@ namespace FoldEngine.Editor.Views {
         
         public void Perform(GuiElement element, MouseEvent e) {
             ((EditorEnvironment) element.Environment).TransactionManager.InsertTransaction(new CreateEntityTransaction(_entityId));
-            // element.Environment.Scene.DeleteEntity(_entityId, true);
         }
     }
 }
