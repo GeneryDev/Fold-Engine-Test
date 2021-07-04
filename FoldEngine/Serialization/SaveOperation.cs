@@ -19,6 +19,12 @@ namespace FoldEngine.Serialization {
             set => _writer.Seek((int) value, SeekOrigin.Begin);
         }
 
+        public SaveOperation(Stream output) {
+            _writer = new BinaryWriter(output);
+            
+            _writer.Write(0L);
+        }
+
         public SaveOperation(string path) {
             _path = path;
 

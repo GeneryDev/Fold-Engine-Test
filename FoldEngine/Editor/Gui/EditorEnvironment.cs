@@ -18,7 +18,6 @@ namespace FoldEngine.Editor.Gui {
         public const int FrameBorder = 4;
         public const int FrameMargin = 8;
 
-        public Scene Scene;
         public sealed override List<GuiPanel> VisiblePanels { get; } = new List<GuiPanel>();
         public Dictionary<Type, EditorView> AllViews = new Dictionary<Type, EditorView>();
         
@@ -108,8 +107,7 @@ namespace FoldEngine.Editor.Gui {
         public BorderPanel WestPanel;
         public BorderPanel EastPanel;
 
-        public EditorEnvironment(Scene scene) {
-            Scene = scene;
+        public EditorEnvironment(Scene scene) : base(scene) {
             TransactionManager = new TransactionManager<EditorEnvironment>(this);
 
             NorthPanel = new BorderPanel(this, -Vector2.UnitY);

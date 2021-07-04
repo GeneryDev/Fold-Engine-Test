@@ -42,7 +42,7 @@ namespace FoldEngine.Components {
                 Sets[componentType] = new ComponentSet<T>(_scene, (int)entityId);
             }
 
-            return ref ((ComponentSet<T>) Sets[componentType]).Create((int)entityId);
+            return ref ((ComponentSet<T>) Sets[componentType]).Create(entityId);
         }
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace FoldEngine.Components {
                 Sets[componentType] = Component.CreateSetForType(componentType, _scene, (int)entityId);
             }
 
-            Sets[componentType].CreateFor((int)entityId);
+            Sets[componentType].CreateFor(entityId);
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace FoldEngine.Components {
         public void RemoveComponent<T>(long entityId) where T : struct {
             Type componentType = typeof(T);
             if(Sets.ContainsKey(componentType)) {
-                ((ComponentSet<T>) Sets[componentType]).Remove((int)entityId);
+                ((ComponentSet<T>) Sets[componentType]).Remove(entityId);
             } else {
                 //Component type not registered
             }
@@ -79,7 +79,7 @@ namespace FoldEngine.Components {
         /// <param name="entityId">The ID of the entity whose components should be removed</param>
         public void RemoveAllComponents(long entityId) {
             foreach(ComponentSet set in Sets.Values) {
-                set.Remove((int)entityId);
+                set.Remove(entityId);
             }
         }
 
@@ -110,7 +110,7 @@ namespace FoldEngine.Components {
         /// <returns>true if the entity has the specified component type, false otherwise.</returns>
         public bool HasComponent<T>(long entityId) where T : struct {
             Type componentType = typeof(T);
-            return Sets.ContainsKey(componentType) && ((ComponentSet<T>) Sets[componentType]).Has((int)entityId);
+            return Sets.ContainsKey(componentType) && ((ComponentSet<T>) Sets[componentType]).Has(entityId);
         }
 
         public ComponentIterator<T> CreateIterator<T>(IterationFlags flags) where T : struct {

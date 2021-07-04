@@ -19,6 +19,12 @@ namespace FoldEngine.Serialization {
             set => _reader.BaseStream.Seek((int) value, SeekOrigin.Begin);
         }
 
+        public LoadOperation(Stream input) {
+            _reader = new BinaryReader(input);
+            
+            ReadHeader();
+        }
+
         public LoadOperation(string path) {
             _path = path;
 

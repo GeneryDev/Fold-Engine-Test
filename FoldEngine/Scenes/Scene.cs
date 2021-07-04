@@ -48,18 +48,46 @@ namespace FoldEngine.Scenes
             Meshes = new MeshCollection();
         }
 
-        private List<long> _recycleQueue = new List<long>();
+        private List<long> _deletedIds = new List<long>();
+        private List<bool> _reclaimableIds;
 
-        public void Recycle(long entityId) {
-            _recycleQueue.Add(entityId + (1L << 32));
+        public void DeleteEntity(long entityId, bool reclaimable = false) {
             Components.RemoveAllComponents(entityId);
+            if(reclaimable) {
+                if(_reclaimableIds == null) {
+                    _reclaimableIds = new List<bool>();
+                    for(int i = 0; i < _deletedIds.Count; i++) {
+                        _reclaimableIds.Add(false);
+                    }
+                }
+                _reclaimableIds.Add(true);
+            }
+            _deletedIds.Add(entityId);
         }
 
         public long CreateEntityId(string name) {
             long newEntityId;
-            if(_recycleQueue.Count > 0) {
-                newEntityId = _recycleQueue[_recycleQueue.Count - 1];
-                _recycleQueue.RemoveAt(_recycleQueue.Count - 1);
+            if(_reclaimableIds != null && _reclaimableIds.Count > 0) {
+                newEntityId = -1;
+                for(int i = _reclaimableIds.Count - 1; i >= 0; i--) {
+                    if(!_reclaimableIds[i]) {
+                        newEntityId = _deletedIds[i] + (1L << 32);
+                        _deletedIds.RemoveAt(i);
+                        _reclaimableIds.RemoveAt(i);
+                        break;
+                    }
+
+                    if(i == 0) {
+                        newEntityId = _nextEntityId++;
+                    }
+                }
+
+                if(newEntityId == -1) {
+                    throw new InvalidOperationException();
+                }
+            } else if(_deletedIds.Count > 0) {
+                newEntityId = _deletedIds[_deletedIds.Count - 1] + (1L << 32);
+                _deletedIds.RemoveAt(_deletedIds.Count - 1);
             } else {
                 newEntityId = _nextEntityId++;
             }
@@ -192,7 +220,7 @@ namespace FoldEngine.Scenes
                 if(!writer.Options.Has(SerializeOnlyEntities.Instance)) {
                     c.WriteMember(nameof(Name), Name);
                     c.WriteMember(nameof(_nextEntityId), _nextEntityId);
-                    c.WriteMember(nameof(_recycleQueue), _recycleQueue);
+                    c.WriteMember(nameof(_deletedIds), _deletedIds);
                     c.WriteMember(nameof(Systems), (ISelfSerializer) Systems);
                 }
 
@@ -213,12 +241,36 @@ namespace FoldEngine.Scenes
                 if(reader.Options.Has(DeserializeClearScene.Instance)) {
                     if(c.HasMember(nameof(Name))) Name = c.GetMember<string>(nameof(Name));
                     if(c.HasMember(nameof(_nextEntityId))) _nextEntityId = c.GetMember<long>(nameof(_nextEntityId));
-                    if(c.HasMember(nameof(_recycleQueue))) _recycleQueue = c.GetListMember<long>(nameof(_recycleQueue));
+                    if(c.HasMember(nameof(_deletedIds))) _deletedIds = c.GetListMember<long>(nameof(_deletedIds));
                 }
 
                 if(c.HasMember(nameof(Systems))) c.DeserializeMember(nameof(Systems), Systems);
                 if(c.HasMember(nameof(Components))) c.DeserializeMember(nameof(Components), Components);
             });
+        }
+
+        public bool Reclaim(long entityId) {
+            int deletedIndex = _deletedIds.IndexOf(entityId);
+            if(deletedIndex > -1 && _reclaimableIds != null && _reclaimableIds[deletedIndex]) {
+                _deletedIds.RemoveAt(deletedIndex);
+                _reclaimableIds.RemoveAt(deletedIndex);
+                return true;
+            }
+
+            Console.WriteLine($"Cannot reclaim entity ID {entityId}; Something external to the editor has already modified it.");
+
+            return false;
+        }
+
+        public bool ReclaimAndCreate(long entityId, string name) {
+            if(Reclaim(entityId)) {
+                ref Transform transform = ref Components.CreateComponent<Transform>(entityId);
+                Components.CreateComponent<EntityName>(entityId).Name = name;
+                Console.WriteLine($"Created entity {entityId}");
+                return true;
+            }
+
+            return false;
         }
     }
 

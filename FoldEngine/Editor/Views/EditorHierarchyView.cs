@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
+using FoldEngine.Editor.Transactions;
 using FoldEngine.Gui;
 using FoldEngine.Interfaces;
+using FoldEngine.Scenes;
 using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
 using Sandbox.Components;
@@ -64,7 +66,7 @@ namespace FoldEngine.Editor.Views {
 
             if(hasChildren && expanded) {
                 foreach(ComponentReference<Transform> childTransform in transform.Children) {
-                    RenderEntity(ref childTransform.Get(), panel, renderer, depth + 1);
+                    if(childTransform.Has()) RenderEntity(ref childTransform.Get(), panel, renderer, depth + 1);
                 }
             }
         }
@@ -114,7 +116,10 @@ namespace FoldEngine.Editor.Views {
             contextMenu.Reset(e.Position);
             contextMenu.Button("Edit", 14).LeftAction<DebugAction>();
             contextMenu.Button("Rename", 14).LeftAction<DebugAction>();
-            contextMenu.Button("Delete", 14).LeftAction<DebugAction>();
+            
+            contextMenu.Button("Create Child", 14).LeftAction<CreateEntityAction>().Id(_id);
+            
+            contextMenu.Button("Delete", 14).LeftAction<DeleteEntityAction>().Id(_id);
             contextMenu.Show();
         }
         
@@ -125,6 +130,51 @@ namespace FoldEngine.Editor.Views {
         public IObjectPool Pool { get; set; }
         public void Perform(GuiElement element, MouseEvent e) {
             Console.WriteLine("debug action");
+        }
+    }
+
+    public class DeleteEntityAction : IGuiAction {
+        public IObjectPool Pool { get; set; }
+
+        private long _entityId;
+
+        public DeleteEntityAction Id(long entityId) {
+            _entityId = entityId;
+            return this;
+        }
+        
+        private static List<long> _entitiesToDelete = new List<long>();
+        
+        public void Perform(GuiElement element, MouseEvent e) {
+            _entitiesToDelete.Clear();
+            if(element.Environment.Scene.Components.HasComponent<Transform>(_entityId)) {
+                element.Environment.Scene.Components.GetComponent<Transform>(_entityId).DumpHierarchy(_entitiesToDelete);
+            }
+
+            CompoundTransaction<EditorEnvironment> transactions = new CompoundTransaction<EditorEnvironment>();
+            foreach(long entityId in _entitiesToDelete) {
+                transactions.Append(() => new DeleteEntityTransaction(entityId));
+                Console.WriteLine($"deleted {entityId}");
+            }
+            
+            ((EditorEnvironment) element.Environment).TransactionManager.InsertTransaction(transactions);
+            // element.Environment.Scene.DeleteEntity(_entityId, true);
+        }
+    }
+
+    public class CreateEntityAction : IGuiAction {
+        public IObjectPool Pool { get; set; }
+
+        private long _entityId;
+
+        public CreateEntityAction Id(long entityId) {
+            _entityId = entityId;
+            return this;
+        }
+        
+        public void Perform(GuiElement element, MouseEvent e) {
+            ((EditorEnvironment) element.Environment).TransactionManager.InsertTransaction(new CreateEntityTransaction(_entityId));
+            // element.Environment.Scene.DeleteEntity(_entityId, true);
         }
     }
 }

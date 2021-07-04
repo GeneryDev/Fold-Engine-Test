@@ -138,7 +138,7 @@ namespace FoldEngine.Components {
         public ref readonly Transform Parent {
             get {
                 if(!IsNotNull) return ref _nullTransform;
-                if(ParentId != -1) {
+                if(ParentId != -1 && Scene.Components.HasComponent<Transform>(ParentId)) {
                     return ref Scene.Components.GetComponent<Transform>(ParentId);
                 } else {
                     return ref _nullTransform;
@@ -155,7 +155,7 @@ namespace FoldEngine.Components {
         public ref Transform MutableParent {
             get {
                 if(!IsNotNull) return ref _nullTransform;
-                if(ParentId != -1) {
+                if(ParentId != -1 && Scene.Components.HasComponent<Transform>(ParentId)) {
                     return ref Scene.Components.GetComponent<Transform>(ParentId);
                 } else {
                     return ref _nullTransform;
@@ -267,7 +267,7 @@ namespace FoldEngine.Components {
 
         public int ChildCount {
             get {
-                if(FirstChildId == -1) {
+                if(FirstChildId == -1 || !Scene.Components.HasComponent<Transform>(FirstChildId)) {
                     return 0;
                 }
 
@@ -284,7 +284,7 @@ namespace FoldEngine.Components {
 
         public ComponentReference<Transform>[] Children {
             get {
-                if(FirstChildId == -1) {
+                if(FirstChildId == -1 || !Scene.Components.HasComponent<Transform>(FirstChildId)) {
                     return new ComponentReference<Transform>[0];
                 }
 
@@ -372,6 +372,58 @@ namespace FoldEngine.Components {
 
         public override string ToString() {
             return IsNotNull ? $"fold:transform_2d|{LocalPosition}" : "fold:transform_2d|NULL";
+        }
+
+        public List<long> DumpHierarchy(List<long> list) {
+            
+            Transform nextChild = FirstChild;
+            while(nextChild.IsNotNull) {
+                nextChild.DumpHierarchy(list);
+                nextChild = nextChild.NextSibling;
+            }
+            
+            list.Add(_ownerId);
+
+            return list;
+        }
+
+        public void RemoveChild(long childEntityId) {
+            if(FirstChildId != -1) {
+                if(Scene.Components.HasComponent<Transform>(FirstChildId)) {
+                    ref Transform firstChild = ref Scene.Components.GetComponent<Transform>(FirstChildId);
+                    if(childEntityId == FirstChildId) {
+                        this.FirstChildId = firstChild.NextSiblingId;
+                        if(Scene.Components.HasComponent<Transform>(FirstChildId)) {
+                            Scene.Components.GetComponent<Transform>(FirstChildId).PreviousSiblingId = -1;
+                        }
+                    } else {
+                        firstChild.RemoveSibling(childEntityId);
+                    }
+                } else {
+                    FirstChildId = -1;
+                }
+            }
+        }
+
+        private void RemoveSibling(long siblingEntityId) {
+            if(NextSiblingId != -1) {
+                if(Scene.Components.HasComponent<Transform>(NextSiblingId)) {
+                    ref Transform nextSibling = ref Scene.Components.GetComponent<Transform>(NextSiblingId);
+                    if(siblingEntityId == NextSiblingId) {
+                        this.NextSiblingId = nextSibling.NextSiblingId;
+                        
+                        nextSibling.PreviousSiblingId = -1;
+                        nextSibling.ParentId = -1;
+                        nextSibling.NextSiblingId = -1;
+                        
+                        if(Scene.Components.HasComponent<Transform>(NextSiblingId)) {
+                            Scene.Components.GetComponent<Transform>(NextSiblingId).PreviousSiblingId = _ownerId;
+                        }
+                    }
+                } else {
+                    NextSiblingId = -1;
+                }
+            }
         }
     }
 }

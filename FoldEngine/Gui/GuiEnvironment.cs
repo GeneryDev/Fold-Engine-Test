@@ -4,11 +4,14 @@ using EntryProject.Util;
 using FoldEngine.Editor.Gui;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
+using FoldEngine.Scenes;
 using Microsoft.Xna.Framework;
 using Mouse = Microsoft.Xna.Framework.Input.Mouse;
 
 namespace FoldEngine.Gui {
     public abstract class GuiEnvironment {
+
+        public Scene Scene;
         
         // Input
         public Point MousePos;
@@ -31,7 +34,8 @@ namespace FoldEngine.Gui {
         public IRenderingLayer Layer { get; set; }
         
 
-        public GuiEnvironment() {
+        public GuiEnvironment(Scene scene) {
+            Scene = scene;
             ContextMenu = new GuiPopupMenu(this);
         }
         

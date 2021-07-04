@@ -29,6 +29,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Inspector\HideInInspectorAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Inspector\NameAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\SceneEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\CompoundTransaction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\CreateEntityTransaction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\DeleteEntityTransaction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorHierarchyView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorInspectorView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorMenuView.cs" />
