@@ -2,6 +2,7 @@
 using System.Reflection;
 using FoldEngine.Editor.Gui;
 using FoldEngine.Editor.Views;
+using FoldEngine.Util.Transactions;
 
 namespace FoldEngine.Editor.Transactions {
     public class SetComponentFieldTransaction : Transaction<EditorEnvironment> {

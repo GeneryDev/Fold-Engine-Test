@@ -29,7 +29,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Inspector\HideInInspectorAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Inspector\NameAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\SceneEditor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\CompoundTransaction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\CreateEntityTransaction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\DeleteEntityTransaction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorHierarchyView.cs" />
@@ -41,9 +40,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Gui\GuiElements.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Gui\GuiEnvironment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Gui\GuiPanel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\ITransaction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\SetComponentFieldTransaction.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\TransactionManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Events\Event.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Events\EventMap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Events\EventQueue.cs" />
@@ -113,6 +110,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Util\ObjectPoolCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\OrderedList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\FieldCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\Transactions\CompoundTransaction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\Transactions\ITransaction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\Transactions\TransactionManager.cs" />
     <Folder Include="$(MSBuildThisFileDirectory)Input\Builder" />
     <Folder Include="$(MSBuildThisFileDirectory)LevelRendering\2d" />
     <Compile Include="$(MSBuildThisFileDirectory)Scenes\Entity.cs" />

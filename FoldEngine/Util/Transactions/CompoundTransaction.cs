@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using FoldEngine.Editor.Transactions;
 
-namespace FoldEngine.Editor.Transactions {
+namespace FoldEngine.Util.Transactions {
     public class CompoundTransaction<T> : Transaction<T> {
         private readonly List<Lazy<Transaction<T>>> _edits;
 

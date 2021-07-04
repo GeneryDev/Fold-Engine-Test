@@ -1,5 +1,6 @@
 ﻿using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
+using FoldEngine.Util.Transactions;
 
 namespace FoldEngine.Editor.Transactions {
     public class CreateEntityTransaction : Transaction<EditorEnvironment> {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace FoldEngine.Editor.Transactions {
+namespace FoldEngine.Util.Transactions {
     public class TransactionManager<T> {
         private readonly List<Transaction<T>> _transactions = new List<Transaction<T>>();
         private int _currentTransaction = 0;

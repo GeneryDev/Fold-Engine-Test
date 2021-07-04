@@ -9,6 +9,7 @@ using FoldEngine.Gui;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
+using FoldEngine.Util.Transactions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 

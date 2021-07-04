@@ -1,11 +1,9 @@
-﻿namespace FoldEngine.Editor.Transactions {
-    public interface ITransaction {
-        
-    }
+﻿namespace FoldEngine.Util.Transactions {
+    public interface ITransaction { }
 
     public abstract class Transaction<T> : ITransaction {
         public readonly long Time = FoldEngine.Time.Now;
-        
+
         public abstract bool Redo(T target);
         public abstract bool Undo(T target);
 

@@ -5,6 +5,7 @@ using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
 using FoldEngine.Scenes;
 using FoldEngine.Serialization;
+using FoldEngine.Util.Transactions;
 
 namespace FoldEngine.Editor.Transactions {
     public class DeleteEntityTransaction : Transaction<EditorEnvironment> {

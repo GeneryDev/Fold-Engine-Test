@@ -8,6 +8,7 @@ using FoldEngine.Gui;
 using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
 using FoldEngine.Systems;
+using FoldEngine.Util.Transactions;
 using Microsoft.Xna.Framework;
 using Sandbox.Components;
 using Woofer;
