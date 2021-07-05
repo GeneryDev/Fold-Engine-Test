@@ -38,7 +38,7 @@ namespace FoldEngine.Editor.Transactions {
             if(target.Scene.Components.HasComponent<Transform>(_newEntityId)) {
                 target.Scene.DeleteEntity(_newEntityId, true);
             } else {
-                SceneEditor.ReportEditorGameConflict($"{nameof(CreateEntityTransaction)}.{nameof(Undo)}");
+                SceneEditor.ReportEditorGameConflict();
             }
             return true;
         }

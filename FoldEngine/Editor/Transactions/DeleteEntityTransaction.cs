@@ -40,7 +40,7 @@ namespace FoldEngine.Editor.Transactions {
                 }
                 target.Scene.DeleteEntity(_entityId, true);
             } else {
-                SceneEditor.ReportEditorGameConflict($"{nameof(DeleteEntityTransaction)}.{nameof(Redo)}");
+                SceneEditor.ReportEditorGameConflict();
             }
 
 

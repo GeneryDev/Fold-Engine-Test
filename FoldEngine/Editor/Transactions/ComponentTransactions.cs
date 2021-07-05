@@ -22,7 +22,7 @@ namespace FoldEngine.Editor.Transactions {
             if(target.Scene.Components.HasComponent<Transform>(_entityId) && !target.Scene.Components.HasComponent(_type, _entityId)) {
                 target.Scene.Components.CreateComponent(_type, _entityId);
             } else {
-                SceneEditor.ReportEditorGameConflict($"{nameof(AddComponentTransaction)}.{nameof(Redo)}");
+                SceneEditor.ReportEditorGameConflict();
             }
 
             return true;
@@ -32,7 +32,7 @@ namespace FoldEngine.Editor.Transactions {
             if(target.Scene.Components.HasComponent(_type, _entityId)) {
                 target.Scene.Components.RemoveComponent(_type, _entityId);
             } else {
-                SceneEditor.ReportEditorGameConflict($"{nameof(AddComponentTransaction)}.{nameof(Undo)}");
+                SceneEditor.ReportEditorGameConflict();
             }
 
             return true;
@@ -68,7 +68,7 @@ namespace FoldEngine.Editor.Transactions {
             if(target.Scene.Components.HasComponent(_type, _entityId)) {
                 target.Scene.Components.RemoveComponent(_type, _entityId);
             } else {
-                SceneEditor.ReportEditorGameConflict($"{nameof(AddComponentTransaction)}.{nameof(Undo)}");
+                SceneEditor.ReportEditorGameConflict();
             }
 
             return true;
@@ -85,7 +85,7 @@ namespace FoldEngine.Editor.Transactions {
                 loadOp.Close();
                 loadOp.Dispose();
             } else {
-                SceneEditor.ReportEditorGameConflict($"{nameof(AddComponentTransaction)}.{nameof(Redo)}");
+                SceneEditor.ReportEditorGameConflict();
             }
             
             return true;
