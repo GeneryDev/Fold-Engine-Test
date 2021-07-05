@@ -9,7 +9,7 @@ namespace FoldEngine.Input {
         
         private ButtonInfo _buttonInfo;
         
-        public bool Consumed => _buttonInfo.Down == WhenDown && ConsumeTime >= _buttonInfo.Since;
+        public bool Consumed => _buttonInfo.Down == WhenDown && ConsumeTime >= _buttonInfo.Since && (!Repeat || Time.Now - _buttonInfo.Since < RepeatStartDelay);
         public long ConsumeTime;
         
         public bool Pressed => _buttonInfo.Down && _buttonInfo.SinceFrame == Time.Frame;
@@ -19,12 +19,16 @@ namespace FoldEngine.Input {
         public int BufferTime = 16; // ms
         public bool WhenDown = true;
 
+        public bool Repeat = false;
+        public int RepeatStartDelay = 400;
+        public int RepeatInterval = 40;
+
         public ButtonAction(ButtonInfo buttonInfo) {
             _buttonInfo = buttonInfo;
         }
 
         public bool Consume() {
-            if(_buttonInfo.Down && _buttonInfo.MillisecondsElapsed <= BufferTime && !Consumed) {
+            if(_buttonInfo.Down == WhenDown && !Consumed && (Repeat && Time.Now - _buttonInfo.Since >= RepeatStartDelay ? Time.Now - ConsumeTime >= RepeatInterval : _buttonInfo.MillisecondsElapsed <= BufferTime)) {
                 ConsumeTime = Time.Now;
                 return true;
             }

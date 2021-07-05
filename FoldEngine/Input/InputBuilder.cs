@@ -72,11 +72,21 @@ namespace FoldEngine.Input {
                             break;
                         default: throw new ArgumentException($"Unknown 'when' {whenRaw}"); 
                     }
-                    
-                    action = new ButtonAction(device.Get<ButtonInfo>(buttonName)) {
+
+                    var buttonAction = new ButtonAction(device.Get<ButtonInfo>(buttonName)) {
                         BufferTime = rawAction.Get<int>("buffer_time", true, 32),
                         WhenDown = down
                     };
+                    
+                    JsonDeserializerObject repeatObj = rawAction.GetObject("repeat", true);
+                    
+                    if(repeatObj != null) {
+                        buttonAction.Repeat = true;
+                        buttonAction.RepeatStartDelay = repeatObj.Get<int>("start_delay", true, buttonAction.RepeatStartDelay);
+                        buttonAction.RepeatInterval = repeatObj.Get<int>("interval", true, buttonAction.RepeatInterval);
+                    }
+
+                    action = buttonAction;
                     break;
                 }
                 case "analog": {
