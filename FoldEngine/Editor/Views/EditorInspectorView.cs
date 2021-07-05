@@ -34,10 +34,11 @@ namespace FoldEngine.Editor.Views {
                         ComponentInfo componentInfo = ComponentInfo.Get(set.ComponentType);
                         if(componentInfo.HideInInspector) continue;
                         
-                        ContentPanel.Separator();
+                        ContentPanel.Spacing(5);
                         
+                        ContentPanel.Element<ComponentHeader>().Info(componentInfo).Id(_id).ContextMenuAction<ShowComponentMenuAction>().Info(componentInfo).Id(_id);
 
-                        ContentPanel.Label(componentInfo.Name, 14).TextAlignment(-1);
+                        // ContentPanel.Label(componentInfo.Name, 14).TextAlignment(-1);
                         
                         foreach(ComponentMember member in componentInfo.Members) {
                             object value = set.GetFieldValue((int) _id, member.FieldInfo);
@@ -104,6 +105,64 @@ namespace FoldEngine.Editor.Views {
             });
         }
     }
+
+    public class ComponentHeader : GuiLabel {
+        private ComponentInfo _info;
+        private long _id;
+
+        private PooledValue<IGuiAction> _contextMenuAction;
+
+        public override void Reset(GuiPanel parent) {
+            base.Reset(parent);
+            _contextMenuAction.Free();
+        }
+
+        public ComponentHeader Info(ComponentInfo info) {
+            _info = info;
+            Text(info.Name);
+            FontSize(14);
+            TextAlignment(-1);
+            return this;
+        }
+
+        public ComponentHeader Id(long id) {
+            _id = id;
+            return this;
+        }
+        
+        public override void AdjustSpacing(GuiPanel parent) {
+            base.AdjustSpacing(parent);
+            Margin = 8;
+        }
+
+        public override void OnMouseReleased(MouseEvent e) {
+            if(e.Button == MouseEvent.RightButton) {
+                _contextMenuAction.Value?.Perform(this, e);
+            }
+            base.OnMouseReleased(e);
+        }
+
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+            layer.Surface.Draw(new DrawRectInstruction() {
+                Texture = renderer.WhiteTexture,
+                Color = new Color(63, 63, 70),
+                DestinationRectangle = Bounds
+            });
+            // _textColor = Environment.HoverTargetPrevious.Element == this ? Color.CornflowerBlue : Color.White;
+            base.Render(renderer, layer);
+        }
+
+        public ComponentHeader ContextMenuAction(IGuiAction action) {
+            _contextMenuAction.Value = action;
+            return this;
+        }
+
+        public T ContextMenuAction<T>() where T : IGuiAction, new() {
+            var action = Parent.Environment.ActionPool.Claim<T>();
+            _contextMenuAction.Value = action;
+            return action;
+        }
+    }
     
     public class ShowAddComponentMenuAction : IGuiAction {
         private long _id;
@@ -116,7 +175,7 @@ namespace FoldEngine.Editor.Views {
         public IObjectPool Pool { get; set; }
         
         public void Perform(GuiElement element, MouseEvent e) {
-            var contextMenu = element.Parent.Environment.ContextMenu;
+            GuiPopupMenu contextMenu = element.Parent.Environment.ContextMenu;
             contextMenu.Reset(e.Position);
 
             foreach(ComponentSet set in element.Environment.Scene.Components.Sets.Values) {
@@ -145,6 +204,53 @@ namespace FoldEngine.Editor.Views {
         
         public void Perform(GuiElement element, MouseEvent e) {
             ((EditorEnvironment) element.Environment).TransactionManager.InsertTransaction(new AddComponentTransaction(_type, _id));
+        }
+    }
+    
+    public class ShowComponentMenuAction : IGuiAction {
+        private ComponentInfo _info;
+        private long _id;
+
+        public ShowComponentMenuAction Info(ComponentInfo info) {
+            _info = info;
+            return this;
+        }
+
+        public ShowComponentMenuAction Id(long id) {
+            _id = id;
+            return this;
+        }
+        
+        public IObjectPool Pool { get; set; }
+        
+        public void Perform(GuiElement element, MouseEvent e) {
+            GuiPopupMenu contextMenu = element.Parent.Environment.ContextMenu;
+            contextMenu.Reset(e.Position);
+
+            contextMenu.Button("Remove", 14).LeftAction<RemoveComponentAction>().Id(_id).Type(_info.ComponentType);
+            
+            contextMenu.Show();
+        }
+    }
+    
+    public class RemoveComponentAction : IGuiAction {
+        private Type _type;
+        private long _id;
+
+        public RemoveComponentAction Type(Type type) {
+            _type = type;
+            return this;
+        }
+
+        public RemoveComponentAction Id(long id) {
+            _id = id;
+            return this;
+        }
+        
+        public IObjectPool Pool { get; set; }
+        
+        public void Perform(GuiElement element, MouseEvent e) {
+            ((EditorEnvironment) element.Environment).TransactionManager.InsertTransaction(new RemoveComponentTransaction(_type, _id));
         }
     }
 }

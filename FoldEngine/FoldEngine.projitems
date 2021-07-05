@@ -29,7 +29,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Inspector\HideInInspectorAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Inspector\NameAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\SceneEditor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\AddComponentTransaction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\ComponentTransactions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\CreateEntityTransaction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\DeleteEntityTransaction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorHierarchyView.cs" />

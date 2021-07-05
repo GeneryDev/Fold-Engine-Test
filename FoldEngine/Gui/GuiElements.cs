@@ -36,6 +36,7 @@ namespace FoldEngine.Gui {
         protected int _textMargin = 4;
         protected ITexture _icon = null;
         protected Point _iconSize;
+        protected Color _textColor;
         protected bool _shouldCache = true;
 
         public override void Reset(GuiPanel parent) {
@@ -43,6 +44,7 @@ namespace FoldEngine.Gui {
             _textAlignment = 0;
             _textMargin = 4;
             _shouldCache = true;
+            _textColor = Color.White;
         }
 
         public override void AdjustSpacing(GuiPanel parent) {
@@ -90,33 +92,38 @@ namespace FoldEngine.Gui {
                 x += _iconSize.X;
                 x += 8;
             }
-            if(renderedText.HasValue) renderedText.DrawOnto(layer.Surface, new Point(x, Bounds.Center.Y + _fontSize / 2), Color.White);
-            else TextRenderer.Instance.DrawOnto(layer.Surface, new Point(x, Bounds.Center.Y + 3 * _fontSize / 7), Color.White);
+            if(renderedText.HasValue) renderedText.DrawOnto(layer.Surface, new Point(x, Bounds.Center.Y + _fontSize / 2), _textColor);
+            else TextRenderer.Instance.DrawOnto(layer.Surface, new Point(x, Bounds.Center.Y + 3 * _fontSize / 7), _textColor);
         }
 
         public GuiLabel Text(string text) {
-            this._text = text;
+            _text = text;
+            return this;
+        }
+
+        public GuiLabel TextColor(Color textColor) {
+            _textColor = textColor;
             return this;
         }
 
         public GuiLabel FontSize(int fontSize) {
-            this._fontSize = fontSize;
+            _fontSize = fontSize;
             return this;
         }
 
         public GuiLabel TextAlignment(int alignment) {
-            this._textAlignment = alignment;
+            _textAlignment = alignment;
             return this;
         }
 
         public GuiLabel TextMargin(int textMargin) {
-            this._textMargin = textMargin;
+            _textMargin = textMargin;
             return this;
         }
 
         public GuiLabel Icon(ITexture icon) {
-            this._icon = icon;
-            this._iconSize = new Point(icon.Width, icon.Height);
+            _icon = icon;
+            _iconSize = new Point(icon.Width, icon.Height);
             return this;
         }
 
@@ -285,17 +292,17 @@ namespace FoldEngine.Gui {
         }
 
         public GuiSeparator FontSize(int fontSize) {
-            this._fontSize = fontSize;
+            _fontSize = fontSize;
             return this;
         }
 
         public GuiSeparator Thickness(int thickness) {
-            this._thickness = thickness;
+            _thickness = thickness;
             return this;
         }
 
         public GuiSeparator Label(string label) {
-            this._label = label;
+            _label = label;
             return this;
         }
     }
