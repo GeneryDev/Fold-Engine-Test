@@ -391,15 +391,15 @@ namespace FoldEngine.Editor.Gui {
             if(pressed) {
                 if(Parent.Environment is EditorEnvironment environment) {
                     if(_side == Vector2.UnitX) {
-                        environment.SizeWest = environment.MousePos.X+1;
+                        environment.SizeWest = Math.Max(1,environment.MousePos.X+1);
                     } else if(_side == -Vector2.UnitX) {
-                        environment.SizeEast = environment.Layer.LayerSize.X - environment.MousePos.X;
+                        environment.SizeEast = Math.Max(1,environment.Layer.LayerSize.X - environment.MousePos.X);
                     }
                     
                     if(_side == Vector2.UnitY) {
-                        environment.SizeNorth = environment.MousePos.Y+1;
+                        environment.SizeNorth = Math.Max(1,environment.MousePos.Y+1);
                     } else if(_side == -Vector2.UnitY) {
-                        environment.SizeSouth = environment.Layer.LayerSize.Y - environment.MousePos.Y;
+                        environment.SizeSouth = Math.Max(1,environment.Layer.LayerSize.Y - environment.MousePos.Y);
                     }
                 }
             }
