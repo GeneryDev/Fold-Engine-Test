@@ -132,7 +132,7 @@ namespace FoldEngine.Components {
                 return false;
             }
 
-            if(_flags.HasFlag(IterationFlags.Ordered)) {
+            if(_flags.Has(IterationFlags.Ordered)) {
                 do {
                     _sparseIndex++;
                 } while(_sparseIndex < _set.Sparse.Length
@@ -201,5 +201,11 @@ namespace FoldEngine.Components {
     public enum IterationFlags {
         None = 0,
         Ordered = 1
+    }
+
+    public static class IterationFlagsExt {
+        public static bool Has(this IterationFlags t, IterationFlags mask) {
+            return (t & mask) != 0;
+        }
     }
 }

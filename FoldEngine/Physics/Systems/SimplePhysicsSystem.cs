@@ -57,8 +57,10 @@ namespace FoldEngine.Physics {
                         if(_colliders.GetEntityId() == _physicsObjects.GetEntityId()) continue; //Skip if self
                         
                         ref Transform otherTransform = ref _colliders.GetCoComponent<Transform>();
+                        if(!_colliders.HasCoComponent<Physics>()) continue;
                         ref Physics otherPhysics = ref _colliders.GetCoComponent<Physics>();
                         ref Collider otherCollider = ref _colliders.GetComponent();
+                        if(otherCollider.Type == ColliderType.None) continue;
                         
                         //Skip if too far
                         float otherColliderReach = otherCollider.GetReach(ref otherTransform);

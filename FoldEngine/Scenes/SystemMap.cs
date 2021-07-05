@@ -40,15 +40,15 @@ namespace FoldEngine.Scenes
             _renderSystems.Clear();
 
             foreach(GameSystem sys in _all) {
-                if(sys.ProcessingCycles.HasFlag(ProcessingCycles.Input)) {
+                if(sys.ProcessingCycles.Has(ProcessingCycles.Input)) {
                     _inputSystems.Add(sys);
                 }
 
-                if(sys.ProcessingCycles.HasFlag(ProcessingCycles.Update)) {
+                if(sys.ProcessingCycles.Has(ProcessingCycles.Update)) {
                     _updateSystems.Add(sys);
                 }
 
-                if(sys.ProcessingCycles.HasFlag(ProcessingCycles.Render)) {
+                if(sys.ProcessingCycles.Has(ProcessingCycles.Render)) {
                     _renderSystems.Add(sys);
                 }
             }
@@ -56,15 +56,15 @@ namespace FoldEngine.Scenes
 
         private void AddDirectly(GameSystem sys) {
             _all.Add(sys);
-            if(sys.ProcessingCycles.HasFlag(ProcessingCycles.Input)) {
+            if(sys.ProcessingCycles.Has(ProcessingCycles.Input)) {
                 _inputSystems.Add(sys);
             }
 
-            if(sys.ProcessingCycles.HasFlag(ProcessingCycles.Update)) {
+            if(sys.ProcessingCycles.Has(ProcessingCycles.Update)) {
                 _updateSystems.Add(sys);
             }
 
-            if(sys.ProcessingCycles.HasFlag(ProcessingCycles.Render)) {
+            if(sys.ProcessingCycles.Has(ProcessingCycles.Render)) {
                 _renderSystems.Add(sys);
             }
 

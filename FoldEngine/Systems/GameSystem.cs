@@ -123,6 +123,12 @@ namespace FoldEngine.Systems {
         All = Input | Update | Render,
     }
 
+    public static class ProcessingCyclesExt {
+        public static bool Has(this ProcessingCycles t, ProcessingCycles mask) {
+            return (t & mask) != 0;
+        }
+    }
+
     public sealed class GameSystemAttribute : Attribute {
         public readonly string SystemName;
         public readonly ProcessingCycles ProcessingCycles;
