@@ -5,6 +5,7 @@ using System.Text;
 using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
+using FoldEngine.Editor.Gui.Fields;
 using FoldEngine.Editor.Transactions;
 using FoldEngine.Graphics;
 using FoldEngine.Gui;
@@ -55,6 +56,8 @@ namespace FoldEngine.Editor.Views {
                                 .UseTextCache(false);
                             if(member.FieldInfo.FieldType == typeof(bool)) {
                                 ContentPanel.Button(value.ToString(), 9).LeftAction<TestAction>().Id(_id).FieldInfo(member.FieldInfo).ComponentSet(set);
+                            } else if(member.FieldInfo.FieldType == typeof(string)) {
+                                ContentPanel.Element<TextField>();
                             }
                             ContentPanel.Spacing(5);
                         }
@@ -135,11 +138,11 @@ namespace FoldEngine.Editor.Views {
             Margin = 8;
         }
 
-        public override void OnMouseReleased(MouseEvent e) {
+        public override void OnMouseReleased(ref MouseEvent e) {
             if(e.Button == MouseEvent.RightButton) {
                 _contextMenuAction.Value?.Perform(this, e);
             }
-            base.OnMouseReleased(e);
+            base.OnMouseReleased(ref e);
         }
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
@@ -148,7 +151,7 @@ namespace FoldEngine.Editor.Views {
                 Color = new Color(63, 63, 70),
                 DestinationRectangle = Bounds
             });
-            // _textColor = Environment.HoverTargetPrevious.Element == this ? Color.CornflowerBlue : Color.White;
+            // _textColor = Rollover ? Color.CornflowerBlue : Color.White;
             base.Render(renderer, layer);
         }
 

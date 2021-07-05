@@ -6,6 +6,7 @@ using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using Mouse = Microsoft.Xna.Framework.Input.Mouse;
 
 namespace FoldEngine.Gui {
@@ -21,6 +22,7 @@ namespace FoldEngine.Gui {
         private GuiPanel[] _pressedPanels = new GuiPanel[MouseEvent.MaxButtons];
         public HoverTarget HoverTargetPrevious;
         public HoverTarget HoverTarget;
+        public GuiElement FocusOwner { get; private set; }
             
         public abstract List<GuiPanel> VisiblePanels { get; }
         
@@ -52,6 +54,8 @@ namespace FoldEngine.Gui {
             HandleMouseEvents(MouseLeft, MouseEvent.LeftButton);
             HandleMouseEvents(MouseMiddle, MouseEvent.MiddleButton);
             HandleMouseEvents(MouseRight, MouseEvent.RightButton);
+
+            HandleKeyboardEvents();
         }
 
         private void HandleMouseEvents(ButtonAction mouseButton, int buttonIndex) {
@@ -64,24 +68,33 @@ namespace FoldEngine.Gui {
                     GuiPanel panel = VisiblePanels[i];
                     if(panel.Visible && panel.Bounds.Contains(MousePos)) {
                         _pressedPanels[buttonIndex] = panel;
-                        panel.OnMousePressed(new MouseEvent() {
-                            Type = MouseEventType.PRESSED,
+
+                        var evt = new MouseEvent() {
+                            Type = MouseEventType.Pressed,
                             Position = MousePos,
                             Button = buttonIndex
-                        });
+                        };
+                        
+                        panel.OnMousePressed(ref evt);
                         break;
                     }
                 }
             } else if(mouseButton.Released) {
                 DismissPopups();
-                
-                _pressedPanels[buttonIndex]?.OnMouseReleased(new MouseEvent() {
-                    Type = MouseEventType.RELEASED,
+
+                var evt = new MouseEvent() {
+                    Type = MouseEventType.Released,
                     Position = MousePos,
                     Button = buttonIndex
-                });
+                };
+                
+                _pressedPanels[buttonIndex]?.OnMouseReleased(ref evt);
                 _pressedPanels[buttonIndex] = null;
             }
+        }
+
+        private void HandleKeyboardEvents() {
+            
         }
 
         public void DismissPopups() {
@@ -101,6 +114,16 @@ namespace FoldEngine.Gui {
             HoverTargetPrevious = HoverTarget;
             HoverTarget = default;
         }
+
+        public void SetFocusedElement(GuiElement element) {
+            if(FocusOwner != element) {
+                FocusOwner?.OnFocusLost();
+
+                FocusOwner = element;
+                
+                FocusOwner?.OnFocusGained();
+            }
+        }
     }
 
     public struct HoverTarget {
@@ -114,6 +137,8 @@ namespace FoldEngine.Gui {
         public MouseEventType Type;
         public int Button;
 
+        public bool Consumed;
+
         public const int LeftButton = 0;
         public const int MiddleButton = 1;
         public const int RightButton = 2;
@@ -122,6 +147,18 @@ namespace FoldEngine.Gui {
     }
 
     public enum MouseEventType {
-        PRESSED, RELEASED
+        Pressed, Released
+    }
+
+    public struct KeyboardEvent {
+        public KeyboardEventType Type;
+        public char Character;
+        public Keys Key;
+
+        public bool Consumed;
+    }
+
+    public enum KeyboardEventType {
+        Pressed, Released, Typed
     }
 }

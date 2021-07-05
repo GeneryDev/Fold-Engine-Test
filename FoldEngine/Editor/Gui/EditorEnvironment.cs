@@ -372,7 +372,7 @@ namespace FoldEngine.Editor.Gui {
             
             var color = new Color(140, 140, 145);
             bool pressed = Pressed();
-            if(pressed || Environment.HoverTargetPrevious.Element == this) {
+            if(pressed || Rollover) {
                 Rectangle drawBounds = Bounds;
                 if(_side.X != 0) {
                     drawBounds.Width = 2;

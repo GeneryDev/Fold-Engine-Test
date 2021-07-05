@@ -16,6 +16,8 @@ namespace FoldEngine.Text {
         private Point _cursor;
         private Point _minPoint;
         private Point _maxPoint;
+
+        public Point Cursor => _cursor;
         
         private readonly List<RenderedTextGlyph> _glyphs = new List<RenderedTextGlyph>();
         private int _lineStartIndex = 0;
@@ -41,19 +43,31 @@ namespace FoldEngine.Text {
 
             while(_index < _text.Length) {
                 char c = _text[_index];
-                if(c == '\n') {
-                    //NEWLINE
-                    FlushLine();
-                    _index++;
-                } else {
-                    RenderedTextGlyph glyph = NextGlyph();
-                    if(!glyph.HasValue) break;
-                    _minPoint = _minPoint.Min(glyph.Destination.Location);
-                    _maxPoint = _maxPoint.Max(glyph.Destination.Location + glyph.Destination.Size);
-                    _glyphs.Add(glyph);
-                }
+                if(!Append(c)) break;
+                _index++;
             }
             FlushLine();
+        }
+
+        public bool Append(char c) {
+            if(c == '\n') {
+                //NEWLINE
+                FlushLine();
+            } else {
+                RenderedTextGlyph glyph = NextGlyph(c);
+                if(!glyph.HasValue) return false;
+                _minPoint = _minPoint.Min(glyph.Destination.Location);
+                _maxPoint = _maxPoint.Max(glyph.Destination.Location + glyph.Destination.Size);
+                _glyphs.Add(glyph);
+            }
+
+            return true;
+        }
+
+        public void DumpChars(IEnumerable<char> chars) {
+            foreach(char c in chars) {
+                Append(c);
+            }
         }
 
         public void Render(BitmapFont bitmapFont, string text, out RenderedText output, float size) {
@@ -79,8 +93,7 @@ namespace FoldEngine.Text {
             }
         }
         
-        private RenderedTextGlyph NextGlyph() {
-            char c = _text[_index];
+        private RenderedTextGlyph NextGlyph(char c) {
             GlyphInfo glyphInfo = _bitmapFont[c];
             if(glyphInfo.NotNull) {
                 
@@ -97,7 +110,7 @@ namespace FoldEngine.Text {
                 };
 
                 _cursor.X += glyphInfo.Advancement;
-                _index++;
+                
                 return glyph;
             }
 

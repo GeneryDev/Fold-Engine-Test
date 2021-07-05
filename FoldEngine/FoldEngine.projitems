@@ -25,6 +25,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editor\EditorBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Gui\EditorEnvironment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Gui\EditorTabs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Gui\Fields\TextField.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Inspector\ComponentInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Inspector\HideInInspectorAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Inspector\NameAttribute.cs" />

@@ -57,7 +57,7 @@ namespace FoldEngine.Editor.Gui {
             
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
-                Color = Pressed(MouseEvent.LeftButton) ? new Color(63, 63, 70) : Environment.HoverTargetPrevious.Element == this ? Color.CornflowerBlue : defaultColor,
+                Color = Pressed(MouseEvent.LeftButton) ? new Color(63, 63, 70) : Rollover ? Color.CornflowerBlue : defaultColor,
                 DestinationRectangle = renderingBounds
             });
             
@@ -80,7 +80,7 @@ namespace FoldEngine.Editor.Gui {
             return this;
         }
 
-        public override void OnMouseReleased(MouseEvent e) {
+        public override void OnMouseReleased(ref MouseEvent e) {
             if(e.Button == MouseEvent.LeftButton) {
                 if(!_dragging) {
                     _viewList.ActiveView = _view;

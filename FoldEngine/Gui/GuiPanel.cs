@@ -25,7 +25,6 @@ namespace FoldEngine.Gui {
 
         private readonly List<GuiElement> _children = new List<GuiElement>();
         public readonly ObjectPoolCollection<GuiElement> ElementPool = new ObjectPoolCollection<GuiElement>();
-        // public readonly ObjectPoolCollection<GuiAction> ActionPool = new ObjectPoolCollection<GuiAction>();
 
         public Point LayoutPosition = Point.Zero;
         public Point ContentSize = Point.Zero;
@@ -167,19 +166,21 @@ namespace FoldEngine.Gui {
 
         private readonly GuiElement[] _pressedElements = new GuiElement[MouseEvent.MaxButtons];
 
-        public override void OnMousePressed(MouseEvent e) {
+        public override void OnMousePressed(ref MouseEvent e) {
             for(int i = _children.Count - 1; i >= 0; i--) {
                 GuiElement element = _children[i];
                 if(element.Bounds.Contains(e.Position)) {
                     _pressedElements[e.Button] = element;
-                    _pressedElements[e.Button].OnMousePressed(e);
+                    _pressedElements[e.Button].OnMousePressed(ref e);
                     break;
                 }
             }
+            
+            base.OnMousePressed(ref e);
         }
 
-        public override void OnMouseReleased(MouseEvent e) {
-            _pressedElements[e.Button]?.OnMouseReleased(e);
+        public override void OnMouseReleased(ref MouseEvent e) {
+            _pressedElements[e.Button]?.OnMouseReleased(ref e);
             _pressedElements[e.Button] = null;
         }
 

@@ -1,4 +1,5 @@
-﻿using EntryProject.Util;
+﻿using System;
+using EntryProject.Util;
 using FoldEngine.Editor.Views;
 using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
@@ -19,14 +20,38 @@ namespace FoldEngine.Gui {
         public abstract void Reset(GuiPanel parent);
         public abstract void AdjustSpacing(GuiPanel parent);
 
-        public abstract void Render(IRenderingUnit renderer, IRenderingLayer layer);
         
-        public virtual void OnMousePressed(MouseEvent e) {}
-        public virtual void OnMouseReleased(MouseEvent e) {}
+        public abstract void Render(IRenderingUnit renderer, IRenderingLayer layer);
+
+        
+        public virtual void OnMousePressed(ref MouseEvent e) {
+            if(!e.Consumed && ClickToFocus) {
+                Focus();
+                if(Focusable) e.Consumed = true;
+            }
+        }
+        public virtual void OnMouseReleased(ref MouseEvent e) {}
+        
+        public virtual void OnKeyPressed(ref MouseEvent e) {}
+        public virtual void OnKeyReleased(ref KeyboardEvent e) {}
+        public virtual void OnKeyTyped(ref KeyboardEvent e) {}
+
+        public virtual void OnFocusGained() { }
+        public virtual void OnFocusLost() {}
+        
+        public virtual bool ClickToFocus => true;
+        public virtual bool Focusable => false;
+
+        public void Focus() {
+            Parent?.Environment?.SetFocusedElement(Focusable ? this : null);
+        }
+        
 
         public bool Pressed(int buttonType = -1) {
             return Parent.IsPressed(this, buttonType);
         }
+        public bool Rollover => Parent.Environment.HoverTargetPrevious.Element == this;
+        public bool Focused => Parent?.Environment?.FocusOwner == this;
     }
 
     public class GuiLabel : GuiElement {
@@ -156,13 +181,13 @@ namespace FoldEngine.Gui {
 
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
-                Color = Pressed(MouseEvent.LeftButton) ? new Color(63, 63, 70) : Environment.HoverTargetPrevious.Element == this ? Color.CornflowerBlue : new Color(37, 37, 38),
+                Color = Pressed(MouseEvent.LeftButton) ? new Color(63, 63, 70) : Rollover ? Color.CornflowerBlue : new Color(37, 37, 38),
                 DestinationRectangle = Bounds
             });
             base.Render(renderer, layer);
         }
 
-        public override void OnMouseReleased(MouseEvent e) {
+        public override void OnMouseReleased(ref MouseEvent e) {
             if(Bounds.Contains(e.Position)) {
                 switch(e.Button) {
                     case MouseEvent.LeftButton: {
