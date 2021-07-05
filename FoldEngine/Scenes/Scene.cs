@@ -275,14 +275,17 @@ namespace FoldEngine.Scenes
     }
 
     public class SerializeOnlyEntities : Field<List<long>> {
-        public static SerializeOnlyEntities Instance = new SerializeOnlyEntities();
+        public static readonly SerializeOnlyEntities Instance = new SerializeOnlyEntities();
+    }
+    public class SerializeOnlyComponents : Field<List<Type>> {
+        public static readonly SerializeOnlyComponents Instance = new SerializeOnlyComponents();
     }
 
     
     public class DeserializeClearScene : Field<bool> {
-        public static DeserializeClearScene Instance = new DeserializeClearScene();
+        public static readonly DeserializeClearScene Instance = new DeserializeClearScene();
     }
     public class DeserializeRemapIds : Field<EntityIdRemapper> {
-        public static DeserializeRemapIds Instance = new DeserializeRemapIds();
+        public static readonly DeserializeRemapIds Instance = new DeserializeRemapIds();
     }
 }

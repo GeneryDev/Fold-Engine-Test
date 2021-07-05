@@ -74,6 +74,19 @@ namespace FoldEngine.Components {
         }
 
         /// <summary>
+        /// Removes a component of the given type from the specified entity ID, if one exists.
+        /// </summary>
+        /// <param name="type">The type of component to remove</param>
+        /// <param name="entityId">The ID of the entity whose component should be removed</param>
+        public void RemoveComponent(Type type, long entityId) {
+            if(Sets.ContainsKey(type)) {
+                Sets[type].Remove(entityId);
+            } else {
+                //Component type not registered
+            }
+        }
+
+        /// <summary>
         /// Removes all components from the specified entity ID.
         /// </summary>
         /// <param name="entityId">The ID of the entity whose components should be removed</param>
@@ -111,6 +124,17 @@ namespace FoldEngine.Components {
         public bool HasComponent<T>(long entityId) where T : struct {
             Type componentType = typeof(T);
             return Sets.ContainsKey(componentType) && ((ComponentSet<T>) Sets[componentType]).Has(entityId);
+        }
+
+        /// <summary>
+        /// Checks whether or not a component of the given type is attached to the entity of the given ID.<br></br>
+        /// <br></br>
+        /// </summary>
+        /// <param name="type">The type of component to search for</param>
+        /// <param name="entityId">The ID of the entity whose component is to be queried</param>
+        /// <returns>true if the entity has the specified component type, false otherwise.</returns>
+        public bool HasComponent(Type type, long entityId) {
+            return Sets.ContainsKey(type) && Sets[type].Has(entityId);
         }
 
         public ComponentIterator<T> CreateIterator<T>(IterationFlags flags) where T : struct {
@@ -151,6 +175,9 @@ namespace FoldEngine.Components {
         public void Serialize(SaveOperation writer) {
             writer.WriteCompound((ref SaveOperation.Compound c) => {
                 foreach(var entry in Sets) {
+                    if(writer.Options.Has(SerializeOnlyComponents.Instance)) {
+                        if(!writer.Options.Get(SerializeOnlyComponents.Instance).Contains(entry.Key)) continue;
+                    }
                     c.WriteMember(Component.IdentifierOf(entry.Key), (ISelfSerializer) entry.Value);
                 }
             });

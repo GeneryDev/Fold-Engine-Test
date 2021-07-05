@@ -59,6 +59,8 @@ namespace FoldEngine.Editor.Views {
                         }
                     }
                 }
+
+                ContentPanel.Button("Add Component", 14).LeftAction<ShowAddComponentMenuAction>().Id(_id);
             }
             // ContentPanel.Label(Scene.Name, 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
         }
@@ -100,6 +102,49 @@ namespace FoldEngine.Editor.Views {
                 OldValue = oldValue,
                 NewValue = newValue
             });
+        }
+    }
+    
+    public class ShowAddComponentMenuAction : IGuiAction {
+        private long _id;
+
+        public ShowAddComponentMenuAction Id(long id) {
+            _id = id;
+            return this;
+        }
+        
+        public IObjectPool Pool { get; set; }
+        
+        public void Perform(GuiElement element, MouseEvent e) {
+            var contextMenu = element.Parent.Environment.ContextMenu;
+            contextMenu.Reset(e.Position);
+
+            foreach(ComponentSet set in element.Environment.Scene.Components.Sets.Values) {
+                if(!set.Has(_id)) contextMenu.Button(set.ComponentType.Name, 9).LeftAction<AddComponentAction>().Id(_id).Type(set.ComponentType);
+            }
+            
+            contextMenu.Show();
+        }
+    }
+    
+    public class AddComponentAction : IGuiAction {
+        private Type _type;
+        private long _id;
+
+        public AddComponentAction Type(Type type) {
+            _type = type;
+            return this;
+        }
+
+        public AddComponentAction Id(long id) {
+            _id = id;
+            return this;
+        }
+        
+        public IObjectPool Pool { get; set; }
+        
+        public void Perform(GuiElement element, MouseEvent e) {
+            ((EditorEnvironment) element.Environment).TransactionManager.InsertTransaction(new AddComponentTransaction(_type, _id));
         }
     }
 }

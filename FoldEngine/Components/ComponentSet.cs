@@ -124,8 +124,14 @@ namespace FoldEngine.Components {
                         Sparse[i + shiftElementsBy] = Sparse[i];
                         Sparse[i] = -1;
                     }
+                    
+                    // Pad the beginning with -1
+                    for(int i = 0; i < shiftElementsBy; i++) {
+                        Sparse[i] = -1;
+                    }
                 }
-
+                
+                // Pad the end with -1
                 for(int i = oldSize + shiftElementsBy; i < newSize; i++) {
                     Sparse[i] = -1;
                 }

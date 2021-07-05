@@ -54,6 +54,8 @@ namespace FoldEngine.Rendering {
                     ref Transform transform = ref _meshRenderables.GetCoComponent<Transform>();
                     ref MeshRenderable meshRenderable = ref _meshRenderables.GetComponent();
 
+                    if(meshRenderable.MeshIdentifier == null || meshRenderable.TextureIdentifier == null) continue;
+
                     ITexture texture = renderer.Textures[meshRenderable.TextureIdentifier];
                     
                     foreach(MeshCollection.Triangle triangle in Owner.Meshes.GetTrianglesForMesh(meshRenderable.MeshIdentifier)) {
