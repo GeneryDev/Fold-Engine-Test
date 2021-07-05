@@ -7,10 +7,11 @@ using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Keyboard = Microsoft.Xna.Framework.Input.Keyboard;
 using Mouse = Microsoft.Xna.Framework.Input.Mouse;
 
 namespace FoldEngine.Gui {
-    public abstract class GuiEnvironment {
+    public abstract class GuiEnvironment : IDisposable {
 
         public Scene Scene;
         
@@ -23,7 +24,7 @@ namespace FoldEngine.Gui {
         public HoverTarget HoverTargetPrevious;
         public HoverTarget HoverTarget;
         public GuiElement FocusOwner { get; private set; }
-            
+        
         public abstract List<GuiPanel> VisiblePanels { get; }
         
 
@@ -39,8 +40,21 @@ namespace FoldEngine.Gui {
         public GuiEnvironment(Scene scene) {
             Scene = scene;
             ContextMenu = new GuiPopupMenu(this);
+            scene.Core.FoldGame.Window.TextInput += WindowOnTextInput;
         }
-        
+
+        private void WindowOnTextInput(object sender, TextInputEventArgs e) {
+            if(FocusOwner != null) {
+                var evt = new KeyboardEvent() {
+                    Type = KeyboardEventType.Typed,
+                    Character = e.Character,
+                    Key = e.Key,
+                    Modifiers = KeyModifiersExt.GetKeyModifiers()
+                };
+                FocusOwner.OnKeyTyped(ref evt);
+            }
+        }
+
         public virtual void Input(InputUnit inputUnit) {
             if(MouseLeft == ButtonAction.Default) {
                 MouseLeft = new ButtonAction(inputUnit.Devices.Mouse.LeftButton);
@@ -94,7 +108,9 @@ namespace FoldEngine.Gui {
         }
 
         private void HandleKeyboardEvents() {
-            
+            if(FocusOwner != null) {
+                
+            }
         }
 
         public void DismissPopups() {
@@ -123,6 +139,10 @@ namespace FoldEngine.Gui {
                 
                 FocusOwner?.OnFocusGained();
             }
+        }
+
+        public void Dispose() {
+            Scene.Core.FoldGame.Window.TextInput -= WindowOnTextInput;
         }
     }
 
@@ -154,11 +174,36 @@ namespace FoldEngine.Gui {
         public KeyboardEventType Type;
         public char Character;
         public Keys Key;
+        public KeyModifiers Modifiers;
 
         public bool Consumed;
     }
 
     public enum KeyboardEventType {
         Pressed, Released, Typed
+    }
+
+    [Flags]
+    public enum KeyModifiers {
+        None = 0,
+        Control = 1,
+        Shift = 2,
+        Alt = 4,
+        Meta = 8
+    }
+
+    public static class KeyModifiersExt {
+        public static bool Has(this KeyModifiers t, KeyModifiers mask) {
+            return (t & mask) != 0;
+        }
+
+        internal static KeyModifiers GetKeyModifiers() {
+            KeyboardState state = Keyboard.GetState();
+            return ((state[Keys.LeftControl] == KeyState.Down || state[Keys.RightControl] == KeyState.Down) ? KeyModifiers.Control : KeyModifiers.None)
+                   | ((state[Keys.LeftShift] == KeyState.Down || state[Keys.RightShift] == KeyState.Down) ? KeyModifiers.Shift : KeyModifiers.None)
+                   | ((state[Keys.LeftAlt] == KeyState.Down || state[Keys.RightAlt] == KeyState.Down) ? KeyModifiers.Alt : KeyModifiers.None)
+                   | ((state[Keys.LeftWindows] == KeyState.Down || state[Keys.RightWindows] == KeyState.Down) ? KeyModifiers.Meta : KeyModifiers.None)
+                ; 
+        }
     }
 }

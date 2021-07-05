@@ -84,6 +84,13 @@ namespace FoldEngine.Editor.Gui.Fields {
             textRenderer.DrawOnto(layer.Surface, new Point(x, y), Focused ? Color.White : Color.LightGray);
         }
 
+        public override void OnKeyTyped(ref KeyboardEvent e) {
+            base.OnKeyTyped(ref e);
+            Console.WriteLine("Character typed: " + e.Character);
+
+            Buffer.Insert(_dot++, e.Character);
+        }
+
         public override void OnMouseReleased(ref MouseEvent e) {
             _blinkerTime = Time.Now;
             base.OnMouseReleased(ref e);
