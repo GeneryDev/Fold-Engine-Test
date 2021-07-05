@@ -12,6 +12,7 @@ using FoldEngine.Scenes;
 using FoldEngine.Util.Transactions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Keyboard = FoldEngine.Input.Keyboard;
 
 namespace FoldEngine.Editor.Gui {
     public class EditorEnvironment : GuiEnvironment {
@@ -22,7 +23,12 @@ namespace FoldEngine.Editor.Gui {
         public sealed override List<GuiPanel> VisiblePanels { get; } = new List<GuiPanel>();
         public Dictionary<Type, EditorView> AllViews = new Dictionary<Type, EditorView>();
         
-        public readonly TransactionManager<EditorEnvironment> TransactionManager;
+        public ViewTab DraggingViewTab { get; set; }
+        public ViewListPanel HoverViewListPanel { get; set; }
+
+        #region Dock Size Properties
+
+        
 
         public int SizeNorth {
             get => _sizeNorth;
@@ -87,10 +93,9 @@ namespace FoldEngine.Editor.Gui {
                 _cornerBiasSouthEast = value;
             }
         }
+        #endregion
 
-        public ViewTab DraggingViewTab { get; set; }
-
-        public ViewListPanel HoverViewListPanel { get; set; }
+        #region Dock Backing Fields
 
         public bool LayoutValidated = false;
         private int _sizeNorth = 96;
@@ -108,6 +113,10 @@ namespace FoldEngine.Editor.Gui {
         public BorderPanel WestPanel;
         public BorderPanel EastPanel;
 
+        #endregion
+        
+        public readonly TransactionManager<EditorEnvironment> TransactionManager;
+
         public EditorEnvironment(Scene scene) : base(scene) {
             TransactionManager = new TransactionManager<EditorEnvironment>(this);
 
@@ -120,6 +129,15 @@ namespace FoldEngine.Editor.Gui {
             VisiblePanels.Add(SouthPanel);
             VisiblePanels.Add(WestPanel);
             VisiblePanels.Add(EastPanel);
+            
+            SetupControlScheme();
+        }
+
+        private void SetupControlScheme() {
+            Keyboard keyboard = Scene.Core.InputUnit.Devices.Keyboard;
+            
+            ControlScheme.PutAction("editor.field.caret.left", new ButtonAction(keyboard[Keys.Left]) {Repeat = true});
+            ControlScheme.PutAction("editor.field.caret.right", new ButtonAction(keyboard[Keys.Right]) {Repeat = true});
         }
 
         public override void Input(InputUnit inputUnit) {

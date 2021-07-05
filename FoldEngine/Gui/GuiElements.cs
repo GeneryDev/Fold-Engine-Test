@@ -2,6 +2,7 @@
 using EntryProject.Util;
 using FoldEngine.Editor.Views;
 using FoldEngine.Graphics;
+using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Text;
 using Microsoft.Xna.Framework;
@@ -32,9 +33,8 @@ namespace FoldEngine.Gui {
         }
         public virtual void OnMouseReleased(ref MouseEvent e) {}
         
-        public virtual void OnKeyPressed(ref MouseEvent e) {}
-        public virtual void OnKeyReleased(ref KeyboardEvent e) {}
         public virtual void OnKeyTyped(ref KeyboardEvent e) {}
+        public virtual void OnInput(ControlScheme controls) {}
 
         public virtual void OnFocusGained() { }
         public virtual void OnFocusLost() {}

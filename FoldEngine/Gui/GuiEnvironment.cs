@@ -24,6 +24,7 @@ namespace FoldEngine.Gui {
         public HoverTarget HoverTargetPrevious;
         public HoverTarget HoverTarget;
         public GuiElement FocusOwner { get; private set; }
+        public ControlScheme ControlScheme = new ControlScheme("Gui");
         
         public abstract List<GuiPanel> VisiblePanels { get; }
         
@@ -41,6 +42,9 @@ namespace FoldEngine.Gui {
             Scene = scene;
             ContextMenu = new GuiPopupMenu(this);
             scene.Core.FoldGame.Window.TextInput += WindowOnTextInput;
+            
+            ControlScheme.AddDevice(Scene.Core.InputUnit.Devices.Keyboard);
+            ControlScheme.AddDevice(Scene.Core.InputUnit.Devices.Mouse);
         }
 
         private void WindowOnTextInput(object sender, TextInputEventArgs e) {
@@ -69,7 +73,7 @@ namespace FoldEngine.Gui {
             HandleMouseEvents(MouseMiddle, MouseEvent.MiddleButton);
             HandleMouseEvents(MouseRight, MouseEvent.RightButton);
 
-            HandleKeyboardEvents();
+            FocusOwner?.OnInput(ControlScheme);
         }
 
         private void HandleMouseEvents(ButtonAction mouseButton, int buttonIndex) {
@@ -104,12 +108,6 @@ namespace FoldEngine.Gui {
                 
                 _pressedPanels[buttonIndex]?.OnMouseReleased(ref evt);
                 _pressedPanels[buttonIndex] = null;
-            }
-        }
-
-        private void HandleKeyboardEvents() {
-            if(FocusOwner != null) {
-                
             }
         }
 

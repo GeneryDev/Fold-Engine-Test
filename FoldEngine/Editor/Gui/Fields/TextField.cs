@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using FoldEngine.Graphics;
 using FoldEngine.Gui;
+using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Text;
 using Microsoft.Xna.Framework;
@@ -63,8 +64,7 @@ namespace FoldEngine.Editor.Gui.Fields {
             int y = Bounds.Center.Y + fontSize / 2 + 1;
             
             textRenderer.Start(renderer.Fonts["default"], "", fontSize);
-            for(int i = 0; i < Buffer.Count; i++) {
-                char c = Buffer[i];
+            for(int i = 0; i <= Buffer.Count; i++) {
                 if(i == _dot && Focused && BlinkerOn) {
                     layer.Surface.Draw(new DrawRectInstruction() {
                         Texture = renderer.WhiteTexture,
@@ -72,7 +72,11 @@ namespace FoldEngine.Editor.Gui.Fields {
                         DestinationRectangle = new Rectangle(x + textRenderer.Cursor.X - 1, y - fontSize - 2, 1, fontSize + 4)
                     });
                 }
-                textRenderer.Append(c);
+
+                if(i < Buffer.Count) {
+                    char c = Buffer[i];
+                    textRenderer.Append(c);
+                }
             }
 
             
@@ -86,14 +90,34 @@ namespace FoldEngine.Editor.Gui.Fields {
 
         public override void OnKeyTyped(ref KeyboardEvent e) {
             base.OnKeyTyped(ref e);
-            Console.WriteLine("Character typed: " + e.Character);
 
             Buffer.Insert(_dot++, e.Character);
         }
 
+        public override void OnInput(ControlScheme controls) {
+            if(controls.Get<ButtonAction>("editor.field.caret.left").Consume()) {
+                _dot--;
+                DotUpdated();
+                ResetBlinker();
+            }
+            if(controls.Get<ButtonAction>("editor.field.caret.right").Consume()) {
+                _dot++;
+                DotUpdated();
+                ResetBlinker();
+            }
+        }
+
+        private void DotUpdated() {
+            _dot = Math.Max(0, Math.Min(Buffer.Count, _dot));
+        }
+
         public override void OnMouseReleased(ref MouseEvent e) {
-            _blinkerTime = Time.Now;
+            ResetBlinker();
             base.OnMouseReleased(ref e);
+        }
+
+        private void ResetBlinker() {
+            _blinkerTime = Time.Now;
         }
 
         public bool BlinkerOn => Pressed() ||  ((Time.Now - _blinkerTime) / 500) % 2 == 0;
