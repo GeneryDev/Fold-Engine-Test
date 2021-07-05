@@ -46,7 +46,7 @@ namespace FoldEngine.Text {
                 if(!Append(c)) break;
                 _index++;
             }
-            FlushLine();
+            if(_index > _lineStartIndex) FlushLine();
         }
 
         public bool Append(char c) {
@@ -85,12 +85,10 @@ namespace FoldEngine.Text {
         }
 
         private void FlushLine() {
-            if(_index > _lineStartIndex) {
-                _cursor.X = 0;
-                _cursor.Y += _bitmapFont.LineHeight;
-                
-                _lineStartIndex = _index;
-            }
+            _cursor.X = 0;
+            _cursor.Y += _bitmapFont.LineHeight;
+            
+            _lineStartIndex = _index;
         }
         
         private RenderedTextGlyph NextGlyph(char c) {

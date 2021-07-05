@@ -55,6 +55,8 @@ namespace FoldEngine.Gui {
                     Key = e.Key,
                     Modifiers = KeyModifiersExt.GetKeyModifiers()
                 };
+                // if(evt.Character == '\n') Console.WriteLine("got a newline");
+                if(evt.Character == '\r') evt.Character = '\n';
                 FocusOwner.OnKeyTyped(ref evt);
             }
         }

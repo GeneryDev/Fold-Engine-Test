@@ -12,11 +12,16 @@ namespace FoldEngine.Editor.Gui.Fields {
     public class TextField : GuiElement {
         
         protected List<char> Buffer = new List<char>();
+        private DocumentModel _document = new DocumentModel();
+        private TextRenderer _textRenderer = new TextRenderer();
         private int _dot = 1;
 
         public override bool Focusable => true;
 
         private long _blinkerTime = 0;
+        
+        private const int FontSize = 9;
+        
 
         public override void OnFocusGained() {
             _blinkerTime = Time.Now;
@@ -41,7 +46,7 @@ namespace FoldEngine.Editor.Gui.Fields {
 
         public override void AdjustSpacing(GuiPanel parent) {
             Bounds.Width = parent.Bounds.Width;
-            Bounds.Height = 12 * 9 / 7;
+            Bounds.Height = 12 * _document.GraphicalLines + 6;
             Margin = 4;
         }
 
@@ -50,42 +55,47 @@ namespace FoldEngine.Editor.Gui.Fields {
                 Environment.HoverTarget.Element = this;
             }
 
-            TextRenderer textRenderer = TextRenderer.Instance;
-
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
                 Color = new Color(63, 63, 70),
                 DestinationRectangle = Bounds
             });
 
-            const int fontSize = 9;
-
             int x = Bounds.X + 4;
-            int y = Bounds.Center.Y + fontSize / 2 + 1;
+            int y = Bounds.Y + FontSize + 5;
             
-            textRenderer.Start(renderer.Fonts["default"], "", fontSize);
+            _document.Reset();
+            _textRenderer.Start(renderer.Fonts["default"], "", FontSize);
             for(int i = 0; i <= Buffer.Count; i++) {
-                if(i == _dot && Focused && BlinkerOn) {
-                    layer.Surface.Draw(new DrawRectInstruction() {
-                        Texture = renderer.WhiteTexture,
-                        Color = Color.White,
-                        DestinationRectangle = new Rectangle(x + textRenderer.Cursor.X - 1, y - fontSize - 2, 1, fontSize + 4)
-                    });
-                }
-
                 if(i < Buffer.Count) {
                     char c = Buffer[i];
-                    textRenderer.Append(c);
+                    int prevX = _textRenderer.Cursor.X;
+                    _textRenderer.Append(c);
+                    if(c == '\n') {
+                        _document.WriteBreak(true);
+                    } else {
+                        _document.WriteChar(_textRenderer.Cursor.X - prevX);
+                    }
                 }
             }
 
+            _document.WriteEnd();
+
+            if(Focused && BlinkerOn) {
+                layer.Surface.Draw(new DrawRectInstruction() {
+                    Texture = renderer.WhiteTexture,
+                    Color = Color.White,
+                    DestinationRectangle = new Rectangle(x + _document.GetXForIndex(_dot) - 1, y + _document.GetYForIndex(_dot) - FontSize - 2, 1, FontSize + 4)
+                });
+            }
             
-            float textWidth = textRenderer.Width;
+            
+            float textWidth = _textRenderer.Width;
 
             int totalWidth = (int) (textWidth);
 
 
-            textRenderer.DrawOnto(layer.Surface, new Point(x, y), Focused ? Color.White : Color.LightGray);
+            _textRenderer.DrawOnto(layer.Surface, new Point(x, y), Focused ? Color.White : Color.LightGray);
         }
 
         public override void OnKeyTyped(ref KeyboardEvent e) {
@@ -104,6 +114,9 @@ namespace FoldEngine.Editor.Gui.Fields {
                 _dot++;
                 DotUpdated();
                 ResetBlinker();
+            }
+            if(controls.Get<ButtonAction>("editor.field.caret.debug").Consume()) {
+                Console.WriteLine(_document.GetLogicalLineForIndex(_dot));
             }
         }
 

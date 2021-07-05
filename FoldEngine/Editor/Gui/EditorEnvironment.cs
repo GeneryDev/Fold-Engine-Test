@@ -138,6 +138,7 @@ namespace FoldEngine.Editor.Gui {
             
             ControlScheme.PutAction("editor.field.caret.left", new ButtonAction(keyboard[Keys.Left]) {Repeat = true});
             ControlScheme.PutAction("editor.field.caret.right", new ButtonAction(keyboard[Keys.Right]) {Repeat = true});
+            ControlScheme.PutAction("editor.field.caret.debug", new ButtonAction(keyboard[Keys.F1]) {Repeat = true});
         }
 
         public override void Input(InputUnit inputUnit) {
