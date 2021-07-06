@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using FoldEngine.Text;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Gui.Fields {
     public class DocumentModel {
+        
+        public List<char> Buffer = new List<char>();
+        
         private DocumentNode[] _nodes = new DocumentNode[16];
         private List<DocumentPage> _pages = new List<DocumentPage>();
         private int _nodeCount = 1;
@@ -74,7 +78,8 @@ namespace FoldEngine.Editor.Gui.Fields {
                 GraphicalLine = _currentGraphicalLine,
                 X = _currentX,
                 Y = _currentY,
-                NodeIndex = _nodeCount
+                NodeIndex = _nodeCount,
+                PageIndex = _pages.Count
             };
             _pages.Add(page);
 
@@ -98,6 +103,29 @@ namespace FoldEngine.Editor.Gui.Fields {
                 if(currentIndex >= index) return value;
                 
                 if(node.IsBreak && node.BreakIsLogical) {
+                    value++;
+                }
+
+                if(node.IsChar) {
+                    currentIndex++;
+                }
+
+                if(node.IsEnd) return value;
+            }
+
+            return -1;
+        }
+
+        public int GetGraphicalLineForIndex(int index) {
+            DocumentPage startPage = GetStartPage(index);
+            int value = startPage.GraphicalLine;
+            int currentIndex = startPage.Index;
+            for(int i = startPage.NodeIndex; i < _nodeCount; i++) {
+                DocumentNode node = _nodes[i];
+
+                if(currentIndex >= index) return value;
+                
+                if(node.IsBreak) {
                     value++;
                 }
 
@@ -218,12 +246,75 @@ namespace FoldEngine.Editor.Gui.Fields {
         }
 
         private DocumentPage GetStartPage(int index) {
+            if(_pages.Count == 1) return _pages[0];
             for(int i = 1; i < _pages.Count; i++) {
                 if(_pages[i].Index > index) {
                     return _pages[i-1];
                 }
             }
-            return _pages[0];
+            return _pages[_pages.Count-1];
+        }
+
+        public int GetRowStart(int index) {
+            return GetStartPage(index).Index;
+        }
+
+        public int GetRowEnd(int index) {
+            DocumentPage startPage = GetStartPage(index);
+            if(startPage.PageIndex+1 >= _pages.Count) return Length;
+            return _pages[startPage.PageIndex + 1].Index-1;
+        }
+
+        public int GetNextNonWhitespace(int index) {
+            while(index < Length && char.IsWhiteSpace(Buffer[index])) {
+                index++;
+            }
+            return index;
+        }
+
+        public int GetPositionAbove(int index, int x) {
+            DocumentPage startPage = GetStartPage(index);
+            if(startPage.PageIndex <= 0) return 0;
+            return _pages[startPage.PageIndex - 1].GetIndexForX(x, _nodes, _nodeCount);
+        }
+
+        public int GetPositionBelow(int index, int x) {
+            DocumentPage startPage = GetStartPage(index);
+            if(startPage.PageIndex >= _pages.Count-1) return Length;
+            return _pages[startPage.PageIndex + 1].GetIndexForX(x, _nodes, _nodeCount);
+        }
+
+        public int GetPreviousWord(int index) {
+            return index - 1; //TODO
+        }
+
+        public int GetNextWord(int index) {
+            return index + 1; //TODO
+        }
+
+        public int GetWordStart(int index) {
+            return index - 1; //TODO
+        }
+
+        public int GetWordEnd(int index) {
+            return index + 1; //TODO
+        }
+
+        public void Render(TextRenderer textRenderer) {
+            Reset();
+            for(int i = 0; i <= Buffer.Count; i++) {
+                if(i < Buffer.Count) {
+                    char c = Buffer[i];
+                    int prevX = textRenderer.Cursor.X;
+                    textRenderer.Append(c);
+                    if(c == '\n') {
+                        WriteBreak(true);
+                    } else {
+                        WriteChar(textRenderer.Cursor.X - prevX);
+                    }
+                }
+            }
+            WriteEnd();
         }
     }
 
@@ -274,5 +365,25 @@ namespace FoldEngine.Editor.Gui.Fields {
         public int Y;
         
         public int NodeIndex;
+        public int PageIndex;
+
+        public int GetIndexForX(int x, DocumentNode[] nodes, int nodeCount) {
+            int currentX = X;
+            int currentIndex = Index;
+            for(int i = NodeIndex; i < nodeCount; i++) {
+                DocumentNode node = nodes[i];
+
+                if(currentX >= x || node.IsBreak) return currentIndex;
+                
+                if(node.IsChar) {
+                    currentIndex++;
+                    currentX += node.CharWidth;
+                }
+
+                if(currentX >= x || node.IsEnd) return currentIndex;
+            }
+
+            return -1;
+        }
     }
 }

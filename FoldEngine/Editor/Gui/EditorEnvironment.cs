@@ -138,6 +138,11 @@ namespace FoldEngine.Editor.Gui {
             
             ControlScheme.PutAction("editor.field.caret.left", new ButtonAction(keyboard[Keys.Left]) {Repeat = true});
             ControlScheme.PutAction("editor.field.caret.right", new ButtonAction(keyboard[Keys.Right]) {Repeat = true});
+            ControlScheme.PutAction("editor.field.caret.up", new ButtonAction(keyboard[Keys.Up]) {Repeat = true});
+            ControlScheme.PutAction("editor.field.caret.down", new ButtonAction(keyboard[Keys.Down]) {Repeat = true});
+            ControlScheme.PutAction("editor.field.caret.home", new ButtonAction(keyboard[Keys.Home]) {Repeat = true});
+            ControlScheme.PutAction("editor.field.caret.end", new ButtonAction(keyboard[Keys.End]) {Repeat = true});
+            
             ControlScheme.PutAction("editor.field.caret.debug", new ButtonAction(keyboard[Keys.F1]) {Repeat = true});
         }
 

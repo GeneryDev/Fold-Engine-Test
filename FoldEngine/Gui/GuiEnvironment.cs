@@ -197,7 +197,7 @@ namespace FoldEngine.Gui {
             return (t & mask) != 0;
         }
 
-        internal static KeyModifiers GetKeyModifiers() {
+        public static KeyModifiers GetKeyModifiers() {
             KeyboardState state = Keyboard.GetState();
             return ((state[Keys.LeftControl] == KeyState.Down || state[Keys.RightControl] == KeyState.Down) ? KeyModifiers.Control : KeyModifiers.None)
                    | ((state[Keys.LeftShift] == KeyState.Down || state[Keys.RightShift] == KeyState.Down) ? KeyModifiers.Shift : KeyModifiers.None)

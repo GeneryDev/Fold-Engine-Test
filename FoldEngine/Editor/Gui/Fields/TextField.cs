@@ -10,35 +10,33 @@ using Microsoft.Xna.Framework.Input;
 
 namespace FoldEngine.Editor.Gui.Fields {
     public class TextField : GuiElement {
-        
-        protected List<char> Buffer = new List<char>();
-        private DocumentModel _document = new DocumentModel();
         private TextRenderer _textRenderer = new TextRenderer();
-        private int _dot = 1;
+        
+        public DocumentModel Document = new DocumentModel();
+        public Caret Caret;
 
         public override bool Focusable => true;
 
-        private long _blinkerTime = 0;
-        
         private const int FontSize = 9;
-        
 
         public override void OnFocusGained() {
-            _blinkerTime = Time.Now;
+            Caret.OnFocusGained();
         }
 
         public TextField() {
-            Buffer.Add('H');
-            Buffer.Add('e');
-            Buffer.Add('l');
-            Buffer.Add('l');
-            Buffer.Add('o');
-            Buffer.Add(' ');
-            Buffer.Add('W');
-            Buffer.Add('o');
-            Buffer.Add('r');
-            Buffer.Add('l');
-            Buffer.Add('d');
+            Caret = new Caret(this);
+            
+            Document.Buffer.Add('H');
+            Document.Buffer.Add('e');
+            Document.Buffer.Add('l');
+            Document.Buffer.Add('l');
+            Document.Buffer.Add('o');
+            Document.Buffer.Add(' ');
+            Document.Buffer.Add('W');
+            Document.Buffer.Add('o');
+            Document.Buffer.Add('r');
+            Document.Buffer.Add('l');
+            Document.Buffer.Add('d');
         }
 
         public override void Reset(GuiPanel parent) {
@@ -46,13 +44,12 @@ namespace FoldEngine.Editor.Gui.Fields {
 
         public override void AdjustSpacing(GuiPanel parent) {
             Bounds.Width = parent.Bounds.Width;
-            Bounds.Height = 12 * _document.GraphicalLines + 6;
+            Bounds.Height = 12 * Document.GraphicalLines + 6;
             Margin = 4;
         }
 
         private Point TextRenderingStartPos => new Point(Bounds.X + 4, Bounds.Y + FontSize + 5);
 
-        private Rectangle _tempRect;
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
             if(Bounds.Contains(Environment.MousePos)) {
@@ -65,95 +62,44 @@ namespace FoldEngine.Editor.Gui.Fields {
                 DestinationRectangle = Bounds
             });
 
-            (int x, int y) = TextRenderingStartPos;
-            
-            _document.Reset();
             _textRenderer.Start(renderer.Fonts["default"], "", FontSize);
-            for(int i = 0; i <= Buffer.Count; i++) {
-                if(i < Buffer.Count) {
-                    char c = Buffer[i];
-                    int prevX = _textRenderer.Cursor.X;
-                    _textRenderer.Append(c);
-                    if(c == '\n') {
-                        _document.WriteBreak(true);
-                    } else {
-                        _document.WriteChar(_textRenderer.Cursor.X - prevX);
-                    }
-                }
-            }
+            Document.Render(_textRenderer);
 
-            _document.WriteEnd();
-            
-            layer.Surface.Draw(new DrawRectInstruction() {
-                Texture = renderer.WhiteTexture,
-                Color = Color.LightGray,
-                DestinationRectangle = _tempRect
-            });
-            
-
-            if(Focused && BlinkerOn) {
-                layer.Surface.Draw(new DrawRectInstruction() {
-                    Texture = renderer.WhiteTexture,
-                    Color = Color.White,
-                    DestinationRectangle = new Rectangle(x + _document.GetXForIndex(_dot) - 1, y + _document.GetYForIndex(_dot) - FontSize - 2, 1, FontSize + 4)
-                });
+            if(Pressed(MouseEvent.LeftButton)) {
+                Caret.DotIndex = Document.ViewToModel(Environment.MousePos - TextRenderingStartPos);
             }
             
             
-            float textWidth = _textRenderer.Width;
+            var textRenderingStartPos = TextRenderingStartPos;
 
-            int totalWidth = (int) (textWidth);
+            Caret.PreRender(renderer, layer, textRenderingStartPos);
+            
+            _textRenderer.DrawOnto(layer.Surface, textRenderingStartPos, Focused ? Color.White : Color.LightGray);
 
-
-            _textRenderer.DrawOnto(layer.Surface, new Point(x, y), Focused ? Color.White : Color.LightGray);
+            Caret.PostRender(renderer, layer, textRenderingStartPos);
         }
 
         public override void OnMousePressed(ref MouseEvent e) {
-            Console.WriteLine();
-            if(Focused) {
-                _dot = _document.ViewToModel(e.Position - TextRenderingStartPos);
-                Console.WriteLine(_dot);
-            }
             base.OnMousePressed(ref e);
+            Caret.Dot = Document.ViewToModel(e.Position - TextRenderingStartPos);
         }
 
         public override void OnKeyTyped(ref KeyboardEvent e) {
             base.OnKeyTyped(ref e);
 
-            Buffer.Insert(_dot++, e.Character);
+            Document.Buffer.Insert(Caret.Dot++, e.Character);
         }
 
         public override void OnInput(ControlScheme controls) {
-            if(controls.Get<ButtonAction>("editor.field.caret.left").Consume()) {
-                _dot--;
-                DotUpdated();
-                ResetBlinker();
-            }
-            if(controls.Get<ButtonAction>("editor.field.caret.right").Consume()) {
-                _dot++;
-                DotUpdated();
-                ResetBlinker();
-            }
+            Caret.OnInput(controls);
+            
             if(controls.Get<ButtonAction>("editor.field.caret.debug").Consume()) {
-                _tempRect = _document.ModelToView(_dot);
-                _tempRect.Offset(TextRenderingStartPos);
                 // Console.WriteLine(_document.GetLogicalLineForIndex(_dot));
             }
         }
 
-        private void DotUpdated() {
-            _dot = Math.Max(0, Math.Min(Buffer.Count, _dot));
-        }
-
         public override void OnMouseReleased(ref MouseEvent e) {
-            ResetBlinker();
             base.OnMouseReleased(ref e);
         }
-
-        private void ResetBlinker() {
-            _blinkerTime = Time.Now;
-        }
-
-        public bool BlinkerOn => Pressed() ||  ((Time.Now - _blinkerTime) / 500) % 2 == 0;
     }
 }
