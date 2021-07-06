@@ -20,6 +20,7 @@ namespace FoldEngine.Editor.Gui.Fields {
         public bool IsPoint => Index == Mark;
 
         public bool InIndentation => this.Index >= GetRowStart() && this.Index <= GetRowContentStart();
+        public int Length => Math.Abs(Index - Mark);
 
 
         public Dot(Document document) : this() {
@@ -29,6 +30,13 @@ namespace FoldEngine.Editor.Gui.Fields {
         public Dot(Document document, int index) : this() {
             Document = document;
             Index = Mark = index;
+        }
+
+        public Dot(Document document, int index, int mark) : this() {
+            Document = document;
+            Index = index;
+            Mark = mark;
+            UpdateX();
         }
 
         public void UpdateX() {

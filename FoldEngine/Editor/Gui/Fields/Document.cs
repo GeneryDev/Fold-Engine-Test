@@ -388,6 +388,33 @@ namespace FoldEngine.Editor.Gui.Fields {
         }
 
         #endregion
+
+        #region Buffer Sampling
+
+        public string GetText(int start, int length) {
+            if(start < 0) throw new ArgumentOutOfRangeException(nameof(start));
+            if(length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+            if(start + length > Length) throw new ArgumentOutOfRangeException(nameof(length));
+            
+            char[] chars = new char[length];
+            for(int i = 0; i < length; i++) {
+                chars[i] = Buffer[i + start];
+            }
+            return new string(chars);
+        }
+        public char[] GetChars(int start, int length) {
+            if(start < 0) throw new ArgumentOutOfRangeException(nameof(start));
+            if(length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+            if(start + length > Length) throw new ArgumentOutOfRangeException(nameof(length));
+            
+            char[] chars = new char[length];
+            for(int i = 0; i < length; i++) {
+                chars[i] = Buffer[i + start];
+            }
+            return chars;
+        }
+
+        #endregion
     }
 
     public struct DocumentNode {

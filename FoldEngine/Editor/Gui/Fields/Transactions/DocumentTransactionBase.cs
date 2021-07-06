@@ -1,0 +1,116 @@
+﻿using System;
+using System.Collections.Generic;
+using EntryProject.Util;
+using FoldEngine.Util.Transactions;
+
+namespace FoldEngine.Editor.Gui.Fields.Transactions {
+    public abstract class DocumentTransactionBase : Transaction<TextField> {
+        private static readonly ObjectPool<List<DocumentModification>> TempModificationListPool = new ObjectPool<List<DocumentModification>>();
+        private static readonly ObjectPool<List<Dot>> TempDotListPool = new ObjectPool<List<Dot>>();
+
+        protected TextField Field;
+        
+        protected CaretProfile PreviousProfile;
+        protected CaretProfile NextProfile;
+
+        private DocumentModification[] _modifications;
+
+        private List<DocumentModification> _tempModificationList;
+        private List<Dot> _tempDotList;
+
+        public DocumentTransactionBase(TextField field) {
+            Field = field;
+            PreviousProfile = field.Caret.CreateProfile();
+        }
+
+        protected abstract void CalculateModifications();
+
+        protected void Modification(int start, int length, char[] newValue) {
+            if(_tempModificationList == null) throw new InvalidOperationException("Cannot add a modification outside the CalculateModifications method");
+            
+            DocumentModification modification = new DocumentModification() {
+                Start = start,
+                Length = length,
+                OldValue = Field.Document.GetChars(start, length),
+                NewValue = newValue
+            };
+            
+            _tempModificationList.Add(modification);
+
+            for(int i = 0; i < _tempDotList.Count; i++) {
+                Dot dot = _tempDotList[i];
+                if(start <= dot.Index && dot.Index <= start + length) dot.Index = start;
+                if(start <= dot.Mark && dot.Mark <= start + length) dot.Mark = start;
+
+                if(dot.Index >= start) dot.Index += newValue.Length;
+                if(dot.Mark >= start) dot.Mark += newValue.Length;
+
+                _tempDotList[i] = dot;
+            }
+        }
+
+        protected void Dot(int index) {
+            Dot(index, index);
+        }
+
+        protected void Dot(int index, int mark) {
+            if(_tempModificationList == null) throw new InvalidOperationException("Cannot add a dot outside the CalculateModifications method");
+            
+            _tempDotList.Add(new Dot(Field.Document, index, mark));
+        }
+
+        public override bool Redo(TextField target) {
+            if(_modifications == null) {
+                _tempModificationList = TempModificationListPool.Claim();
+                _tempDotList = TempDotListPool.Claim();
+                
+                CalculateModifications();
+                _tempModificationList.Sort((a, b) => b.Start - a.Start);
+                _modifications = _tempModificationList.ToArray();
+                NextProfile = new CaretProfile(_tempDotList.ToArray());
+                
+                _tempModificationList.Clear();
+                _tempDotList.Clear();
+                
+                TempModificationListPool.Free(_tempModificationList);
+                TempDotListPool.Free(_tempDotList);
+                
+                _tempModificationList = null;
+                _tempDotList = null;
+            }
+
+            for(int i = _modifications.Length - 1; i >= 0; i--) {
+                _modifications[i].Redo(target.Document);
+            }
+            
+            target.Caret.SetProfile(NextProfile);
+
+            return true;
+        }
+
+        public override bool Undo(TextField target) {
+            for(int i = 0; i < _modifications.Length; i++) {
+                _modifications[i].Undo(target.Document);
+            }
+            
+            target.Caret.SetProfile(PreviousProfile);
+            
+            return true;
+        }
+    }
+
+    public struct DocumentModification {
+        public int Start;
+        public int Length;
+        public char[] OldValue;
+        public char[] NewValue;
+
+        public void Redo(Document document) {
+            document.Replace(Start, Length, NewValue);
+        }
+
+        public void Undo(Document document) {
+            document.Replace(Start, NewValue.Length, OldValue);
+        }
+    }
+}

@@ -29,6 +29,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Gui\Fields\Document.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Gui\Fields\Dot.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Gui\Fields\TextField.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Gui\Fields\Transactions\DeletionEdit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Gui\Fields\Transactions\DocumentTransactionBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Gui\Fields\Transactions\InsertionEdit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Inspector\ComponentInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Inspector\HideInInspectorAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Inspector\NameAttribute.cs" />

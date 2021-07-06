@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using FoldEngine.Graphics;
 using FoldEngine.Gui;
 using FoldEngine.Input;
@@ -109,6 +110,43 @@ namespace FoldEngine.Editor.Gui.Fields {
                     dot.DrawIndex(renderer, layer, offset);
                 }
             }
+        }
+
+        public CaretProfile CreateProfile() {
+            CaretProfile profile = new CaretProfile(_dots.ToArray());
+            profile.Sort();
+            return profile;
+        }
+
+        public void SetProfile(CaretProfile profile) {
+            _dots.Clear();
+
+            foreach(Dot dot in profile.Dots) {
+                if(dot.Document == Document) {
+                    _dots.Add(dot);
+                } else {
+                    _dots.Add(new Dot(Document, dot.Index, dot.Mark));
+                }
+            }
+        }
+    }
+
+    public struct CaretProfile {
+        public readonly Dot[] Dots;
+
+        public CaretProfile(CaretProfile other) {
+            Dots = new Dot[other.Dots.Length];
+            for(int i = 0; i < other.Dots.Length; i++) {
+                Dots[i] = other.Dots[i];
+            }
+        }
+
+        public CaretProfile(params Dot[] dots) {
+            Dots = dots;
+        }
+
+        public void Sort() {
+            Array.Sort(Dots, (a, b) => b.Index - a.Index);
         }
     }
 }

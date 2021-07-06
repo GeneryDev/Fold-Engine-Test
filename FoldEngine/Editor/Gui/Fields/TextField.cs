@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using FoldEngine.Editor.Gui.Fields.Transactions;
 using FoldEngine.Graphics;
 using FoldEngine.Gui;
 using FoldEngine.Input;
@@ -79,7 +80,11 @@ namespace FoldEngine.Editor.Gui.Fields {
         public override void OnKeyTyped(ref KeyboardEvent e) {
             base.OnKeyTyped(ref e);
 
-            Document.Insert(Caret.Dot++, e.Character);
+            if(e.Character == '\b') {
+                Transactions.InsertTransaction(new DeletionEdit(this));
+            } else {
+                Transactions.InsertTransaction(new InsertionEdit(new char[] {e.Character}, this));
+            }
         }
 
         public override void OnInput(ControlScheme controls) {
