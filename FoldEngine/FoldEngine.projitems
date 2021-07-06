@@ -121,7 +121,6 @@
     <Folder Include="$(MSBuildThisFileDirectory)Input\Builder" />
     <Folder Include="$(MSBuildThisFileDirectory)LevelRendering\2d" />
     <Compile Include="$(MSBuildThisFileDirectory)Scenes\Entity.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Scenes\EntityObjectPool.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scenes\Scene.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scenes\SystemMap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Systems\GameSystem.cs" />

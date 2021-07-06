@@ -23,7 +23,6 @@ namespace FoldEngine.Scenes
         public readonly ComponentMap Components;
         public readonly EventMap Events;
         public readonly SystemMap Systems;
-        internal readonly EntityObjectPool EntityObjectPool;
 
         public readonly MeshCollection Meshes;
 
@@ -44,7 +43,6 @@ namespace FoldEngine.Scenes
             Components = new ComponentMap(this);
             Events = new EventMap(this);
             Systems = new SystemMap(this);
-            EntityObjectPool = new EntityObjectPool(this);
             Meshes = new MeshCollection();
         }
 
@@ -99,7 +97,7 @@ namespace FoldEngine.Scenes
         }
 
         public Entity CreateEntity(string name = "Unnamed Entity") {
-            return EntityObjectPool.GetOrCreateEntityObject(CreateEntityId(name));
+            return new Entity(this, CreateEntityId(name));
         }
 
 
