@@ -50,6 +50,10 @@ namespace FoldEngine.Editor.Gui.Fields {
             Margin = 4;
         }
 
+        private Point TextRenderingStartPos => new Point(Bounds.X + 4, Bounds.Y + FontSize + 5);
+
+        private Rectangle _tempRect;
+
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
             if(Bounds.Contains(Environment.MousePos)) {
                 Environment.HoverTarget.Element = this;
@@ -61,8 +65,7 @@ namespace FoldEngine.Editor.Gui.Fields {
                 DestinationRectangle = Bounds
             });
 
-            int x = Bounds.X + 4;
-            int y = Bounds.Y + FontSize + 5;
+            (int x, int y) = TextRenderingStartPos;
             
             _document.Reset();
             _textRenderer.Start(renderer.Fonts["default"], "", FontSize);
@@ -80,6 +83,13 @@ namespace FoldEngine.Editor.Gui.Fields {
             }
 
             _document.WriteEnd();
+            
+            layer.Surface.Draw(new DrawRectInstruction() {
+                Texture = renderer.WhiteTexture,
+                Color = Color.LightGray,
+                DestinationRectangle = _tempRect
+            });
+            
 
             if(Focused && BlinkerOn) {
                 layer.Surface.Draw(new DrawRectInstruction() {
@@ -96,6 +106,15 @@ namespace FoldEngine.Editor.Gui.Fields {
 
 
             _textRenderer.DrawOnto(layer.Surface, new Point(x, y), Focused ? Color.White : Color.LightGray);
+        }
+
+        public override void OnMousePressed(ref MouseEvent e) {
+            Console.WriteLine();
+            if(Focused) {
+                _dot = _document.ViewToModel(e.Position - TextRenderingStartPos);
+                Console.WriteLine(_dot);
+            }
+            base.OnMousePressed(ref e);
         }
 
         public override void OnKeyTyped(ref KeyboardEvent e) {
@@ -116,7 +135,9 @@ namespace FoldEngine.Editor.Gui.Fields {
                 ResetBlinker();
             }
             if(controls.Get<ButtonAction>("editor.field.caret.debug").Consume()) {
-                Console.WriteLine(_document.GetLogicalLineForIndex(_dot));
+                _tempRect = _document.ModelToView(_dot);
+                _tempRect.Offset(TextRenderingStartPos);
+                // Console.WriteLine(_document.GetLogicalLineForIndex(_dot));
             }
         }
 

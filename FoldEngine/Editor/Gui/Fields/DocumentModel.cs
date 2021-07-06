@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using FoldEngine.Util;
+using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Gui.Fields {
     public class DocumentModel {
@@ -156,6 +157,64 @@ namespace FoldEngine.Editor.Gui.Fields {
             }
 
             return -1;
+        }
+
+        public int ViewToModel(Point p) {
+            DocumentPage startPage = _pages[_pages.Count-1];
+            foreach(DocumentPage page in _pages) {
+                if(p.Y <= page.Y) {
+                    startPage = page;
+                    break;
+                }
+            }
+
+            int charX = startPage.X;
+            int value = startPage.Index;
+            for(int i = startPage.NodeIndex; i < _nodeCount; i++) {
+                DocumentNode node = _nodes[i];
+
+                if(charX >= p.X || node.IsBreak) return value;
+                
+                if(node.IsChar) {
+                    value++;
+                    charX += node.CharWidth;
+                }
+
+                if(charX >= p.X || node.IsEnd) return value;
+            }
+
+            return startPage.Index;
+        }
+
+        public Rectangle ModelToView(int index) {
+            DocumentPage startPage = GetStartPage(index);
+            Rectangle value = new Rectangle(startPage.X, startPage.Y - 12, 1, 12);
+            int currentIndex = startPage.Index;
+            for(int i = startPage.NodeIndex; i < _nodeCount; i++) {
+                DocumentNode node = _nodes[i];
+
+                if(currentIndex >= index) {
+                    if(node.IsChar) {
+                        value.Width = node.CharWidth;
+                    }
+                    return value;
+                }
+                
+                if(node.IsBreak) {
+                    if(node.BreakIsLogical) currentIndex++;
+                    value.X = 0;
+                    value.Y += 12; //TODO line height
+                }
+
+                if(node.IsChar) {
+                    currentIndex++;
+                    value.X += node.CharWidth;
+                }
+
+                if(node.IsEnd) return value;
+            }
+
+            return default;
         }
 
         private DocumentPage GetStartPage(int index) {
