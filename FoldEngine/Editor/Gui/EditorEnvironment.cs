@@ -136,6 +136,9 @@ namespace FoldEngine.Editor.Gui {
         private void SetupControlScheme() {
             Keyboard keyboard = Scene.Core.InputUnit.Devices.Keyboard;
             
+            ControlScheme.PutAction("editor.undo", new ButtonAction(keyboard[Keys.Z]) {Repeat = true}.Modifiers(keyboard[Keys.LeftControl]));
+            ControlScheme.PutAction("editor.redo", new ButtonAction(keyboard[Keys.Y]) {Repeat = true}.Modifiers(keyboard[Keys.LeftControl]));
+            
             ControlScheme.PutAction("editor.field.caret.left", new ButtonAction(keyboard[Keys.Left]) {Repeat = true});
             ControlScheme.PutAction("editor.field.caret.right", new ButtonAction(keyboard[Keys.Right]) {Repeat = true});
             ControlScheme.PutAction("editor.field.caret.up", new ButtonAction(keyboard[Keys.Up]) {Repeat = true});
@@ -148,17 +151,10 @@ namespace FoldEngine.Editor.Gui {
 
         public override void Input(InputUnit inputUnit) {
             base.Input(inputUnit);
-            if(inputUnit.Devices.Keyboard[Keys.LeftControl].Down
-               && inputUnit.Devices.Keyboard[Keys.Z].Down
-               && inputUnit.Devices.Keyboard[Keys.Z].SinceFrame == Time.Frame) {
-                TransactionManager.Undo();
-            }
-            if(inputUnit.Devices.Keyboard[Keys.LeftControl].Down
-               && inputUnit.Devices.Keyboard[Keys.Y].Down
-               && inputUnit.Devices.Keyboard[Keys.Y].SinceFrame == Time.Frame) {
-                TransactionManager.Redo();
-            }
-
+            
+            if(ControlScheme.Get<ButtonAction>("editor.undo").Consume()) TransactionManager.Undo();
+            if(ControlScheme.Get<ButtonAction>("editor.redo").Consume()) TransactionManager.Redo();
+            
             if(HoverTarget.ScrollablePanel != null) {
                 if(HoverTarget.ScrollablePanel.IsAncestorOf(HoverTarget.Element)) {
                     if(Scene.Core.InputUnit.Players[0].Get<ChangeAction>("zoom.in")) {

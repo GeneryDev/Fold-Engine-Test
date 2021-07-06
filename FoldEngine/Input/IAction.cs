@@ -8,6 +8,8 @@ namespace FoldEngine.Input {
         public static readonly ButtonAction Default = new ButtonAction(new ButtonInfo(() => false));
         
         private ButtonInfo _buttonInfo;
+
+        private ButtonInfo[] _modifiers;
         
         public bool Consumed => _buttonInfo.Down == WhenDown && ConsumeTime >= _buttonInfo.Since && (!Repeat || Time.Now - _buttonInfo.Since < RepeatStartDelay);
         public long ConsumeTime;
@@ -27,7 +29,17 @@ namespace FoldEngine.Input {
             _buttonInfo = buttonInfo;
         }
 
+        public ButtonAction Modifiers(params ButtonInfo[] modifiers) {
+            _modifiers = modifiers;
+            return this;
+        }
+
         public bool Consume() {
+            if(_modifiers != null) {
+                foreach(ButtonInfo modifier in _modifiers) {
+                    if(!modifier.Down) return false;
+                }
+            }
             if(_buttonInfo.Down == WhenDown && !Consumed && (Repeat && Time.Now - _buttonInfo.Since >= RepeatStartDelay ? Time.Now - ConsumeTime >= RepeatInterval : _buttonInfo.MillisecondsElapsed <= BufferTime)) {
                 ConsumeTime = Time.Now;
                 return true;

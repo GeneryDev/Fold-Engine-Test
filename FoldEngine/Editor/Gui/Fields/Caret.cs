@@ -10,7 +10,7 @@ namespace FoldEngine.Editor.Gui.Fields {
         private List<Dot> _dots = new List<Dot>();
         private TextField _parent;
 
-        private DocumentModel Document => _parent.Document;
+        private Document Document => _parent.Document;
         
         private long _blinkerTime = 0;
         public bool BlinkerOn => _parent.Pressed(MouseEvent.LeftButton) ||  ((Time.Now - _blinkerTime) / 500) % 2 == 0;

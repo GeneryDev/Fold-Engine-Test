@@ -5,9 +5,11 @@ using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Gui.Fields {
-    public class DocumentModel {
+    public class Document {
         
-        public List<char> Buffer = new List<char>();
+        protected readonly List<char> Buffer = new List<char>();
+
+        public bool Dirty { get; private set; } = true;
         
         private DocumentNode[] _nodes = new DocumentNode[16];
         private List<DocumentPage> _pages = new List<DocumentPage>();
@@ -20,22 +22,25 @@ namespace FoldEngine.Editor.Gui.Fields {
         private int _currentX = 0;
         private int _currentY = 0;
 
-        public int Length => _currentIndex;
+        public int Length => Buffer.Count;
         public int LogicalLines => _currentLogicalLine + 1;
         public int GraphicalLines => _currentGraphicalLine + 1;
+
+
+        #region Model Construction
 
         private void EnsureSize(int size) {
             if(_nodes.Length < size) Array.Resize(ref _nodes, MathUtil.NearestPowerOfTwo(size));
         }
-        
-        public void Reset() {
+
+        private void ResetModel() {
             _currentIndex = _currentColumn = _currentLogicalLine = _currentGraphicalLine = _currentX = _currentY = 0;
             _pages.Clear();
             _nodeCount = 0;
             WritePage();
         }
 
-        public DocumentModel WriteChar(int width) {
+        private Document WriteChar(int width) {
             EnsureSize(_nodeCount+1);
             _nodes[_nodeCount].SetChar(width);
             _nodeCount++;
@@ -47,7 +52,7 @@ namespace FoldEngine.Editor.Gui.Fields {
             return this;
         }
 
-        public DocumentModel WriteBreak(bool logical) {
+        private Document WriteBreak(bool logical) {
             EnsureSize(_nodeCount+1);
             _nodes[_nodeCount].SetBreak(logical);
             _nodeCount++;
@@ -70,7 +75,7 @@ namespace FoldEngine.Editor.Gui.Fields {
             return this;
         }
 
-        public DocumentModel WritePage() {
+        private Document WritePage() {
             var page = new DocumentPage() {
                 Index = _currentIndex,
                 Column = _currentColumn,
@@ -86,12 +91,34 @@ namespace FoldEngine.Editor.Gui.Fields {
             return this;
         }
 
-        public DocumentModel WriteEnd() {
+        private Document WriteEnd() {
             EnsureSize(_nodeCount+1);
             _nodes[_nodeCount].SetEnd();
             _nodeCount++;
             return this;
         }
+
+        public void RebuildModel(TextRenderer textRenderer) {
+            ResetModel();
+            for(int i = 0; i <= Buffer.Count; i++) {
+                if(i < Buffer.Count) {
+                    char c = Buffer[i];
+                    int prevX = textRenderer.Cursor.X;
+                    textRenderer.Append(c);
+                    if(c == '\n') {
+                        WriteBreak(true);
+                    } else {
+                        WriteChar(textRenderer.Cursor.X - prevX);
+                    }
+                }
+            }
+            WriteEnd();
+            Dirty = false;
+        }
+
+        #endregion
+
+        #region Model To View Methods
 
         public int GetLogicalLineForIndex(int index) {
             DocumentPage startPage = GetStartPage(index);
@@ -186,34 +213,7 @@ namespace FoldEngine.Editor.Gui.Fields {
 
             return -1;
         }
-
-        public int ViewToModel(Point p) {
-            DocumentPage startPage = _pages[_pages.Count-1];
-            foreach(DocumentPage page in _pages) {
-                if(p.Y <= page.Y) {
-                    startPage = page;
-                    break;
-                }
-            }
-
-            int charX = startPage.X;
-            int value = startPage.Index;
-            for(int i = startPage.NodeIndex; i < _nodeCount; i++) {
-                DocumentNode node = _nodes[i];
-
-                if(charX >= p.X || node.IsBreak) return value;
-                
-                if(node.IsChar) {
-                    value++;
-                    charX += node.CharWidth;
-                }
-
-                if(charX >= p.X || node.IsEnd) return value;
-            }
-
-            return startPage.Index;
-        }
-
+        
         public Rectangle ModelToView(int index) {
             DocumentPage startPage = GetStartPage(index);
             Rectangle value = new Rectangle(startPage.X, startPage.Y - 12, 1, 12);
@@ -245,6 +245,41 @@ namespace FoldEngine.Editor.Gui.Fields {
             return default;
         }
 
+        #endregion
+        
+        #region View To Model Methods
+        
+        public int ViewToModel(Point p) {
+            DocumentPage startPage = _pages[_pages.Count-1];
+            foreach(DocumentPage page in _pages) {
+                if(p.Y <= page.Y) {
+                    startPage = page;
+                    break;
+                }
+            }
+
+            int charX = startPage.X;
+            int value = startPage.Index;
+            for(int i = startPage.NodeIndex; i < _nodeCount; i++) {
+                DocumentNode node = _nodes[i];
+
+                if(charX >= p.X || node.IsBreak) return value;
+                
+                if(node.IsChar) {
+                    value++;
+                    charX += node.CharWidth;
+                }
+
+                if(charX >= p.X || node.IsEnd) return value;
+            }
+
+            return startPage.Index;
+        }
+        
+        #endregion
+
+        #region Model To Model Methods
+        
         private DocumentPage GetStartPage(int index) {
             if(_pages.Count == 1) return _pages[0];
             for(int i = 1; i < _pages.Count; i++) {
@@ -300,22 +335,59 @@ namespace FoldEngine.Editor.Gui.Fields {
             return index + 1; //TODO
         }
 
-        public void Render(TextRenderer textRenderer) {
-            Reset();
-            for(int i = 0; i <= Buffer.Count; i++) {
-                if(i < Buffer.Count) {
-                    char c = Buffer[i];
-                    int prevX = textRenderer.Cursor.X;
-                    textRenderer.Append(c);
-                    if(c == '\n') {
-                        WriteBreak(true);
-                    } else {
-                        WriteChar(textRenderer.Cursor.X - prevX);
-                    }
+        #endregion
+
+        #region Buffer Modification
+
+        public string Text {
+            get => new string(Buffer.ToArray());
+            set {
+                Buffer.Clear();
+                if(Buffer.Capacity < value.Length) Buffer.Capacity = value.Length;
+                foreach(char c in value) {
+                    Buffer.Add(c);
                 }
+
+                Dirty = true;
             }
-            WriteEnd();
         }
+
+        public void Insert(int start, IEnumerable<char> chars) {
+            Replace(start, 0, chars);
+        }
+
+        public void Remove(int start, int length) {
+            Replace(start, length, null);
+        }
+
+        public void Replace(int start, int length, IEnumerable<char> chars) {
+            if(length == 0 && chars == null) return;
+
+            if(length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+            if(start + length > Length) throw new ArgumentOutOfRangeException(nameof(start));
+            if(start < 0) throw new ArgumentOutOfRangeException(nameof(start));
+
+            for(int i = start; i < start + length; i++) {
+                Buffer.RemoveAt(start);
+            }
+            if(chars != null) {
+                Buffer.InsertRange(start, chars);
+            }
+
+            Dirty = true;
+        }
+        
+        
+
+        public void Insert(int start, char c) {
+            if(start < 0) throw new ArgumentOutOfRangeException(nameof(start));
+
+            Buffer.Insert(start, c);
+            
+            Dirty = true;
+        }
+
+        #endregion
     }
 
     public struct DocumentNode {

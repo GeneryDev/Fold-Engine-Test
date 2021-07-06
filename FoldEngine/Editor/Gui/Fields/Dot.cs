@@ -8,7 +8,7 @@ namespace FoldEngine.Editor.Gui.Fields {
     public struct Dot {
         private const bool SMART_KEYS_HOME = false;
         
-        public DocumentModel Document;
+        public Document Document;
         
         public int Index;
         public int Mark;
@@ -22,11 +22,11 @@ namespace FoldEngine.Editor.Gui.Fields {
         public bool InIndentation => this.Index >= GetRowStart() && this.Index <= GetRowContentStart();
 
 
-        public Dot(DocumentModel document) : this() {
+        public Dot(Document document) : this() {
             Document = document;
         }
 
-        public Dot(DocumentModel document, int index) : this() {
+        public Dot(Document document, int index) : this() {
             Document = document;
             Index = Mark = index;
         }

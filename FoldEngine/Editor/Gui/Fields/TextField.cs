@@ -5,38 +5,28 @@ using FoldEngine.Gui;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Text;
+using FoldEngine.Util.Transactions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 namespace FoldEngine.Editor.Gui.Fields {
     public class TextField : GuiElement {
+        private const int FontSize = 9;
+        
         private TextRenderer _textRenderer = new TextRenderer();
         
-        public DocumentModel Document = new DocumentModel();
-        public Caret Caret;
+        public readonly Document Document = new Document();
+        public readonly Caret Caret;
+        
+        public readonly TransactionManager<TextField> Transactions;
 
         public override bool Focusable => true;
 
-        private const int FontSize = 9;
-
-        public override void OnFocusGained() {
-            Caret.OnFocusGained();
-        }
-
         public TextField() {
             Caret = new Caret(this);
-            
-            Document.Buffer.Add('H');
-            Document.Buffer.Add('e');
-            Document.Buffer.Add('l');
-            Document.Buffer.Add('l');
-            Document.Buffer.Add('o');
-            Document.Buffer.Add(' ');
-            Document.Buffer.Add('W');
-            Document.Buffer.Add('o');
-            Document.Buffer.Add('r');
-            Document.Buffer.Add('l');
-            Document.Buffer.Add('d');
+            Transactions = new TransactionManager<TextField>(this);
+
+            Document.Text = "Hello World";
         }
 
         public override void Reset(GuiPanel parent) {
@@ -62,8 +52,10 @@ namespace FoldEngine.Editor.Gui.Fields {
                 DestinationRectangle = Bounds
             });
 
-            _textRenderer.Start(renderer.Fonts["default"], "", FontSize);
-            Document.Render(_textRenderer);
+            if(Document.Dirty) {
+                _textRenderer.Start(renderer.Fonts["default"], "", FontSize);
+                Document.RebuildModel(_textRenderer);
+            }
 
             if(Pressed(MouseEvent.LeftButton)) {
                 Caret.DotIndex = Document.ViewToModel(Environment.MousePos - TextRenderingStartPos);
@@ -87,11 +79,18 @@ namespace FoldEngine.Editor.Gui.Fields {
         public override void OnKeyTyped(ref KeyboardEvent e) {
             base.OnKeyTyped(ref e);
 
-            Document.Buffer.Insert(Caret.Dot++, e.Character);
+            Document.Insert(Caret.Dot++, e.Character);
         }
 
         public override void OnInput(ControlScheme controls) {
             Caret.OnInput(controls);
+
+            if(controls.Get<ButtonAction>("editor.undo").Consume()) {
+                Transactions.Undo();
+            }
+            if(controls.Get<ButtonAction>("editor.redo").Consume()) {
+                Transactions.Redo();
+            }
             
             if(controls.Get<ButtonAction>("editor.field.caret.debug").Consume()) {
                 // Console.WriteLine(_document.GetLogicalLineForIndex(_dot));
@@ -100,6 +99,10 @@ namespace FoldEngine.Editor.Gui.Fields {
 
         public override void OnMouseReleased(ref MouseEvent e) {
             base.OnMouseReleased(ref e);
+        }
+
+        public override void OnFocusGained() {
+            Caret.OnFocusGained();
         }
     }
 }
