@@ -124,6 +124,14 @@ namespace FoldEngine.Editor.Gui.Fields {
             Caret.OnFocusGained();
         }
 
+        public TextField Value(string value) {
+            if(!Focused) {
+                Document.Text = value;
+            }
+
+            return this;
+        }
+
         public TextField EditedAction(IGuiAction action) {
             _editedAction.Value = action;
             return this;
@@ -136,22 +144,22 @@ namespace FoldEngine.Editor.Gui.Fields {
         }
     }
     
-    public class SetStringFieldAction : IGuiAction {
+    public class SetFieldAction : IGuiAction {
         private long _id;
         private FieldInfo _fieldInfo;
         private ComponentSet _set;
 
-        public SetStringFieldAction Id(long id) {
+        public SetFieldAction Id(long id) {
             _id = id;
             return this;
         }
         
-        public SetStringFieldAction FieldInfo(FieldInfo fieldInfo) {
+        public SetFieldAction FieldInfo(FieldInfo fieldInfo) {
             _fieldInfo = fieldInfo;
             return this;
         }
 
-        public SetStringFieldAction ComponentSet(ComponentSet set) {
+        public SetFieldAction ComponentSet(ComponentSet set) {
             _set = set;
             return this;
         }
@@ -159,9 +167,26 @@ namespace FoldEngine.Editor.Gui.Fields {
         public IObjectPool Pool { get; set; }
         
         public void Perform(GuiElement element, MouseEvent e) {
+            object oldValue = _set.GetFieldValue((int) _id, _fieldInfo);;
+            object newValue = null;
+
+            if(_fieldInfo.FieldType == typeof(int)) {
+                if(!int.TryParse(((TextField) element).Document.Text, out int parsed)) return;
+                newValue = parsed;
+            } else if(_fieldInfo.FieldType == typeof(long)) {
+                if(!long.TryParse(((TextField) element).Document.Text, out long parsed)) return;
+                newValue = parsed;
+            } else if(_fieldInfo.FieldType == typeof(float)) {
+                if(!float.TryParse(((TextField) element).Document.Text, out float parsed)) return;
+                newValue = parsed;
+            } else if(_fieldInfo.FieldType == typeof(double)) {
+                if(!double.TryParse(((TextField) element).Document.Text, out double parsed)) return;
+                newValue = parsed;
+            } else {
+                Console.WriteLine("Unsupported SetFieldAction field type " + _fieldInfo.FieldType);
+                return;
+            }
             
-            string oldValue = (string) _set.GetFieldValue((int) _id, _fieldInfo);
-            string newValue = ((TextField) element).Document.Text;
             ((EditorEnvironment) element.Parent.Environment).TransactionManager.InsertTransaction(new SetComponentFieldTransaction() {
                 ComponentType = _set.ComponentType,
                 EntityId = _id,

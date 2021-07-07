@@ -47,6 +47,7 @@ namespace FoldEngine.Rendering {
                 Owner.MainCameraId = _cameras.GetEntityId();
 
                 IRenderingLayer layer = camera.RenderToLayer != null ? renderer.MainGroup[camera.RenderToLayer] : renderer.WorldLayer;
+                if(layer == null) continue;
 
                 _meshRenderables.Reset();
 

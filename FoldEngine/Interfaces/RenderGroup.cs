@@ -13,7 +13,7 @@ namespace FoldEngine.Interfaces {
         private Dictionary<string, IRenderingLayer> _layers = new Dictionary<string, IRenderingLayer>();
 
         public IRenderingLayer this[string layerName] {
-            get => _layers[layerName];
+            get => _layers.ContainsKey(layerName) ? _layers[layerName] : null;
             set {
                 _layers[layerName] = value;
                 value.Group = this;

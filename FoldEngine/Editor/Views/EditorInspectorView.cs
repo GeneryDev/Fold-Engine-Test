@@ -56,8 +56,8 @@ namespace FoldEngine.Editor.Views {
                                 .UseTextCache(false);
                             if(member.FieldInfo.FieldType == typeof(bool)) {
                                 ContentPanel.Button(value.ToString(), 9).LeftAction<TestAction>().Id(_id).FieldInfo(member.FieldInfo).ComponentSet(set);
-                            } else if(member.FieldInfo.FieldType == typeof(string)) {
-                                ContentPanel.Element<TextField>().EditedAction<SetStringFieldAction>().Id(_id).FieldInfo(member.FieldInfo).ComponentSet(set);
+                            } else if(member.FieldInfo.FieldType == typeof(string) || member.FieldInfo.FieldType == typeof(int) || member.FieldInfo.FieldType == typeof(long) || member.FieldInfo.FieldType == typeof(float) || member.FieldInfo.FieldType == typeof(double)) {
+                                ContentPanel.Element<TextField>().Value(value?.ToString() ?? "").EditedAction<SetFieldAction>().Id(_id).FieldInfo(member.FieldInfo).ComponentSet(set);
                             }
                             ContentPanel.Spacing(5);
                         }
