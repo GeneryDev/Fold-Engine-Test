@@ -1,16 +1,27 @@
-﻿namespace FoldEngine.Editor.Gui.Fields.Transactions {
+﻿using System;
+
+namespace FoldEngine.Editor.Gui.Fields.Transactions {
     public class DeletionEdit : DocumentTransactionBase {
-        public DeletionEdit(TextField field) : base(field) { }
+        private bool _wholeWord;
+        private bool _forward;
+
+        public DeletionEdit(TextField field, bool wholeWord, bool forward = false) : base(field) {
+            _wholeWord = wholeWord;
+            _forward = forward;
+        }
         
         protected override void CalculateModifications() {
             foreach(Dot dot in PreviousProfile.Dots) {
                 if(dot.IsPoint) {
-                    //TODO ctrl
-                    
-                    if(dot.Index > 0) {
-                        Modification(dot.Index-1, 1, new char[0]);
-                        Dot(dot.Index-1);
+                    int end;
+                    // Hello World
+                    if(_forward) {
+                        end = _wholeWord ? dot.GetPositionAfterWord() : dot.GetPositionAfter();
+                    } else {
+                        end = _wholeWord ? dot.GetPositionBeforeWord() : dot.GetPositionBefore();
                     }
+                    Modification(Math.Min(dot.Index, end), Math.Abs(dot.Index - end), new char[0]);
+                    Dot(Math.Min(dot.Index, end));
                 } else {
                     Modification(dot.Min, dot.Length, new char[0]);
                     Dot(dot.Min);

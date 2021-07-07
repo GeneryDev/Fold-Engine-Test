@@ -79,23 +79,27 @@ namespace FoldEngine.Editor.Gui.Fields.Transactions {
                 _tempDotList = null;
             }
 
+            bool actionPerformed = false;
+
             for(int i = _modifications.Length - 1; i >= 0; i--) {
-                _modifications[i].Redo(target.Document);
+                actionPerformed |= _modifications[i].Redo(target.Document);
             }
             
             target.Caret.SetProfile(NextProfile);
 
-            return true;
+            return actionPerformed;
         }
 
         public override bool Undo(TextField target) {
+            bool actionPerformed = false;
+            
             for(int i = 0; i < _modifications.Length; i++) {
-                _modifications[i].Undo(target.Document);
+                actionPerformed |= _modifications[i].Undo(target.Document);
             }
             
             target.Caret.SetProfile(PreviousProfile);
             
-            return true;
+            return actionPerformed;
         }
     }
 
@@ -105,12 +109,16 @@ namespace FoldEngine.Editor.Gui.Fields.Transactions {
         public char[] OldValue;
         public char[] NewValue;
 
-        public void Redo(Document document) {
+        public bool Redo(Document document) {
             document.Replace(Start, Length, NewValue);
+
+            return Length > 0 || NewValue.Length > 0;
         }
 
-        public void Undo(Document document) {
+        public bool Undo(Document document) {
             document.Replace(Start, NewValue.Length, OldValue);
+
+            return Length > 0 || NewValue.Length > 0;
         }
     }
 }

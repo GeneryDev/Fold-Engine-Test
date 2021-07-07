@@ -81,7 +81,9 @@ namespace FoldEngine.Editor.Gui.Fields {
             base.OnKeyTyped(ref e);
 
             if(e.Character == '\b') {
-                Transactions.InsertTransaction(new DeletionEdit(this));
+                Transactions.InsertTransaction(new DeletionEdit(this, KeyModifiersExt.GetKeyModifiers().Has(KeyModifiers.Control)));
+            } else if(e.Character == 127) {
+                Transactions.InsertTransaction(new DeletionEdit(this, KeyModifiersExt.GetKeyModifiers().Has(KeyModifiers.Control), true));
             } else {
                 Transactions.InsertTransaction(new InsertionEdit(new char[] {e.Character}, this));
             }

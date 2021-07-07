@@ -319,12 +319,57 @@ namespace FoldEngine.Editor.Gui.Fields {
             return _pages[startPage.PageIndex + 1].GetIndexForX(x, _nodes, _nodeCount);
         }
 
+        private JumpCharType GetJumpCharType(char c) {
+            if(c == '\n') return JumpCharType.Null;
+            if(char.IsWhiteSpace(c)) return JumpCharType.WhiteSpace;
+            if(c == '_' || char.IsLetterOrDigit(c)) return JumpCharType.Alpha;
+            if(c == ',' || c == ':' || c == '=' || c == ';') return JumpCharType.Separator;
+            // if(getIndentationManager().isOpeningBrace(c)) return JumpCharType.OpenBrace;
+            // if(getIndentationManager().isClosingBrace(c)) return JumpCharType.CloseBrace;
+            return JumpCharType.Symbol;
+        }
+
         public int GetPreviousWord(int index) {
-            return index - 1; //TODO
+            index--;
+            JumpCharType prevType = JumpCharType.Null;
+            bool firstIsWhitespace = false;
+            bool first = true;
+            while(index >= 0) {
+                char ch = Buffer[index];
+                JumpCharType type = GetJumpCharType(ch);
+                if(first && type == JumpCharType.WhiteSpace) firstIsWhitespace = true;
+                if(!first && ((type != prevType) || !prevType.Merge)) {
+                    if(!firstIsWhitespace || prevType != JumpCharType.WhiteSpace) {
+                        break;
+                    }
+                }
+                first = false;
+
+                index--;
+                prevType = type;
+            }
+            return index+1;
         }
 
         public int GetNextWord(int index) {
-            return index + 1; //TODO
+            JumpCharType prevType = JumpCharType.Null;
+            bool firstIsWhitespace = false;
+            bool first = true;
+            while(index < Length) {
+                char ch = Buffer[index];
+                JumpCharType type = GetJumpCharType(ch);
+                if(first && type == JumpCharType.WhiteSpace) firstIsWhitespace = true;
+                if(!first && ((type != prevType) || !prevType.Merge)) {
+                    if(firstIsWhitespace || type != JumpCharType.WhiteSpace) {
+                        break;
+                    }
+                }
+                first = false;
+
+                index++;
+                prevType = type;
+            }
+            return index;
         }
 
         public int GetWordStart(int index) {
@@ -483,6 +528,46 @@ namespace FoldEngine.Editor.Gui.Fields {
             }
 
             return -1;
+        }
+    }
+
+    internal struct JumpCharType {
+        public static JumpCharType Null = new JumpCharType(false);
+        public static JumpCharType Alpha = new JumpCharType(true);
+        public static JumpCharType WhiteSpace = new JumpCharType(true);
+        public static JumpCharType OpenBrace = new JumpCharType(true);
+        public static JumpCharType CloseBrace = new JumpCharType(true);
+        public static JumpCharType Separator = new JumpCharType(false);
+        public static JumpCharType Symbol = new JumpCharType(true);
+
+        private static int _nextIndex = 0;
+
+        public readonly bool Merge;
+        private readonly int _index;
+
+        public JumpCharType(bool merge) {
+            Merge = merge;
+            _index = _nextIndex++;
+        }
+
+        public bool Equals(JumpCharType other) {
+            return _index == other._index;
+        }
+
+        public override bool Equals(object obj) {
+            return obj is JumpCharType other && Equals(other);
+        }
+
+        public override int GetHashCode() {
+            return _index;
+        }
+        
+        public static bool operator ==(JumpCharType a, JumpCharType b) {
+            return a._index == b._index;
+        }
+
+        public static bool operator !=(JumpCharType a, JumpCharType b) {
+            return !(a == b);
         }
     }
 }
