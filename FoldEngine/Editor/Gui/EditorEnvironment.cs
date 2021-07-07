@@ -372,8 +372,6 @@ namespace FoldEngine.Editor.Gui {
     public class GuiResizer : GuiElement {
         private Vector2 _side;
 
-        public override Point Displacement => Point.Zero;
-
         public override void Reset(GuiPanel parent) {
         }
 
@@ -390,7 +388,9 @@ namespace FoldEngine.Editor.Gui {
                 Bounds.Height = EditorEnvironment.FrameMargin;
                 if(_side.Y > 0) Bounds.Y += parent.Bounds.Height - Bounds.Height;
             }
-            
+        }
+
+        public override void Displace(ref Point layoutPosition) {
         }
         
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {

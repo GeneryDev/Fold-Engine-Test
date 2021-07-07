@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -43,23 +44,86 @@ namespace FoldEngine.Editor.Views {
                         
                         foreach(ComponentMember member in componentInfo.Members) {
                             object value = set.GetFieldValue((int) _id, member.FieldInfo);
-                            ContentPanel
-                                .Label(
-                                    StringBuilder
-                                        .Clear()
-                                        .Append(member.Name)
-                                        .Append(StringUtil.Repeat(" ", Math.Max(0, 32 - member.Name.Length)))
-                                        .Append(value)
-                                        .ToString(),
-                                    9)
-                                .TextAlignment(-1)
-                                .UseTextCache(false);
+                            // ContentPanel
+                            //     .Label(
+                            //         StringBuilder
+                            //             .Clear()
+                            //             .Append(member.Name)
+                            //             .Append(StringUtil.Repeat(" ", Math.Max(0, 32 - member.Name.Length)))
+                            //             .Append(value)
+                            //             .ToString(),
+                            //         9)
+                            //     .TextAlignment(-1)
+                            //     .UseTextCache(false);
+
+                            ContentPanel.Element<ComponentMemberLabel>().Member(member);
                             if(member.FieldInfo.FieldType == typeof(bool)) {
                                 ContentPanel.Button(value.ToString(), 9).LeftAction<TestAction>().Id(_id).FieldInfo(member.FieldInfo).ComponentSet(set);
                             } else if(member.FieldInfo.FieldType == typeof(string) || member.FieldInfo.FieldType == typeof(int) || member.FieldInfo.FieldType == typeof(long) || member.FieldInfo.FieldType == typeof(float) || member.FieldInfo.FieldType == typeof(double)) {
-                                ContentPanel.Element<TextField>().Value(value?.ToString() ?? "").EditedAction<SetFieldAction>().Id(_id).FieldInfo(member.FieldInfo).ComponentSet(set);
+                                ContentPanel.Element<TextField>()
+                                    .FieldSpacing(ComponentMemberLabel.LabelWidth)
+                                    .Value(value?.ToString() ?? "")
+                                    .EditedAction<SetFieldAction>()
+                                    .Id(_id)
+                                    .FieldInfo(member.FieldInfo)
+                                    .ComponentSet(set);
+                                
+                            } else if(member.FieldInfo.FieldType == typeof(Vector2)) {
+                                ContentPanel.Element<TextField>()
+                                    .FieldSpacing(ComponentMemberLabel.LabelWidth, 2)
+                                    .Value(((Vector2) value).X.ToString(CultureInfo.InvariantCulture))
+                                    .EditedAction<SetFieldAction>()
+                                    .Id(_id)
+                                    .FieldInfo(member.FieldInfo)
+                                    .ComponentSet(set)
+                                    .Index(0);
+                                ContentPanel.Element<TextField>()
+                                    .FieldSpacing(ComponentMemberLabel.LabelWidth, 2)
+                                    .Value(((Vector2) value).Y.ToString(CultureInfo.InvariantCulture))
+                                    .EditedAction<SetFieldAction>()
+                                    .Id(_id)
+                                    .FieldInfo(member.FieldInfo)
+                                    .ComponentSet(set)
+                                    .Index(1);
+                            } else if(member.FieldInfo.FieldType == typeof(Color)) {
+                                ContentPanel.Element<TextField>()
+                                    .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
+                                    .Value(((Color) value).R.ToString(CultureInfo.InvariantCulture))
+                                    .EditedAction<SetFieldAction>()
+                                    .Id(_id)
+                                    .FieldInfo(member.FieldInfo)
+                                    .ComponentSet(set)
+                                    .Index(0);
+                                ContentPanel.Element<TextField>()
+                                    .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
+                                    .Value(((Color) value).G.ToString(CultureInfo.InvariantCulture))
+                                    .EditedAction<SetFieldAction>()
+                                    .Id(_id)
+                                    .FieldInfo(member.FieldInfo)
+                                    .ComponentSet(set)
+                                    .Index(1);
+                                ContentPanel.Element<TextField>()
+                                    .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
+                                    .Value(((Color) value).B.ToString(CultureInfo.InvariantCulture))
+                                    .EditedAction<SetFieldAction>()
+                                    .Id(_id)
+                                    .FieldInfo(member.FieldInfo)
+                                    .ComponentSet(set)
+                                    .Index(2);
+                                ContentPanel.Element<TextField>()
+                                    .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
+                                    .Value(((Color) value).A.ToString(CultureInfo.InvariantCulture))
+                                    .EditedAction<SetFieldAction>()
+                                    .Id(_id)
+                                    .FieldInfo(member.FieldInfo)
+                                    .ComponentSet(set)
+                                    .Index(3);
+                            } else {
+                                ContentPanel.Label(value?.ToString() ?? "", 9).TextAlignment(-1).UseTextCache(false);
                             }
-                            ContentPanel.Spacing(5);
+
+                            ContentPanel.Element<ComponentMemberBreak>();
+                            // ContentPanel.Spacing(5);
                         }
                     }
                 }
@@ -106,6 +170,46 @@ namespace FoldEngine.Editor.Views {
                 OldValue = oldValue,
                 NewValue = newValue
             });
+        }
+    }
+
+    public class ComponentMemberLabel : GuiLabel {
+        public const int LabelWidth = 140;
+        
+        private ComponentMember _member;
+
+        public override void Reset(GuiPanel parent) {
+            base.Reset(parent);
+            FontSize(9);
+            TextAlignment(-1);
+
+            UseTextCache(true);
+        }
+
+        public ComponentMemberLabel Member(ComponentMember member) {
+            _member = member;
+            Text(member.Name);
+            return this;
+        }
+
+        public override void Displace(ref Point layoutPosition) {
+            layoutPosition.X += LabelWidth;
+        }
+    }
+
+    public class ComponentMemberBreak : GuiElement {
+        public override void Reset(GuiPanel parent) {
+        }
+
+        public override void AdjustSpacing(GuiPanel parent) {
+        }
+
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+        }
+
+        public override void Displace(ref Point layoutPosition) {
+            layoutPosition.X = Parent.Bounds.X;
+            layoutPosition.Y += 20;
         }
     }
 

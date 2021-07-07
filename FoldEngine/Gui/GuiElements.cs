@@ -11,8 +11,6 @@ namespace FoldEngine.Gui {
     public abstract class GuiElement {
         internal GuiPanel Parent;
 
-        public virtual Point Displacement => new Point(0, Bounds.Height + Margin);
-
         public virtual GuiEnvironment Environment => Parent.Environment;
 
         public Rectangle Bounds;
@@ -52,6 +50,10 @@ namespace FoldEngine.Gui {
         }
         public bool Rollover => Parent.Environment.HoverTargetPrevious.Element == this;
         public bool Focused => Parent?.Environment?.FocusOwner == this;
+
+        public virtual void Displace(ref Point layoutPosition) {
+            layoutPosition += new Point(0, Bounds.Height + Margin);
+        }
     }
 
     public class GuiLabel : GuiElement {

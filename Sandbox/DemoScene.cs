@@ -53,10 +53,10 @@ namespace Sandbox {
                 mr.TextureIdentifier = "main:beacon";
             }
             e3.Transform.Position += Vector2.UnitY * 64;
-            e3.Transform.Position += Vector2.UnitX * 0.75f;
+            e3.Transform.Position += Vector2.UnitX * 1.25f;
             e3.AddComponent<Physics>();
             e3.AddComponent<Collider>().SetMesh("circle");
-            e3.AddComponent<Living>();
+            // e3.AddComponent<Living>();
             
             
             {

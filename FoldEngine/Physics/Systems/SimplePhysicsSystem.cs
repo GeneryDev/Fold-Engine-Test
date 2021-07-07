@@ -129,8 +129,8 @@ namespace FoldEngine.Physics {
                                 Line gizmoLine = new Line(transformPosition, otherTransform.Position);
                                 Owner.DrawGizmo(gizmoLine.From + gizmoLine.Normal * 0.1f, gizmoLine.To + gizmoLine.Normal * 0.1f, Color.Red, Color.Black);
                                 
-                                float restitution = 0.0f; //TODO get from components
-                                float friction = 0.01f; //TODO get from components
+                                float restitution = Math.Max(physics.Restitution, otherPhysics.Restitution);
+                                float friction = otherPhysics.Friction;
                             
                                 if(!largestCrossSection.Equals(float.NaN) && totalSurfaceNormalFaceLength > 0) {
                                     Complex surfaceNormalComplex = surfaceNormalSum / totalSurfaceNormalFaceLength;

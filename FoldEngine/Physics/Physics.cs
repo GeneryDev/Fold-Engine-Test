@@ -1,6 +1,7 @@
 ﻿using System;
 using EntryProject.Util;
 using FoldEngine.Components;
+using FoldEngine.Editor.Inspector;
 using FoldEngine.Scenes;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
@@ -24,14 +25,20 @@ namespace FoldEngine.Physics {
         public float Torque;
 
         public Vector2 ContactDisplacement;
+        [HideInInspector]
         public Vector2 PreviousPosition;
+
+        public float Restitution;
+        public float Friction;
 
         public static Physics InitializeComponent(Scene scene, long entityId) {
             return new Physics() {
                 _scene = scene,
                 _entityId = entityId,
                 GravityMultiplier = 1,
-                Mass = 1
+                Mass = 1,
+                Restitution = 0.0f,
+                Friction = 0.1f
             };
         }
 

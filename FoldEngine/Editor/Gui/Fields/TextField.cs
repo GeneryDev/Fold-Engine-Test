@@ -27,8 +27,11 @@ namespace FoldEngine.Editor.Gui.Fields {
         public readonly TransactionManager<TextField> Transactions;
 
         public override bool Focusable => true;
-        
+
         private PooledValue<IGuiAction> _editedAction;
+
+        private int _parentWidthOccupied = 0;
+        private int _fieldsInRow = 1;
 
         public TextField() {
             Caret = new Caret(this);
@@ -37,12 +40,20 @@ namespace FoldEngine.Editor.Gui.Fields {
             Document.Text = "Hello World";
         }
 
+        public TextField FieldSpacing(int parentWidthOccupied, int fieldsInRow = 1) {
+            _parentWidthOccupied = parentWidthOccupied;
+            _fieldsInRow = fieldsInRow;
+            return this;
+        }
+
         public override void Reset(GuiPanel parent) {
             _editedAction.Free();
+            _parentWidthOccupied = 0;
+            _fieldsInRow = 1;
         }
 
         public override void AdjustSpacing(GuiPanel parent) {
-            Bounds.Width = parent.Bounds.Width;
+            Bounds.Width = (int)Math.Ceiling((float)(parent.Bounds.Width - _parentWidthOccupied) / _fieldsInRow);
             Bounds.Height = 12 * Document.GraphicalLines + 6;
             Margin = 4;
         }
@@ -120,6 +131,10 @@ namespace FoldEngine.Editor.Gui.Fields {
             base.OnMouseReleased(ref e);
         }
 
+        public override void Displace(ref Point layoutPosition) {
+            layoutPosition += new Point(Bounds.Width, 0);
+        }
+
         public override void OnFocusGained() {
             Caret.OnFocusGained();
         }
@@ -148,6 +163,7 @@ namespace FoldEngine.Editor.Gui.Fields {
         private long _id;
         private FieldInfo _fieldInfo;
         private ComponentSet _set;
+        private int _index;
 
         public SetFieldAction Id(long id) {
             _id = id;
@@ -156,11 +172,17 @@ namespace FoldEngine.Editor.Gui.Fields {
         
         public SetFieldAction FieldInfo(FieldInfo fieldInfo) {
             _fieldInfo = fieldInfo;
+            _index = 0;
             return this;
         }
 
         public SetFieldAction ComponentSet(ComponentSet set) {
             _set = set;
+            return this;
+        }
+
+        public SetFieldAction Index(int index) {
+            _index = index;
             return this;
         }
 
@@ -182,6 +204,48 @@ namespace FoldEngine.Editor.Gui.Fields {
             } else if(_fieldInfo.FieldType == typeof(double)) {
                 if(!double.TryParse(((TextField) element).Document.Text, out double parsed)) return;
                 newValue = parsed;
+            } else if(_fieldInfo.FieldType == typeof(Vector2)) {
+                if(!float.TryParse(((TextField) element).Document.Text, out float parsed)) return;
+                Vector2 newVector = (Vector2) oldValue;
+
+                switch(_index) {
+                    case 0: newVector.X = parsed;
+                        break;
+                    case 1: newVector.Y = parsed;
+                        break;
+                }
+
+                newValue = newVector;
+            } else if(_fieldInfo.FieldType == typeof(Vector3)) {
+                if(!float.TryParse(((TextField) element).Document.Text, out float parsed)) return;
+                Vector3 newVector = (Vector3) oldValue;
+
+                switch(_index) {
+                    case 0: newVector.X = parsed;
+                        break;
+                    case 1: newVector.Y = parsed;
+                        break;
+                    case 2: newVector.Y = parsed;
+                        break;
+                }
+
+                newValue = newVector;
+            } else if(_fieldInfo.FieldType == typeof(Color)) {
+                if(!byte.TryParse(((TextField) element).Document.Text, out byte parsed)) return;
+                Color newColor = (Color) oldValue;
+
+                switch(_index) {
+                    case 0: newColor.R = parsed;
+                        break;
+                    case 1: newColor.G = parsed;
+                        break;
+                    case 2: newColor.B = parsed;
+                        break;
+                    case 3: newColor.A = parsed;
+                        break;
+                }
+
+                newValue = newColor;
             } else {
                 Console.WriteLine("Unsupported SetFieldAction field type " + _fieldInfo.FieldType);
                 return;

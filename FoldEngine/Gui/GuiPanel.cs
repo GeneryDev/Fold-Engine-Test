@@ -71,7 +71,7 @@ namespace FoldEngine.Gui {
         protected void EndPreviousElement() {
             if(_previousElement != null) {
                 _previousElement.AdjustSpacing(this);
-                LayoutPosition += _previousElement.Displacement;
+                _previousElement.Displace(ref LayoutPosition);
                 ContentSize.X = Math.Max(ContentSize.X, _previousElement.Bounds.Right - Bounds.Location.X + ScrollPosition.X);
                 ContentSize.Y = Math.Max(ContentSize.Y, _previousElement.Bounds.Bottom - Bounds.Location.Y + ScrollPosition.Y);
                 _previousElement = null;

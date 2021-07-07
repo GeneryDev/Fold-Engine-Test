@@ -19,8 +19,6 @@ namespace FoldEngine.Editor.Gui {
 
         public const int TabHeight = 14;
 
-        public override Point Displacement => new Point(Bounds.Width + Margin, 0);
-
         public override void Reset(GuiPanel parent) {
             _view = null;
             _renderedName = default;
@@ -31,6 +29,10 @@ namespace FoldEngine.Editor.Gui {
             Margin = 2;
             Bounds.Width = 16 + (int)_renderedName.Width + Margin*2;
             Bounds.Height = TabHeight;
+        }
+
+        public override void Displace(ref Point layoutPosition) {
+            layoutPosition += new Point(Bounds.Width + Margin, 0);
         }
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {

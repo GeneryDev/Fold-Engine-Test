@@ -212,7 +212,8 @@ namespace FoldEngine.Editor.Gui.Fields {
         public void DrawIndex(IRenderingUnit renderer, IRenderingLayer layer, Point offset) {
             Rectangle rect = Document.ModelToView(Index);
             rect.Offset(offset);
-            rect.Width = 1;
+            rect.Width = 2;
+            rect.X -= rect.Width / 2;
             
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,

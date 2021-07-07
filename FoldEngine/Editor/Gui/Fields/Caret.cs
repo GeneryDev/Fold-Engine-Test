@@ -103,10 +103,12 @@ namespace FoldEngine.Editor.Gui.Fields {
         }
 
         public void PreRender(IRenderingUnit renderer, IRenderingLayer layer, Point offset) {
-            int fieldWidth = _parent.Bounds.Width;
-            fieldWidth -= 2 * (offset.X - _parent.Bounds.X);
-            foreach(Dot dot in _dots) {
-                dot.DrawSelection(renderer, layer, offset, fieldWidth);
+            if(_parent.Focused) {
+                int fieldWidth = _parent.Bounds.Width;
+                fieldWidth -= 2 * (offset.X - _parent.Bounds.X);
+                foreach(Dot dot in _dots) {
+                    dot.DrawSelection(renderer, layer, offset, fieldWidth);
+                }
             }
         }
 

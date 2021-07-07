@@ -67,7 +67,7 @@ namespace Sandbox.Systems {
                         soundInstance.PlayOnce();
                         _livingComponents.GetCoComponent<Physics>().Velocity.Y = 8;
                     }
-                    _livingComponents.GetCoComponent<Physics>().Velocity.X = 2*moveX;
+                    _livingComponents.GetCoComponent<Physics>().ApplyForce(new Vector2(2*moveX * 5, 0), default);
                     // Console.WriteLine(_livingComponents.GetCoComponent<Physics>().Velocity);
 
                     if(_livingComponents.GetCoComponent<Physics>().Velocity.Y != 0) {
