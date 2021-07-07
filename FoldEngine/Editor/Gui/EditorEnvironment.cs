@@ -139,6 +139,7 @@ namespace FoldEngine.Editor.Gui {
             ControlScheme.PutAction("editor.undo", new ButtonAction(keyboard[Keys.Z]) {Repeat = true}.Modifiers(keyboard[Keys.LeftControl]));
             ControlScheme.PutAction("editor.redo", new ButtonAction(keyboard[Keys.Y]) {Repeat = true}.Modifiers(keyboard[Keys.LeftControl]));
             
+            ControlScheme.PutAction("editor.field.select_all", new ButtonAction(keyboard[Keys.A]) {Repeat = true}.Modifiers(keyboard[Keys.LeftControl]));
             ControlScheme.PutAction("editor.field.caret.left", new ButtonAction(keyboard[Keys.Left]) {Repeat = true});
             ControlScheme.PutAction("editor.field.caret.right", new ButtonAction(keyboard[Keys.Right]) {Repeat = true});
             ControlScheme.PutAction("editor.field.caret.up", new ButtonAction(keyboard[Keys.Up]) {Repeat = true});

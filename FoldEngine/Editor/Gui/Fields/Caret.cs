@@ -69,6 +69,12 @@ namespace FoldEngine.Editor.Gui.Fields {
             if(controls.Get<ButtonAction>("editor.field.caret.end").Consume()) {
                 FireDotEvent(DotEventType.End, modifiers);
             }
+            if(controls.Get<ButtonAction>("editor.field.select_all").Consume()) {
+                _dots.Clear();
+                _dots.Add(new Dot(Document, 0, Document.Length));
+                DotsUpdated();
+                ResetBlinker();
+            }
         }
 
 
