@@ -145,6 +145,10 @@ namespace FoldEngine.Gui {
             return RenderedStrings[str];
         }
 
+        public override void Focus() {
+            Environment?.SetFocusedElement(Focusable ? this : null);
+        }
+
         public override void Reset(GuiPanel parent) {
         }
 

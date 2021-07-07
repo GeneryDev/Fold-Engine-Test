@@ -42,7 +42,7 @@ namespace FoldEngine.Gui {
         public virtual bool ClickToFocus => true;
         public virtual bool Focusable => false;
 
-        public void Focus() {
+        public virtual void Focus() {
             Parent?.Environment?.SetFocusedElement(Focusable ? this : null);
         }
         

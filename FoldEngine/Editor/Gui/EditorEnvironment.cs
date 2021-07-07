@@ -112,6 +112,8 @@ namespace FoldEngine.Editor.Gui {
         public BorderPanel SouthPanel;
         public BorderPanel WestPanel;
         public BorderPanel EastPanel;
+        
+        public GuiPanel CenterPanel;
 
         #endregion
         
@@ -124,11 +126,13 @@ namespace FoldEngine.Editor.Gui {
             SouthPanel = new BorderPanel(this, Vector2.UnitY);
             WestPanel = new BorderPanel(this, -Vector2.UnitX);
             EastPanel = new BorderPanel(this, Vector2.UnitX);
+            CenterPanel = new GuiPanel(this);
             
             VisiblePanels.Add(NorthPanel);
             VisiblePanels.Add(SouthPanel);
             VisiblePanels.Add(WestPanel);
             VisiblePanels.Add(EastPanel);
+            VisiblePanels.Add(CenterPanel);
             
             SetupControlScheme();
         }
@@ -235,8 +239,11 @@ namespace FoldEngine.Editor.Gui {
             if(!LayoutValidated) {
                 renderer.Groups["editor"].Dependencies[0].Group.Size = new Point(renderer.WindowSize.X - SizeWest - SizeEast, renderer.WindowSize.Y - SizeNorth - SizeSouth);
                 renderer.Groups["editor"].Dependencies[0].Destination = new Rectangle(SizeWest, SizeNorth, renderer.WindowSize.X - SizeWest - SizeEast, renderer.WindowSize.Y - SizeNorth - SizeSouth);
+                CenterPanel.Bounds = new Rectangle(SizeWest, SizeNorth, renderer.WindowSize.X - SizeWest - SizeEast,
+                    renderer.WindowSize.Y - SizeNorth - SizeSouth);
                 LayoutValidated = true;
             }
+            CenterPanel.Render(renderer, layer);
         }
 
         private void RenderBackground(Rectangle rectangle, IRenderingUnit renderer, IRenderingLayer layer) {

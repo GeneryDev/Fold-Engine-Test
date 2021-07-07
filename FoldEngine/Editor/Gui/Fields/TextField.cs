@@ -1,6 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
+using EntryProject.Util;
+using FoldEngine.Components;
 using FoldEngine.Editor.Gui.Fields.Transactions;
+using FoldEngine.Editor.Transactions;
+using FoldEngine.Editor.Views;
 using FoldEngine.Graphics;
 using FoldEngine.Gui;
 using FoldEngine.Input;
@@ -22,6 +27,8 @@ namespace FoldEngine.Editor.Gui.Fields {
         public readonly TransactionManager<TextField> Transactions;
 
         public override bool Focusable => true;
+        
+        private PooledValue<IGuiAction> _editedAction;
 
         public TextField() {
             Caret = new Caret(this);
@@ -31,6 +38,7 @@ namespace FoldEngine.Editor.Gui.Fields {
         }
 
         public override void Reset(GuiPanel parent) {
+            _editedAction.Free();
         }
 
         public override void AdjustSpacing(GuiPanel parent) {
@@ -56,6 +64,10 @@ namespace FoldEngine.Editor.Gui.Fields {
             if(Document.Dirty) {
                 _textRenderer.Start(renderer.Fonts["default"], "", FontSize);
                 Document.RebuildModel(_textRenderer);
+
+                if(Focused) {
+                    _editedAction.Value?.Perform(this, default);
+                }
             }
 
             if(Pressed(MouseEvent.LeftButton)) {
@@ -110,6 +122,53 @@ namespace FoldEngine.Editor.Gui.Fields {
 
         public override void OnFocusGained() {
             Caret.OnFocusGained();
+        }
+
+        public TextField EditedAction(IGuiAction action) {
+            _editedAction.Value = action;
+            return this;
+        }
+
+        public T EditedAction<T>() where T : IGuiAction, new() {
+            var action = Parent.Environment.ActionPool.Claim<T>();
+            _editedAction.Value = action;
+            return action;
+        }
+    }
+    
+    public class SetStringFieldAction : IGuiAction {
+        private long _id;
+        private FieldInfo _fieldInfo;
+        private ComponentSet _set;
+
+        public SetStringFieldAction Id(long id) {
+            _id = id;
+            return this;
+        }
+        
+        public SetStringFieldAction FieldInfo(FieldInfo fieldInfo) {
+            _fieldInfo = fieldInfo;
+            return this;
+        }
+
+        public SetStringFieldAction ComponentSet(ComponentSet set) {
+            _set = set;
+            return this;
+        }
+
+        public IObjectPool Pool { get; set; }
+        
+        public void Perform(GuiElement element, MouseEvent e) {
+            
+            string oldValue = (string) _set.GetFieldValue((int) _id, _fieldInfo);
+            string newValue = ((TextField) element).Document.Text;
+            ((EditorEnvironment) element.Parent.Environment).TransactionManager.InsertTransaction(new SetComponentFieldTransaction() {
+                ComponentType = _set.ComponentType,
+                EntityId = _id,
+                FieldInfo = _fieldInfo,
+                OldValue = oldValue,
+                NewValue = newValue
+            });
         }
     }
 }
