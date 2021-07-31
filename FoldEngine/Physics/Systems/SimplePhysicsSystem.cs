@@ -24,9 +24,10 @@ namespace FoldEngine.Physics {
         }
         
         public override void OnUpdate() {
-            CalculateForcesAndCollision();
             ApplyDynamics();
+            CalculateForcesAndCollision();
             ApplyContactDisplacement();
+            ApplyAndResetForces();
         }
 
         private void CalculateForcesAndCollision() {
@@ -178,13 +179,8 @@ namespace FoldEngine.Physics {
                 Vector2 oldPos = transform.Position;
                 
                 if(!physics.Static) {
-                    physics.Velocity += physics.AccelerationFromForce * Time.DeltaTime;
                     transform.Position = oldPos + physics.Velocity * Time.DeltaTime;
-                } else {
-                    physics.Velocity = default;
                 }
-                physics.AccelerationFromForce = default;
-                physics.Torque = default;
 
                 physics.PreviousPosition = oldPos;
             }
@@ -200,6 +196,21 @@ namespace FoldEngine.Physics {
                     transform.Position += physics.ContactDisplacement;
                 }
                 physics.ContactDisplacement = default;
+            }
+        }
+
+        private void ApplyAndResetForces() {
+            _physicsObjects.Reset();
+            while(_physicsObjects.Next()) {
+                ref Physics physics = ref _physicsObjects.GetComponent();
+
+                if(!physics.Static) {
+                    physics.Velocity += physics.AccelerationFromForce * Time.DeltaTime;
+                } else {
+                    physics.Velocity = default;
+                }
+                physics.AccelerationFromForce = default;
+                physics.Torque = default;
             }
         }
     }

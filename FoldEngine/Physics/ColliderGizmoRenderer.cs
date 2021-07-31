@@ -5,7 +5,7 @@ using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Physics {
-    [GameSystem("fold:gizmos.collider", ProcessingCycles.Update)]
+    [GameSystem("fold:gizmos.collider", ProcessingCycles.Render)]
     public class ColliderGizmoRenderer : GameSystem {
         private ComponentIterator<Collider> _colliders;
 
@@ -13,7 +13,7 @@ namespace FoldEngine.Physics {
             _colliders = Owner.Components.CreateIterator<Collider>(IterationFlags.None);
         }
 
-        public override void OnUpdate() {
+        public override void OnRender(IRenderingUnit renderer) {
             _colliders.Reset();
             while(_colliders.Next()) {
                 ref Transform transform = ref _colliders.GetCoComponent<Transform>();

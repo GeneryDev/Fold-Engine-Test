@@ -34,8 +34,9 @@ namespace FoldEngine {
 
             this.IsMouseVisible = true;
 
-            IsFixedTimeStep = false;
-            Graphics.SynchronizeWithVerticalRetrace = false;
+            IsFixedTimeStep = true;
+            TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0 / 60);
+            Graphics.SynchronizeWithVerticalRetrace = true;
         }
 
         /// <summary>

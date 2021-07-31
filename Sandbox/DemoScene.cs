@@ -54,7 +54,7 @@ namespace Sandbox {
             }
             e3.Transform.Position += Vector2.UnitY * 64;
             e3.Transform.Position += Vector2.UnitX * 1.25f;
-            e3.AddComponent<Physics>();
+            e3.AddComponent<Physics>().Static = true;
             e3.AddComponent<Collider>().SetMesh("circle");
             // e3.AddComponent<Living>();
             
