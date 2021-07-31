@@ -51,6 +51,9 @@ namespace FoldEngine.Editor.Views {
     }
 
     public class ComponentMember {
+        public static Dictionary<Type, InspectorElementProvider> TypeToInspectorElementProvider =
+            new Dictionary<Type, InspectorElementProvider>();
+        
         public string Name;
         public FieldInfo FieldInfo;
         private InspectorElementProvider _createInspectorElement;
@@ -61,6 +64,10 @@ namespace FoldEngine.Editor.Views {
                 Name = nameAttribute.Name;
             } else {
                 Name = fieldInfo.Name;
+            }
+
+            if(TypeToInspectorElementProvider.ContainsKey(fieldInfo.FieldType)) {
+                _createInspectorElement = TypeToInspectorElementProvider[fieldInfo.FieldType];
             }
         }
         
@@ -81,16 +88,14 @@ namespace FoldEngine.Editor.Views {
 
         public void CreateInspectorElement(GuiPanel parentPanel, object startingValue) {
             if(_createInspectorElement != null) {
-                _createInspectorElement(parentPanel, startingValue);
+                _createInspectorElement(parentPanel, this, startingValue);
                 return;
+            } else {
+                parentPanel.Label(startingValue?.ToString() ?? "", 9).TextAlignment(-1).UseTextCache(false);
             }
-
-            CreateInspectorElementForType(parentPanel, startingValue);
         }
         
-        
-
-        private SetFieldAction CreateAction(GuiPanel panel, FieldInfo fieldInfo, int index = 0) {
+        private SetFieldAction CreateAction(GuiPanel panel, int index = 0) {
             SetFieldAction action;
             if(_createNextForId != -1) {
                 action = panel.Environment.ActionPool.Claim<SetComponentFieldAction>()
@@ -101,60 +106,72 @@ namespace FoldEngine.Editor.Views {
                     .Object(_createNextForObject);
             }
             
-            action.FieldInfo(fieldInfo);
+            action.FieldInfo(FieldInfo);
             action.Index(0);
             return action;
         }
 
-        private void CreateInspectorElementForType(GuiPanel parentPanel, object startingValue) {
-            FieldInfo fieldInfo = FieldInfo;
-            if(fieldInfo.FieldType == typeof(bool)) {
+        public static void SetDefaultInspectorElementProvider<T>(InspectorElementProvider provider) {
+            TypeToInspectorElementProvider[typeof(T)] = provider;
+        }
+
+        static ComponentMember() {
+            // Checkbox
+            // bool
+            SetDefaultInspectorElementProvider<bool>((parentPanel, member, startingValue) =>
                 parentPanel.Element<Checkbox>()
                     .Value((bool) startingValue)
-                    .EditedAction(CreateAction(parentPanel, fieldInfo));
-            } else if(fieldInfo.FieldType == typeof(string)
-                      || fieldInfo.FieldType == typeof(int)
-                      || fieldInfo.FieldType == typeof(long)
-                      || fieldInfo.FieldType == typeof(float)
-                      || fieldInfo.FieldType == typeof(double)) {
-                
-                parentPanel.Element<TextField>()
+                    .EditedAction(member.CreateAction(parentPanel)));
+            
+            // Text Field
+            // strings and various numeric types
+            InspectorElementProvider textFieldProvider = (parentPanel, member, startingValue) => parentPanel.Element<TextField>()
                     .FieldSpacing(ComponentMemberLabel.LabelWidth)
                     .Value(startingValue?.ToString() ?? "")
-                    .EditedAction(CreateAction(parentPanel, fieldInfo))
-                    ;
+                    .EditedAction(member.CreateAction(parentPanel))
+                ;
+            SetDefaultInspectorElementProvider<string>(textFieldProvider);
+            SetDefaultInspectorElementProvider<int>(textFieldProvider);
+            SetDefaultInspectorElementProvider<long>(textFieldProvider);
+            SetDefaultInspectorElementProvider<float>(textFieldProvider);
+            SetDefaultInspectorElementProvider<double>(textFieldProvider);
 
-            } else if(fieldInfo.FieldType == typeof(Vector2)) {
+
+            // Multiple Text Fields
+            // Vector2
+            SetDefaultInspectorElementProvider<Vector2>((parentPanel, member, startingValue) => {
                 parentPanel.Element<TextField>()
                     .FieldSpacing(ComponentMemberLabel.LabelWidth, 2)
                     .Value(((Vector2) startingValue).X.ToString(CultureInfo.InvariantCulture))
-                    .EditedAction(CreateAction(parentPanel, fieldInfo, 0));
+                    .EditedAction(member.CreateAction(parentPanel, 0));
+                
                 parentPanel.Element<TextField>()
                     .FieldSpacing(ComponentMemberLabel.LabelWidth, 2)
                     .Value(((Vector2) startingValue).Y.ToString(CultureInfo.InvariantCulture))
-                    .EditedAction(CreateAction(parentPanel, fieldInfo, 1));
-            } else if(fieldInfo.FieldType == typeof(Color)) {
+                    .EditedAction(member.CreateAction(parentPanel, 1));
+            });
+            
+            // Color
+            SetDefaultInspectorElementProvider<Color>((parentPanel, member, startingValue) => {
                 parentPanel.Element<TextField>()
                     .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
                     .Value(((Color) startingValue).R.ToString(CultureInfo.InvariantCulture))
-                    .EditedAction(CreateAction(parentPanel, fieldInfo, 0));
+                    .EditedAction(member.CreateAction(parentPanel, 0));
                 parentPanel.Element<TextField>()
                     .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
                     .Value(((Color) startingValue).G.ToString(CultureInfo.InvariantCulture))
-                    .EditedAction(CreateAction(parentPanel, fieldInfo, 1));
+                    .EditedAction(member.CreateAction(parentPanel, 1));
                 parentPanel.Element<TextField>()
                     .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
                     .Value(((Color) startingValue).B.ToString(CultureInfo.InvariantCulture))
-                    .EditedAction(CreateAction(parentPanel, fieldInfo, 2));
+                    .EditedAction(member.CreateAction(parentPanel, 2));
                 parentPanel.Element<TextField>()
                     .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
                     .Value(((Color) startingValue).A.ToString(CultureInfo.InvariantCulture))
-                    .EditedAction(CreateAction(parentPanel, fieldInfo, 3));
-            } else {
-                parentPanel.Label(startingValue?.ToString() ?? "", 9).TextAlignment(-1).UseTextCache(false);
-            }
+                    .EditedAction(member.CreateAction(parentPanel, 3));
+            });
         }
 
-        public delegate void InspectorElementProvider(GuiPanel parentPanel, object startingValue);
+        public delegate void InspectorElementProvider(GuiPanel parentPanel, ComponentMember member, object startingValue);
     }
 }
