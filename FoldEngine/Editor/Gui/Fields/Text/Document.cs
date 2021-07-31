@@ -4,7 +4,7 @@ using FoldEngine.Text;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Editor.Gui.Fields {
+namespace FoldEngine.Editor.Gui.Fields.Text {
     public class Document {
         
         protected readonly List<char> Buffer = new List<char>();

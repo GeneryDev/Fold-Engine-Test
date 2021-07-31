@@ -162,6 +162,7 @@ namespace Woofer
             editorAtlas.AddTexture("cube", "editor/cube");
             editorAtlas.AddTexture("hierarchy", "editor/hierarchy");
             editorAtlas.AddTexture("info", "editor/info");
+            editorAtlas.AddTexture("checkmark", "editor/checkmark");
             editorAtlas.Pack();
 
 

@@ -24,8 +24,8 @@ namespace FoldEngine.Physics {
         }
         
         public override void OnUpdate() {
-            ApplyDynamics();
             CalculateForcesAndCollision();
+            ApplyDynamics();
             ApplyContactDisplacement();
         }
 
@@ -126,8 +126,8 @@ namespace FoldEngine.Physics {
                                     }
                                 }
                             
-                                Line gizmoLine = new Line(transformPosition, otherTransform.Position);
-                                Owner.DrawGizmo(gizmoLine.From + gizmoLine.Normal * 0.1f, gizmoLine.To + gizmoLine.Normal * 0.1f, Color.Red, Color.Black);
+                                // Line gizmoLine = new Line(transformPosition, otherTransform.Position);
+                                // Owner.DrawGizmo(gizmoLine.From + gizmoLine.Normal * 0.1f, gizmoLine.To + gizmoLine.Normal * 0.1f, Color.Red, Color.Black);
                                 
                                 float restitution = Math.Max(physics.Restitution, otherPhysics.Restitution);
                                 float friction = otherPhysics.Friction;
@@ -143,11 +143,23 @@ namespace FoldEngine.Physics {
                                         
                                         physics.ContactDisplacement = surfaceNormalSum / totalSurfaceNormalFaceLength * largestCrossSection;
                                         
-                                        physics.Velocity =
+                                        Vector2 targetVelocity =
                                             (((Complex) physics.Velocity) / surfaceNormalComplex).ScaleAxes(
                                                 -restitution,
                                                 1 - friction * 100 * Time.DeltaTime)
                                             * surfaceNormalComplex;
+
+                                        Vector2 normalAndFrictionForce = (targetVelocity - physics.Velocity)
+                                                        / Time.DeltaTime;
+                                        
+                                        physics.ApplyForce(normalAndFrictionForce * physics.Mass, default);
+
+                                        Vector2 contactForce = (Vector2)(((Complex)physics.Velocity
+                                                                  / surfaceNormalComplex).ScaleAxes(1, 0)
+                                                               * surfaceNormalComplex)
+                                                               * physics.Mass * 1000;
+
+                                        otherPhysics.ApplyForce(-normalAndFrictionForce * physics.Mass, default, Color.Green);
                                     }
                                 }
                             }
@@ -168,6 +180,8 @@ namespace FoldEngine.Physics {
                 if(!physics.Static) {
                     physics.Velocity += physics.AccelerationFromForce * Time.DeltaTime;
                     transform.Position = oldPos + physics.Velocity * Time.DeltaTime;
+                } else {
+                    physics.Velocity = default;
                 }
                 physics.AccelerationFromForce = default;
                 physics.Torque = default;

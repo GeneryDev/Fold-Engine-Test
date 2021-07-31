@@ -4,7 +4,7 @@ using FoldEngine.Gui;
 using FoldEngine.Interfaces;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Editor.Gui.Fields {
+namespace FoldEngine.Editor.Gui.Fields.Text {
     public struct Dot {
         private const bool SMART_KEYS_HOME = false;
         

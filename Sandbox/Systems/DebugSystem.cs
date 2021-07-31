@@ -67,7 +67,19 @@ namespace Sandbox.Systems {
                         soundInstance.PlayOnce();
                         _livingComponents.GetCoComponent<Physics>().Velocity.Y = 8;
                     }
-                    _livingComponents.GetCoComponent<Physics>().ApplyForce(new Vector2(2*moveX * 5, 0), default);
+
+                    ref var physics = ref _livingComponents.GetCoComponent<Physics>();
+                    if(moveX < 0) {
+                        if(physics.Velocity.X > walkVel * moveX) {
+                            physics.ApplyForce(new Vector2(2 * moveX * 5, 0) * physics.Mass, default);
+                        }
+                    } else {
+                        if(physics.Velocity.X < walkVel * moveX) {
+                            physics.ApplyForce(new Vector2(2 * moveX * 5, 0) * physics.Mass, default);
+                        }
+                    }
+                    
+                    
                     // Console.WriteLine(_livingComponents.GetCoComponent<Physics>().Velocity);
 
                     if(_livingComponents.GetCoComponent<Physics>().Velocity.Y != 0) {
@@ -125,6 +137,7 @@ namespace Sandbox.Systems {
 
         private RenderedText _renderedHelloWorld;
         private Vector2 _lastNormal;
+        private double walkVel = 3;
 
         public override void OnRender(IRenderingUnit renderer) {
             if(!_renderedHelloWorld.HasValue) {

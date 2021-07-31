@@ -142,7 +142,7 @@
 /processorParam:TextureFormat=Color
 /build:Textures/editor/blank.png
 
-#begin Textures/editor/checkbox.checked.png
+#begin Textures/editor/checkmark.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -152,19 +152,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Textures/editor/checkbox.checked.png
-
-#begin Textures/editor/checkbox.unchecked.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Textures/editor/checkbox.unchecked.png
+/build:Textures/editor/checkmark.png
 
 #begin Textures/editor/cog.png
 /importer:TextureImporter

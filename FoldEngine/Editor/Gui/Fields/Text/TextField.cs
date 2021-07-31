@@ -15,8 +15,8 @@ using FoldEngine.Util.Transactions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
-namespace FoldEngine.Editor.Gui.Fields {
-    public class TextField : GuiElement {
+namespace FoldEngine.Editor.Gui.Fields.Text {
+    public class TextField : GuiElement, IInspectorField {
         private const int FontSize = 9;
         
         private TextRenderer _textRenderer = new TextRenderer();
@@ -157,70 +157,39 @@ namespace FoldEngine.Editor.Gui.Fields {
             _editedAction.Value = action;
             return action;
         }
-    }
-    
-    public class SetFieldAction : IGuiAction {
-        private long _id;
-        private FieldInfo _fieldInfo;
-        private ComponentSet _set;
-        private int _index;
 
-        public SetFieldAction Id(long id) {
-            _id = id;
-            return this;
-        }
-        
-        public SetFieldAction FieldInfo(FieldInfo fieldInfo) {
-            _fieldInfo = fieldInfo;
-            _index = 0;
-            return this;
-        }
+        public bool EditValueForType(Type type, ref object value, int index) {
+            if(type == typeof(string)) {
+                value = Document.Text;
+            } else if(type == typeof(int)) {
+                if(!int.TryParse(Document.Text, out int parsed)) return false;
+                value = parsed;
+            } else if(type == typeof(long)) {
+                if(!long.TryParse(Document.Text, out long parsed)) return false;
+                value = parsed;
+            } else if(type == typeof(float)) {
+                if(!float.TryParse(Document.Text, out float parsed)) return false;
+                value = parsed;
+            } else if(type == typeof(double)) {
+                if(!double.TryParse(Document.Text, out double parsed)) return false;
+                value = parsed;
+            } else if(type == typeof(Vector2)) {
+                if(!float.TryParse(Document.Text, out float parsed)) return false;
+                Vector2 newVector = (Vector2) value;
 
-        public SetFieldAction ComponentSet(ComponentSet set) {
-            _set = set;
-            return this;
-        }
-
-        public SetFieldAction Index(int index) {
-            _index = index;
-            return this;
-        }
-
-        public IObjectPool Pool { get; set; }
-        
-        public void Perform(GuiElement element, MouseEvent e) {
-            object oldValue = _set.GetFieldValue((int) _id, _fieldInfo);;
-            object newValue = null;
-
-            if(_fieldInfo.FieldType == typeof(int)) {
-                if(!int.TryParse(((TextField) element).Document.Text, out int parsed)) return;
-                newValue = parsed;
-            } else if(_fieldInfo.FieldType == typeof(long)) {
-                if(!long.TryParse(((TextField) element).Document.Text, out long parsed)) return;
-                newValue = parsed;
-            } else if(_fieldInfo.FieldType == typeof(float)) {
-                if(!float.TryParse(((TextField) element).Document.Text, out float parsed)) return;
-                newValue = parsed;
-            } else if(_fieldInfo.FieldType == typeof(double)) {
-                if(!double.TryParse(((TextField) element).Document.Text, out double parsed)) return;
-                newValue = parsed;
-            } else if(_fieldInfo.FieldType == typeof(Vector2)) {
-                if(!float.TryParse(((TextField) element).Document.Text, out float parsed)) return;
-                Vector2 newVector = (Vector2) oldValue;
-
-                switch(_index) {
+                switch(index) {
                     case 0: newVector.X = parsed;
                         break;
                     case 1: newVector.Y = parsed;
                         break;
                 }
 
-                newValue = newVector;
-            } else if(_fieldInfo.FieldType == typeof(Vector3)) {
-                if(!float.TryParse(((TextField) element).Document.Text, out float parsed)) return;
-                Vector3 newVector = (Vector3) oldValue;
+                value = newVector;
+            } else if(type == typeof(Vector3)) {
+                if(!float.TryParse(Document.Text, out float parsed)) return false;
+                Vector3 newVector = (Vector3) value;
 
-                switch(_index) {
+                switch(index) {
                     case 0: newVector.X = parsed;
                         break;
                     case 1: newVector.Y = parsed;
@@ -229,12 +198,12 @@ namespace FoldEngine.Editor.Gui.Fields {
                         break;
                 }
 
-                newValue = newVector;
-            } else if(_fieldInfo.FieldType == typeof(Color)) {
-                if(!byte.TryParse(((TextField) element).Document.Text, out byte parsed)) return;
-                Color newColor = (Color) oldValue;
+                value = newVector;
+            } else if(type == typeof(Color)) {
+                if(!byte.TryParse(Document.Text, out byte parsed)) return false;
+                Color newColor = (Color) value;
 
-                switch(_index) {
+                switch(index) {
                     case 0: newColor.R = parsed;
                         break;
                     case 1: newColor.G = parsed;
@@ -245,19 +214,12 @@ namespace FoldEngine.Editor.Gui.Fields {
                         break;
                 }
 
-                newValue = newColor;
+                value = newColor;
             } else {
-                Console.WriteLine("Unsupported SetFieldAction field type " + _fieldInfo.FieldType);
-                return;
+                throw new ArgumentException("Unsupported text field type " + type);
             }
-            
-            ((EditorEnvironment) element.Parent.Environment).TransactionManager.InsertTransaction(new SetComponentFieldTransaction() {
-                ComponentType = _set.ComponentType,
-                EntityId = _id,
-                FieldInfo = _fieldInfo,
-                OldValue = oldValue,
-                NewValue = newValue
-            });
+
+            return true;
         }
     }
 }

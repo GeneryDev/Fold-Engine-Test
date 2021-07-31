@@ -1,4 +1,5 @@
 ﻿using System;
+using FoldEngine.Editor.Gui.Fields.Text;
 
 namespace FoldEngine.Editor.Gui.Fields.Transactions {
     public class DeletionEdit : DocumentTransactionBase {

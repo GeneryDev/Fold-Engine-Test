@@ -42,7 +42,7 @@ namespace FoldEngine.Physics {
             };
         }
 
-        public void ApplyForce(Vector2 force, Vector2 point) {
+        public void ApplyForce(Vector2 force, Vector2 point, Color? gizmoColor = null) {
             if(force == default) return;
             if(Static) return;
             Complex diff = ((((Complex) force.Normalized()) / (Complex) point.Normalized())).Normalized;
@@ -55,7 +55,7 @@ namespace FoldEngine.Physics {
             Torque += torque;
 
             Vector2 ownerPos = _scene.Components.GetComponent<Transform>(_entityId).Position;
-            _scene.DrawGizmo(ownerPos + point, ownerPos + point + force / 10, Color.Red);
+            _scene.DrawGizmo(ownerPos + point, ownerPos + point + force / 10, gizmoColor ?? Color.Red);
         }
     }
 }

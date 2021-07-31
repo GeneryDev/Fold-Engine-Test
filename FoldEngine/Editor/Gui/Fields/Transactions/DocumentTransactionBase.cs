@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using EntryProject.Util;
+using FoldEngine.Editor.Gui.Fields.Text;
 using FoldEngine.Util.Transactions;
 
 namespace FoldEngine.Editor.Gui.Fields.Transactions {

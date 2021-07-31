@@ -1,4 +1,6 @@
-﻿namespace FoldEngine.Editor.Gui.Fields.Transactions {
+﻿using FoldEngine.Editor.Gui.Fields.Text;
+
+namespace FoldEngine.Editor.Gui.Fields.Transactions {
     public class InsertionEdit : DocumentTransactionBase {
         private char[] _textToInsert;
         

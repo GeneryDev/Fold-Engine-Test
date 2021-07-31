@@ -6,7 +6,7 @@ using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Editor.Gui.Fields {
+namespace FoldEngine.Editor.Gui.Fields.Text {
     public class Caret {
         private List<Dot> _dots = new List<Dot>();
         private TextField _parent;
@@ -80,7 +80,7 @@ namespace FoldEngine.Editor.Gui.Fields {
 
         private void DotsUpdated() {
             // foreach(Dot dot in _dots) {
-                // dot.Clamp();
+            // dot.Clamp();
             // }
         }
 
