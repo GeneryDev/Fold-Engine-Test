@@ -90,7 +90,7 @@ namespace FoldEngine.Editor.Views {
             
             ContentPanel.Label(info.Name, 14)
                 .TextAlignment(-1)
-                .Icon(renderer.Textures["editor:cube"]);
+                .Icon(renderer.Textures["editor:cog"]);
             ContentPanel.Spacing(12);
             
 
