@@ -11,7 +11,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 namespace FoldEngine.Physics {
-    [GameSystem("fold:physics.simple", ProcessingCycles.Update)]
+    [GameSystem("fold:physics.simple", ProcessingCycles.FixedUpdate)]
     public class SimplePhysicsSystem : GameSystem {
         private ComponentIterator<Physics> _physicsObjects;
         private ComponentIterator<Collider> _colliders;
@@ -23,7 +23,7 @@ namespace FoldEngine.Physics {
             _colliders = CreateComponentIterator<Collider>(IterationFlags.None);
         }
         
-        public override void OnUpdate() {
+        public override void OnFixedUpdate() {
             ApplyDynamics();
             CalculateForcesAndCollision();
             ApplyContactDisplacement();
@@ -40,7 +40,7 @@ namespace FoldEngine.Physics {
                 float positionDelta = (transform.Position - physics.PreviousPosition).Length();
 
                 if(!physics.Static) {
-                    physics.Velocity += Gravity * physics.GravityMultiplier * Time.DeltaTime;                    
+                    physics.Velocity += Gravity * physics.GravityMultiplier * Time.FixedDeltaTime;                    
                 }
 
                 Collider collider = default;
@@ -147,20 +147,19 @@ namespace FoldEngine.Physics {
                                         Vector2 targetVelocity =
                                             (((Complex) physics.Velocity) / surfaceNormalComplex).ScaleAxes(
                                                 -restitution,
-                                                1 - friction * 100 * Time.DeltaTime)
+                                                1 - friction * 100 * Time.FixedDeltaTime)
                                             * surfaceNormalComplex;
 
-                                        Vector2 normalAndFrictionForce = (targetVelocity - physics.Velocity)
-                                                        / Time.DeltaTime;
+                                        Vector2 normalAndFrictionForce = (targetVelocity - physics.Velocity);
                                         
-                                        physics.ApplyForce(normalAndFrictionForce * physics.Mass, default);
+                                        physics.ApplyForce(normalAndFrictionForce * physics.Mass, default, ForceMode.Instant);
 
                                         Vector2 contactForce = (Vector2)(((Complex)physics.Velocity
                                                                   / surfaceNormalComplex).ScaleAxes(1, 0)
                                                                * surfaceNormalComplex)
                                                                * physics.Mass * 1000;
 
-                                        otherPhysics.ApplyForce(-normalAndFrictionForce * physics.Mass, default, Color.Green);
+                                        otherPhysics.ApplyForce(-normalAndFrictionForce * physics.Mass, default, ForceMode.Instant, Color.Green);
                                     }
                                 }
                             }
@@ -179,7 +178,7 @@ namespace FoldEngine.Physics {
                 Vector2 oldPos = transform.Position;
                 
                 if(!physics.Static) {
-                    transform.Position = oldPos + physics.Velocity * Time.DeltaTime;
+                    transform.Position = oldPos + physics.Velocity * Time.FixedDeltaTime;
                 }
 
                 physics.PreviousPosition = oldPos;
@@ -205,7 +204,7 @@ namespace FoldEngine.Physics {
                 ref Physics physics = ref _physicsObjects.GetComponent();
 
                 if(!physics.Static) {
-                    physics.Velocity += physics.AccelerationFromForce * Time.DeltaTime;
+                    physics.Velocity += physics.AccelerationFromForce * Time.FixedDeltaTime;
                 } else {
                     physics.Velocity = default;
                 }

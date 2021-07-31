@@ -71,11 +71,11 @@ namespace Sandbox.Systems {
                     ref var physics = ref _livingComponents.GetCoComponent<Physics>();
                     if(moveX < 0) {
                         if(physics.Velocity.X > walkVel * moveX) {
-                            physics.ApplyForce(new Vector2(2 * moveX * 5, 0) * physics.Mass, default);
+                            physics.ApplyForce(new Vector2(moveX * 0.2f, 0) * physics.Mass, default, ForceMode.Continuous);
                         }
                     } else {
                         if(physics.Velocity.X < walkVel * moveX) {
-                            physics.ApplyForce(new Vector2(2 * moveX * 5, 0) * physics.Mass, default);
+                            physics.ApplyForce(new Vector2(moveX * 0.2f, 0) * physics.Mass, default, ForceMode.Continuous);
                         }
                     }
                     

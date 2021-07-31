@@ -14,6 +14,7 @@ namespace FoldEngine.Scenes
         private readonly List<GameSystem> _all = new List<GameSystem>();
 
         private readonly List<GameSystem> _inputSystems = new List<GameSystem>();
+        private readonly List<GameSystem> _fixedUpdateSystems = new List<GameSystem>();
         private readonly List<GameSystem> _updateSystems = new List<GameSystem>();
         private readonly List<GameSystem> _renderSystems = new List<GameSystem>();
 
@@ -36,12 +37,17 @@ namespace FoldEngine.Scenes
 
         private void UpdateProcessingGroups() {
             _inputSystems.Clear();
+            _fixedUpdateSystems.Clear();
             _updateSystems.Clear();
             _renderSystems.Clear();
 
             foreach(GameSystem sys in _all) {
                 if(sys.ProcessingCycles.Has(ProcessingCycles.Input)) {
                     _inputSystems.Add(sys);
+                }
+
+                if(sys.ProcessingCycles.Has(ProcessingCycles.FixedUpdate)) {
+                    _fixedUpdateSystems.Add(sys);
                 }
 
                 if(sys.ProcessingCycles.Has(ProcessingCycles.Update)) {
@@ -58,6 +64,10 @@ namespace FoldEngine.Scenes
             _all.Add(sys);
             if(sys.ProcessingCycles.Has(ProcessingCycles.Input)) {
                 _inputSystems.Add(sys);
+            }
+
+            if(sys.ProcessingCycles.Has(ProcessingCycles.FixedUpdate)) {
+                _fixedUpdateSystems.Add(sys);
             }
 
             if(sys.ProcessingCycles.Has(ProcessingCycles.Update)) {
@@ -77,6 +87,7 @@ namespace FoldEngine.Scenes
             _all.Remove(sys);
             _inputSystems.Remove(sys);
             _updateSystems.Remove(sys);
+            _fixedUpdateSystems.Remove(sys);
             _renderSystems.Remove(sys);
 
             sys.UnsubscribeFromEvents();
@@ -105,6 +116,21 @@ namespace FoldEngine.Scenes
                 _owner.Events.FlushAfterSystem();
             }
             _owner.Events.FlushEnd();
+        }
+        
+        public float Accumulator = 0;
+
+        internal void InvokeFixedUpdate() {
+            Accumulator += Time.DeltaTime;
+            while(Accumulator >= Time.FixedDeltaTime) {
+                foreach(GameSystem sys in _fixedUpdateSystems) {
+                    sys.OnFixedUpdate();
+                    _owner.Events.FlushAfterSystem();
+                }
+                Accumulator -= Time.FixedDeltaTime;
+                
+                _owner.Events.FlushEnd();
+            }
         }
 
         internal void InvokeRender(IRenderingUnit renderer) {

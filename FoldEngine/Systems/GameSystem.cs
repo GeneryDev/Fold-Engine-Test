@@ -25,6 +25,7 @@ namespace FoldEngine.Systems {
 
         public virtual void OnInput() { }
         public virtual void OnUpdate() { }
+        public virtual void OnFixedUpdate() { }
         public virtual void OnRender(IRenderingUnit renderer) { }
 
         protected MultiComponentIterator CreateComponentIterator(params Type[] watchingTypes) {
@@ -118,9 +119,10 @@ namespace FoldEngine.Systems {
     public enum ProcessingCycles {
         None = 0,
         Input = 1,
-        Update = 2,
-        Render = 4,
-        All = Input | Update | Render,
+        FixedUpdate = 2,
+        Update = 4,
+        Render = 8,
+        All = Input | FixedUpdate | Update | Render
     }
 
     public static class ProcessingCyclesExt {

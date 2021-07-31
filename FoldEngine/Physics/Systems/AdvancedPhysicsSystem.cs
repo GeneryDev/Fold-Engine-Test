@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 namespace FoldEngine.Physics {
-    [GameSystem("fold:physics.advanced", ProcessingCycles.Update)]
+    [GameSystem("fold:physics.advanced", ProcessingCycles.FixedUpdate)]
     public class AdvancedPhysicsSystem : GameSystem {
         private ComponentIterator<Physics> _physicsObjects;
         private ComponentIterator<Collider> _colliders;
@@ -20,7 +20,7 @@ namespace FoldEngine.Physics {
             _colliders = CreateComponentIterator<Collider>(IterationFlags.None);
         }
 
-        public override void OnUpdate() {
+        public override void OnFixedUpdate() {
             if(Mouse.GetState().LeftButton == ButtonState.Pressed) return;
             _physicsObjects.Reset();
 
@@ -29,7 +29,7 @@ namespace FoldEngine.Physics {
                 ref Physics physics = ref _physicsObjects.GetComponent();
 
                 if(!physics.Static) {
-                    physics.Velocity += Gravity * physics.GravityMultiplier * Time.DeltaTime;                    
+                    physics.Velocity += Gravity * physics.GravityMultiplier * Time.FixedDeltaTime;                    
                 }
 
                 if(_physicsObjects.HasCoComponent<Collider>()) {
@@ -76,14 +76,14 @@ namespace FoldEngine.Physics {
 
                                         if(vertex.IsFromA && !vertex.IsFromB) {
                                             Complex rotationByTorque =
-                                                Complex.FromRotation(physics.AngularVelocity * Time.DeltaTime);
+                                                Complex.FromRotation(physics.AngularVelocity * Time.FixedDeltaTime);
                                             Vector2 projectedNextVertexPosition =
                                                 ((Complex) (vertex.Position - currentPos) * rotationByTorque)
                                                 + (Complex) currentPos;
                                             //TODO relativize to the other object
                                             Vector2 vertexVelocity = physics.Velocity
                                                                      + (projectedNextVertexPosition - vertex.Position)
-                                                                     / Time.DeltaTime;
+                                                                     / Time.FixedDeltaTime;
                                             totalVertexVelocity += vertexVelocity;
                                             totalContactVertexVelocity += vertexVelocity;
                                             verticesCountedForVelocity++;
@@ -124,7 +124,8 @@ namespace FoldEngine.Physics {
                                                                         * physics.Mass;
                                                         physics.ApplyForce(
                                                             force,
-                                                            contactPoint - transform.Position);
+                                                            contactPoint - transform.Position,
+                                                            ForceMode.Continuous);
                                                         // Console.WriteLine("Applying force in direction: " + normal);
                                                         // Console.WriteLine("at location: " + contactPoint);
                                                     }
@@ -154,8 +155,8 @@ namespace FoldEngine.Physics {
                                             1 - friction)
                                         * (Complex) surfaceNormal;
                                     Vector2 velocityDelta = expectedVelocity - physics.Velocity;
-                                    Vector2 force = velocityDelta * physics.Mass / Time.DeltaTime;
-                                    physics.ApplyForce(force, Vector2.Zero);
+                                    Vector2 force = velocityDelta * physics.Mass;
+                                    physics.ApplyForce(force, Vector2.Zero, ForceMode.Continuous);
                                     // Console.WriteLine($"physics.Velocity (after) = {physics.Velocity}");
                                     
                                 } else {
@@ -167,11 +168,11 @@ namespace FoldEngine.Physics {
                 }
 
                 if(!physics.Static) {
-                    physics.AngularVelocity += physics.Torque * Time.DeltaTime;
-                    physics.Velocity += physics.AccelerationFromForce * Time.DeltaTime;
+                    physics.AngularVelocity += physics.Torque * Time.FixedDeltaTime;
+                    physics.Velocity += physics.AccelerationFromForce * Time.FixedDeltaTime;
                     
-                    transform.Rotation += physics.AngularVelocity * Time.DeltaTime;
-                    transform.Position += physics.Velocity * Time.DeltaTime;
+                    transform.Rotation += physics.AngularVelocity * Time.FixedDeltaTime;
+                    transform.Position += physics.Velocity * Time.FixedDeltaTime;
                     transform.Position += physics.ContactDisplacement;
                 }
                 

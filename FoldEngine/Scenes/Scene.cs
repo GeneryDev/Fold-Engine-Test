@@ -118,6 +118,7 @@ namespace FoldEngine.Scenes
                 _initialized = true;
             }
 
+            Systems.InvokeFixedUpdate();
             Systems.InvokeUpdate();
 
             Core.CommandQueue.ExecuteAll();

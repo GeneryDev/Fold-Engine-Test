@@ -102,7 +102,7 @@ namespace Sandbox.Systems {
                     }
 
                     if(!rightPressed && _rightPreviouslyPressed) {
-                        physics.ApplyForce((currentMouseWorldPos - _rightPressedWorldPos) * 100, currentMouseWorldPos - transform.Position);
+                        physics.ApplyForce((currentMouseWorldPos - _rightPressedWorldPos) * 100, currentMouseWorldPos - transform.Position, ForceMode.Instant);
                         Console.WriteLine($"Torque: {physics.Torque}");
                         Console.WriteLine($"Linear Acceleration: {physics.AccelerationFromForce}");                        
                     }
