@@ -86,16 +86,15 @@ namespace FoldEngine.Editor.Views {
         }
 
         private void RenderObjectView(IRenderingUnit renderer) {
-            ContentPanel.Label(Scene.Components.GetComponent<EntityName>(_id).Name, 14)
+            ComponentInfo info = ComponentInfo.Get(_object.GetType());
+            
+            ContentPanel.Label(info.Name, 14)
                 .TextAlignment(-1)
                 .Icon(renderer.Textures["editor:cube"]);
-            ContentPanel.Label($"ID: {_id}", 7).TextAlignment(-1);
             ContentPanel.Spacing(12);
             
-            
-            ComponentInfo componentInfo = ComponentInfo.Get(_object.GetType());
 
-            foreach(ComponentMember member in componentInfo.Members) {
+            foreach(ComponentMember member in info.Members) {
                 object value = member.FieldInfo.GetValue(_object);
 
                 ContentPanel.Element<ComponentMemberLabel>().Member(member);
