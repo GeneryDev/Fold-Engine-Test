@@ -45,7 +45,12 @@ namespace FoldEngine.Physics {
         public void ApplyForce(Vector2 force, Vector2 point, ForceMode mode, Color? gizmoColor = null) {
             if(force == default) return;
             if(Static) return;
-            if(mode != ForceMode.Continuous) force /= Time.FixedDeltaTime;
+            
+            if(mode == ForceMode.Instant) {
+                force /= Time.FixedDeltaTime;
+            }
+
+            // if(mode == ForceMode.Instant) force /= Time.FixedDeltaTime;
             Complex diff = ((((Complex) force.Normalized()) / (Complex) point.Normalized())).Normalized;
             if(point == Vector2.Zero) diff = force.Normalized();
             

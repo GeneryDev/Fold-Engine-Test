@@ -16,8 +16,8 @@ namespace FoldEngine
         public static float TotalTime { get; internal set; }
         public static double TotalTimeD { get; internal set; }
 
-        public static float FixedDeltaTime = 1.0f / 60;
-        public static double FixedDeltaTimeD = 1.0 / 60;
+        public static float FixedDeltaTime = 1.0f / 120;
+        public static double FixedDeltaTimeD = 1.0 / 120;
         
         public static float FramesPerSecond { get; internal set; }
         

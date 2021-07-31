@@ -18,7 +18,7 @@ using Sandbox.Components;
 using Mouse = Microsoft.Xna.Framework.Input.Mouse;
 
 namespace Sandbox.Systems {
-    [GameSystem("sandbox:test", ProcessingCycles.Input | ProcessingCycles.Render)]
+    [GameSystem("sandbox:test", ProcessingCycles.Input | ProcessingCycles.FixedUpdate | ProcessingCycles.Render)]
     [Listening(typeof(CollisionEvent))]
     public class DebugSystem : GameSystem {
         private ComponentIterator<Living> _livingComponents;
@@ -34,7 +34,20 @@ namespace Sandbox.Systems {
         private Vector2 _leftVel;
         
         private static readonly string TargetDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Fold", "scenes");
-        
+
+        private Vector2 _moveForce = default;
+
+        public override void OnFixedUpdate() {
+            _livingComponents.Reset();
+                
+            while(_livingComponents.Next()) {
+                if(_livingComponents.HasCoComponent<Physics>()) {
+                    ref var physics = ref _livingComponents.GetCoComponent<Physics>();
+                    physics.ApplyForce(_moveForce * 60 * physics.Mass, default, ForceMode.Continuous);
+                }
+            }
+        }
+
         public override void OnInput() {
             float moveX = Owner.Core.InputUnit.Players[0].Get<AnalogAction>("movement.axis.x");
             if(Owner.Core.InputUnit.Players[0].Get<ButtonAction>("movement.sprint").Down) {
@@ -65,17 +78,18 @@ namespace Sandbox.Systems {
                         SoundInstance soundInstance = Owner.Core.AudioUnit.CreateInstance("Audio/failure");
                         soundInstance.Pan = MathHelper.Clamp(moveX, -1, 1);
                         soundInstance.PlayOnce();
-                        _livingComponents.GetCoComponent<Physics>().Velocity.Y = 8;
+                        _livingComponents.GetCoComponent<Physics>().ApplyForce(Vector2.UnitY * 8,default, ForceMode.Instant);
                     }
 
                     ref var physics = ref _livingComponents.GetCoComponent<Physics>();
+                    _moveForce = default;
                     if(moveX < 0) {
                         if(physics.Velocity.X > walkVel * moveX) {
-                            physics.ApplyForce(new Vector2(moveX * 0.2f, 0) * physics.Mass, default, ForceMode.Continuous);
+                            _moveForce = new Vector2(moveX * 0.2f, 0);
                         }
                     } else {
                         if(physics.Velocity.X < walkVel * moveX) {
-                            physics.ApplyForce(new Vector2(moveX * 0.2f, 0) * physics.Mass, default, ForceMode.Continuous);
+                            _moveForce = new Vector2(moveX * 0.2f, 0);
                         }
                     }
                     

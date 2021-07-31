@@ -150,16 +150,16 @@ namespace FoldEngine.Physics {
                                                 1 - friction * 100 * Time.FixedDeltaTime)
                                             * surfaceNormalComplex;
 
-                                        Vector2 normalAndFrictionForce = (targetVelocity - physics.Velocity);
+                                        Vector2 normalAndFrictionForce = (targetVelocity - physics.Velocity) / Time.FixedDeltaTime;
                                         
-                                        physics.ApplyForce(normalAndFrictionForce * physics.Mass, default, ForceMode.Instant);
+                                        physics.ApplyForce(normalAndFrictionForce * physics.Mass, default, ForceMode.Continuous);
 
                                         Vector2 contactForce = (Vector2)(((Complex)physics.Velocity
                                                                   / surfaceNormalComplex).ScaleAxes(1, 0)
                                                                * surfaceNormalComplex)
                                                                * physics.Mass * 1000;
 
-                                        otherPhysics.ApplyForce(-normalAndFrictionForce * physics.Mass, default, ForceMode.Instant, Color.Green);
+                                        otherPhysics.ApplyForce(-normalAndFrictionForce * physics.Mass, default, ForceMode.Continuous, Color.Green);
                                     }
                                 }
                             }
