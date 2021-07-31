@@ -107,7 +107,7 @@ namespace FoldEngine.Editor.Views {
             }
             
             action.FieldInfo(FieldInfo);
-            action.Index(0);
+            action.Index(index);
             return action;
         }
 
