@@ -58,12 +58,24 @@ namespace Sandbox {
             e3.AddComponent<Collider>().SetMesh("circle");
             // e3.AddComponent<Living>();
             
+            // {
+            //     ref MeshRenderable mr = ref e0.AddComponent<MeshRenderable>();
+            //     mr.MeshIdentifier = "square";
+            //     mr.TextureIdentifier = "main:beacon";
+            // }
+            // e0.Transform.Position += Vector2.UnitY * 64;
+            // e0.Transform.Position += Vector2.UnitX * -1.25f;
+            // e0.AddComponent<Physics>();
+            // e0.AddComponent<Collider>().SetMesh("circle");
+            // // e0.AddComponent<Living>();
+            
             
             {
                 ref MeshRenderable mr = ref e2.AddComponent<MeshRenderable>();
                 mr.MeshIdentifier = "square";
                 mr.TextureIdentifier = "main:pixel.white";
             }
+            e2.Name = "Platform";
             e2.Transform.Position += Vector2.UnitY * -9;
             e2.Transform.LocalScale = new Vector2(9, 4);
             e2.AddComponent<Physics>().Static = true;

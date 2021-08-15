@@ -9,6 +9,7 @@ using FoldEngine.Systems;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Shard.Scripts.Instructions;
 
 namespace FoldEngine.Physics {
     [GameSystem("fold:physics.simple", ProcessingCycles.FixedUpdate)]
@@ -16,7 +17,7 @@ namespace FoldEngine.Physics {
         private ComponentIterator<Physics> _physicsObjects;
         private ComponentIterator<Collider> _colliders;
         
-        public Vector2 Gravity = new Vector2(0, -27f);
+        public Vector2 Gravity = new Vector2(0, -27);
         
         internal override void Initialize() {
             _physicsObjects = CreateComponentIterator<Physics>(IterationFlags.None);
@@ -40,7 +41,7 @@ namespace FoldEngine.Physics {
                 float positionDelta = (transform.Position - physics.PreviousPosition).Length();
 
                 if(!physics.Static) {
-                    physics.Velocity += Gravity * physics.GravityMultiplier * Time.FixedDeltaTime;                    
+                    physics.ApplyForce(Gravity * physics.GravityMultiplier * physics.Mass, default, ForceMode.Continuous);
                 }
 
                 Collider collider = default;
@@ -132,6 +133,7 @@ namespace FoldEngine.Physics {
                                 
                                 float restitution = Math.Max(physics.Restitution, otherPhysics.Restitution);
                                 float friction = otherPhysics.Friction;
+                                float damping = 1f;
                             
                                 if(!largestCrossSection.Equals(float.NaN) && totalSurfaceNormalFaceLength > 0) {
                                     Complex surfaceNormalComplex = surfaceNormalSum / totalSurfaceNormalFaceLength;
@@ -141,25 +143,60 @@ namespace FoldEngine.Physics {
 
                                     if(!physics.Static) {
                                         Owner.DrawGizmo(tempNormalStart, tempNormalStart + surfaceNormalSum / totalSurfaceNormalFaceLength, Color.Gold);
-                                        
-                                        physics.ContactDisplacement = surfaceNormalSum / totalSurfaceNormalFaceLength * largestCrossSection;
-                                        
-                                        Vector2 targetVelocity =
-                                            (((Complex) physics.Velocity) / surfaceNormalComplex).ScaleAxes(
-                                                -restitution,
-                                                1 - friction * 100 * Time.FixedDeltaTime)
-                                            * surfaceNormalComplex;
 
-                                        Vector2 normalAndFrictionForce = (targetVelocity - physics.Velocity) / Time.FixedDeltaTime;
+                                        physics.ContactDisplacement += surfaceNormalSum / totalSurfaceNormalFaceLength * largestCrossSection;
+
+                                        float velocityInNormalDirection = (((Complex) (physics.Velocity - otherPhysics.Velocity)) / surfaceNormalComplex).A;
+                                        float velocityInNormalPerpendicular = (((Complex) (physics.Velocity - otherPhysics.Velocity)) / surfaceNormalComplex).B;
                                         
-                                        physics.ApplyForce(normalAndFrictionForce * physics.Mass, default, ForceMode.Continuous);
+                                        // Vector2 normalForce = ((Vector2)surfaceNormalComplex.Normalized) * physics.Mass * -velocityInNormalDirection;
+                                        // physics.ApplyForce(normalForce, default, ForceMode.Continuous);
 
-                                        Vector2 contactForce = (Vector2)(((Complex)physics.Velocity
-                                                                  / surfaceNormalComplex).ScaleAxes(1, 0)
-                                                               * surfaceNormalComplex)
-                                                               * physics.Mass * 1000;
+                                        physics.ApplyForce((Vector2)surfaceNormalComplex.Normalized * -damping * velocityInNormalDirection * (1+restitution) * physics.Mass, default, ForceMode.Instant);
+                                        physics.ApplyForce((Vector2)(surfaceNormalComplex.Normalized * Complex.Imaginary) * -velocityInNormalPerpendicular * friction * physics.Mass, default, ForceMode.Instant);
+                                        
+                                        // //Momentum
+                                        //
+                                        // Vector2 momentumThis = physics.LinearMomentum;
+                                        // Vector2 momentumOther = otherPhysics.LinearMomentum;
+                                        //
+                                        // float totalMass = physics.Mass + (otherPhysics.Static ? float.PositiveInfinity : otherPhysics.Mass);
+                                        //
+                                        // Vector2 totalMomentum = momentumOther + momentumThis;
+                                        //
+                                        // Vector2 targetMomentumThis = (physics.Mass / totalMass) * totalMomentum;
+                                        // Vector2 targetMomentumOther = (otherPhysics.Mass / totalMass) * totalMomentum;
+                                        //
+                                        // if(targetMomentumThis + targetMomentumOther != totalMomentum) {
+                                        //     Console.WriteLine("Momentum not preserved");
+                                        // }
+                                        //
+                                        // physics.Velocity = targetMomentumThis / physics.Mass;
+                                        // otherPhysics.Velocity = targetMomentumOther / otherPhysics.Mass;
+                                        
+                                        
+                                        
+                                        
 
-                                        otherPhysics.ApplyForce(-normalAndFrictionForce * physics.Mass, default, ForceMode.Continuous, Color.Green);
+                                        // physics.ApplyForce(targetMomentumThis / Time.FixedDeltaTime, default, ForceMode.Continuous);
+                                        // otherPhysics.ApplyForce(targetMomentumOther / Time.FixedDeltaTime, default, ForceMode.Continuous);
+
+                                        // Vector2 targetVelocity =
+                                        //     (((Complex) physics.Velocity) / surfaceNormalComplex).ScaleAxes(
+                                        //         -restitution,
+                                        //         1 - friction * 100 * Time.FixedDeltaTime)
+                                        //     * surfaceNormalComplex;
+                                        //
+                                        // Vector2 normalAndFrictionForce = (targetVelocity - physics.Velocity) / Time.FixedDeltaTime;
+                                        //
+                                        // physics.ApplyForce(normalAndFrictionForce * physics.Mass, default, ForceMode.Continuous);
+                                        //
+                                        // Vector2 contactForce = (Vector2)(((Complex)physics.Velocity
+                                        //                           / surfaceNormalComplex).ScaleAxes(1, 0)
+                                        //                        * surfaceNormalComplex)
+                                        //                        * physics.Mass * 1000;
+                                        //
+                                        // otherPhysics.ApplyForce(-normalAndFrictionForce * physics.Mass, default, ForceMode.Continuous, Color.Green);
                                     }
                                 }
                             }
@@ -168,6 +205,8 @@ namespace FoldEngine.Physics {
                 }
             }
         }
+        
+        private const bool UseVerletIntegration = false;
 
         private void ApplyDynamics() {
             _physicsObjects.Reset();
@@ -178,7 +217,11 @@ namespace FoldEngine.Physics {
                 Vector2 oldPos = transform.Position;
                 
                 if(!physics.Static) {
-                    transform.Position = oldPos + physics.Velocity * Time.FixedDeltaTime;
+                    if(UseVerletIntegration) {
+                        transform.Position = oldPos + physics.Velocity * Time.FixedDeltaTime + (0.5f * physics.PreviousAcceleration * Time.FixedDeltaTime * Time.FixedDeltaTime);
+                    } else {
+                        transform.Position = oldPos + physics.Velocity * Time.FixedDeltaTime;
+                    }
                 }
 
                 physics.PreviousPosition = oldPos;
@@ -204,10 +247,16 @@ namespace FoldEngine.Physics {
                 ref Physics physics = ref _physicsObjects.GetComponent();
 
                 if(!physics.Static) {
-                    physics.Velocity += physics.AccelerationFromForce * Time.FixedDeltaTime;
+                    if(UseVerletIntegration) {
+                        physics.Velocity += (physics.AccelerationFromForce + physics.PreviousAcceleration) * 0.5f * Time.FixedDeltaTime;
+                    } else {
+                        physics.Velocity += physics.AccelerationFromForce * Time.FixedDeltaTime;
+                    }
                 } else {
                     physics.Velocity = default;
                 }
+
+                physics.PreviousAcceleration = physics.AccelerationFromForce;
                 physics.AccelerationFromForce = default;
                 physics.Torque = default;
             }

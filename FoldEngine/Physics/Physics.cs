@@ -22,6 +22,7 @@ namespace FoldEngine.Physics {
         public float AngularVelocity;
 
         public Vector2 AccelerationFromForce;
+        public Vector2 PreviousAcceleration;
         public float Torque;
 
         public Vector2 ContactDisplacement;
@@ -30,6 +31,8 @@ namespace FoldEngine.Physics {
 
         public float Restitution;
         public float Friction;
+
+        public Vector2 LinearMomentum => Static ? Vector2.Zero : Mass * Velocity;
 
         public static Physics InitializeComponent(Scene scene, long entityId) {
             return new Physics() {
