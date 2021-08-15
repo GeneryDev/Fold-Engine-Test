@@ -64,7 +64,7 @@ namespace FoldEngine.Physics {
             Torque += torque;
 
             Vector2 ownerPos = _scene.Components.GetComponent<Transform>(_entityId).Position;
-            _scene.DrawGizmo(ownerPos + point, ownerPos + point + force, gizmoColor ?? Color.Red);
+            _scene.DrawGizmo(ownerPos + point, ownerPos + point + force / 40, gizmoColor ?? Color.Red);
         }
     }
 
