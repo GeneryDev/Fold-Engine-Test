@@ -5,7 +5,7 @@ using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Physics {
-    [GameSystem("fold:gizmos.collider", ProcessingCycles.Render)]
+    [GameSystem("fold:gizmos.collider", ProcessingCycles.Render, runWhenPaused: true)]
     public class ColliderGizmoRenderer : GameSystem {
         private ComponentIterator<Collider> _colliders;
 

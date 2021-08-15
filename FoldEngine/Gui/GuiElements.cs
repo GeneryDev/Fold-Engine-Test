@@ -114,7 +114,7 @@ namespace FoldEngine.Gui {
             if(_icon != null) {
                 layer.Surface.Draw(new DrawRectInstruction() {
                     Texture = _icon,
-                    DestinationRectangle = new Rectangle(x, Bounds.Center.Y - _iconSize.Y/2,  _iconSize.X, _iconSize.Y)
+                    DestinationRectangle = new Rectangle(_text.Length > 0 ? x : (Bounds.Center.X - _iconSize.X/2), Bounds.Center.Y - _iconSize.Y/2,  _iconSize.X, _iconSize.Y)
                 });
                 x += _iconSize.X;
                 x += 8;
@@ -165,6 +165,10 @@ namespace FoldEngine.Gui {
         private PooledValue<IGuiAction> _leftAction;
         private PooledValue<IGuiAction> _rightAction;
 
+        protected virtual Color NormalColor => new Color(37, 37, 38);
+        protected virtual Color RolloverColor => Color.CornflowerBlue;
+        protected virtual Color PressedColor => new Color(63, 63, 70);
+
         public override void Reset(GuiPanel parent) {
             base.Reset(parent);
             _leftAction.Free();
@@ -183,7 +187,7 @@ namespace FoldEngine.Gui {
 
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
-                Color = Pressed(MouseEvent.LeftButton) ? new Color(63, 63, 70) : Rollover ? Color.CornflowerBlue : new Color(37, 37, 38),
+                Color = Pressed(MouseEvent.LeftButton) ? PressedColor : Rollover ? RolloverColor : NormalColor,
                 DestinationRectangle = Bounds
             });
             base.Render(renderer, layer);
