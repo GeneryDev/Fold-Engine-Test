@@ -15,7 +15,7 @@
               "device": "keyboard",
 
               "button": "Space",
-              "buffer_time": 80
+              "buffer_time": 200
             },
             {
               "identifier": "movement.axis.x",
