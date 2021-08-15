@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework.Input;
 using Sandbox.Components;
 
 namespace FoldEngine.Rendering {
-    [GameSystem("fold:level_renderer.2d", ProcessingCycles.Render)]
+    [GameSystem("fold:level_renderer.2d", ProcessingCycles.Render, runWhenPaused: true)]
     public class LevelRenderer2D : GameSystem {
         private ComponentIterator<Camera> _cameras;
         private ComponentIterator<MeshRenderable> _meshRenderables;

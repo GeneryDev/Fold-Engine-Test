@@ -17,6 +17,7 @@ namespace FoldEngine.Systems {
         private readonly GameSystemAttribute _attribute;
         public string SystemName => _attribute.SystemName;
         public ProcessingCycles ProcessingCycles => _attribute.ProcessingCycles;
+        public bool RunWhenPaused => _attribute.RunWhenPaused;
         private List<EventUnsubscriber> EventUnsubscribers = new List<EventUnsubscriber>();
 
         protected GameSystem() {
@@ -134,10 +135,12 @@ namespace FoldEngine.Systems {
     public sealed class GameSystemAttribute : Attribute {
         public readonly string SystemName;
         public readonly ProcessingCycles ProcessingCycles;
+        public readonly bool RunWhenPaused = false;
 
-        public GameSystemAttribute(string identifier, ProcessingCycles processingCycles) {
+        public GameSystemAttribute(string identifier, ProcessingCycles processingCycles, bool runWhenPaused = false) {
             SystemName = identifier;
             ProcessingCycles = processingCycles;
+            RunWhenPaused = runWhenPaused;
         }
     }
 

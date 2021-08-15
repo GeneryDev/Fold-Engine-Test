@@ -106,14 +106,19 @@ namespace FoldEngine.Scenes
 
         internal void InvokeInput() {
             foreach(GameSystem sys in _inputSystems) {
-                sys.OnInput();
+                if(!_owner.Paused || sys.RunWhenPaused) {
+                    sys.OnInput();
+                    _owner.Events.FlushAfterSystem();
+                }
             }
         }
 
         internal void InvokeUpdate() {
             foreach(GameSystem sys in _updateSystems) {
-                sys.OnUpdate();
-                _owner.Events.FlushAfterSystem();
+                if(!_owner.Paused || sys.RunWhenPaused) {
+                    sys.OnUpdate();
+                    _owner.Events.FlushAfterSystem();
+                }
             }
             _owner.Events.FlushEnd();
         }
@@ -124,8 +129,10 @@ namespace FoldEngine.Scenes
             Accumulator += Time.DeltaTime;
             while(Accumulator >= Time.FixedDeltaTime) {
                 foreach(GameSystem sys in _fixedUpdateSystems) {
-                    sys.OnFixedUpdate();
-                    _owner.Events.FlushAfterSystem();
+                    if(!_owner.Paused || sys.RunWhenPaused) {
+                        sys.OnFixedUpdate();
+                        _owner.Events.FlushAfterSystem();
+                    }
                 }
                 Accumulator -= Time.FixedDeltaTime;
                 
@@ -135,7 +142,10 @@ namespace FoldEngine.Scenes
 
         internal void InvokeRender(IRenderingUnit renderer) {
             foreach(GameSystem sys in _renderSystems) {
-                sys.OnRender(renderer);
+                if(!_owner.Paused || sys.RunWhenPaused) {
+                    sys.OnRender(renderer);
+                    _owner.Events.FlushAfterSystem();
+                }
             }
         }
 

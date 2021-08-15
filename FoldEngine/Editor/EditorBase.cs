@@ -11,7 +11,7 @@ using Woofer;
 
 namespace FoldEngine.Editor {
 
-    [GameSystem("fold:editor.base", ProcessingCycles.All)]
+    [GameSystem("fold:editor.base", ProcessingCycles.All, runWhenPaused: true)]
     public class EditorBase : GameSystem {
         // public override bool ShouldSave => false;
         

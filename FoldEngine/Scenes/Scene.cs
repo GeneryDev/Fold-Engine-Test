@@ -33,6 +33,8 @@ namespace FoldEngine.Scenes
 
         public ref Transform MainCameraTransform => ref Components.GetComponent<Transform>(MainCameraId);
 
+        public bool Paused = false;
+
         /// <summary>
         /// The speed at which the game is simulated
         /// </summary>
@@ -101,7 +103,7 @@ namespace FoldEngine.Scenes
         }
 
 
-        bool _initialized = false;
+        private bool _initialized = false;
 
         public virtual void Initialize() { }
 
