@@ -10,7 +10,7 @@ namespace FoldEngine.Graphics {
     public class MeshCollection {
         private const int InitialSize = 256*3;
         
-        private VertexPositionColorTexture[] _vertices;
+        private MeshVertex[] _vertices;
         private int[] _indices;
         
         private readonly Dictionary<string, MeshInfo> _meshInfos = new Dictionary<string, MeshInfo>();
@@ -20,7 +20,7 @@ namespace FoldEngine.Graphics {
         private int _nextTriangleIndex = 0;
 
         public MeshCollection() {
-            _vertices = new VertexPositionColorTexture[InitialSize];
+            _vertices = new MeshVertex[InitialSize];
             _indices = new int[InitialSize];
         }
 
@@ -32,36 +32,37 @@ namespace FoldEngine.Graphics {
         }
 
         public MeshCollection Vertex(Vector3 pos, Vector2 uv, Color? color = null) {
-            _vertices[_nextVertexIndex] = new VertexPositionColorTexture(pos, color ?? Color.White, uv);
-            // _indices[_nextTriangleIndex] = _nextVertexIndex;
-            
-            MeshInfo meshInfo = _meshInfos[_currentMesh];
-            meshInfo.VertexCount++;
-            float distanceSquared = pos.LengthSquared();
-            if(meshInfo.RadiusSquared < distanceSquared) {
-                meshInfo.RadiusSquared = distanceSquared;
-                meshInfo.FarthestVertexFromOrigin = pos.ToVector2();
-            }
-            _meshInfos[_currentMesh] = meshInfo;
-            
-            _nextVertexIndex++;
-            
-            return this;
+            return this.Vertex(new MeshVertex(pos, color ?? Color.White, uv));
+        }
+
+        public MeshCollection Vertex(Vector3 pos, float friction = 1f, float restitution = 0f, bool enabled = true) {
+            return this.Vertex(new MeshVertex() {
+                Position = pos,
+                Friction = friction,
+                Restitution = restitution,
+                Enabled = enabled
+            });
         }
 
         public MeshCollection Vertex(Vector2 pos, Vector2 uv, Color? color = null) {
-            _vertices[_nextVertexIndex] = new VertexPositionColorTexture(new Vector3(pos, 0), color ?? Color.White, uv);
-            // _indices[_nextTriangleIndex] = _nextVertexIndex;
+            return this.Vertex(new Vector3(pos, 0), uv, color);
+        }
+
+        public MeshCollection Vertex(Vector2 pos, float friction = 1f, float restitution = 0f, bool enabled = true) {
+            return this.Vertex(new Vector3(pos, 0), friction, restitution, enabled);
+        }
+
+        public MeshCollection Vertex(MeshVertex vertex) {
+            _vertices[_nextVertexIndex] = vertex;
             
             MeshInfo meshInfo = _meshInfos[_currentMesh];
             meshInfo.VertexCount++;
-            float distanceSquared = pos.LengthSquared();
+            float distanceSquared = vertex.Position.LengthSquared();
             if(meshInfo.RadiusSquared < distanceSquared) {
                 meshInfo.RadiusSquared = distanceSquared;
-                meshInfo.FarthestVertexFromOrigin = pos;
+                meshInfo.FarthestVertexFromOrigin = vertex.Position.ToVector2();
             }
             _meshInfos[_currentMesh] = meshInfo;
-
             
             _nextVertexIndex++;
             
@@ -218,7 +219,7 @@ namespace FoldEngine.Graphics {
             return hits % 2 != 0;
         }
 
-        public IEnumerable<VertexPositionColorTexture> GetVertexInfoForMesh(string name) {
+        public IEnumerable<MeshVertex> GetVertexInfoForMesh(string name) {
             MeshInfo meshInfo = _meshInfos[name];
             for(int i = meshInfo.VertexStartIndex; i < meshInfo.VertexStartIndex + meshInfo.VertexCount; i++) {
                 yield return _vertices[i];
@@ -342,15 +343,36 @@ namespace FoldEngine.Graphics {
         }
 
         public struct Triangle {
-            public VertexPositionColorTexture A;
-            public VertexPositionColorTexture B;
-            public VertexPositionColorTexture C;
+            public MeshVertex A;
+            public MeshVertex B;
+            public MeshVertex C;
 
-            public Triangle(VertexPositionColorTexture a, VertexPositionColorTexture b, VertexPositionColorTexture c) {
+            public Triangle(MeshVertex a, MeshVertex b, MeshVertex c) {
                 A = a;
                 B = b;
                 C = c;
             }
         }
+
+        public struct MeshVertex {
+            public Vector3 Position;
+            public bool Enabled;
+            
+            public Color Color;
+            public Vector2 TextureCoordinate;
+            
+            public float Friction;
+            public float Restitution;
+
+            public MeshVertex(Vector3 pos, Color color, Vector2 uv) {
+                this.Position = pos;
+                this.Color = color;
+                this.TextureCoordinate = uv;
+                
+                this.Enabled = true;
+                this.Friction = 1;
+                this.Restitution = 0;
+            }
+        } 
     }
 }
