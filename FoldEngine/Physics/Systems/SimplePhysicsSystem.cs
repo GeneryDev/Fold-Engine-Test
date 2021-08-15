@@ -18,6 +18,7 @@ namespace FoldEngine.Physics {
         private ComponentIterator<Collider> _colliders;
         
         public Vector2 Gravity = new Vector2(0, -27);
+        public float FaceNormalVelocityDotTolerance = 1f;
         
         internal override void Initialize() {
             _physicsObjects = CreateComponentIterator<Physics>(IterationFlags.None);
@@ -100,7 +101,7 @@ namespace FoldEngine.Physics {
                                         
                                         if(next.IsFromB
                                            && current.VertexIndexA != next.VertexIndexA
-                                           && normalMoveDot <= 0) {
+                                           && normalMoveDot <= FaceNormalVelocityDotTolerance) {
                                             
                                             bool validFace;
 
