@@ -113,7 +113,7 @@ namespace FoldEngine.Editor.Gui {
         public BorderPanel WestPanel;
         public BorderPanel EastPanel;
         
-        public GuiPanel CenterPanel;
+        public BorderPanel CenterPanel;
 
         #endregion
         
@@ -126,7 +126,7 @@ namespace FoldEngine.Editor.Gui {
             SouthPanel = new BorderPanel(this, Vector2.UnitY);
             WestPanel = new BorderPanel(this, -Vector2.UnitX);
             EastPanel = new BorderPanel(this, Vector2.UnitX);
-            CenterPanel = new GuiPanel(this);
+            CenterPanel = new BorderPanel(this, Vector2.Zero);
             
             VisiblePanels.Add(NorthPanel);
             VisiblePanels.Add(SouthPanel);
@@ -171,13 +171,13 @@ namespace FoldEngine.Editor.Gui {
             }
         }
 
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
-            base.Render(renderer, layer);
+        public override void Render(IRenderingUnit renderer, IRenderingLayer baseLayer, IRenderingLayer overlayLayer) {
+            base.Render(renderer, baseLayer, overlayLayer);
 
             HoverViewListPanel = default;
 
             {
-                var bounds = new Rectangle(0, 0, layer.LayerSize.X, SizeNorth);
+                var bounds = new Rectangle(0, 0, baseLayer.LayerSize.X, SizeNorth);
                 if(!_cornerBiasNorthWest) {
                     bounds.X += SizeWest;
                     bounds.Width -= SizeWest;
@@ -186,11 +186,10 @@ namespace FoldEngine.Editor.Gui {
                     bounds.Width -= SizeEast;
                 }
                 NorthPanel.Bounds = bounds;
-                RenderBackground(bounds, renderer, layer);
-                NorthPanel.Render(renderer, layer);
+                NorthPanel.Render(renderer, baseLayer);
             }
             {
-                var bounds = new Rectangle(0, layer.LayerSize.Y - SizeSouth, layer.LayerSize.X, SizeSouth);
+                var bounds = new Rectangle(0, baseLayer.LayerSize.Y - SizeSouth, baseLayer.LayerSize.X, SizeSouth);
                 if(!_cornerBiasSouthWest) {
                     bounds.X += SizeWest;
                     bounds.Width -= SizeWest;
@@ -199,12 +198,11 @@ namespace FoldEngine.Editor.Gui {
                     bounds.Width -= SizeEast;
                 }
                 SouthPanel.Bounds = bounds;
-                RenderBackground(bounds, renderer, layer);
-                SouthPanel.Render(renderer, layer);
+                SouthPanel.Render(renderer, baseLayer);
             }
 
             {
-                var bounds = new Rectangle(0, 0, SizeWest, layer.LayerSize.Y);
+                var bounds = new Rectangle(0, 0, SizeWest, baseLayer.LayerSize.Y);
                 if(_cornerBiasNorthWest) {
                     bounds.Y += SizeNorth;
                     bounds.Height -= SizeNorth;
@@ -213,11 +211,10 @@ namespace FoldEngine.Editor.Gui {
                     bounds.Height -= SizeSouth;
                 }
                 WestPanel.Bounds = bounds;
-                RenderBackground(bounds, renderer, layer);
-                WestPanel.Render(renderer, layer);
+                WestPanel.Render(renderer, baseLayer);
             }
             {
-                var bounds = new Rectangle(layer.LayerSize.X - SizeEast, 0, SizeEast, layer.LayerSize.Y);
+                var bounds = new Rectangle(baseLayer.LayerSize.X - SizeEast, 0, SizeEast, baseLayer.LayerSize.Y);
                 if(_cornerBiasNorthEast) {
                     bounds.Y += SizeNorth;
                     bounds.Height -= SizeNorth;
@@ -226,37 +223,23 @@ namespace FoldEngine.Editor.Gui {
                     bounds.Height -= SizeSouth;
                 }
                 EastPanel.Bounds = bounds;
-                RenderBackground(bounds, renderer, layer);
-                EastPanel.Render(renderer, layer);
+                EastPanel.Render(renderer, baseLayer);
             }
             
-            DraggingViewTab?.Render(renderer, layer);
+            DraggingViewTab?.Render(renderer, overlayLayer);
 
             if(ContextMenu.Showing) {
-                ContextMenu.Render(renderer, layer);
+                ContextMenu.Render(renderer, overlayLayer);
             }
 
             if(!LayoutValidated) {
-                renderer.Groups["editor"].Dependencies[0].Group.Size = new Point(renderer.WindowSize.X - SizeWest - SizeEast, renderer.WindowSize.Y - SizeNorth - SizeSouth);
-                renderer.Groups["editor"].Dependencies[0].Destination = new Rectangle(SizeWest, SizeNorth, renderer.WindowSize.X - SizeWest - SizeEast, renderer.WindowSize.Y - SizeNorth - SizeSouth);
+                // renderer.Groups["editor"].Dependencies[0].Group.Size = new Point(renderer.WindowSize.X - SizeWest - SizeEast, renderer.WindowSize.Y - SizeNorth - SizeSouth + ViewTab.TabHeight + FrameBorder);
+                // renderer.Groups["editor"].Dependencies[0].Destination = new Rectangle(SizeWest, SizeNorth + ViewTab.TabHeight + FrameBorder, renderer.WindowSize.X - SizeWest - SizeEast, renderer.WindowSize.Y - SizeNorth - SizeSouth - ViewTab.TabHeight - FrameBorder);
                 CenterPanel.Bounds = new Rectangle(SizeWest, SizeNorth, renderer.WindowSize.X - SizeWest - SizeEast,
                     renderer.WindowSize.Y - SizeNorth - SizeSouth);
                 LayoutValidated = true;
             }
-            CenterPanel.Render(renderer, layer);
-        }
-
-        private void RenderBackground(Rectangle rectangle, IRenderingUnit renderer, IRenderingLayer layer) {
-            layer.Surface.Draw(new DrawRectInstruction() {
-                Texture = renderer.WhiteTexture,
-                DestinationRectangle = rectangle,
-                Color = new Color(45, 45, 48)
-            });
-            layer.Surface.Draw(new DrawRectInstruction() {
-                Texture = renderer.WhiteTexture,
-                DestinationRectangle = rectangle.Grow(-FrameBorder),
-                Color = new Color(37, 37, 38)
-            });
+            CenterPanel.Render(renderer, baseLayer);
         }
 
         public void AddView<T>(BorderPanel preferredPanel = null) where T : EditorView, new() {
@@ -283,9 +266,23 @@ namespace FoldEngine.Editor.Gui {
             this.Side = side;
             ViewLists.Add(new ViewListPanel(editorEnvironment));
         }
+        
+        private void RenderBackground(IRenderingUnit renderer, IRenderingLayer layer) {
+            layer.Surface.Draw(new DrawRectInstruction() {
+                Texture = renderer.WhiteTexture,
+                DestinationRectangle = Bounds,
+                Color = new Color(45, 45, 48)
+            });
+            layer.Surface.Draw(new DrawRectInstruction() {
+                Texture = renderer.WhiteTexture,
+                DestinationRectangle = Bounds.Grow(-EditorEnvironment.FrameBorder),
+                Color = new Color(37, 37, 38)
+            });
+        }
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
             Reset();
+            RenderBackground(renderer, layer);
             
             for(int i = 0; i < ViewLists.Count; i++) {
                 ViewListPanel viewList = ViewLists[i];
@@ -299,7 +296,7 @@ namespace FoldEngine.Editor.Gui {
             
             ResetLayoutPosition();
             
-            Element<GuiResizer>().Side(-Side);
+            if(Side != default) Element<GuiResizer>().Side(-Side);
             
             base.Render(renderer, layer);
         }
@@ -316,6 +313,16 @@ namespace FoldEngine.Editor.Gui {
             if(Environment is EditorEnvironment editorEnvironment && Bounds.Contains(Environment.MousePos)) {
                 editorEnvironment.HoverViewListPanel = this;
             }
+
+            Color? bgColor = ActiveView?.BackgroundColor;
+            if(bgColor.HasValue) {
+                layer.Surface.Draw(new DrawRectInstruction() {
+                    Texture = renderer.WhiteTexture,
+                    Color = bgColor.Value,
+                    DestinationRectangle = Bounds
+                });
+            }
+            
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
                 Color = new Color(45, 45, 48),
@@ -342,9 +349,8 @@ namespace FoldEngine.Editor.Gui {
                 ActiveView.ContentPanel.Bounds = Bounds;
                 ActiveView.ContentPanel.Bounds.Y += ViewTab.TabHeight;
                 ActiveView.ContentPanel.Bounds.Height -= ViewTab.TabHeight;
-                ActiveView.ContentPanel.Bounds = ActiveView.ContentPanel.Bounds.Grow(-EditorEnvironment.FrameMargin);
+                if(ActiveView.UseMargin) ActiveView.ContentPanel.Bounds = ActiveView.ContentPanel.Bounds.Grow(-EditorEnvironment.FrameMargin);
 
-                
                 ActiveView.ContentPanel.Reset();
                 ActiveView.Render(renderer);
             }
@@ -421,13 +427,13 @@ namespace FoldEngine.Editor.Gui {
                     if(_side == Vector2.UnitX) {
                         environment.SizeWest = Math.Max(1,environment.MousePos.X+1);
                     } else if(_side == -Vector2.UnitX) {
-                        environment.SizeEast = Math.Max(1,environment.Layer.LayerSize.X - environment.MousePos.X);
+                        environment.SizeEast = Math.Max(1,environment.BaseLayer.LayerSize.X - environment.MousePos.X);
                     }
                     
                     if(_side == Vector2.UnitY) {
                         environment.SizeNorth = Math.Max(1,environment.MousePos.Y+1);
                     } else if(_side == -Vector2.UnitY) {
-                        environment.SizeSouth = Math.Max(1,environment.Layer.LayerSize.Y - environment.MousePos.Y);
+                        environment.SizeSouth = Math.Max(1,environment.BaseLayer.LayerSize.Y - environment.MousePos.Y);
                     }
                 }
             }

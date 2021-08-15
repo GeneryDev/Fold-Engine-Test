@@ -34,6 +34,8 @@ namespace FoldEngine.Interfaces
         Vector2 LayerToWindow(Vector2 point);
 
         void WindowSizeChanged(Point oldSize, Point newSize);
+        void Begin();
+        void End();
     }
 
     public class RenderingLayer : IRenderingLayer {
@@ -128,6 +130,14 @@ namespace FoldEngine.Interfaces
                 Destination = new Rectangle(Point.Zero, LayerSize);
                 LogicalSize = newSize.ToVector2();
             }
+        }
+
+        public void Begin() {
+            Surface?.Begin();
+        }
+
+        public void End() {
+            Surface?.End();
         }
     }
 }

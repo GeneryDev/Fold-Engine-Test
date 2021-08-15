@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Woofer;
 
 namespace FoldEngine.Interfaces {
     public class RenderGroup {
@@ -27,7 +28,7 @@ namespace FoldEngine.Interfaces {
 
         public void Begin() {
             foreach(IRenderingLayer layer in _layers.Values) {
-                layer.Surface.Begin();
+                layer.Begin();
             }
             foreach(Dependency dependency in Dependencies) {
                 dependency.Group.Begin();
@@ -38,16 +39,17 @@ namespace FoldEngine.Interfaces {
                 dependency.Group.End();
             }
             foreach(IRenderingLayer layer in _layers.Values) {
-                layer.Surface.End();
+                layer.End();
             }
         }
 
         public void Present(SpriteBatch spriteBatch) {
-            foreach(Dependency dependency in Dependencies) {
-                dependency.Group.Present(spriteBatch);
-            }
             Rectangle groupBounds = Bounds;
             foreach(IRenderingLayer layer in _layers.Values) {
+                if(layer is DependencyRenderingLayer dependencyLayer) {
+                    Dependencies[dependencyLayer.DependencyIndex].Group.Present(spriteBatch);
+                    continue;
+                }
                 Vector2 start = layer.Destination.Location.ToVector2();
                 Vector2 end = start + layer.Destination.Size.ToVector2();
                 

@@ -35,7 +35,8 @@ namespace FoldEngine.Gui {
         
         // Renderer
         public IRenderingUnit Renderer { get; set; }
-        public IRenderingLayer Layer { get; set; }
+        public IRenderingLayer BaseLayer { get; set; }
+        public IRenderingLayer OverlayLayer { get; set; }
         
 
         public GuiEnvironment(Scene scene) {
@@ -69,7 +70,7 @@ namespace FoldEngine.Gui {
             }
 
             MousePos = Mouse.GetState().Position;
-            if(Layer != null) MousePos = Layer.WindowToLayer(MousePos.ToVector2()).ToPoint();
+            if(BaseLayer != null) MousePos = BaseLayer.WindowToLayer(MousePos.ToVector2()).ToPoint();
             
             HandleMouseEvents(MouseLeft, MouseEvent.LeftButton);
             HandleMouseEvents(MouseMiddle, MouseEvent.MiddleButton);
@@ -123,9 +124,10 @@ namespace FoldEngine.Gui {
             
         }
 
-        public virtual void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+        public virtual void Render(IRenderingUnit renderer, IRenderingLayer baseLayer, IRenderingLayer overlayLayer) {
             Renderer = renderer;
-            Layer = layer;
+            BaseLayer = baseLayer;
+            OverlayLayer = overlayLayer;
 
             HoverTargetPrevious = HoverTarget;
             HoverTarget = default;

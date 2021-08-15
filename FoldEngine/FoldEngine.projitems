@@ -42,6 +42,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\ComponentTransactions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\CreateEntityTransaction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\DeleteEntityTransaction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorGameView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorHierarchyView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorInspectorView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorMenuView.cs" />

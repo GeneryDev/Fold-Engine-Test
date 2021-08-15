@@ -30,6 +30,7 @@ namespace FoldEngine.Editor {
             Environment.AddView<EditorHierarchyView>(Environment.WestPanel);
             Environment.AddView<EditorSystemsView>(Environment.WestPanel);
             Environment.AddView<EditorInspectorView>(Environment.EastPanel);
+            Environment.AddView<EditorGameView>(Environment.CenterPanel);
         }
 
         public override void OnInput() {
@@ -41,7 +42,7 @@ namespace FoldEngine.Editor {
         }
 
         public override void OnRender(IRenderingUnit renderer) {
-            Environment.Render(renderer, renderer.RootGroup["editor_gui"]);
+            Environment.Render(renderer, renderer.RootGroup["editor_gui"], renderer.RootGroup["editor_gui_overlay"]);
         }
     }
 }

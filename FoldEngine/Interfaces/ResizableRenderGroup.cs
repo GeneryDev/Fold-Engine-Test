@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Woofer;
 
 namespace FoldEngine.Interfaces {
     public class ResizableRenderGroup : RenderGroup {
@@ -8,6 +9,7 @@ namespace FoldEngine.Interfaces {
             this.Dependencies.Add(new Dependency() {
                 Group = group
             });
+            this["child"] = new DependencyRenderingLayer(0);
             AdjustDependency(Dependencies[0]);
         }
 
