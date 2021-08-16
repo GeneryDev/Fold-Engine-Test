@@ -30,8 +30,10 @@ namespace FoldEngine.Editor.Views {
         }
 
         public override void Scroll(int dir) {
-            Environment.Scene.EditorComponents.EditorTransform.LocalScale -=
-                Environment.Scene.EditorComponents.EditorTransform.LocalScale * 0.1f * dir;
+            if(Environment.Scene.EditorComponents != null) {
+                Environment.Scene.EditorComponents.EditorTransform.LocalScale -=
+                    Environment.Scene.EditorComponents.EditorTransform.LocalScale * 0.1f * dir;
+            }
         }
     }
 }
