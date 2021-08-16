@@ -56,6 +56,21 @@ namespace FoldEngine.Components {
         /// Complex number used to quickly multiply coordinates for rotations.
         /// </summary>
         private Complex _rotationComplex;
+        private float _rotationUsedInComplex;
+
+        /// <summary>
+        /// Complex number used to quickly multiply coordinates for rotations.
+        /// </summary>
+        private Complex RotationComplex {
+            get {
+                // ReSharper disable once CompareOfFloatsByEqualityOperator
+                if(_rotationUsedInComplex != LocalRotation) {
+                    _rotationComplex = Complex.FromRotation(LocalRotation);
+                }
+
+                return _rotationComplex;
+            }
+        }
 
         /// <summary>
         /// Entity ID of this transform's first child (or -1 if it has no children)
@@ -79,24 +94,10 @@ namespace FoldEngine.Components {
         public long NextSiblingId;
 
         /// <summary>
-        /// Float used to save this transform's rotation in radians. Used for the LocalRotation property
-        /// </summary>
-        [Name("Rotation")]
-        public float _localRotation;
-
-        /// <summary>
         /// This transform's local rotation, in radians.
         /// </summary>
-        public float LocalRotation {
-            get => _localRotation;
-            set {
-                // ReSharper disable once CompareOfFloatsByEqualityOperator
-                if(_localRotation != value) {
-                    _localRotation = value;
-                    _rotationComplex = Complex.FromRotation(value);
-                }
-            }
-        }
+        [Name("Rotation")]
+        public float LocalRotation;
 
         /// <summary>
         /// 2D vector for the scale of this entity
@@ -122,6 +123,7 @@ namespace FoldEngine.Components {
             ParentId = -1;
 
             FirstChildId = -1;
+            _rotationUsedInComplex = float.NaN;
             PreviousSiblingId = -1;
             NextSiblingId = -1;
 
@@ -129,7 +131,7 @@ namespace FoldEngine.Components {
             _rotationComplex = new Complex(1, 0);
             LocalScale = new Vector2(1, 1);
 
-            _localRotation = 0;
+            LocalRotation = 0;
         }
 
         /// <summary>
@@ -309,10 +311,10 @@ namespace FoldEngine.Components {
         public float Rotation {
             get {
                 if(!IsNotNull) return 0f;
-                float total = _localRotation;
+                float total = LocalRotation;
                 ref readonly Transform current = ref Parent;
                 while(current.IsNotNull) {
-                    total += current._localRotation;
+                    total += current.LocalRotation;
                     current = ref current.Parent;
                 }
 
@@ -348,7 +350,7 @@ namespace FoldEngine.Components {
             ref readonly Transform current = ref this;
 
             while(current.IsNotNull) {
-                point = (Vector2) ((Complex) (point * current.LocalScale) * current._rotationComplex)
+                point = (Vector2) ((Complex) (point * current.LocalScale) * current.RotationComplex)
                         + current.LocalPosition;
                 current = ref current.Parent;
             }
@@ -366,7 +368,7 @@ namespace FoldEngine.Components {
             if(!IsNotNull) return point;
             ref readonly Transform current = ref this;
 
-            return (Vector2) ((Complex) (Parent.ApplyReverse(point) - current.LocalPosition) / current._rotationComplex)
+            return (Vector2) ((Complex) (Parent.ApplyReverse(point) - current.LocalPosition) / current.RotationComplex)
                    / current.LocalScale;
         }
 
