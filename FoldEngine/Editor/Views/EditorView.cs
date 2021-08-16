@@ -17,5 +17,11 @@ namespace FoldEngine.Editor.Views {
 
         public virtual void Initialize() { }
         public abstract void Render(IRenderingUnit renderer);
+
+        public virtual void EnsurePanelExists(GuiEnvironment environment) {
+            if(ContentPanel == null) {
+                ContentPanel = new GuiPanel(environment);
+            }
+        }
     }
 }

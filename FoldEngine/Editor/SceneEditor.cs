@@ -9,6 +9,8 @@ using FoldEngine.Scenes;
 namespace FoldEngine.Editor {
     public static class SceneEditor {
         public static void AttachEditor(Scene scene) {
+            scene.EditorComponents = new EditorComponents(scene);
+            
             scene.Core.CommandQueue.Enqueue(new SetWindowTitleCommand(scene.Name + " - Scene Editor"));
             scene.Paused = true;
 

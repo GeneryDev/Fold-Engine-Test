@@ -3,6 +3,7 @@ using FoldEngine.Commands;
 using FoldEngine.Editor.Gui;
 using FoldEngine.Editor.Views;
 using FoldEngine.Graphics;
+using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Systems;
 using Microsoft.Xna.Framework;

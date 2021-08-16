@@ -176,6 +176,8 @@ namespace FoldEngine.Editor.Gui {
 
             HoverViewListPanel = default;
 
+            renderer.Groups["editor"].Dependencies[0].Group.Size = default;
+            
             {
                 var bounds = new Rectangle(0, 0, baseLayer.LayerSize.X, SizeNorth);
                 if(!_cornerBiasNorthWest) {
@@ -340,9 +342,7 @@ namespace FoldEngine.Editor.Gui {
             }
 
             if(ActiveView != null) {
-                if(ActiveView.ContentPanel == null) {
-                    ActiveView.ContentPanel = new GuiPanel(Environment);
-                }
+                ActiveView.EnsurePanelExists(Environment);
                 
                 Element(ActiveView.ContentPanel);
 

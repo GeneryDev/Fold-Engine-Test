@@ -5,9 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using EntryProject.Util;
 using FoldEngine.Components;
+using FoldEngine.Editor;
 using FoldEngine.Events;
 using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
+using FoldEngine.Rendering;
 using FoldEngine.Serialization;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
@@ -28,10 +30,20 @@ namespace FoldEngine.Scenes
 
         private long _nextEntityId = 0;
 
+        public EditorComponents EditorComponents;
+
         public Matrix GizmoTransformMatrix { get; set; }
         public long MainCameraId { get; set; }
 
-        public ref Transform MainCameraTransform => ref Components.GetComponent<Transform>(MainCameraId);
+        public ref Transform MainCameraTransform {
+            get {
+                if(EditorComponents != null) {
+                    return ref EditorComponents.EditorTransform;
+                } else {
+                    return ref Components.GetComponent<Transform>(MainCameraId);
+                }
+            }
+        }
 
         public bool Paused = false;
 

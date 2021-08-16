@@ -199,7 +199,7 @@ namespace FoldEngine.Gui {
             return element == _pressedElements[buttonType];
         }
 
-        public void Scroll(int dir) {
+        public virtual void Scroll(int dir) {
             if(MayScroll) {
                 ScrollPosition.Y -= dir * ScrollAmount;
                 if(ScrollPosition.Y > ContentSize.Y - Bounds.Height) ScrollPosition.Y = ContentSize.Y - Bounds.Height;
