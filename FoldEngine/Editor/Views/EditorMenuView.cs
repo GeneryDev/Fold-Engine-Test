@@ -47,7 +47,6 @@ namespace FoldEngine.Editor.Views {
             } else {
                 Stop(element.Environment as EditorEnvironment);
             }
-            element.Environment.Scene.Paused = !element.Environment.Scene.Paused;
         }
 
         private static byte[] _storedScene = null;
@@ -63,6 +62,7 @@ namespace FoldEngine.Editor.Views {
             saveOp.Close();
             _storedScene = stream.GetBuffer();
             saveOp.Dispose();
+            environment.Scene.Paused = false;
         }
 
         private void Stop(EditorEnvironment environment) {
@@ -76,6 +76,7 @@ namespace FoldEngine.Editor.Views {
             loadOp.Dispose();
             _storedScene = null;
             environment.Scene.EditorComponents = new EditorComponents(environment.Scene);
+            environment.Scene.Paused = true;
         }
     }
 }
