@@ -178,6 +178,13 @@ namespace FoldEngine.Editor.Gui {
 
             renderer.Groups["editor"].Dependencies[0].Group.Size = default;
             
+            if(!LayoutValidated) {
+                CenterPanel.Bounds = new Rectangle(SizeWest, SizeNorth, renderer.WindowSize.X - SizeWest - SizeEast,
+                    renderer.WindowSize.Y - SizeNorth - SizeSouth);
+                LayoutValidated = true;
+            }
+            CenterPanel.Render(renderer, baseLayer);
+            
             {
                 var bounds = new Rectangle(0, 0, baseLayer.LayerSize.X, SizeNorth);
                 if(!_cornerBiasNorthWest) {
@@ -233,15 +240,6 @@ namespace FoldEngine.Editor.Gui {
             if(ContextMenu.Showing) {
                 ContextMenu.Render(renderer, overlayLayer);
             }
-
-            if(!LayoutValidated) {
-                // renderer.Groups["editor"].Dependencies[0].Group.Size = new Point(renderer.WindowSize.X - SizeWest - SizeEast, renderer.WindowSize.Y - SizeNorth - SizeSouth + ViewTab.TabHeight + FrameBorder);
-                // renderer.Groups["editor"].Dependencies[0].Destination = new Rectangle(SizeWest, SizeNorth + ViewTab.TabHeight + FrameBorder, renderer.WindowSize.X - SizeWest - SizeEast, renderer.WindowSize.Y - SizeNorth - SizeSouth - ViewTab.TabHeight - FrameBorder);
-                CenterPanel.Bounds = new Rectangle(SizeWest, SizeNorth, renderer.WindowSize.X - SizeWest - SizeEast,
-                    renderer.WindowSize.Y - SizeNorth - SizeSouth);
-                LayoutValidated = true;
-            }
-            CenterPanel.Render(renderer, baseLayer);
         }
 
         public void AddView<T>(BorderPanel preferredPanel = null) where T : EditorView, new() {
