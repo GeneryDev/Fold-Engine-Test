@@ -21,7 +21,7 @@ namespace FoldEngine.Editor.Gui {
         public const int FrameMargin = 8;
 
         public sealed override List<GuiPanel> VisiblePanels { get; } = new List<GuiPanel>();
-        public Dictionary<Type, EditorView> AllViews = new Dictionary<Type, EditorView>();
+        public List<EditorView> AllViews = new List<EditorView>();
         
         public ViewTab DraggingViewTab { get; set; }
         public ViewListPanel HoverViewListPanel { get; set; }
@@ -246,13 +246,29 @@ namespace FoldEngine.Editor.Gui {
             T view = new T {Scene = Scene};
             view.Initialize();
 
-            AllViews[view.GetType()] = view;
+            AllViews.Add(view);
 
             preferredPanel?.ViewLists[0].AddView(view);
         }
 
         public T GetView<T>() where T : EditorView {
-            return AllViews[typeof(T)] as T;
+            foreach(EditorView view in AllViews) {
+                if(view is T viewT) return viewT;
+            }
+            return null;
+        }
+
+        public bool SwitchToView(EditorView view) {
+            foreach(BorderPanel borderPanel in VisiblePanels) {
+                foreach(ViewListPanel viewListPanel in borderPanel.ViewLists) {
+                    if(viewListPanel.ContainsView(view)) {
+                        viewListPanel.SwitchToView(view);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
     }
 
@@ -370,6 +386,14 @@ namespace FoldEngine.Editor.Gui {
                     ActiveView = null;
                 }
             }
+        }
+
+        public bool ContainsView(EditorView view) {
+            return Views.Contains(view);
+        }
+
+        public void SwitchToView(EditorView view) {
+            ActiveView = view;
         }
     }
 

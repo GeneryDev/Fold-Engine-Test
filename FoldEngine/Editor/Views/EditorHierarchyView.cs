@@ -97,6 +97,7 @@ namespace FoldEngine.Editor.Views {
                     editorEnvironment.GetView<EditorHierarchyView>().ExpandCollapseEntity(_id);
                 } else {
                     editorEnvironment.GetView<EditorInspectorView>().SetEntity(_id);
+                    editorEnvironment.SwitchToView(editorEnvironment.GetView<EditorInspectorView>());
                 }
             }
         }

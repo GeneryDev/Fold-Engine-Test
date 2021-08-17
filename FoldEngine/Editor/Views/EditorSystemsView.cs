@@ -32,8 +32,10 @@ namespace FoldEngine.Editor.Views {
         }
         
         public void Perform(GuiElement element, MouseEvent e) {
-            if(element.Environment is EditorEnvironment editorEnvironment)
+            if(element.Environment is EditorEnvironment editorEnvironment) {
                 editorEnvironment.GetView<EditorInspectorView>().SetObject(_system);
+                editorEnvironment.SwitchToView(editorEnvironment.GetView<EditorInspectorView>());
+            }
         }
 
         public IObjectPool Pool { get; set; }
