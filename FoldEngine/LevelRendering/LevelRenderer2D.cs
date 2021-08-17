@@ -100,5 +100,29 @@ namespace FoldEngine.Rendering {
                 }
             }
         }
+
+        public static void DrawOutline(Entity entity) {
+            if(entity.HasComponent<MeshRenderable>()) DrawOutline(entity.Scene, entity.Transform, entity.GetComponent<MeshRenderable>(), new Color(250, 110, 30));
+        }
+
+        public static void DrawOutline(Scene scene, Transform transform, MeshRenderable meshRenderable, Color outlineColor) {
+            if(meshRenderable.MeshIdentifier == null || meshRenderable.TextureIdentifier == null) return;
+
+            Vector2 firstVertex = default;
+            Vector2 prevVertex = default;
+            bool first = true;
+            foreach(var localVertex in scene.Meshes.GetVerticesForMesh(meshRenderable.MeshIdentifier)) {
+                Vector2 vertex = transform.Apply(localVertex);
+                if(first) {
+                    firstVertex = vertex;
+                } else {
+                    scene.DrawGizmo(prevVertex, vertex, outlineColor);
+                }
+
+                first = false;
+                prevVertex = vertex;
+            }
+            scene.DrawGizmo(prevVertex, firstVertex, outlineColor);
+        }
     }
 }

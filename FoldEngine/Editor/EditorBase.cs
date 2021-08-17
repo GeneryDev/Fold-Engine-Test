@@ -1,10 +1,14 @@
 ﻿using System;
 using FoldEngine.Commands;
+using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
 using FoldEngine.Editor.Views;
 using FoldEngine.Graphics;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
+using FoldEngine.Physics;
+using FoldEngine.Rendering;
+using FoldEngine.Scenes;
 using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -17,6 +21,7 @@ namespace FoldEngine.Editor {
         // public override bool ShouldSave => false;
         
         public EditorEnvironment Environment;
+        public long EditingEntity = -1;
         
         public override void SubscribeToEvents() {
             Subscribe<WindowSizeChangedEvent>((ref WindowSizeChangedEvent evt) => {
@@ -44,6 +49,15 @@ namespace FoldEngine.Editor {
 
         public override void OnRender(IRenderingUnit renderer) {
             Environment.Render(renderer, renderer.RootGroup["editor_gui"], renderer.RootGroup["editor_gui_overlay"]);
+
+            if(EditingEntity != -1 && Owner.Components.HasComponent<Transform>(EditingEntity)) {
+                Entity entity = new Entity(Owner, EditingEntity);
+                
+                LevelRenderer2D.DrawOutline(entity);
+                ColliderGizmoRenderer.DrawColliderGizmos(entity);
+                
+                Owner.DrawGizmo(entity.Transform.Position, 1, Color.AntiqueWhite);
+            }
         }
     }
 }

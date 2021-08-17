@@ -32,6 +32,7 @@ namespace FoldEngine.Editor.Views {
 
             if(!HideInInspector) {
                 foreach(FieldInfo fieldInfo in componentType.GetFields()) {
+                    if(fieldInfo.IsStatic) continue;
                     if(fieldInfo.GetCustomAttribute<HideInInspector>() != null) continue;
                     Members.Add(new ComponentMember(fieldInfo));
                 }

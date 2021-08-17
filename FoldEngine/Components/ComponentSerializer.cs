@@ -8,6 +8,7 @@ namespace FoldEngine.Components {
         public static void Serialize<T>(T component, SaveOperation writer) where T : struct {
             writer.WriteCompound((ref SaveOperation.Compound c) => {
                 foreach(FieldInfo fieldInfo in typeof(T).GetFields()) {
+                    if(fieldInfo.IsStatic) continue;
                     object value = fieldInfo.GetValue(component);
                     if(value != null) {
                         c.WriteMember(fieldInfo.Name, value);
@@ -19,6 +20,7 @@ namespace FoldEngine.Components {
         public static void Deserialize<T>(ComponentSet componentSet, long entityId, LoadOperation reader) where T : struct {
             reader.ReadCompound(c => {
                 foreach(FieldInfo fieldInfo in typeof(T).GetFields()) {
+                    if(fieldInfo.IsStatic) continue;
                     if(c.HasMember(fieldInfo.Name)) {
                         c.StartReadMember(fieldInfo.Name);
                         object value = reader.Read(fieldInfo.FieldType);

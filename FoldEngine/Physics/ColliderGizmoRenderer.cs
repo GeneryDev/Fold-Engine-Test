@@ -1,6 +1,8 @@
 ﻿using System;
 using FoldEngine.Components;
+using FoldEngine.Editor.Gui;
 using FoldEngine.Interfaces;
+using FoldEngine.Scenes;
 using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
 
@@ -16,46 +18,56 @@ namespace FoldEngine.Physics {
         public override void OnRender(IRenderingUnit renderer) {
             _colliders.Reset();
             while(_colliders.Next()) {
-                ref Transform transform = ref _colliders.GetCoComponent<Transform>();
+                Transform transform = _colliders.GetCoComponent<Transform>();
+                Collider collider = _colliders.GetComponent();
+                
+                DrawColliderGizmos(Owner, transform, collider);
+            }
+        }
 
-                ref Collider collider = ref _colliders.GetComponent();
-                switch(collider.Type) {
-                    case ColliderType.Box: {
+        public static void DrawColliderGizmos(Entity entity) {
+            if(entity.HasComponent<Collider>()) DrawColliderGizmos(entity.Scene, entity.Transform, entity.GetComponent<Collider>());
+        }
+
+        public static void DrawColliderGizmos(Scene scene, Transform transform, Collider collider) {
+            Color colliderColor = new Color(102, 226, 148);
+            Color reachColor = new Color(236, 187, 136);
+            switch(collider.Type) {
+                case ColliderType.Box: {
                         
-                        Vector2 a = transform.Apply(new Vector2(-collider.Width / 2, -collider.Height / 2));
-                        Vector2 b = transform.Apply(new Vector2(-collider.Width / 2, collider.Height / 2));
-                        Vector2 c = transform.Apply(new Vector2(collider.Width / 2, collider.Height / 2));
-                        Vector2 d = transform.Apply(new Vector2(collider.Width / 2, -collider.Height / 2));
+                    Vector2 a = transform.Apply(new Vector2(-collider.Width / 2, -collider.Height / 2));
+                    Vector2 b = transform.Apply(new Vector2(-collider.Width / 2, collider.Height / 2));
+                    Vector2 c = transform.Apply(new Vector2(collider.Width / 2, collider.Height / 2));
+                    Vector2 d = transform.Apply(new Vector2(collider.Width / 2, -collider.Height / 2));
                     
-                        Owner.DrawGizmo(a, b, Color.Blue);
-                        Owner.DrawGizmo(b, c, Color.Blue);
-                        Owner.DrawGizmo(c, d, Color.Blue);
-                        Owner.DrawGizmo(d, a, Color.Blue);
+                    scene.DrawGizmo(a, b, colliderColor);
+                    scene.DrawGizmo(b, c, colliderColor);
+                    scene.DrawGizmo(c, d, colliderColor);
+                    scene.DrawGizmo(d, a, colliderColor);
                     
-                        Owner.DrawGizmo(transform.Position, collider.GetReach(ref transform), Color.Lime);
-                        break;
-                    }
-                    case ColliderType.Mesh: {
+                    scene.DrawGizmo(transform.Position, collider.GetReach(ref transform), reachColor);
+                    break;
+                }
+                case ColliderType.Mesh: {
 
-                        Vector2 firstVertex = default;
-                        Vector2 prevVertex = default;
-                        bool first = true;
-                        foreach(var localVertex in Owner.Meshes.GetVerticesForMesh(collider.MeshIdentifier)) {
-                            Vector2 vertex = transform.Apply(localVertex);
-                            if(first) {
-                                firstVertex = vertex;
-                            } else {
-                                Owner.DrawGizmo(prevVertex, vertex, Color.Blue);
-                            }
-
-                            first = false;
-                            prevVertex = vertex;
+                    Vector2 firstVertex = default;
+                    Vector2 prevVertex = default;
+                    bool first = true;
+                    foreach(var localVertex in scene.Meshes.GetVerticesForMesh(collider.MeshIdentifier)) {
+                        Vector2 vertex = transform.Apply(localVertex);
+                        if(first) {
+                            firstVertex = vertex;
+                        } else {
+                            scene.DrawGizmo(prevVertex, vertex, colliderColor);
                         }
-                        Owner.DrawGizmo(prevVertex, firstVertex, Color.Blue);
-                    
-                        // Owner.DrawGizmo(transform.Position, collider.GetReach(ref transform), Color.Lime);
-                        break;
+
+                        first = false;
+                        prevVertex = vertex;
                     }
+                    scene.DrawGizmo(prevVertex, firstVertex, colliderColor);
+                    
+                    // Owner.DrawGizmo(transform.Position, collider.GetReach(ref transform), reachColor);
+                    break;
                 }
             }
         }

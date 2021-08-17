@@ -10,6 +10,8 @@ namespace FoldEngine.Physics {
     [Component("fold:physics")]
     [ComponentInitializer(typeof(Physics), nameof(InitializeComponent))]
     public struct Physics {
+        public static readonly bool DrawForceGizmos = false;
+        
         private Scene _scene;
         private long _entityId;
         
@@ -63,8 +65,10 @@ namespace FoldEngine.Physics {
             AccelerationFromForce += accel;
             Torque += torque;
 
-            Vector2 ownerPos = _scene.Components.GetComponent<Transform>(_entityId).Position;
-            _scene.DrawGizmo(ownerPos + point, ownerPos + point + force / 40, gizmoColor ?? Color.Red);
+            if(DrawForceGizmos) {
+                Vector2 ownerPos = _scene.Components.GetComponent<Transform>(_entityId).Position;
+                _scene.DrawGizmo(ownerPos + point, ownerPos + point + force / 40, gizmoColor ?? Color.Red);
+            }
         }
     }
 

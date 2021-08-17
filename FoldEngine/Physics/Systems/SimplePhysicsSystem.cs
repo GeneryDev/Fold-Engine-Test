@@ -14,6 +14,8 @@ using Shard.Scripts.Instructions;
 namespace FoldEngine.Physics {
     [GameSystem("fold:physics.simple", ProcessingCycles.FixedUpdate)]
     public class SimplePhysicsSystem : GameSystem {
+        public static readonly bool DrawCollisionGizmos = false;
+        
         private ComponentIterator<Physics> _physicsObjects;
         private ComponentIterator<Collider> _colliders;
         
@@ -120,7 +122,9 @@ namespace FoldEngine.Physics {
                                             
                                         }
                                         //Draw gizmos
-                                        Owner.DrawGizmo(current.Position, next.Position, Color.Fuchsia, zOrder: 1);
+                                        if(DrawCollisionGizmos) {
+                                            Owner.DrawGizmo(current.Position, next.Position, Color.Fuchsia, zOrder: 1);
+                                        }
                                     }
 
                                     if(totalSurfaceNormalFaceLength != 0) {
@@ -143,7 +147,9 @@ namespace FoldEngine.Physics {
                                     Owner.Events.Invoke(new CollisionEvent(_colliders.GetEntityId(), _physicsObjects.GetEntityId(), -(Vector2)surfaceNormalComplex));
 
                                     if(!physics.Static) {
-                                        Owner.DrawGizmo(tempNormalStart, tempNormalStart + surfaceNormalSum / totalSurfaceNormalFaceLength, Color.Gold);
+                                        if(DrawCollisionGizmos) {
+                                            Owner.DrawGizmo(tempNormalStart, tempNormalStart + surfaceNormalSum / totalSurfaceNormalFaceLength, Color.Gold);
+                                        }
 
                                         physics.ContactDisplacement += surfaceNormalSum / totalSurfaceNormalFaceLength * largestCrossSection;
 

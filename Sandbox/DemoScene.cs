@@ -23,7 +23,7 @@ namespace Sandbox {
             
             Systems.Add<SimplePhysicsSystem>();
             Systems.Add<LevelRenderer2D>();
-            Systems.Add<ColliderGizmoRenderer>();
+            // Systems.Add<ColliderGizmoRenderer>();
             Systems.Add<DebugSystem>();
             
             Entity e0 = CreateEntity("Entity 0");

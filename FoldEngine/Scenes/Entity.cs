@@ -29,6 +29,10 @@ namespace FoldEngine.Scenes {
             EntityId = entityId;
         }
 
+        public bool HasComponent<T>() where T : struct {
+            return Scene.Components.HasComponent<T>(EntityId);
+        }
+
         public ref T GetComponent<T>() where T : struct {
             return ref Scene.Components.GetComponent<T>(EntityId);
         }
