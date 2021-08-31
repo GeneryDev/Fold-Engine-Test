@@ -37,6 +37,7 @@ namespace FoldEngine.Editor {
             Environment.AddView<EditorSystemsView>(Environment.WestPanel);
             Environment.AddView<EditorInspectorView>(Environment.EastPanel);
             Environment.AddView<EditorGameView>(Environment.CenterPanel);
+            Environment.AddView<EditorTestView>(Environment.SouthPanel);
         }
 
         public override void OnInput() {

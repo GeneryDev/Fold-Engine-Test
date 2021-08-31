@@ -21,15 +21,11 @@ namespace FoldEngine {
         
         private Point _lastKnownWindowSize = Point.Zero;
 
-        public FoldGame() {
-            Graphics = new GraphicsDeviceManager(this);
-            Content.RootDirectory = "Content";
-        }
-
         public FoldGame(IGameCore core) {
             this._core = core;
 
             Graphics = new GraphicsDeviceManager(this);
+            Graphics.GraphicsProfile = GraphicsProfile.HiDef;
             Content.RootDirectory = "Content";
 
             this.IsMouseVisible = true;
@@ -46,7 +42,8 @@ namespace FoldEngine {
         /// and initialize them as well.
         /// </summary>
         protected override void Initialize() {
-            _core.RenderingUnit.Textures = new TextureManager(Graphics, GraphicsDevice, _spriteBatch, Content);
+            _core.RenderingUnit.Textures = new TextureManager(GraphicsDevice, Content);
+            _core.RenderingUnit.Effects = new EffectManager(Content);
             _core.RenderingUnit.Fonts = new FontManager(_core.RenderingUnit.Textures);
 
             _core.AudioUnit._content = Content;
@@ -153,7 +150,7 @@ namespace FoldEngine {
             
             //Draw each layer's buffer onto the screen
             GraphicsDevice.SetRenderTarget(null);
-            GraphicsDevice.Clear(new Color(0, 0, 0));
+            GraphicsDevice.Clear(Color.Black);
             
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
             

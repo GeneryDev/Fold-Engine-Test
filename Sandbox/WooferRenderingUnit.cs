@@ -20,6 +20,7 @@ namespace Woofer
         private Point _windowSize = new Point(1280, 720);
 
         public TextureManager Textures { get; set; }
+        public EffectManager Effects { get; set; }
         public FontManager Fonts { get; set; }
 
         public Point WindowSize {

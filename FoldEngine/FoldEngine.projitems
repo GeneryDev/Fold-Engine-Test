@@ -48,7 +48,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorInspectorView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorMenuView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorSystemsView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorTestView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\EffectManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Gui\GuiAction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Gui\GuiElements.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Gui\GuiEnvironment.cs" />

@@ -37,7 +37,7 @@ namespace FoldEngine.Graphics {
         }
 
         private void SetupMatrix(Viewport viewport) {
-            Matrix.CreateOrthographicOffCenter(0.0f, viewport.Width, viewport.Height, 0.0f, 0.0f, -1f, out this._projection);
+            Matrix.CreateOrthographicOffCenter(0.0f, viewport.Width, viewport.Height, 0.0f, 0.0f, -100f, out this._projection);
             if (NeedsHalfPixelOffset)
             {
                 this._projection.M41 += -0.5f * this._projection.M11;

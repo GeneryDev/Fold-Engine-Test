@@ -40,22 +40,6 @@ namespace FoldEngine.Graphics
             Resize(width, height);
         }
 
-        public void Draw(DrawRectInstruction instruction)
-        {
-            TriBatch.DrawQuad(
-                instruction.Texture.Source,
-                new Vector2(instruction.DestinationRectangle.Left, instruction.DestinationRectangle.Bottom),
-                new Vector2(instruction.DestinationRectangle.Left, instruction.DestinationRectangle.Top),
-                new Vector2(instruction.DestinationRectangle.Right, instruction.DestinationRectangle.Bottom),
-                new Vector2(instruction.DestinationRectangle.Right, instruction.DestinationRectangle.Top),
-                instruction.Texture.ToSourceUV(new Vector2(instruction.SourceRectangle?.Left ?? 0, instruction.SourceRectangle?.Bottom ?? 1)),
-                instruction.Texture.ToSourceUV(new Vector2(instruction.SourceRectangle?.Left ?? 0, instruction.SourceRectangle?.Top ?? 0)),
-                instruction.Texture.ToSourceUV(new Vector2(instruction.SourceRectangle?.Right ?? 1, instruction.SourceRectangle?.Bottom ?? 1)),
-                instruction.Texture.ToSourceUV(new Vector2(instruction.SourceRectangle?.Right ?? 1, instruction.SourceRectangle?.Top ?? 0)),
-                instruction.Color
-            );
-        }
-
         public void Draw(DrawQuadInstruction instruction)
         {
             TriBatch.DrawQuad(
@@ -93,14 +77,16 @@ namespace FoldEngine.Graphics
 
         internal void Begin()
         {
+            GraphicsDevice.SetRenderTarget(Target);
+            GraphicsDevice.Clear(Layer?.Color ?? Color.Transparent);
+            
             GizBatch.WhiteTexture = RenderingUnit.WhiteTexture;
-            TriBatch.Begin(samplerState: SamplerState.PointClamp);
+            TriBatch.Begin(samplerState: SamplerState.PointClamp, depthStencilState: DepthStencilState.Default);
             GizBatch.Begin(samplerState: SamplerState.PointClamp);
         }
         internal void End()
         {
             GraphicsDevice.SetRenderTarget(Target);
-            GraphicsDevice.Clear(Layer?.Color ?? Color.Transparent);
             TriBatch.End();
             GizBatch.End();
         }
@@ -108,7 +94,9 @@ namespace FoldEngine.Graphics
         public void Resize(int newWidth, int newHeight)
         {
             Target?.Dispose();
-            Target = new RenderTarget2D(GraphicsDevice, newWidth, newHeight);
+            Target = new RenderTarget2D(GraphicsDevice, newWidth, newHeight, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, usage: RenderTargetUsage.PlatformContents);
+            //TODO MAKE THIS NOT PRESEVE CONTENTS
+            //Tweak the TriBatcher to support batching with different parameters together
         }
     }
 }

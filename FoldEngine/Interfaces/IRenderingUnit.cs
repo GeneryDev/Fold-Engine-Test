@@ -15,6 +15,7 @@ namespace FoldEngine.Interfaces
         IGameCore Core { get; }
         
         TextureManager Textures { get; set; }
+        EffectManager Effects { get; set; }
         FontManager Fonts { get; set; }
 
         Point WindowSize { get; set; }
@@ -29,7 +30,7 @@ namespace FoldEngine.Interfaces
         IRenderingLayer WorldLayer { get; }
         IRenderingLayer WindowLayer { get; }
         IRenderingLayer GizmoLayer { get; }
-        
+
         Rectangle GetGroupBounds(RenderGroup renderGroup);
         void Initialize();
     }

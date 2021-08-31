@@ -18,7 +18,6 @@ namespace FoldEngine.Graphics {
         private Matrix? _matrix;
         private Viewport _lastViewport;
         private Matrix _projection;
-        private Rectangle _tempRect = new Rectangle(0, 0, 0, 0);
         public bool NeedsHalfPixelOffset { get; set; } = true;
         
         public TriangleBatch(GraphicsDevice graphicsDevice)
@@ -32,7 +31,7 @@ namespace FoldEngine.Graphics {
         }
 
         private void SetupMatrix(Viewport viewport) {
-            Matrix.CreateOrthographicOffCenter(0.0f, viewport.Width, viewport.Height, 0.0f, 0.0f, -1f, out this._projection);
+            Matrix.CreateOrthographicOffCenter(0.0f, viewport.Width, viewport.Height, 0.0f, 0.0f, -100f, out this._projection);
             if (NeedsHalfPixelOffset)
             {
                 this._projection.M41 += -0.5f * this._projection.M11;
@@ -112,6 +111,21 @@ namespace FoldEngine.Graphics {
             Color? colorB = null,
             Color? colorC = null) {
             
+            DrawTriangle(texture, new Vector3(a, 0), new Vector3(b, 0), new Vector3(c, 0), texA, texB, texC, colorA, colorB, colorC);
+        }
+
+        public void DrawTriangle(
+            Texture2D texture,
+            Vector3 a,
+            Vector3 b,
+            Vector3 c,
+            Vector2 texA,
+            Vector2 texB,
+            Vector2 texC,
+            Color? colorA = null,
+            Color? colorB = null,
+            Color? colorC = null) {
+            
             CheckValid(texture);
             
             colorA = colorA ?? Color.White;
@@ -125,9 +139,9 @@ namespace FoldEngine.Graphics {
             item.VertexB.Color = colorB.Value;
             item.VertexC.Color = colorC.Value;
 
-            item.VertexA.Position = new Vector3(a, 0);
-            item.VertexB.Position = new Vector3(b, 0);
-            item.VertexC.Position = new Vector3(c, 0);
+            item.VertexA.Position = a;
+            item.VertexB.Position = b;
+            item.VertexC.Position = c;
 
             item.VertexA.TextureCoordinate = texA;
             item.VertexB.TextureCoordinate = texB;
@@ -140,6 +154,23 @@ namespace FoldEngine.Graphics {
             Vector2 b,
             Vector2 c,
             Vector2 d,
+            Vector2 texA,
+            Vector2 texB,
+            Vector2 texC,
+            Vector2 texD,
+            Color? colorA = null,
+            Color? colorB = null,
+            Color? colorC = null,
+            Color? colorD = null) {
+            DrawQuad(texture, new Vector3(a, 0), new Vector3(b, 0), new Vector3(c, 0), new Vector3(d, 0), texA, texB, texC, texC, colorA, colorB, colorC, colorD);
+        }
+
+        public void DrawQuad(
+            Texture2D texture,
+            Vector3 a,
+            Vector3 b,
+            Vector3 c,
+            Vector3 d,
             Vector2 texA,
             Vector2 texB,
             Vector2 texC,
@@ -164,9 +195,9 @@ namespace FoldEngine.Graphics {
             item0.VertexB.Color = colorB.Value;
             item0.VertexC.Color = colorC.Value;
 
-            item0.VertexA.Position = new Vector3(a, 0);
-            item0.VertexB.Position = new Vector3(b, 0);
-            item0.VertexC.Position = new Vector3(c, 0);
+            item0.VertexA.Position = a;
+            item0.VertexB.Position = b;
+            item0.VertexC.Position = c;
 
             item0.VertexA.TextureCoordinate = texA;
             item0.VertexB.TextureCoordinate = texB;
@@ -177,13 +208,17 @@ namespace FoldEngine.Graphics {
             item1.VertexB.Color = colorD.Value;
             item1.VertexC.Color = colorC.Value;
 
-            item1.VertexA.Position = new Vector3(b, 0);
-            item1.VertexB.Position = new Vector3(d, 0);
-            item1.VertexC.Position = new Vector3(c, 0);
+            item1.VertexA.Position = b;
+            item1.VertexB.Position = d;
+            item1.VertexC.Position = c;
 
             item1.VertexA.TextureCoordinate = texB;
             item1.VertexB.TextureCoordinate = texD;
             item1.VertexC.TextureCoordinate = texC;
+        }
+
+        public void Clear() {
+            _batcher.Clear();
         }
     }
 
@@ -310,6 +345,10 @@ namespace FoldEngine.Graphics {
             }
             else
                 _device.DrawUserIndexedPrimitives(primitiveType, _vertexArray, 0, numVertices, _index, 0, primitiveCount, VertexPositionColorTexture.VertexDeclaration);
+        }
+
+        public void Clear() {
+            _batchItemCount = 0;
         }
     }
 

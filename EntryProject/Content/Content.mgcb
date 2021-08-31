@@ -28,6 +28,12 @@
 #begin Config/input.json
 /copy:Config/input.json
 
+#begin Effects/testfx.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Effects/testfx.fx
+
 #begin Fonts/default.7.json
 /copy:Fonts/default.7.json
 

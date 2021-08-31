@@ -15,10 +15,8 @@ namespace FoldEngine.Graphics
         private readonly Dictionary<string, FoldEngine.Graphics.ITexture> _sprites = new Dictionary<string, FoldEngine.Graphics.ITexture>();
 
         private ContentManager _content;
-        private GraphicsDeviceManager _graphics;
         internal GraphicsDevice _device;
-        private SpriteBatch _spriteBatch;
-        
+
         public readonly Dictionary<string, TextureAtlas> Atlases = new Dictionary<string, TextureAtlas>();
 
         public FoldEngine.Graphics.ITexture this[string name]
@@ -36,11 +34,9 @@ namespace FoldEngine.Graphics
             set => _sprites[name] = value;
         }
 
-        public TextureManager(GraphicsDeviceManager graphics, GraphicsDevice device, SpriteBatch spriteBatch, ContentManager content)
+        public TextureManager(GraphicsDevice device, ContentManager content)
         {
-            this._graphics = graphics;
             this._device = device;
-            this._spriteBatch = spriteBatch;
             this._content = content;
 
             RenderTarget2D nullTexture = new RenderTarget2D(device, 2, 2);
