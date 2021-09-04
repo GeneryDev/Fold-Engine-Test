@@ -206,19 +206,6 @@ namespace FoldEngine.Graphics {
             meshInfo.TriangleCount++;
         }
 
-        public bool IsPointInsidePolygon(Vector2 point, string name) {
-            int hits = 0;
-            foreach(Line face in GetLinesForMesh(name)) {
-                if(face.From.Y < 0 != face.To.Y < 0) {
-                    double xIntersect = (double)face.From.X + (-(double)face.From.Y / ((double)face.To.Y - face.From.Y)) * ((double)face.To.X - face.From.X);
-                    if(xIntersect >= 0) {
-                        hits++;
-                    }
-                }
-            }
-            return hits % 2 != 0;
-        }
-
         public IEnumerable<MeshVertex> GetVertexInfoForMesh(string name) {
             MeshInfo meshInfo = _meshInfos[name];
             for(int i = meshInfo.VertexStartIndex; i < meshInfo.VertexStartIndex + meshInfo.VertexCount; i++) {

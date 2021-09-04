@@ -124,5 +124,22 @@ namespace FoldEngine.Rendering {
             }
             scene.DrawGizmo(prevVertex, firstVertex, outlineColor);
         }
+        
+        public long ListEntitiesIntersectingPosition(Vector2 worldPos) {
+            _meshRenderables.Reset();
+
+            while(_meshRenderables.Next()) {
+                ref Transform transform = ref _meshRenderables.GetCoComponent<Transform>();
+                ref MeshRenderable meshRenderable = ref _meshRenderables.GetComponent();
+
+                if(meshRenderable.MeshIdentifier == null || meshRenderable.TextureIdentifier == null) continue;
+
+                if(meshRenderable.Contains(worldPos, ref transform)) {
+                    return _meshRenderables.GetEntityId();
+                }
+            }
+
+            return -1;
+        }
     }
 }

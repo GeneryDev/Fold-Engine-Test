@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using EntryProject.Util;
 using FoldEngine.Commands;
+using FoldEngine.Editor.Tools;
 using FoldEngine.Editor.Transactions;
 using FoldEngine.Editor.Views;
 using FoldEngine.Graphics;
@@ -117,6 +118,12 @@ namespace FoldEngine.Editor.Gui {
         public BorderPanel CenterPanel;
 
         #endregion
+
+        public readonly List<EditorTool> Tools = new List<EditorTool>();
+        public EditorTool SelectedTool;
+        public EditorTool ForcedTool;
+
+        public EditorTool ActiveTool => ForcedTool ?? SelectedTool;
         
         public readonly TransactionManager<EditorEnvironment> TransactionManager;
 
@@ -136,6 +143,7 @@ namespace FoldEngine.Editor.Gui {
             VisiblePanels.Add(CenterPanel);
             
             SetupControlScheme();
+            SetupTools();
         }
 
         private void SetupControlScheme() {
@@ -162,6 +170,13 @@ namespace FoldEngine.Editor.Gui {
             ControlScheme.PutAction("editor.movement.axis.y", new AnalogAction(() => (keyboard[Keys.Down].Down ? -1 : 0) + (keyboard[Keys.Up].Down ? 1 : 0)));
             
             ControlScheme.PutAction("editor.movement.faster", new ButtonAction(keyboard[Keys.LeftShift]));
+        }
+
+        private void SetupTools() {
+            Tools.Add(new HandTool(this));
+            Tools.Add(new SelectTool(this));
+
+            SelectedTool = Tools[1];
         }
 
         public override void Input(InputUnit inputUnit) {

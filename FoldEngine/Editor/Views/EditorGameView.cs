@@ -30,27 +30,26 @@ namespace FoldEngine.Editor.Views {
     public class GameViewPanel : GuiPanel {
         public override bool Focusable => true;
 
-        private bool dragging = false;
-        private Vector2 dragStartWorldPos;
-
-        private EditorTool SelectedTool;
-        private EditorTool ForcedTool;
-
-        private EditorTool ActiveTool => ForcedTool ?? SelectedTool;
-        
         public GameViewPanel(EditorGameView editorGameView, GuiEnvironment environment) : base(environment) {
             MayScroll = true;
-            SelectedTool = new HandTool(environment as EditorEnvironment);
         }
 
         public override void OnMousePressed(ref MouseEvent e) {
-            ActiveTool?.OnMousePressed(ref e);
+            if(e.Button == MouseEvent.MiddleButton || e.Button == MouseEvent.RightButton) {
+                ((EditorEnvironment) Environment).ForcedTool = ((EditorEnvironment) Environment).Tools[0];
+            }
+            
+            ((EditorEnvironment) Environment).ActiveTool?.OnMousePressed(ref e);
             base.OnMousePressed(ref e);
         }
 
         public override void OnMouseReleased(ref MouseEvent e) {
+            if(e.Button == MouseEvent.MiddleButton || e.Button == MouseEvent.RightButton) {
+                ((EditorEnvironment) Environment).ForcedTool = null;
+            }
+            
             base.OnMouseReleased(ref e);
-            ActiveTool?.OnMouseReleased(ref e);
+            ((EditorEnvironment) Environment).ActiveTool?.OnMouseReleased(ref e);
         }
 
         public override void Scroll(int dir) {
@@ -83,7 +82,7 @@ namespace FoldEngine.Editor.Views {
                 Environment.Scene.EditorComponents.EditorTransform.Position += move * speed * Time.DeltaTime;
             }
             
-            ActiveTool?.OnInput(controls);
+            ((EditorEnvironment) Environment).ActiveTool?.OnInput(controls);
         }
     }
 }

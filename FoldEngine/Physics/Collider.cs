@@ -110,16 +110,14 @@ namespace FoldEngine.Physics {
                 case ColliderType.None: {
                     return false;
                 }
-                case ColliderType.Box: {
+                case ColliderType.Box:
+                case ColliderType.Mesh: {
                     foreach(Line line in GetFaces(ref transform)) {
                         Vector2 pointCopy = point;
                         Line.LayFlat(line, ref pointCopy, out _);
                         if(pointCopy.Y > 0) return false;
                     }
                     return true;
-                }
-                case ColliderType.Mesh: {
-                    return transform.Scene.Meshes.IsPointInsidePolygon(transform.Relativize(point), MeshIdentifier);
                 }
                 default: throw new InvalidOperationException();
             }
