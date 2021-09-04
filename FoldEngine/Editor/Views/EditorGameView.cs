@@ -55,8 +55,17 @@ namespace FoldEngine.Editor.Views {
 
         public override void Scroll(int dir) {
             if(Environment.Scene.EditorComponents != null) {
-                Environment.Scene.EditorComponents.EditorTransform.LocalScale -=
-                    Environment.Scene.EditorComponents.EditorTransform.LocalScale * 0.05f * dir;
+                ref Transform cameraTransform = ref Environment.Scene.EditorComponents.EditorTransform;
+
+                var worldLayer = Environment.Scene.Core.RenderingUnit.WorldLayer;
+                Vector2 cameraRelativePos =
+                    worldLayer.LayerToCamera(worldLayer.WindowToLayer(Environment.MousePos.ToVector2()));
+                Vector2 pivot = cameraTransform.Apply(cameraRelativePos);
+                
+                cameraTransform.LocalScale -= cameraTransform.LocalScale * 0.05f * dir;
+                
+                cameraTransform.Position = pivot;
+                cameraTransform.Position = cameraTransform.Apply(-cameraRelativePos);
             }
         }
 

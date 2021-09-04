@@ -27,12 +27,12 @@ namespace FoldEngine.Editor.Tools {
         public override void OnInput(ControlScheme controls) {
             if(_dragging) {
                 var worldLayer = Environment.Scene.Core.RenderingUnit.WorldLayer;
-                Vector2 cameraPos = worldLayer.LayerToCamera(worldLayer.WindowToLayer(Environment.MousePos.ToVector2()));
+                Vector2 cameraRelativePos = worldLayer.LayerToCamera(worldLayer.WindowToLayer(Environment.MousePos.ToVector2()));
 
                 ref Transform cameraTransform = ref Scene.EditorComponents.EditorTransform;
 
                 cameraTransform.Position = _dragStartWorldPos;
-                cameraTransform.Position = cameraTransform.Apply(-cameraPos);
+                cameraTransform.Position = cameraTransform.Apply(-cameraRelativePos);
             }
         }
 
