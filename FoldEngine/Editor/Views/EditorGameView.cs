@@ -1,5 +1,7 @@
 ﻿using System;
+using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
+using FoldEngine.Editor.Tools;
 using FoldEngine.Gui;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
@@ -28,8 +30,27 @@ namespace FoldEngine.Editor.Views {
     public class GameViewPanel : GuiPanel {
         public override bool Focusable => true;
 
+        private bool dragging = false;
+        private Vector2 dragStartWorldPos;
+
+        private EditorTool SelectedTool;
+        private EditorTool ForcedTool;
+
+        private EditorTool ActiveTool => ForcedTool ?? SelectedTool;
+        
         public GameViewPanel(EditorGameView editorGameView, GuiEnvironment environment) : base(environment) {
             MayScroll = true;
+            SelectedTool = new HandTool(environment as EditorEnvironment);
+        }
+
+        public override void OnMousePressed(ref MouseEvent e) {
+            ActiveTool?.OnMousePressed(ref e);
+            base.OnMousePressed(ref e);
+        }
+
+        public override void OnMouseReleased(ref MouseEvent e) {
+            base.OnMouseReleased(ref e);
+            ActiveTool?.OnMouseReleased(ref e);
         }
 
         public override void Scroll(int dir) {
@@ -52,6 +73,8 @@ namespace FoldEngine.Editor.Views {
                 
                 Environment.Scene.EditorComponents.EditorTransform.Position += move * speed * Time.DeltaTime;
             }
+            
+            ActiveTool?.OnInput(controls);
         }
     }
 }

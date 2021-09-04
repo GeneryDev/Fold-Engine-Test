@@ -40,6 +40,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Inspector\HideInInspectorAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Inspector\NameAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\SceneEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Tools\EditorTool.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Tools\HandTool.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\ComponentTransactions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\CreateEntityTransaction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\DeleteEntityTransaction.cs" />

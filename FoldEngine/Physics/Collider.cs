@@ -119,7 +119,7 @@ namespace FoldEngine.Physics {
                     return true;
                 }
                 case ColliderType.Mesh: {
-                    return transform.Scene.Meshes.IsPointInsidePolygon(transform.ApplyReverse(point), MeshIdentifier);
+                    return transform.Scene.Meshes.IsPointInsidePolygon(transform.Relativize(point), MeshIdentifier);
                 }
                 default: throw new InvalidOperationException();
             }

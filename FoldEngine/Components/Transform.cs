@@ -364,11 +364,11 @@ namespace FoldEngine.Components {
         /// <param name="point"></param>
         /// <returns></returns>
         [Pure]
-        public Vector2 ApplyReverse(Vector2 point) {
+        public Vector2 Relativize(Vector2 point) {
             if(!IsNotNull) return point;
             ref readonly Transform current = ref this;
 
-            return (Vector2) ((Complex) (Parent.ApplyReverse(point) - current.LocalPosition) / current.RotationComplex)
+            return (Vector2) ((Complex) (Parent.Relativize(point) - current.LocalPosition) / current.RotationComplex)
                    / current.LocalScale;
         }
 
