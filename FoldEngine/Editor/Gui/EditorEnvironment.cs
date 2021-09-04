@@ -13,6 +13,7 @@ using FoldEngine.Util.Transactions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Keyboard = FoldEngine.Input.Keyboard;
+using Mouse = FoldEngine.Input.Mouse;
 
 namespace FoldEngine.Editor.Gui {
     public class EditorEnvironment : GuiEnvironment {
@@ -139,6 +140,7 @@ namespace FoldEngine.Editor.Gui {
 
         private void SetupControlScheme() {
             Keyboard keyboard = Scene.Core.InputUnit.Devices.Keyboard;
+            Mouse mouse = Scene.Core.InputUnit.Devices.Mouse;
             
             ControlScheme.PutAction("editor.undo", new ButtonAction(keyboard[Keys.Z]) {Repeat = true}.Modifiers(keyboard[Keys.LeftControl]));
             ControlScheme.PutAction("editor.redo", new ButtonAction(keyboard[Keys.Y]) {Repeat = true}.Modifiers(keyboard[Keys.LeftControl]));
@@ -152,6 +154,14 @@ namespace FoldEngine.Editor.Gui {
             ControlScheme.PutAction("editor.field.caret.end", new ButtonAction(keyboard[Keys.End]) {Repeat = true});
             
             ControlScheme.PutAction("editor.field.caret.debug", new ButtonAction(keyboard[Keys.F1]) {Repeat = true});
+            
+            ControlScheme.PutAction("editor.zoom.in", new ChangeAction(mouse.ScrollWheel, 0.5f, null));
+            ControlScheme.PutAction("editor.zoom.out", new ChangeAction(mouse.ScrollWheel, null, -1.5f));
+            
+            ControlScheme.PutAction("editor.movement.axis.x", new AnalogAction(() => (keyboard[Keys.Left].Down ? -1 : 0) + (keyboard[Keys.Right].Down ? 1 : 0)));
+            ControlScheme.PutAction("editor.movement.axis.y", new AnalogAction(() => (keyboard[Keys.Down].Down ? -1 : 0) + (keyboard[Keys.Up].Down ? 1 : 0)));
+            
+            ControlScheme.PutAction("editor.movement.faster", new ButtonAction(keyboard[Keys.LeftShift]));
         }
 
         public override void Input(InputUnit inputUnit) {
@@ -162,9 +172,9 @@ namespace FoldEngine.Editor.Gui {
             
             if(HoverTarget.ScrollablePanel != null) {
                 if(HoverTarget.ScrollablePanel.IsAncestorOf(HoverTarget.Element)) {
-                    if(Scene.Core.InputUnit.Players[0].Get<ChangeAction>("zoom.in")) {
+                    if(ControlScheme.Get<ChangeAction>("editor.zoom.in")) {
                         HoverTarget.ScrollablePanel.Scroll(1);
-                    } else if(Scene.Core.InputUnit.Players[0].Get<ChangeAction>("zoom.out")) {
+                    } else if(ControlScheme.Get<ChangeAction>("editor.zoom.out")) {
                         HoverTarget.ScrollablePanel.Scroll(-1);
                     }
                 }

@@ -54,10 +54,10 @@ namespace Sandbox.Systems {
                 moveX *= 2;
             }
             
-            if(Owner.Core.InputUnit.Players[0].Get<ChangeAction>("zoom.in")) {
+            if(Owner.Core.InputUnit.Players[0].Get<ChangeAction>("editor.zoom.in")) {
                 Owner.MainCameraTransform.LocalScale /= 1.2f;
                 Console.WriteLine("Scale is now: " + Owner.MainCameraTransform.LocalScale.X);
-            } else if(Owner.Core.InputUnit.Players[0].Get<ChangeAction>("zoom.out")) {
+            } else if(Owner.Core.InputUnit.Players[0].Get<ChangeAction>("editor.zoom.out")) {
                 Owner.MainCameraTransform.LocalScale *= 1.2f;
                 Console.WriteLine("Scale is now: " + Owner.MainCameraTransform.LocalScale.X);
             }
