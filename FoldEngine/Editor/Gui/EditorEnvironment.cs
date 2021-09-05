@@ -174,9 +174,8 @@ namespace FoldEngine.Editor.Gui {
 
         private void SetupTools() {
             Tools.Add(new HandTool(this));
-            Tools.Add(new SelectTool(this));
-
-            SelectedTool = Tools[1];
+            Tools.Add(new MoveTool(this));
+            Tools.Add(SelectedTool = new SelectTool(this));
         }
 
         public override void Input(InputUnit inputUnit) {

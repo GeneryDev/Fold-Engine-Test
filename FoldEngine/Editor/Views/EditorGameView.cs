@@ -18,6 +18,8 @@ namespace FoldEngine.Editor.Views {
         public override void Render(IRenderingUnit renderer) {
             renderer.Groups["editor"].Dependencies[0].Group.Size = ContentPanel.Bounds.Size;
             renderer.Groups["editor"].Dependencies[0].Destination = ContentPanel.Bounds;
+
+            ((EditorEnvironment) ContentPanel.Environment).ActiveTool?.Render(renderer);
         }
 
         public override void EnsurePanelExists(GuiEnvironment environment) {
