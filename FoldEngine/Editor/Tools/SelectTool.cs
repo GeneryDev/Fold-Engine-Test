@@ -1,6 +1,7 @@
 ﻿using System;
 using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
+using FoldEngine.Editor.Views;
 using FoldEngine.Gui;
 using FoldEngine.Input;
 using FoldEngine.Rendering;
@@ -8,6 +9,8 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Tools {
     public class SelectTool : EditorTool {
+        public override string Icon => "editor:cursor";
+        
         public SelectTool(EditorEnvironment environment) : base(environment) { }
         
         public override void OnInput(ControlScheme controls) {
@@ -24,6 +27,8 @@ namespace FoldEngine.Editor.Tools {
             long intersectingEntities = Scene.Systems.Get<LevelRenderer2D>().ListEntitiesIntersectingPosition(worldPos);
 
             Scene.Systems.Get<EditorBase>().EditingEntity = intersectingEntities;
+            Environment.GetView<EditorInspectorView>().SetEntity(intersectingEntities);
+            Environment.SwitchToView(Environment.GetView<EditorInspectorView>());
         }
 
         public override void OnMouseReleased(ref MouseEvent e) {

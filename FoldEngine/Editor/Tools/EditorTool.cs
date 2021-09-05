@@ -7,7 +7,8 @@ namespace FoldEngine.Editor.Tools {
     public abstract class EditorTool {
         protected readonly EditorEnvironment Environment;
         protected Scene Scene => Environment.Scene;
-        
+        public abstract string Icon { get; }
+
 
         public EditorTool(EditorEnvironment environment) {
             Environment = environment;

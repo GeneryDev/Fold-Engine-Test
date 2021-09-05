@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Tools {
     public class HandTool : EditorTool {
+        public override string Icon => "editor:hand";
         
         private bool _dragging = false;
         private Vector2 _dragStartWorldPos;

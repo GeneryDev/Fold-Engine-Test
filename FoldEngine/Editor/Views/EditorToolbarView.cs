@@ -5,6 +5,7 @@ using System.IO;
 using EntryProject.Util;
 using FoldEngine.Commands;
 using FoldEngine.Editor.Gui;
+using FoldEngine.Editor.Tools;
 using FoldEngine.Editor.Views;
 using FoldEngine.Gui;
 using FoldEngine.Interfaces;
@@ -15,20 +16,46 @@ using Microsoft.Xna.Framework;
 using Woofer;
 
 namespace FoldEngine.Editor.Views {
-    public class EditorMenuView : EditorView {
+    public class EditorToolbarView : EditorView {
         public override string Icon => "editor:cog";
         public override string Name => "Toolbar";
 
         public override void Render(IRenderingUnit renderer) {
+            foreach(EditorTool tool in ((EditorEnvironment) ContentPanel.Environment).Tools) {
+                ContentPanel.Element<ToolbarButton>()
+                    .Down(tool == ((EditorEnvironment) ContentPanel.Environment).ActiveTool)
+                    .Text("")
+                    .FontSize(14)
+                    .Icon(renderer.Textures[tool.Icon])
+                    .LeftAction<SelectToolAction>()
+                    .Tool(tool);
+            }
+            
             // ContentPanel.Label(Scene.Name, 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
             // ContentPanel.Element<ToolbarButton>().Text("Save").FontSize(14).Icon(renderer.Textures["editor:cog"]);
+            // ContentPanel.Separator();
             ContentPanel.Element<ToolbarButton>().Text("").FontSize(14).Icon(renderer.Textures["editor:play"]).LeftAction<PlayStopAction>();
             ContentPanel.Element<ToolbarButton>().Down(Scene.Paused).Text("").FontSize(14).Icon(renderer.Textures["editor:pause"]).LeftAction<PauseAction>();
-            // ContentPanel.Separator();
             // ContentPanel.Button("Entities").Action(SceneEditor.Actions.ChangeToMenu, 1);
             // ContentPanel.Button("Systems").Action(SceneEditor.Actions.ChangeToMenu, 2);
             // ContentPanel.Button("Edit Save Data").Action(SceneEditor.Actions.Test, 0);
             // ContentPanel.Element<ToolbarButton>().Text("Quit").FontSize(14);
+        }
+    }
+
+    public class SelectToolAction : IGuiAction {
+        private EditorTool _tool;
+        
+        public SelectToolAction Tool(EditorTool tool) {
+            _tool = tool;
+            return this;
+        }
+        
+        public IObjectPool Pool { get; set; }
+        public void Perform(GuiElement element, MouseEvent e) {
+            if(element.Environment is EditorEnvironment editorEnvironment) {
+                editorEnvironment.SelectedTool = _tool;
+            }
         }
     }
 

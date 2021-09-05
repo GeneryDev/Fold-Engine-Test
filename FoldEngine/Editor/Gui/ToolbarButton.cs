@@ -24,7 +24,7 @@ namespace FoldEngine.Editor.Gui {
         
         public override void AdjustSpacing(GuiPanel parent) {
             _renderedName = Parent.RenderString(_text, _fontSize);
-            Bounds.Width = (_text.Length > 0 ? Margin*2 + (int)_renderedName.Width : 0) + 16 + _iconSize.X;
+            Bounds.Width = 12 * _fontSize / 7;
             Bounds.Height = 12 * _fontSize / 7;
             Margin = 4;
         }

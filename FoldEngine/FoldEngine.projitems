@@ -49,7 +49,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorGameView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorHierarchyView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorInspectorView.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorMenuView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorToolbarView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorSystemsView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorTestView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorView.cs" />

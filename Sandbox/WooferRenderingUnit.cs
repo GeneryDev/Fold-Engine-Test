@@ -173,6 +173,9 @@ namespace Woofer
             editorAtlas.AddTexture("checkmark", "editor/checkmark");
             editorAtlas.AddTexture("play", "editor/play");
             editorAtlas.AddTexture("pause", "editor/pause");
+            editorAtlas.AddTexture("cursor", "editor/cursor");
+            editorAtlas.AddTexture("hand", "editor/hand");
+            editorAtlas.AddTexture("move", "editor/move");
             editorAtlas.Pack();
 
 

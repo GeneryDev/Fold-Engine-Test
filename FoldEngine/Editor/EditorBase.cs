@@ -32,7 +32,7 @@ namespace FoldEngine.Editor {
         internal override void Initialize() {
             Environment = new EditorEnvironment(Owner);
 
-            Environment.AddView<EditorMenuView>(Environment.NorthPanel);
+            Environment.AddView<EditorToolbarView>(Environment.NorthPanel);
             Environment.AddView<EditorHierarchyView>(Environment.WestPanel);
             Environment.AddView<EditorSystemsView>(Environment.WestPanel);
             Environment.AddView<EditorInspectorView>(Environment.EastPanel);
