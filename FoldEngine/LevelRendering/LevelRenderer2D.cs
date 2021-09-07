@@ -64,7 +64,7 @@ namespace FoldEngine.Rendering {
                 Owner.MainCameraId = _cameras.GetEntityId();
             }
 
-            IRenderingLayer layer = camera.RenderToLayer != null
+            IRenderingLayer layer = !string.IsNullOrEmpty(camera.RenderToLayer)
                 ? renderer.MainGroup[camera.RenderToLayer]
                 : renderer.WorldLayer;
             if(layer == null) return;

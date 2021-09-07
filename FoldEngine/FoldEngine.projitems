@@ -43,6 +43,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Tools\EditorTool.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Tools\HandTool.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Tools\MoveTool.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Tools\RotateTool.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Tools\ScaleTool.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Tools\SelectTool.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\ComponentTransactions.cs" />

@@ -47,18 +47,20 @@ namespace FoldEngine.Rendering {
 
                 i++;
             }
-            faces[faces.Length-1] = new Line(prevVertex, firstVertex);
+            if(faces.Length > 0) faces[faces.Length-1] = new Line(prevVertex, firstVertex);
 
             return faces;
         }
 
         public bool Contains(Vector2 point, ref Transform transform) {
+            bool any = false;
             foreach(Line line in GetFaces(ref transform)) {
+                any = true;
                 Vector2 pointCopy = point;
                 Line.LayFlat(line, ref pointCopy, out _);
                 if(pointCopy.Y > 0) return false;
             }
-            return true;
+            return any;
         }
     }
 }

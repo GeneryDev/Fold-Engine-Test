@@ -207,6 +207,7 @@ namespace FoldEngine.Graphics {
         }
 
         public IEnumerable<MeshVertex> GetVertexInfoForMesh(string name) {
+            if(!_meshInfos.ContainsKey(name)) yield break;
             MeshInfo meshInfo = _meshInfos[name];
             for(int i = meshInfo.VertexStartIndex; i < meshInfo.VertexStartIndex + meshInfo.VertexCount; i++) {
                 yield return _vertices[i];
@@ -214,6 +215,7 @@ namespace FoldEngine.Graphics {
         }
 
         public IEnumerable<Vector2> GetVerticesForMesh(string name) {
+            if(!_meshInfos.ContainsKey(name)) yield break;
             MeshInfo meshInfo = _meshInfos[name];
             for(int i = meshInfo.VertexStartIndex; i < meshInfo.VertexStartIndex + meshInfo.VertexCount; i++) {
                 yield return _vertices[i].Position.ToVector2();
@@ -221,6 +223,7 @@ namespace FoldEngine.Graphics {
         }
 
         public IEnumerable<Line> GetLinesForMesh(string name) {
+            if(!_meshInfos.ContainsKey(name)) yield break;
             MeshInfo meshInfo = _meshInfos[name];
             for(int i = meshInfo.VertexStartIndex; i < meshInfo.VertexStartIndex + meshInfo.VertexCount; i++) {
                 yield return new Line(_vertices[i].Position.ToVector2(),
@@ -233,6 +236,7 @@ namespace FoldEngine.Graphics {
         }
 
         public IEnumerable<Tuple<Vector2, Vector2, Vector2>> GetVertexTriosForMesh(string name) {
+            if(!_meshInfos.ContainsKey(name)) yield break;
             MeshInfo meshInfo = _meshInfos[name];
             for(int i = meshInfo.VertexStartIndex; i < meshInfo.VertexStartIndex + meshInfo.VertexCount; i++) {
                 yield return new Tuple<Vector2, Vector2, Vector2>(
@@ -252,22 +256,28 @@ namespace FoldEngine.Graphics {
         }
 
         public TriangleEnumerator GetTrianglesForMesh(string name) {
-            return new TriangleEnumerator(this, _meshInfos[name]);
+            return _meshInfos.ContainsKey(name)
+                ? new TriangleEnumerator(this, _meshInfos[name])
+                : new TriangleEnumerator(this);
         }
 
         public int GetVertexCountForMesh(string name) {
+            if(!_meshInfos.ContainsKey(name)) return 0;
             return _meshInfos[name].VertexCount;
         }
 
         public float GetRadiusSquaredForMesh(string name) {
+            if(!_meshInfos.ContainsKey(name)) return 0;
             return _meshInfos[name].RadiusSquared;
         }
 
         public float GetRadiusForMesh(string name) {
+            if(!_meshInfos.ContainsKey(name)) return 0;
             return _meshInfos[name].Radius;
         }
 
         public Vector2 GetFarthestVertexFromOrigin(string name) {
+            if(!_meshInfos.ContainsKey(name)) return Vector2.Zero;
             return _meshInfos[name].FarthestVertexFromOrigin;
         }
 
@@ -276,16 +286,20 @@ namespace FoldEngine.Graphics {
             private MeshCollection meshCollection;
             private MeshInfo meshInfo;
 
+            internal TriangleEnumerator(MeshCollection meshCollection) {
+                this.meshCollection = meshCollection;
+                this.meshInfo = new MeshInfo();
+                i = 0;
+            }
+
             internal TriangleEnumerator(MeshCollection meshCollection, MeshInfo meshInfo) {
                 this.meshCollection = meshCollection;
                 this.meshInfo = meshInfo;
                 i = meshInfo.TriangleStartIndex - 3;
-                // for(int i = meshInfo.TriangleStartIndex; ; i += 3) {
-                    // yield return new Triangle(_vertices[_indices[i]], _vertices[_indices[i+1]], _vertices[_indices[i+2]]);
-                // }
             }
 
             public bool MoveNext() {
+                if(meshInfo.TriangleCount == 0) return false;
                 i += 3;
                 return i < meshInfo.TriangleStartIndex + meshInfo.TriangleCount * 3;
             }
@@ -360,6 +374,10 @@ namespace FoldEngine.Graphics {
                 this.Friction = 1;
                 this.Restitution = 0;
             }
-        } 
+        }
+
+        public bool Exists(string identifier) {
+            return _meshInfos.ContainsKey(identifier);
+        }
     }
 }

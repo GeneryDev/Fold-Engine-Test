@@ -43,7 +43,7 @@ namespace FoldEngine.Physics {
                 GravityMultiplier = 1,
                 Mass = 1,
                 Restitution = 0.0f,
-                Friction = 0.1f
+                Friction = 0.03f
             };
         }
 
