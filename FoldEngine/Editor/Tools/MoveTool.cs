@@ -106,11 +106,7 @@ namespace FoldEngine.Editor.Tools {
                     Entity entity = new Entity(Scene, entityId);
                 
                     _movePivot.LocalPosition += entity.Transform.Position;
-                    if(editorBase.EditingEntity.Count == 1) {
-                        _movePivot.Rotation = entity.Transform.Rotation;
-                    } else {
-                        _movePivot.Rotation = 0;
-                    }
+                    _movePivot.Rotation = entity.Transform.Rotation;
                 }
                 if(any) _movePivot.LocalPosition /= editorBase.EditingEntity.Count;
             }
