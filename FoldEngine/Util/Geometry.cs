@@ -39,7 +39,7 @@ namespace EntryProject.Util {
                 if(point.X <= 0) return point.Length();
                 if(point.X >= flat.X) return Vector2.Distance(point, flat);
             }
-            return point.Y;
+            return Math.Abs(point.Y);
         }
 
         public Vector2 SnapPointToLine(Vector2 point, bool capped) {
