@@ -27,7 +27,6 @@ namespace FoldEngine.Editor.Tools {
             long intersectingEntities = Scene.Systems.Get<LevelRenderer2D>().ListEntitiesIntersectingPosition(worldPos);
 
             Scene.Systems.Get<EditorBase>().EditingEntity = intersectingEntities;
-            Environment.GetView<EditorInspectorView>().SetEntity(intersectingEntities);
             Environment.SwitchToView(Environment.GetView<EditorInspectorView>());
         }
 

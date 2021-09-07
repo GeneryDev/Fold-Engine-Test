@@ -41,7 +41,7 @@ namespace FoldEngine.Editor.Tools {
             Vector2 dir = (end - start).Normalized();
             Complex dirComplex = dir;
 
-            float thickness = 4;
+            float thickness = 2;
             float headLength = 20;
             float headWidth = 16;
             

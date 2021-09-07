@@ -19,31 +19,34 @@ namespace FoldEngine.Editor.Views {
         public override string Icon => "editor:info";
         public override string Name => "Inspector";
 
-        private long _id = -1;
         private object _object = null;
 
         private static readonly StringBuilder StringBuilder = new StringBuilder();
         
         public override void Render(IRenderingUnit renderer) {
             ContentPanel.MayScroll = true;
-            if(_id != -1 && Scene.Components.HasComponent<Transform>(_id)) {
-                RenderEntityView(renderer);
+            long id = -1;
+            var editorBase = Scene.Systems.Get<EditorBase>();
+            if(editorBase.EditingEntity != -1) id = editorBase.EditingEntity;
+            
+            if(id != -1 && Scene.Components.HasComponent<Transform>(id)) {
+                RenderEntityView(renderer, id);
             } else if(_object != null) {
                 RenderObjectView(renderer);
             }
             // ContentPanel.Label(Scene.Name, 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
         }
 
-        private void RenderEntityView(IRenderingUnit renderer) {
-            ContentPanel.Label(Scene.Components.GetComponent<EntityName>(_id).Name, 14)
+        private void RenderEntityView(IRenderingUnit renderer, long id) {
+            ContentPanel.Label(Scene.Components.GetComponent<EntityName>(id).Name, 14)
                 .TextAlignment(-1)
                 .Icon(renderer.Textures["editor:cube"]);
-            ContentPanel.Label($"ID: {_id}", 7).TextAlignment(-1);
+            ContentPanel.Label($"ID: {id}", 7).TextAlignment(-1);
             ContentPanel.Spacing(12);
 
             foreach(ComponentSet set in Scene.Components.Sets.Values) {
                 // if(set.ComponentType == typeof(EntityName)) continue;
-                if(set.Has((int) _id)) {
+                if(set.Has((int) id)) {
                     ComponentInfo componentInfo = ComponentInfo.Get(set.ComponentType);
                     if(componentInfo.HideInInspector) continue;
 
@@ -51,15 +54,15 @@ namespace FoldEngine.Editor.Views {
 
                     ContentPanel.Element<ComponentHeader>()
                         .Info(componentInfo)
-                        .Id(_id)
+                        .Id(id)
                         .ContextMenuAction<ShowComponentMenuAction>()
                         .Info(componentInfo)
-                        .Id(_id);
+                        .Id(id);
 
                     // ContentPanel.Label(componentInfo.Name, 14).TextAlignment(-1);
 
                     foreach(ComponentMember member in componentInfo.Members) {
-                        object value = set.GetFieldValue((int) _id, member.FieldInfo);
+                        object value = set.GetFieldValue((int) id, member.FieldInfo);
                         // ContentPanel
                         //     .Label(
                         //         StringBuilder
@@ -74,7 +77,7 @@ namespace FoldEngine.Editor.Views {
 
                         ContentPanel.Element<ComponentMemberLabel>().Member(member);
 
-                        member.ForEntity(set, _id).CreateInspectorElement(ContentPanel, value);
+                        member.ForEntity(set, id).CreateInspectorElement(ContentPanel, value);
 
                         ContentPanel.Element<ComponentMemberBreak>();
                         // ContentPanel.Spacing(5);
@@ -82,7 +85,7 @@ namespace FoldEngine.Editor.Views {
                 }
             }
 
-            ContentPanel.Button("Add Component", 14).LeftAction<ShowAddComponentMenuAction>().Id(_id);
+            ContentPanel.Button("Add Component", 14).LeftAction<ShowAddComponentMenuAction>().Id(id);
         }
 
         private void RenderObjectView(IRenderingUnit renderer) {
@@ -105,14 +108,8 @@ namespace FoldEngine.Editor.Views {
             }
         }
 
-        public void SetEntity(long id) {
-            _id = id;
-            _object = null;
-        }
-
         public void SetObject(object obj) {
             _object = obj;
-            _id = -1;
         }
     }
     
