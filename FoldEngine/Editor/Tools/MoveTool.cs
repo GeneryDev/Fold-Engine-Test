@@ -1,5 +1,6 @@
 ﻿using System;
 using EntryProject.Util;
+using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
 using FoldEngine.Graphics;
 using FoldEngine.Gui;
@@ -18,15 +19,35 @@ namespace FoldEngine.Editor.Tools {
             base.OnMousePressed(ref e);
         }
 
+        private Transform _movePivot;
+
+        private void EnsurePivotExists() {
+            if(!_movePivot.IsNotNull) {
+                _movePivot = Transform.InitializeComponent(Scene, 0);
+            }
+        }
+
         public override void Render(IRenderingUnit renderer) {
+            EnsurePivotExists();
+            
             EditorBase editorBase = Scene.Systems.Get<EditorBase>();
+            _movePivot.LocalPosition = default;
+            bool any = false;
             foreach(long entityId in editorBase.EditingEntity) {
                 if(entityId == -1) continue;
+                any = true;
 
                 Entity entity = new Entity(Scene, entityId);
-                Vector2 origin = entity.Transform.Position;
-                Complex rotation = (entity.Transform.Apply(Vector2.UnitX) - origin).Normalized();
             
+                _movePivot.LocalPosition += entity.Transform.Position;
+            }
+
+            if(any) {
+                _movePivot.LocalPosition /= editorBase.EditingEntity.Count;
+                
+                Vector2 origin = _movePivot.LocalPosition;
+                Complex rotation = (_movePivot.Apply(Vector2.UnitX) - origin).Normalized();
+                
                 RenderArrow(renderer, origin, origin + (Vector2)((Complex)Vector2.UnitX * rotation), Color.Red, 100);
                 RenderArrow(renderer, origin, origin + (Vector2)((Complex)Vector2.UnitY * rotation), Color.Lime, 100);
             }
