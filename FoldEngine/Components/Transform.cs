@@ -427,5 +427,13 @@ namespace FoldEngine.Components {
                 }
             }
         }
+
+        public Transform CreateSnapshot() {
+            Transform snapshot = InitializeComponent(Scene, EntityId);
+            snapshot.LocalPosition = this.Position;
+            snapshot.LocalRotation = this.Rotation;
+            snapshot.LocalScale = this.LocalScale;
+            return snapshot;
+        }
     }
 }

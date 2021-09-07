@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
+using FoldEngine.Editor.Transactions;
 using FoldEngine.Graphics;
 using FoldEngine.Gui;
 using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
 using FoldEngine.Util;
+using FoldEngine.Util.Transactions;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Tools {
@@ -22,6 +24,7 @@ namespace FoldEngine.Editor.Tools {
         private Vector2 _pressPivotPosition;
         private Vector2 _pressMousePivotPosition;
         private List<Vector2> _pressEntityPivotPosition = new List<Vector2>();
+        private List<SetEntityTransformTransaction> _transactions = new List<SetEntityTransformTransaction>();
 
         public MoveTool(EditorEnvironment environment) : base(environment) { }
 
@@ -33,6 +36,7 @@ namespace FoldEngine.Editor.Tools {
                 _pressPivotPosition = _movePivot.Position;
                 _pressMousePivotPosition = _movePivot.Relativize(mouseWorldPos);
                 
+                _transactions.Clear();
                 _pressEntityPivotPosition.Clear();
                 EditorBase editorBase = Scene.Systems.Get<EditorBase>();
                 foreach(long entityId in editorBase.EditingEntity) {
@@ -43,6 +47,10 @@ namespace FoldEngine.Editor.Tools {
                     Vector2 relativeEntityPos = _movePivot.Relativize(entity.Transform.Position);
                     
                     _pressEntityPivotPosition.Add(relativeEntityPos);
+                    
+                    var transaction = new SetEntityTransformTransaction(entity.Transform.CreateSnapshot());
+                    Environment.TransactionManager.InsertTransaction(transaction);
+                    _transactions.Add(transaction);
                 }
                 _dragging = true;
             } else {
@@ -52,6 +60,8 @@ namespace FoldEngine.Editor.Tools {
 
         public override void OnMouseReleased(ref MouseEvent e) {
             _dragging = false;
+            _transactions.Clear();
+            _pressEntityPivotPosition.Clear();
             base.OnMouseReleased(ref e);
         }
 
@@ -94,6 +104,8 @@ namespace FoldEngine.Editor.Tools {
 
                     entity.Transform.Position = _movePivot.Position;
                     entity.Transform.Position = _movePivot.Apply(_pressEntityPivotPosition[i]);
+                    
+                    _transactions[i].UpdateAfter(entity.Transform.CreateSnapshot());
 
                     i++;
                 }

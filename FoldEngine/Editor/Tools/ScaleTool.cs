@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
+using FoldEngine.Editor.Transactions;
 using FoldEngine.Graphics;
 using FoldEngine.Gui;
 using FoldEngine.Interfaces;
@@ -22,6 +23,7 @@ namespace FoldEngine.Editor.Tools {
         private Vector2 _pressMousePivotPosition;
         private List<Vector2> _pressEntityPivotPosition = new List<Vector2>();
         private List<Vector2> _pressEntityScale = new List<Vector2>();
+        private List<SetEntityTransformTransaction> _transactions = new List<SetEntityTransformTransaction>();
 
         public ScaleTool(EditorEnvironment environment) : base(environment) { }
 
@@ -34,6 +36,7 @@ namespace FoldEngine.Editor.Tools {
                 
                 _pressEntityPivotPosition.Clear();
                 _pressEntityScale.Clear();
+                _transactions.Clear();
                 EditorBase editorBase = Scene.Systems.Get<EditorBase>();
                 foreach(long entityId in editorBase.EditingEntity) {
                     if(entityId == -1) continue;
@@ -44,6 +47,10 @@ namespace FoldEngine.Editor.Tools {
                     
                     _pressEntityPivotPosition.Add(relativeEntityPos);
                     _pressEntityScale.Add(entity.Transform.LocalScale);
+                    
+                    var transaction = new SetEntityTransformTransaction(entity.Transform.CreateSnapshot());
+                    Environment.TransactionManager.InsertTransaction(transaction);
+                    _transactions.Add(transaction);
                 }
                 _dragging = true;
             } else {
@@ -53,6 +60,8 @@ namespace FoldEngine.Editor.Tools {
 
         public override void OnMouseReleased(ref MouseEvent e) {
             _dragging = false;
+            _transactions.Clear();
+            _pressEntityPivotPosition.Clear();
             base.OnMouseReleased(ref e);
         }
 
@@ -92,6 +101,8 @@ namespace FoldEngine.Editor.Tools {
                     entity.Transform.Position = _movePivot.Apply(_pressEntityPivotPosition[i]);
                     
                     entity.Transform.LocalScale = _pressEntityScale[i] * newScale;
+                    
+                    _transactions[i].UpdateAfter(entity.Transform.CreateSnapshot());
                 
                     i++;
                 }
