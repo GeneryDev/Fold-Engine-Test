@@ -19,15 +19,17 @@ namespace FoldEngine.Editor.Tools {
         }
 
         public override void Render(IRenderingUnit renderer) {
-            long editingEntity = Scene.Systems.Get<EditorBase>().EditingEntity;
-            if(editingEntity == -1) return;
+            EditorBase editorBase = Scene.Systems.Get<EditorBase>();
+            foreach(long entityId in editorBase.EditingEntity) {
+                if(entityId == -1) continue;
+
+                Entity entity = new Entity(Scene, entityId);
+                Vector2 origin = entity.Transform.Position;
+                Complex rotation = (entity.Transform.Apply(Vector2.UnitX) - origin).Normalized();
             
-            Entity entity = new Entity(Scene, editingEntity);
-            Vector2 origin = entity.Transform.Position;
-            Complex rotation = (entity.Transform.Apply(Vector2.UnitX) - origin).Normalized();
-            
-            RenderArrow(renderer, origin, origin + (Vector2)((Complex)Vector2.UnitX * rotation), Color.Red, 100);
-            RenderArrow(renderer, origin, origin + (Vector2)((Complex)Vector2.UnitY * rotation), Color.Lime, 100);
+                RenderArrow(renderer, origin, origin + (Vector2)((Complex)Vector2.UnitX * rotation), Color.Red, 100);
+                RenderArrow(renderer, origin, origin + (Vector2)((Complex)Vector2.UnitY * rotation), Color.Lime, 100);
+            }
         }
 
         private void RenderArrow(IRenderingUnit renderer, Vector2 start, Vector2 end, Color color, float fixedLength = 0) {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using FoldEngine.Commands;
 using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
@@ -21,7 +22,7 @@ namespace FoldEngine.Editor {
         // public override bool ShouldSave => false;
         
         public EditorEnvironment Environment;
-        public long EditingEntity = -1;
+        public List<long> EditingEntity = new List<long>();
         
         public override void SubscribeToEvents() {
             Subscribe<WindowSizeChangedEvent>((ref WindowSizeChangedEvent evt) => {
@@ -51,13 +52,15 @@ namespace FoldEngine.Editor {
         public override void OnRender(IRenderingUnit renderer) {
             Environment.Render(renderer, renderer.RootGroup["editor_gui"], renderer.RootGroup["editor_gui_overlay"]);
 
-            if(EditingEntity != -1 && Owner.Components.HasComponent<Transform>(EditingEntity)) {
-                Entity entity = new Entity(Owner, EditingEntity);
+            foreach(long entityId in EditingEntity) {
+                if(Owner.Components.HasComponent<Transform>(entityId)) {
+                    Entity entity = new Entity(Owner, entityId);
                 
-                LevelRenderer2D.DrawOutline(entity);
-                ColliderGizmoRenderer.DrawColliderGizmos(entity);
+                    LevelRenderer2D.DrawOutline(entity);
+                    ColliderGizmoRenderer.DrawColliderGizmos(entity);
                 
-                Owner.DrawGizmo(entity.Transform.Position, 1, Color.AntiqueWhite);
+                    Owner.DrawGizmo(entity.Transform.Position, 1, Color.AntiqueWhite);                    
+                }
             }
         }
     }

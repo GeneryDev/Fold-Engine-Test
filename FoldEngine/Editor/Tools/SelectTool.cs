@@ -6,6 +6,7 @@ using FoldEngine.Gui;
 using FoldEngine.Input;
 using FoldEngine.Rendering;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 
 namespace FoldEngine.Editor.Tools {
     public class SelectTool : EditorTool {
@@ -26,7 +27,13 @@ namespace FoldEngine.Editor.Tools {
 
             long intersectingEntities = Scene.Systems.Get<LevelRenderer2D>().ListEntitiesIntersectingPosition(worldPos);
 
-            Scene.Systems.Get<EditorBase>().EditingEntity = intersectingEntities;
+            EditorBase editorBase = Scene.Systems.Get<EditorBase>();
+            if(!Scene.Core.InputUnit.Devices.Keyboard[Keys.LeftControl].Down
+               && !Scene.Core.InputUnit.Devices.Keyboard[Keys.RightControl].Down) {
+                editorBase.EditingEntity.Clear();
+            }
+
+            if(intersectingEntities != -1 && !editorBase.EditingEntity.Contains(intersectingEntities)) editorBase.EditingEntity.Add(intersectingEntities);
             Environment.SwitchToView(Environment.GetView<EditorInspectorView>());
         }
 

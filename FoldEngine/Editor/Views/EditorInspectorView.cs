@@ -27,7 +27,7 @@ namespace FoldEngine.Editor.Views {
             ContentPanel.MayScroll = true;
             long id = -1;
             var editorBase = Scene.Systems.Get<EditorBase>();
-            if(editorBase.EditingEntity != -1) id = editorBase.EditingEntity;
+            if(editorBase.EditingEntity.Count == 1) id = editorBase.EditingEntity[0];
             
             if(id != -1 && Scene.Components.HasComponent<Transform>(id)) {
                 RenderEntityView(renderer, id);
