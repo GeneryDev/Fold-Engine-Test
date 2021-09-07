@@ -175,6 +175,7 @@ namespace FoldEngine.Editor.Gui {
         private void SetupTools() {
             Tools.Add(new HandTool(this));
             Tools.Add(new MoveTool(this));
+            Tools.Add(new ScaleTool(this));
             Tools.Add(SelectedTool = new SelectTool(this));
         }
 

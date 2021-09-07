@@ -176,6 +176,7 @@ namespace Woofer
             editorAtlas.AddTexture("cursor", "editor/cursor");
             editorAtlas.AddTexture("hand", "editor/hand");
             editorAtlas.AddTexture("move", "editor/move");
+            editorAtlas.AddTexture("scale", "editor/scale");
             editorAtlas.Pack();
 
 
