@@ -76,8 +76,7 @@ namespace FoldEngine.Editor.Tools {
 
                 Vector2 newScale = _movePivot.Relativize(mouseWorldPos) / _pressMousePivotPosition;
 
-                newScale = (((Complex) newScale) / _movePivot.RotationComplex).ScaleAxes(_selectedGizmo.X, _selectedGizmo.Y)
-                    * _movePivot.RotationComplex;
+                newScale *= _selectedGizmo;
                 if(newScale.X == 0) newScale.X = 1;
                 if(newScale.Y == 0) newScale.Y = 1;
 
