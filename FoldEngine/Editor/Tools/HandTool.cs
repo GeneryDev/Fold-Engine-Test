@@ -13,9 +13,11 @@ namespace FoldEngine.Editor.Tools {
         private Vector2 _dragStartWorldPos;
 
         public override void OnMousePressed(ref MouseEvent e) {
-            IRenderingLayer worldLayer = Environment.Scene.Core.RenderingUnit.WorldLayer;
+            if(Scene.EditorComponents == null) return;
+            
+            IRenderingLayer worldLayer = Scene.Core.RenderingUnit.WorldLayer;
             Vector2 cameraPos = worldLayer.LayerToCamera(worldLayer.WindowToLayer(e.Position.ToVector2()));
-            Vector2 worldPos = Environment.Scene.EditorComponents.EditorTransform.Apply(cameraPos);
+            Vector2 worldPos = Scene.EditorComponents.EditorTransform.Apply(cameraPos);
 
             _dragStartWorldPos = worldPos;
             _dragging = true;
@@ -26,8 +28,10 @@ namespace FoldEngine.Editor.Tools {
         }
 
         public override void OnInput(ControlScheme controls) {
+            if(Scene.EditorComponents == null) return;
+            
             if(_dragging) {
-                var worldLayer = Environment.Scene.Core.RenderingUnit.WorldLayer;
+                var worldLayer = Scene.Core.RenderingUnit.WorldLayer;
                 Vector2 cameraRelativePos = worldLayer.LayerToCamera(worldLayer.WindowToLayer(Environment.MousePos.ToVector2()));
 
                 ref Transform cameraTransform = ref Scene.EditorComponents.EditorTransform;

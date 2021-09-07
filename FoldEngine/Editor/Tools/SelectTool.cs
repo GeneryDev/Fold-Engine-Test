@@ -18,7 +18,7 @@ namespace FoldEngine.Editor.Tools {
         }
 
         public override void OnMousePressed(ref MouseEvent e) {
-            ref Transform cameraTransform = ref Scene.EditorComponents.EditorTransform;
+            ref Transform cameraTransform = ref Scene.MainCameraTransform;
             
             var worldLayer = Environment.Scene.Core.RenderingUnit.WorldLayer;
             Vector2 cameraRelativePos =

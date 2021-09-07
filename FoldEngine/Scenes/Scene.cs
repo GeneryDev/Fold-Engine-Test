@@ -34,7 +34,7 @@ namespace FoldEngine.Scenes
 
         public Matrix GizmoTransformMatrix { get; set; }
         public long MainCameraId { get; set; }
-
+        
         public ref Transform MainCameraTransform {
             get {
                 if(EditorComponents != null) {

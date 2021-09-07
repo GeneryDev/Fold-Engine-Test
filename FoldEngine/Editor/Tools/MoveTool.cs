@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
@@ -13,13 +14,46 @@ namespace FoldEngine.Editor.Tools {
     public class MoveTool : SelectTool {
         public override string Icon => "editor:move";
 
+        private Transform _movePivot;
+        private bool _dragging = false;
+
+        private Vector2 _selectedGizmo = default;
+
+        private Vector2 _pressPivotPosition;
+        private Vector2 _pressMousePivotPosition;
+        private List<Vector2> _pressEntityPivotPosition = new List<Vector2>();
+
         public MoveTool(EditorEnvironment environment) : base(environment) { }
 
         public override void OnMousePressed(ref MouseEvent e) {
-            base.OnMousePressed(ref e);
+            if(_selectedGizmo != default) {
+                Vector2 mouseWorldPos =
+                    Scene.MainCameraTransform.Apply(Environment.Renderer.GizmoLayer.LayerToCamera(
+                        Environment.Renderer.GizmoLayer.WindowToLayer(e.Position.ToVector2())));
+                _pressPivotPosition = _movePivot.Position;
+                _pressMousePivotPosition = _movePivot.Relativize(mouseWorldPos);
+                
+                _pressEntityPivotPosition.Clear();
+                EditorBase editorBase = Scene.Systems.Get<EditorBase>();
+                foreach(long entityId in editorBase.EditingEntity) {
+                    if(entityId == -1) continue;
+
+                    Entity entity = new Entity(Scene, entityId);
+
+                    Vector2 relativeEntityPos = _movePivot.Relativize(entity.Transform.Position);
+                    
+                    _pressEntityPivotPosition.Add(relativeEntityPos);
+                }
+                _dragging = true;
+            } else {
+                base.OnMousePressed(ref e);
+            }
         }
 
-        private Transform _movePivot;
+        public override void OnMouseReleased(ref MouseEvent e) {
+            _dragging = false;
+            base.OnMouseReleased(ref e);
+        }
 
         private void EnsurePivotExists() {
             if(!_movePivot.IsNotNull) {
@@ -29,33 +63,92 @@ namespace FoldEngine.Editor.Tools {
 
         public override void Render(IRenderingUnit renderer) {
             EnsurePivotExists();
+            if(!_dragging) _selectedGizmo = default;
+            
+            bool any = false;
             
             EditorBase editorBase = Scene.Systems.Get<EditorBase>();
-            _movePivot.LocalPosition = default;
-            bool any = false;
-            foreach(long entityId in editorBase.EditingEntity) {
-                if(entityId == -1) continue;
-                any = true;
+            if(_dragging) {
+                Vector2 mouseWorldPos =
+                    Scene.MainCameraTransform.Apply(Environment.Renderer.GizmoLayer.LayerToCamera(
+                        Environment.Renderer.GizmoLayer.WindowToLayer(Environment.MousePos.ToVector2())));
 
-                Entity entity = new Entity(Scene, entityId);
-            
-                _movePivot.LocalPosition += entity.Transform.Position;
+                _movePivot.Position = mouseWorldPos;
+                _movePivot.Position = _movePivot.Apply(-_pressMousePivotPosition);
+                
+                Vector2 pivotDelta = _movePivot.Position - _pressPivotPosition;
+
+                Vector2 filteredDelta =
+                    (((Complex) pivotDelta) / _movePivot.RotationComplex).ScaleAxes(_selectedGizmo.X,
+                        _selectedGizmo.Y)
+                    * _movePivot.RotationComplex;
+
+                _movePivot.Position = _pressPivotPosition + filteredDelta;
+
+                int i = 0;
+                foreach(long entityId in editorBase.EditingEntity) {
+                    if(entityId == -1) continue;
+                    any = true;
+
+                    Entity entity = new Entity(Scene, entityId);
+
+                    entity.Transform.Position = _movePivot.Position;
+                    entity.Transform.Position = _movePivot.Apply(_pressEntityPivotPosition[i]);
+
+                    i++;
+                }
+            } else {
+                _movePivot.LocalPosition = default;
+                foreach(long entityId in editorBase.EditingEntity) {
+                    if(entityId == -1) continue;
+                    any = true;
+
+                    Entity entity = new Entity(Scene, entityId);
+                
+                    _movePivot.LocalPosition += entity.Transform.Position;
+                    if(editorBase.EditingEntity.Count == 1) {
+                        _movePivot.Rotation = entity.Transform.Rotation;
+                    } else {
+                        _movePivot.Rotation = 0;
+                    }
+                }
+                if(any) _movePivot.LocalPosition /= editorBase.EditingEntity.Count;
             }
 
             if(any) {
-                _movePivot.LocalPosition /= editorBase.EditingEntity.Count;
                 
                 Vector2 origin = _movePivot.LocalPosition;
                 Complex rotation = (_movePivot.Apply(Vector2.UnitX) - origin).Normalized();
                 
-                RenderArrow(renderer, origin, origin + (Vector2)((Complex)Vector2.UnitX * rotation), Color.Red, new Color(255, 200, 200), out _, 100);
-                RenderArrow(renderer, origin, origin + (Vector2)((Complex)Vector2.UnitY * rotation), Color.Lime, new Color(200, 255, 200), out _, 100);
+                RenderArrow(renderer,
+                    origin,
+                    origin + (Vector2) ((Complex) Vector2.UnitX * rotation),
+                    Color.Red,
+                    new Color(255,
+                        200,
+                        200),
+                    out bool hoveredX,
+                    _dragging ? _selectedGizmo.X > 0 : (bool?) null,
+                    100);
+                RenderArrow(renderer,
+                    origin,
+                    origin + (Vector2) ((Complex) Vector2.UnitY * rotation),
+                    Color.Lime,
+                    new Color(200,
+                        255,
+                        200),
+                    out bool hoveredY,
+                    _dragging ? _selectedGizmo.Y > 0 : (bool?) null,
+                    100);
+
+                if(hoveredX) _selectedGizmo.X = 1;
+                if(hoveredY) _selectedGizmo.Y = 1;
             }
         }
 
-        private void RenderArrow(IRenderingUnit renderer, Vector2 start, Vector2 end, Color defaultColor, Color hoverColor, out bool hovered, float fixedLength = 0) {
-            start = renderer.GizmoLayer.CameraToLayer(Scene.EditorComponents.EditorTransform.Relativize(start));
-            end = renderer.GizmoLayer.CameraToLayer(Scene.EditorComponents.EditorTransform.Relativize(end));
+        private void RenderArrow(IRenderingUnit renderer, Vector2 start, Vector2 end, Color defaultColor, Color hoverColor, out bool hovered, bool? forceHoverState, float fixedLength = 0) {
+            start = renderer.GizmoLayer.CameraToLayer(Scene.MainCameraTransform.Relativize(start));
+            end = renderer.GizmoLayer.CameraToLayer(Scene.MainCameraTransform.Relativize(end));
 
             if(fixedLength > 0) {
                 end = (end - start).Normalized() * fixedLength + start;
@@ -70,9 +163,13 @@ namespace FoldEngine.Editor.Tools {
             float hoverDistance = 16;
             
             //Check hover
-            Line line = new Line(start, end);
-            Vector2 mousePosLayerSpace = renderer.GizmoLayer.WindowToLayer(Environment.MousePos.ToVector2());
-            hovered = line.DistanceFromPoint(mousePosLayerSpace, true) <= hoverDistance;
+            if(!forceHoverState.HasValue) {
+                Line line = new Line(start, end);
+                Vector2 mousePosLayerSpace = renderer.GizmoLayer.WindowToLayer(Environment.MousePos.ToVector2());
+                hovered = line.DistanceFromPoint(mousePosLayerSpace, true) <= hoverDistance;
+            } else {
+                hovered = forceHoverState.Value;
+            }
             
             //Render line
 

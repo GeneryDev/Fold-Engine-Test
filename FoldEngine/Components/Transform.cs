@@ -61,7 +61,7 @@ namespace FoldEngine.Components {
         /// <summary>
         /// Complex number used to quickly multiply coordinates for rotations.
         /// </summary>
-        private Complex RotationComplex {
+        public Complex RotationComplex {
             get {
                 // ReSharper disable once CompareOfFloatsByEqualityOperator
                 if(_rotationUsedInComplex != LocalRotation) {
