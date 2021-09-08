@@ -31,7 +31,6 @@ namespace FoldEngine.Physics {
 
         public static void DrawColliderGizmos(Scene scene, Transform transform, Collider collider) {
             Color colliderColor = new Color(102, 226, 148);
-            Color reachColor = new Color(236, 187, 136);
             switch(collider.Type) {
                 case ColliderType.Box: {
                         
@@ -44,8 +43,6 @@ namespace FoldEngine.Physics {
                     scene.DrawGizmo(b, c, colliderColor);
                     scene.DrawGizmo(c, d, colliderColor);
                     scene.DrawGizmo(d, a, colliderColor);
-                    
-                    scene.DrawGizmo(transform.Position, collider.GetReach(ref transform), reachColor);
                     break;
                 }
                 case ColliderType.Mesh: {

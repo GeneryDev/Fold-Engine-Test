@@ -58,8 +58,6 @@ namespace FoldEngine.Editor {
                 
                     LevelRenderer2D.DrawOutline(entity);
                     ColliderGizmoRenderer.DrawColliderGizmos(entity);
-                
-                    Owner.DrawGizmo(entity.Transform.Position, 1, Color.AntiqueWhite);                    
                 }
             }
         }
