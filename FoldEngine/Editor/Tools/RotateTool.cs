@@ -20,9 +20,12 @@ namespace FoldEngine.Editor.Tools {
 
         private bool hoveringRing = false;
 
+        private float _startRotation;
+        private float _newRotation;
         private Vector2 _pressMousePivotPosition;
+        private float _pressMousePivotRotation;
         private List<Vector2> _pressEntityPivotPosition = new List<Vector2>();
-        private List<Vector2> _pressEntityScale = new List<Vector2>();
+        private List<float> _pressEntityRotation = new List<float>();
         private List<SetEntityTransformTransaction> _transactions = new List<SetEntityTransformTransaction>();
 
         public RotateTool(EditorEnvironment environment) : base(environment) { }
@@ -33,9 +36,10 @@ namespace FoldEngine.Editor.Tools {
                     Scene.MainCameraTransform.Apply(Environment.Renderer.GizmoLayer.LayerToCamera(
                         Environment.Renderer.GizmoLayer.WindowToLayer(e.Position.ToVector2())));
                 _pressMousePivotPosition = _movePivot.Relativize(mouseWorldPos);
+                _pressMousePivotRotation = (float)Math.Atan2(_pressMousePivotPosition.Y, _pressMousePivotPosition.X);
                 
                 _pressEntityPivotPosition.Clear();
-                _pressEntityScale.Clear();
+                _pressEntityRotation.Clear();
                 _transactions.Clear();
                 EditorBase editorBase = Scene.Systems.Get<EditorBase>();
                 foreach(long entityId in editorBase.EditingEntity) {
@@ -46,7 +50,7 @@ namespace FoldEngine.Editor.Tools {
                     Vector2 relativeEntityPos = _movePivot.Relativize(entity.Transform.Position);
                     
                     _pressEntityPivotPosition.Add(relativeEntityPos);
-                    _pressEntityScale.Add(entity.Transform.LocalScale);
+                    _pressEntityRotation.Add(entity.Transform.Rotation);
                     
                     var transaction = new SetEntityTransformTransaction(entity.Transform.CreateSnapshot());
                     Environment.TransactionManager.InsertTransaction(transaction);
@@ -83,12 +87,10 @@ namespace FoldEngine.Editor.Tools {
                     Scene.MainCameraTransform.Apply(Environment.Renderer.GizmoLayer.LayerToCamera(
                         Environment.Renderer.GizmoLayer.WindowToLayer(Environment.MousePos.ToVector2())));
 
-                Vector2 newScale = _movePivot.Relativize(mouseWorldPos) / _pressMousePivotPosition;
+                Vector2 mouseOffset = _movePivot.Relativize(mouseWorldPos);
+                float newRotation = (float) Math.Atan2(mouseOffset.Y, mouseOffset.X);
 
-                if(newScale.X == 0) newScale.X = 1;
-                if(newScale.Y == 0) newScale.Y = 1;
-
-                _movePivot.LocalScale = newScale;
+                _movePivot.LocalRotation = newRotation - _pressMousePivotRotation + _startRotation;
                 int i = 0;
                 foreach(long entityId in editorBase.EditingEntity) {
                     if(entityId == -1) continue;
@@ -99,14 +101,16 @@ namespace FoldEngine.Editor.Tools {
                     entity.Transform.Position = _movePivot.Position;
                     entity.Transform.Position = _movePivot.Apply(_pressEntityPivotPosition[i]);
                     
-                    entity.Transform.LocalScale = _pressEntityScale[i] * newScale;
+                    entity.Transform.Rotation = _pressEntityRotation[i] + (newRotation - _pressMousePivotRotation);
                     
                     _transactions[i].UpdateAfter(entity.Transform.CreateSnapshot());
                 
                     i++;
                 }
+
+                _newRotation = newRotation - _pressMousePivotRotation + _startRotation;
                 
-                _movePivot.LocalScale = Vector2.One;
+                _movePivot.LocalRotation = _startRotation;
             } else {
                 _movePivot.LocalPosition = default;
                 foreach(long entityId in editorBase.EditingEntity) {
@@ -116,7 +120,7 @@ namespace FoldEngine.Editor.Tools {
                     Entity entity = new Entity(Scene, entityId);
                 
                     _movePivot.LocalPosition += entity.Transform.Position;
-                    _movePivot.Rotation = entity.Transform.Rotation;
+                    _startRotation = _movePivot.Rotation = entity.Transform.Rotation;
                 }
                 if(any) _movePivot.LocalPosition /= editorBase.EditingEntity.Count;
             }
@@ -124,18 +128,34 @@ namespace FoldEngine.Editor.Tools {
             if(any) {
                 
                 Vector2 origin = _movePivot.LocalPosition;
-                Complex rotation = (_movePivot.Apply(Vector2.UnitX) - origin).Normalized();
+                Complex rotationA = (_movePivot.Apply(Vector2.UnitX) - origin).Normalized();
 
                 RenderLine(renderer,
                     origin,
-                    origin + (Vector2) ((Complex) Vector2.UnitX * rotation),
+                    origin + (Vector2) ((Complex) Vector2.UnitX * rotationA),
                     Color.Blue,
                     120
                     );
+
+                if(_dragging) {
+                    _movePivot.LocalRotation = _newRotation;
+                    
+                    Complex rotationB = (_movePivot.Apply(Vector2.UnitX) - origin).Normalized();
+                    
+                    RenderLine(renderer,
+                        origin,
+                        origin + (Vector2) ((Complex) Vector2.UnitX * rotationB),
+                        new Color(200,
+                            200,
+                            255),
+                        120
+                    );
+                    _movePivot.LocalRotation = _startRotation;
+                }
                 
                 RenderRing(renderer,
                     origin,
-                    origin + (Vector2) ((Complex) Vector2.UnitX * rotation),
+                    origin + (Vector2) ((Complex) Vector2.UnitX * rotationA),
                     Color.Blue,
                     new Color(200,
                         200,
