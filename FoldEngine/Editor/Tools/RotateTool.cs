@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
@@ -17,7 +18,7 @@ namespace FoldEngine.Editor.Tools {
         private Transform _movePivot;
         private bool _dragging = false;
 
-        private Vector2 _selectedGizmo = default;
+        private bool hoveringRing = false;
 
         private Vector2 _pressMousePivotPosition;
         private List<Vector2> _pressEntityPivotPosition = new List<Vector2>();
@@ -27,7 +28,7 @@ namespace FoldEngine.Editor.Tools {
         public RotateTool(EditorEnvironment environment) : base(environment) { }
 
         public override void OnMousePressed(ref MouseEvent e) {
-            if(_selectedGizmo != default) {
+            if(hoveringRing) {
                 Vector2 mouseWorldPos =
                     Scene.MainCameraTransform.Apply(Environment.Renderer.GizmoLayer.LayerToCamera(
                         Environment.Renderer.GizmoLayer.WindowToLayer(e.Position.ToVector2())));
@@ -51,6 +52,7 @@ namespace FoldEngine.Editor.Tools {
                     Environment.TransactionManager.InsertTransaction(transaction);
                     _transactions.Add(transaction);
                 }
+
                 _dragging = true;
             } else {
                 base.OnMousePressed(ref e);
@@ -72,7 +74,6 @@ namespace FoldEngine.Editor.Tools {
 
         public override void Render(IRenderingUnit renderer) {
             EnsurePivotExists();
-            if(!_dragging) _selectedGizmo = default;
             
             bool any = false;
             
@@ -84,7 +85,6 @@ namespace FoldEngine.Editor.Tools {
 
                 Vector2 newScale = _movePivot.Relativize(mouseWorldPos) / _pressMousePivotPosition;
 
-                newScale *= _selectedGizmo;
                 if(newScale.X == 0) newScale.X = 1;
                 if(newScale.Y == 0) newScale.Y = 1;
 
@@ -125,34 +125,29 @@ namespace FoldEngine.Editor.Tools {
                 
                 Vector2 origin = _movePivot.LocalPosition;
                 Complex rotation = (_movePivot.Apply(Vector2.UnitX) - origin).Normalized();
-                
-                RenderArrow(renderer,
+
+                RenderLine(renderer,
                     origin,
                     origin + (Vector2) ((Complex) Vector2.UnitX * rotation),
-                    Color.Red,
-                    new Color(255,
-                        200,
-                        200),
-                    out bool hoveredX,
-                    _dragging ? _selectedGizmo.X > 0 : (bool?) null,
-                    100);
-                RenderArrow(renderer,
+                    Color.Blue,
+                    120
+                    );
+                
+                RenderRing(renderer,
                     origin,
-                    origin + (Vector2) ((Complex) Vector2.UnitY * rotation),
-                    Color.Lime,
+                    origin + (Vector2) ((Complex) Vector2.UnitX * rotation),
+                    Color.Blue,
                     new Color(200,
-                        255,
-                        200),
-                    out bool hoveredY,
-                    _dragging ? _selectedGizmo.Y > 0 : (bool?) null,
-                    100);
-
-                if(hoveredX) _selectedGizmo.X = 1;
-                if(hoveredY) _selectedGizmo.Y = 1;
+                        200,
+                        255),
+                    0, (float) (Math.PI / 2),
+                    out hoveringRing,
+                    _dragging ? hoveringRing : (bool?) null,
+                    120);
             }
         }
-
-        private void RenderArrow(IRenderingUnit renderer, Vector2 start, Vector2 end, Color defaultColor, Color hoverColor, out bool hovered, bool? forceHoverState, float fixedLength = 0) {
+        
+        private void RenderLine(IRenderingUnit renderer, Vector2 start, Vector2 end, Color color, float fixedLength = 0) {
             start = renderer.GizmoLayer.CameraToLayer(Scene.MainCameraTransform.Relativize(start));
             end = renderer.GizmoLayer.CameraToLayer(Scene.MainCameraTransform.Relativize(end));
 
@@ -164,52 +159,115 @@ namespace FoldEngine.Editor.Tools {
             Complex dirComplex = dir;
 
             float thickness = 2;
-            float headLength = 16;
-            float headWidth = 16;
-            float hoverDistance = 16;
-            
-            //Check hover
-            if(!forceHoverState.HasValue) {
-                Line line = new Line(start, end);
-                Vector2 mousePosLayerSpace = renderer.GizmoLayer.WindowToLayer(Environment.MousePos.ToVector2());
-                hovered = line.DistanceFromPoint(mousePosLayerSpace, true) <= hoverDistance;
-            } else {
-                hovered = forceHoverState.Value;
-            }
             
             //Render line
 
             renderer.GizmoLayer.Surface.Draw(new DrawTriangleInstruction() {
                 A = new Vector3(start + (Vector2)(dirComplex * Complex.Imaginary) * thickness / 2, 0),
                 B = new Vector3(start - (Vector2)(dirComplex * Complex.Imaginary) * thickness / 2, 0),
-                C = new Vector3(end + (Vector2)(dirComplex * Complex.Imaginary) * thickness / 2 - dir * headLength, 0),
+                C = new Vector3(end + (Vector2)(dirComplex * Complex.Imaginary) * thickness / 2, 0),
                 Texture = renderer.WhiteTexture,
-                Color = hovered ? hoverColor : defaultColor
+                Color = color
             });
             renderer.GizmoLayer.Surface.Draw(new DrawTriangleInstruction() {
-                A = new Vector3(end + (Vector2)(dirComplex * Complex.Imaginary) * thickness / 2 - dir * headLength, 0),
+                A = new Vector3(end + (Vector2)(dirComplex * Complex.Imaginary) * thickness / 2, 0),
                 B = new Vector3(start - (Vector2)(dirComplex * Complex.Imaginary) * thickness / 2, 0),
-                C = new Vector3(end - (Vector2)(dirComplex * Complex.Imaginary) * thickness / 2 - dir * headLength, 0),
+                C = new Vector3(end - (Vector2)(dirComplex * Complex.Imaginary) * thickness / 2, 0),
                 Texture = renderer.WhiteTexture,
-                Color = hovered ? hoverColor : defaultColor
+                Color = color
             });
             
-            // Render head
+        }
+
+        private void RenderRing(IRenderingUnit renderer, Vector2 start, Vector2 end, Color defaultColor, Color hoverColor, float startRotation, float endRotation, out bool hovered, bool? forceHoverState, float fixedRadius = 0) {
+            start = renderer.GizmoLayer.CameraToLayer(Scene.MainCameraTransform.Relativize(start));
+            end = renderer.GizmoLayer.CameraToLayer(Scene.MainCameraTransform.Relativize(end));
+
+            if(fixedRadius > 0) {
+                end = (end - start).Normalized() * fixedRadius + start;
+            }
             
-            renderer.GizmoLayer.Surface.Draw(new DrawTriangleInstruction() {
-                A = new Vector3(end + (Vector2)(dirComplex * Complex.Imaginary) * headWidth / 2 - dir * headLength, 0),
-                B = new Vector3(end - (Vector2)(dirComplex * Complex.Imaginary) * headWidth / 2 - dir * headLength, 0),
-                C = new Vector3(end + (Vector2)(dirComplex * Complex.Imaginary) * headWidth / 2, 0),
-                Texture = renderer.WhiteTexture,
-                Color = hovered ? hoverColor : defaultColor
-            });
-            renderer.GizmoLayer.Surface.Draw(new DrawTriangleInstruction() {
-                A = new Vector3(end + (Vector2)(dirComplex * Complex.Imaginary) * headWidth / 2, 0),
-                B = new Vector3(end - (Vector2)(dirComplex * Complex.Imaginary) * headWidth / 2 - dir * headLength, 0),
-                C = new Vector3(end - (Vector2)(dirComplex * Complex.Imaginary) * headWidth / 2, 0),
-                Texture = renderer.WhiteTexture,
-                Color = hovered ? hoverColor : defaultColor
-            });
+
+            Vector2 dir = (end - start).Normalized();
+            Complex dirComplex = dir;
+
+            float thickness = 2;
+            float hoverDistance = 16;
+
+            //Check hover
+            if(!forceHoverState.HasValue) {
+                Vector2 mousePosLayerSpace = renderer.GizmoLayer.WindowToLayer(Environment.MousePos.ToVector2());
+                float distance = Math.Abs(Vector2.Distance(start, mousePosLayerSpace)
+                                          - Vector2.Distance(start, end));
+                hovered = distance <= hoverDistance;
+            } else {
+                hovered = forceHoverState.Value;
+            }
+            //
+            // //Render line
+            //
+            // renderer.GizmoLayer.Surface.Draw(new DrawTriangleInstruction() {
+            //     A = new Vector3(start + (Vector2)(dirComplex * Complex.Imaginary) * thickness / 2, 0),
+            //     B = new Vector3(start - (Vector2)(dirComplex * Complex.Imaginary) * thickness / 2, 0),
+            //     C = new Vector3(end + (Vector2)(dirComplex * Complex.Imaginary) * thickness / 2 - dir * headLength, 0),
+            //     Texture = renderer.WhiteTexture,
+            //     Color = hovered ? hoverColor : defaultColor
+            // });
+            // renderer.GizmoLayer.Surface.Draw(new DrawTriangleInstruction() {
+            //     A = new Vector3(end + (Vector2)(dirComplex * Complex.Imaginary) * thickness / 2 - dir * headLength, 0),
+            //     B = new Vector3(start - (Vector2)(dirComplex * Complex.Imaginary) * thickness / 2, 0),
+            //     C = new Vector3(end - (Vector2)(dirComplex * Complex.Imaginary) * thickness / 2 - dir * headLength, 0),
+            //     Texture = renderer.WhiteTexture,
+            //     Color = hovered ? hoverColor : defaultColor
+            // });
+            //
+            // // Render head
+            //
+            // renderer.GizmoLayer.Surface.Draw(new DrawTriangleInstruction() {
+            //     A = new Vector3(end + (Vector2)(dirComplex * Complex.Imaginary) * headWidth / 2 - dir * headLength, 0),
+            //     B = new Vector3(end - (Vector2)(dirComplex * Complex.Imaginary) * headWidth / 2 - dir * headLength, 0),
+            //     C = new Vector3(end + (Vector2)(dirComplex * Complex.Imaginary) * headWidth / 2, 0),
+            //     Texture = renderer.WhiteTexture,
+            //     Color = hovered ? hoverColor : defaultColor
+            // });
+            // renderer.GizmoLayer.Surface.Draw(new DrawTriangleInstruction() {
+            //     A = new Vector3(end + (Vector2)(dirComplex * Complex.Imaginary) * headWidth / 2, 0),
+            //     B = new Vector3(end - (Vector2)(dirComplex * Complex.Imaginary) * headWidth / 2 - dir * headLength, 0),
+            //     C = new Vector3(end - (Vector2)(dirComplex * Complex.Imaginary) * headWidth / 2, 0),
+            //     Texture = renderer.WhiteTexture,
+            //     Color = hovered ? hoverColor : defaultColor
+            // });
+            
+            
+            int segments = 24;
+            
+            Vector2 endInner = end - dir * thickness / 2;
+            Vector2 endOuter = end + dir * thickness / 2;
+
+            Complex delta = Complex.FromRotation((float) (Math.PI * (360f / segments) / 180));
+            for(int i = 0; i < segments; i++) {
+                Vector2 nextInner = (Vector2) ((Complex) (endInner - start) * delta) + start;
+                Vector2 nextOuter = (Vector2) ((Complex) (endOuter - start) * delta) + start;
+                
+                renderer.GizmoLayer.Surface.Draw(new DrawTriangleInstruction() {
+                    A = new Vector3(endInner, 0),
+                    B = new Vector3(endOuter, 0),
+                    C = new Vector3(nextInner, 0),
+                    Texture = renderer.WhiteTexture,
+                    Color = hovered ? hoverColor : defaultColor
+                });
+                
+                renderer.GizmoLayer.Surface.Draw(new DrawTriangleInstruction() {
+                    A = new Vector3(endOuter, 0),
+                    B = new Vector3(nextOuter, 0),
+                    C = new Vector3(nextInner, 0),
+                    Texture = renderer.WhiteTexture,
+                    Color = hovered ? hoverColor : defaultColor
+                });
+
+                endInner = nextInner;
+                endOuter = nextOuter;
+            }
         }
     }
 }
