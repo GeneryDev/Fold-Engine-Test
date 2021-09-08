@@ -63,7 +63,7 @@ namespace FoldEngine.Editor.Views {
                     worldLayer.LayerToCamera(worldLayer.WindowToLayer(Environment.MousePos.ToVector2()));
                 Vector2 pivot = cameraTransform.Apply(cameraRelativePos);
                 
-                cameraTransform.LocalScale -= cameraTransform.LocalScale * 0.05f * dir;
+                cameraTransform.LocalScale -= cameraTransform.LocalScale * 0.1f * dir;
                 
                 cameraTransform.Position = pivot;
                 cameraTransform.Position = cameraTransform.Apply(-cameraRelativePos);
