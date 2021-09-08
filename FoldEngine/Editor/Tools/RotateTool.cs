@@ -10,6 +10,7 @@ using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 
 namespace FoldEngine.Editor.Tools {
     public class RotateTool : SelectTool {
@@ -76,6 +77,11 @@ namespace FoldEngine.Editor.Tools {
             }
         }
 
+        private float SnapAngle(float angle) {
+            float snap = (float) (22.5f * Math.PI / 180);
+            return (float) (Math.Round(angle / snap) * snap);
+        }
+
         public override void Render(IRenderingUnit renderer) {
             EnsurePivotExists();
             
@@ -89,6 +95,11 @@ namespace FoldEngine.Editor.Tools {
 
                 Vector2 mouseOffset = _movePivot.Relativize(mouseWorldPos);
                 float newRotation = (float) Math.Atan2(mouseOffset.Y, mouseOffset.X);
+                
+                if(Scene.Core.InputUnit.Devices.Keyboard[Keys.LeftShift].Down
+                   || Scene.Core.InputUnit.Devices.Keyboard[Keys.RightShift].Down) {
+                    newRotation = SnapAngle(newRotation - _pressMousePivotRotation + _startRotation) + _pressMousePivotRotation - _startRotation;
+                }
 
                 _movePivot.LocalRotation = newRotation - _pressMousePivotRotation + _startRotation;
                 int i = 0;
