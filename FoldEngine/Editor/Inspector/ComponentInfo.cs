@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
+using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
 using FoldEngine.Editor.Gui.Fields;
 using FoldEngine.Editor.Gui.Fields.Text;
 using FoldEngine.Editor.Inspector;
 using FoldEngine.Gui;
+using FoldEngine.Physics;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Views {
@@ -69,6 +71,8 @@ namespace FoldEngine.Editor.Views {
 
             if(TypeToInspectorElementProvider.ContainsKey(fieldInfo.FieldType)) {
                 _createInspectorElement = TypeToInspectorElementProvider[fieldInfo.FieldType];
+            } else if(fieldInfo.FieldType.IsEnum) {
+                _createInspectorElement = EnumInspectorElementProvider;
             }
         }
         
@@ -96,7 +100,7 @@ namespace FoldEngine.Editor.Views {
             }
         }
         
-        private SetFieldAction CreateAction(GuiPanel panel, int index = 0) {
+        public SetFieldAction CreateAction(GuiPanel panel, int index = 0) {
             SetFieldAction action;
             if(_createNextForId != -1) {
                 action = panel.Environment.ActionPool.Claim<SetComponentFieldAction>()
@@ -171,8 +175,45 @@ namespace FoldEngine.Editor.Views {
                     .Value(((Color) startingValue).A.ToString(CultureInfo.InvariantCulture))
                     .EditedAction(member.CreateAction(parentPanel, 3));
             });
+            
         }
 
         public delegate void InspectorElementProvider(GuiPanel parentPanel, ComponentMember member, object startingValue);
+
+        public static readonly InspectorElementProvider EnumInspectorElementProvider =
+            (parentPanel, member, startingValue) => {
+                parentPanel.Element<ValueDropdown>()
+                    .FieldSpacing(ComponentMemberLabel.LabelWidth, 1)
+                    .Text(startingValue.ToString())
+                    .FontSize(9)
+                    .LeftAction<ShowEnumDropdownAction>().Type(member.FieldInfo.FieldType).Member(member)
+                    ;
+            };
+    }
+
+    public class ShowEnumDropdownAction : IGuiAction {
+        private Type _type;
+        private ComponentMember _member;
+
+        public ShowEnumDropdownAction Type(Type type) {
+            _type = type;
+            return this;
+        }
+        public ShowEnumDropdownAction Member(ComponentMember member) {
+            _member = member;
+            return this;
+        }
+
+        public IObjectPool Pool { get; set; }
+        public void Perform(GuiElement element, MouseEvent e) {
+            GuiPopupMenu contextMenu = element.Parent.Environment.ContextMenu;
+            contextMenu.Reset(e.Position);
+
+            foreach(object value in _type.GetEnumValues()) {
+                contextMenu.Button(value.ToString(), 9).LeftAction(_member.CreateAction(contextMenu).ForcedValue(value));
+            }
+            
+            contextMenu.Show();
+        }
     }
 }

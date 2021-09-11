@@ -17,14 +17,25 @@ namespace FoldEngine.Editor.Gui {
         protected FieldInfo _fieldInfo;
         protected int _index;
 
-        public SetFieldAction Index(int index) {
-            _index = index;
-            return this;
-        }
+        protected object _forcedValue;
+        protected bool _useForcedValue;
         
         public SetFieldAction FieldInfo(FieldInfo fieldInfo) {
             _fieldInfo = fieldInfo;
             _index = 0;
+            _forcedValue = null;
+            _useForcedValue = false;
+            return this;
+        }
+
+        public SetFieldAction Index(int index) {
+            _index = index;
+            return this;
+        }
+
+        public SetFieldAction ForcedValue(object forcedValue) {
+            _forcedValue = forcedValue;
+            _useForcedValue = true;
             return this;
         }
 
@@ -35,7 +46,11 @@ namespace FoldEngine.Editor.Gui {
             object oldValue = GetOldValue();
             object newValue = oldValue;
 
-            if(!((IInspectorField) element).EditValueForType(_fieldInfo.FieldType, ref newValue, _index)) return;
+            if(_useForcedValue) newValue = _forcedValue;
+
+            if(element is IInspectorField inspectorField) {
+                if(!inspectorField.EditValueForType(_fieldInfo.FieldType, ref newValue, _index)) return;
+            }
 
             SetFieldTransaction transaction = CreateBaseTransaction();
             transaction.FieldInfo = _fieldInfo;

@@ -207,7 +207,7 @@ namespace FoldEngine.Graphics {
         }
 
         public IEnumerable<MeshVertex> GetVertexInfoForMesh(string name) {
-            if(!_meshInfos.ContainsKey(name)) yield break;
+            if(name == null || !_meshInfos.ContainsKey(name)) yield break;
             MeshInfo meshInfo = _meshInfos[name];
             for(int i = meshInfo.VertexStartIndex; i < meshInfo.VertexStartIndex + meshInfo.VertexCount; i++) {
                 yield return _vertices[i];
@@ -215,7 +215,7 @@ namespace FoldEngine.Graphics {
         }
 
         public IEnumerable<Vector2> GetVerticesForMesh(string name) {
-            if(!_meshInfos.ContainsKey(name)) yield break;
+            if(name == null || !_meshInfos.ContainsKey(name)) yield break;
             MeshInfo meshInfo = _meshInfos[name];
             for(int i = meshInfo.VertexStartIndex; i < meshInfo.VertexStartIndex + meshInfo.VertexCount; i++) {
                 yield return _vertices[i].Position.ToVector2();
@@ -223,7 +223,7 @@ namespace FoldEngine.Graphics {
         }
 
         public IEnumerable<Line> GetLinesForMesh(string name) {
-            if(!_meshInfos.ContainsKey(name)) yield break;
+            if(name == null || !_meshInfos.ContainsKey(name)) yield break;
             MeshInfo meshInfo = _meshInfos[name];
             for(int i = meshInfo.VertexStartIndex; i < meshInfo.VertexStartIndex + meshInfo.VertexCount; i++) {
                 yield return new Line(_vertices[i].Position.ToVector2(),
@@ -236,7 +236,7 @@ namespace FoldEngine.Graphics {
         }
 
         public IEnumerable<Tuple<Vector2, Vector2, Vector2>> GetVertexTriosForMesh(string name) {
-            if(!_meshInfos.ContainsKey(name)) yield break;
+            if(name == null || !_meshInfos.ContainsKey(name)) yield break;
             MeshInfo meshInfo = _meshInfos[name];
             for(int i = meshInfo.VertexStartIndex; i < meshInfo.VertexStartIndex + meshInfo.VertexCount; i++) {
                 yield return new Tuple<Vector2, Vector2, Vector2>(
@@ -256,28 +256,28 @@ namespace FoldEngine.Graphics {
         }
 
         public TriangleEnumerator GetTrianglesForMesh(string name) {
-            return _meshInfos.ContainsKey(name)
+            return name != null && _meshInfos.ContainsKey(name)
                 ? new TriangleEnumerator(this, _meshInfos[name])
                 : new TriangleEnumerator(this);
         }
 
         public int GetVertexCountForMesh(string name) {
-            if(!_meshInfos.ContainsKey(name)) return 0;
+            if(name == null || !_meshInfos.ContainsKey(name)) return 0;
             return _meshInfos[name].VertexCount;
         }
 
         public float GetRadiusSquaredForMesh(string name) {
-            if(!_meshInfos.ContainsKey(name)) return 0;
+            if(name == null || !_meshInfos.ContainsKey(name)) return 0;
             return _meshInfos[name].RadiusSquared;
         }
 
         public float GetRadiusForMesh(string name) {
-            if(!_meshInfos.ContainsKey(name)) return 0;
+            if(name == null || !_meshInfos.ContainsKey(name)) return 0;
             return _meshInfos[name].Radius;
         }
 
         public Vector2 GetFarthestVertexFromOrigin(string name) {
-            if(!_meshInfos.ContainsKey(name)) return Vector2.Zero;
+            if(name == null || !_meshInfos.ContainsKey(name)) return Vector2.Zero;
             return _meshInfos[name].FarthestVertexFromOrigin;
         }
 
@@ -377,7 +377,7 @@ namespace FoldEngine.Graphics {
         }
 
         public bool Exists(string identifier) {
-            return _meshInfos.ContainsKey(identifier);
+            return identifier != null && _meshInfos.ContainsKey(identifier);
         }
     }
 }
