@@ -1,4 +1,5 @@
 ﻿using System;
+using EntryProject.Editor.Inspector;
 using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Editor.Inspector;
@@ -17,16 +18,23 @@ namespace FoldEngine.Physics {
         
         public bool Static;
         
+        [ShowOnlyIf.Not(nameof(Static), true)]
         public float GravityMultiplier;
         public float Mass;
         
+        [ShowOnlyIf.Not(nameof(Static), true)]
         public Vector2 Velocity;
+        [ShowOnlyIf.Not(nameof(Static), true)]
         public float AngularVelocity;
 
+        [HideInInspector]
         public Vector2 AccelerationFromForce;
+        [HideInInspector]
         public Vector2 PreviousAcceleration;
+        [HideInInspector]
         public float Torque;
 
+        [ShowOnlyIf.Not(nameof(Static), true)]
         public Vector2 ContactDisplacement;
         [HideInInspector]
         public Vector2 PreviousPosition;

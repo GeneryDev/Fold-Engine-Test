@@ -1,6 +1,7 @@
 ﻿using System;
 using FoldEngine.Editor.Gui.Fields.Text;
 using FoldEngine.Gui;
+using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Gui.Fields {
     public class ValueDropdown : GuiButton {
@@ -18,6 +19,10 @@ namespace FoldEngine.Editor.Gui.Fields {
             Bounds.Width = (int)Math.Ceiling((float)(parent.Bounds.Width - _parentWidthOccupied) / _fieldsInRow);
             Bounds.Height = 18;
             Margin = 4;
+        }
+
+        public override void Displace(ref Point layoutPosition) {
+            layoutPosition += new Point(Bounds.Width, 0);
         }
     }
 }

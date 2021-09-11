@@ -1,4 +1,5 @@
 ﻿using System;
+using EntryProject.Editor.Inspector;
 using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Scenes;
@@ -9,13 +10,21 @@ namespace FoldEngine.Physics {
     [ComponentInitializer(typeof(Collider), nameof(InitializeComponent))]
     public struct Collider {
         public ColliderType Type;
-
+        [ShowOnlyIf.Not(nameof(Type), ColliderType.None)]
+        [ShowOnlyIf(nameof(Type), ColliderType.Mesh)]
+        public string MeshIdentifier;
+        
+        [ShowOnlyIf.Not(nameof(Type), ColliderType.None)]
+        [ShowOnlyIf(nameof(Type), ColliderType.Box)]
         public float Width;
+        [ShowOnlyIf.Not(nameof(Type), ColliderType.None)]
+        [ShowOnlyIf(nameof(Type), ColliderType.Box)]
         public float Height;
         
-        public string MeshIdentifier;
-
+        [ShowOnlyIf.Not(nameof(Type), ColliderType.None)]
         public bool ThickFaces;
+        [ShowOnlyIf.Not(nameof(Type), ColliderType.None)]
+        [ShowOnlyIf(nameof(ThickFaces), false)]
         public float ThinFaceTolerance;
 
         public static Collider InitializeComponent(Scene scene, long entityId) {

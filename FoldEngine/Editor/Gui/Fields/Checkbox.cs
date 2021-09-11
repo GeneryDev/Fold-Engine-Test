@@ -74,5 +74,9 @@ namespace FoldEngine.Editor.Gui.Fields {
             value = !(bool) value;
             return true;
         }
+
+        public override void Displace(ref Point layoutPosition) {
+            layoutPosition += new Point(Bounds.Width, 0);
+        }
     }
 }

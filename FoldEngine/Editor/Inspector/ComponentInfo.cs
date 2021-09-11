@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
+using EntryProject.Editor.Inspector;
 using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
@@ -10,6 +11,7 @@ using FoldEngine.Editor.Gui.Fields.Text;
 using FoldEngine.Editor.Inspector;
 using FoldEngine.Gui;
 using FoldEngine.Physics;
+using FoldEngine.Scenes;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Views {
@@ -20,6 +22,16 @@ namespace FoldEngine.Editor.Views {
         public string Name;
         public readonly List<ComponentMember> Members = new List<ComponentMember>();
         public bool HideInInspector = false;
+
+        public ComponentMember this[string name] {
+            get {
+                foreach(ComponentMember member in Members) {
+                    if(member.FieldInfo.Name == name) return member;
+                }
+
+                return null;
+            }
+        }
 
         private ComponentInfo(Type componentType) {
             ComponentType = componentType;
@@ -38,6 +50,10 @@ namespace FoldEngine.Editor.Views {
                     if(fieldInfo.GetCustomAttribute<HideInInspector>() != null) continue;
                     Members.Add(new ComponentMember(fieldInfo));
                 }
+            }
+
+            foreach(ComponentMember member in Members) {
+                member.ComponentInfoComplete(this);
             }
         }
 
@@ -60,6 +76,7 @@ namespace FoldEngine.Editor.Views {
         public string Name;
         public FieldInfo FieldInfo;
         private InspectorElementProvider _createInspectorElement;
+        private ComponentPredicate _showCondition;
 
         public ComponentMember(FieldInfo fieldInfo) {
             FieldInfo = fieldInfo;
@@ -74,6 +91,43 @@ namespace FoldEngine.Editor.Views {
             } else if(fieldInfo.FieldType.IsEnum) {
                 _createInspectorElement = EnumInspectorElementProvider;
             }
+        }
+
+        public void ComponentInfoComplete(ComponentInfo componentInfo) {
+            foreach(ShowOnlyIf showOnlyIf in FieldInfo.GetCustomAttributes<ShowOnlyIf>()) {
+                
+                ComponentMember conditionMember = componentInfo[showOnlyIf.FieldName];
+                if(conditionMember != null) {
+                    AddShowCondition((scene, id, obj) => Equals(scene.Components
+                        .Sets[componentInfo.ComponentType]
+                        .GetFieldValue(id, conditionMember.FieldInfo), showOnlyIf.Value));
+                } else {
+                    Console.WriteLine($"Invalid ShowOnlyIf attribute for field {Name} of component {componentInfo.Name}: Field {showOnlyIf.FieldName} does not exist");
+                }
+            }
+            foreach(ShowOnlyIf.Not showOnlyIf in FieldInfo.GetCustomAttributes<ShowOnlyIf.Not>()) {
+                
+                ComponentMember conditionMember = componentInfo[showOnlyIf.FieldName];
+                if(conditionMember != null) {
+                    AddShowCondition((scene, id, obj) => !Equals(scene.Components
+                        .Sets[componentInfo.ComponentType]
+                        .GetFieldValue(id, conditionMember.FieldInfo), showOnlyIf.Value));
+                } else {
+                    Console.WriteLine($"Invalid ShowOnlyIf attribute for field {Name} of component {componentInfo.Name}: Field {showOnlyIf.FieldName} does not exist");
+                }
+            }
+        }
+
+        private void AddShowCondition(ComponentPredicate condition) {
+            if(_showCondition == null) _showCondition = condition;
+            else {
+                ComponentPredicate oldCondition = _showCondition;
+                _showCondition = (scene, id, obj) => oldCondition(scene, id, obj) && condition(scene, id, obj);
+            }
+        }
+
+        public bool ShouldShowInInspector(Scene scene, long id) {
+            return _showCondition == null || _showCondition(scene, id, null);
         }
         
         private object _createNextForObject = null;
@@ -189,6 +243,8 @@ namespace FoldEngine.Editor.Views {
                     .LeftAction<ShowEnumDropdownAction>().Type(member.FieldInfo.FieldType).Member(member)
                     ;
             };
+
+        public delegate bool ComponentPredicate(Scene scene, long id, object obj);
     }
 
     public class ShowEnumDropdownAction : IGuiAction {

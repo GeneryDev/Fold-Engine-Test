@@ -40,6 +40,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Inspector\ComponentInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Inspector\HideInInspectorAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Inspector\NameAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Inspector\ShowOnlyIf.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\SceneEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Tools\EditorTool.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Tools\HandTool.cs" />

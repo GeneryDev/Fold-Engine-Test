@@ -62,6 +62,7 @@ namespace FoldEngine.Editor.Views {
                     // ContentPanel.Label(componentInfo.Name, 14).TextAlignment(-1);
 
                     foreach(ComponentMember member in componentInfo.Members) {
+                        if(!member.ShouldShowInInspector(Scene, id)) continue;
                         object value = set.GetFieldValue((int) id, member.FieldInfo);
                         // ContentPanel
                         //     .Label(
