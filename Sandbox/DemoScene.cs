@@ -30,6 +30,7 @@ namespace Sandbox {
             Entity e1 = CreateEntity("Entity 1");
             Entity e2 = CreateEntity("Entity 2");
             Entity e3 = CreateEntity("Entity 3");
+            Entity e4 = CreateEntity("Entity 4");
 
             Entity cam = CreateEntity("Main Camera");
             cam.Transform.LocalScale *= 1 / 64f;
@@ -44,7 +45,7 @@ namespace Sandbox {
             }
             e1.Transform.Position += Vector2.UnitY * 64;
             e1.AddComponent<Physics>();
-            e1.AddComponent<Collider>().SetMesh("circle");
+            e1.AddComponent<Collider>().SetBox(1, 1);
             e1.AddComponent<Living>();
             
             {
@@ -52,10 +53,21 @@ namespace Sandbox {
                 mr.MeshIdentifier = "square";
                 mr.TextureIdentifier = "main:beacon";
             }
-            e3.Transform.Position += Vector2.UnitY * 64;
-            e3.Transform.Position += Vector2.UnitX * 1.25f;
-            e3.AddComponent<Physics>();
-            e3.AddComponent<Collider>().SetMesh("circle");
+            e3.Transform.Position += Vector2.UnitY * 60;
+            e3.Transform.Position += Vector2.UnitX * -0.7f;
+            e3.AddComponent<Physics>().Static = true;
+            e3.AddComponent<Collider>().SetBox(1, 1);
+            
+            
+            {
+                ref MeshRenderable mr = ref e4.AddComponent<MeshRenderable>();
+                mr.MeshIdentifier = "square";
+                mr.TextureIdentifier = "main:beacon";
+            }
+            e4.Transform.Position += Vector2.UnitY * 60;
+            e4.Transform.Position += Vector2.UnitX * 0.7f;
+            e4.AddComponent<Physics>().Static = true;
+            e4.AddComponent<Collider>().SetBox(1, 1);
             // e3.AddComponent<Living>();
             
             // {
@@ -76,7 +88,7 @@ namespace Sandbox {
                 mr.TextureIdentifier = "main:pixel.white";
             }
             e2.Name = "Platform";
-            e2.Transform.Position += Vector2.UnitY * -9;
+            e2.Transform.Position += Vector2.UnitY * 57;
             e2.Transform.LocalScale = new Vector2(9, 4);
             e2.AddComponent<Physics>().Static = true;
             e2.AddComponent<Collider>().ThickFaces = false;

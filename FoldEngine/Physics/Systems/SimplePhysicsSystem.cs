@@ -171,8 +171,22 @@ namespace FoldEngine.Physics {
                                         // Vector2 normalForce = ((Vector2)surfaceNormalComplex.Normalized) * physics.Mass * -velocityInNormalDirection;
                                         // physics.ApplyForce(normalForce, default, ForceMode.Continuous);
 
-                                        physics.ApplyForce((Vector2)surfaceNormalComplex.Normalized * -damping * velocityInNormalDirection * (1+restitution) * physics.Mass, default, ForceMode.Instant);
-                                        physics.ApplyForce((Vector2)(surfaceNormalComplex.Normalized * Complex.Imaginary) * -velocityInNormalPerpendicular * friction * physics.Mass, default, ForceMode.Instant);
+                                        Vector2 normalForce = (Vector2) surfaceNormalComplex.Normalized
+                                                              * -damping
+                                                              * velocityInNormalDirection
+                                                              * (1 + restitution)
+                                                              * physics.Mass;
+
+                                        Vector2 frictionForce =
+                                            (Vector2) (surfaceNormalComplex.Normalized * Complex.Imaginary)
+                                            * -velocityInNormalPerpendicular
+                                            * friction
+                                            * physics.Mass;
+
+                                        // physics.ApplyForce(normalForce, default, ForceMode.Instant);
+                                        // physics.ApplyForce(frictionForce, default, ForceMode.Instant);
+
+                                        physics.Velocity += (normalForce + frictionForce) / physics.Mass;
                                     }
                                 }
                             }

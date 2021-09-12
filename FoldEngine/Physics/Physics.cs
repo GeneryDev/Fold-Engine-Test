@@ -11,22 +11,25 @@ namespace FoldEngine.Physics {
     [Component("fold:physics")]
     [ComponentInitializer(typeof(Physics), nameof(InitializeComponent))]
     public struct Physics {
-        public static readonly bool DrawForceGizmos = false;
+        public static readonly bool DrawForceGizmos = true;
         
         private Scene _scene;
         private long _entityId;
         
         public bool Static;
         
-        [ShowOnlyIf.Not(nameof(Static), true)]
-        public float GravityMultiplier;
         public float Mass;
         
         [ShowOnlyIf.Not(nameof(Static), true)]
-        public Vector2 Velocity;
+        public float GravityMultiplier;
+        
         [ShowOnlyIf.Not(nameof(Static), true)]
+        public Vector2 Velocity;
+        [HideInInspector]
         public float AngularVelocity;
 
+        [HideInInspector]
+        public Vector2 PreviousPosition;
         [HideInInspector]
         public Vector2 AccelerationFromForce;
         [HideInInspector]
@@ -34,10 +37,8 @@ namespace FoldEngine.Physics {
         [HideInInspector]
         public float Torque;
 
-        [ShowOnlyIf.Not(nameof(Static), true)]
-        public Vector2 ContactDisplacement;
         [HideInInspector]
-        public Vector2 PreviousPosition;
+        public Vector2 ContactDisplacement;
 
         public float Restitution;
         public float Friction;
