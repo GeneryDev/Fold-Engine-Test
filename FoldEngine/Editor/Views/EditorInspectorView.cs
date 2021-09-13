@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
 using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
@@ -21,8 +20,6 @@ namespace FoldEngine.Editor.Views {
 
         private object _object = null;
 
-        private static readonly StringBuilder StringBuilder = new StringBuilder();
-        
         public override void Render(IRenderingUnit renderer) {
             ContentPanel.MayScroll = true;
             long id = -1;

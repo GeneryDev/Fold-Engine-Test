@@ -35,6 +35,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Gui\Fields\Transactions\DocumentTransactionBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Gui\Fields\Transactions\InsertionEdit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Gui\Fields\ValueDropdown.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Gui\Hierarchy\EntityHierarchyActions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Gui\Hierarchy\HierarchyElement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Gui\InspectorField.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Gui\ToolbarButton.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Inspector\ComponentInfo.cs" />

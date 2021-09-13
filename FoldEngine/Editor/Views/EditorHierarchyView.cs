@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
+using FoldEngine.Editor.Gui.Hierarchy;
 using FoldEngine.Editor.Transactions;
 using FoldEngine.Gui;
 using FoldEngine.Interfaces;
@@ -49,22 +50,18 @@ namespace FoldEngine.Editor.Views {
             
             bool hasChildren = transform.FirstChildId != -1;
             bool expanded = _expandedEntities.Contains(entityId);
+            
+            Entity entity = new Entity(Scene, entityId);
 
-            var button = panel.Button(Scene.Components.GetComponent<EntityName>(entityId).Name, 14)
-                .TextAlignment(-1)
-                .Icon(renderer.Textures[
-                    hasChildren ? expanded ? "editor:triangle.down" : "editor:triangle.right" : "editor:blank"])
+            bool selected = Scene.Systems.Get<EditorBase>().EditingEntity.Contains(entity.EntityId);
+
+            var button = panel.Element<HierarchyElement>()
+                .Entity(entity, depth)
+                .Icon(renderer.Textures["editor:cube"], selected ? Color.White : new Color(128, 128, 128))
+                .Expanded(expanded)
+                .Selected(selected)
                 ;
             
-            button.LeftAction<HierarchyAction>()
-                .Id(entityId)
-                .Depth(depth)
-                ;
-            
-            button.RightAction<ShowEntityContextMenu>()
-                .Id(entityId)
-                ;
-
             if(hasChildren && expanded) {
                 foreach(ComponentReference<Transform> childTransform in transform.Children) {
                     if(childTransform.Has()) RenderEntity(ref childTransform.Get(), panel, renderer, depth + 1);
@@ -75,59 +72,6 @@ namespace FoldEngine.Editor.Views {
         public void ExpandCollapseEntity(long entityId) {
             if(!_expandedEntities.Remove(entityId)) _expandedEntities.Add(entityId);
         }
-    }
-
-    public class HierarchyAction : IGuiAction {
-        private long _id;
-        private int _depth;
-
-        public HierarchyAction Id(long id) {
-            _id = id;
-            return this;
-        }
-        
-        public HierarchyAction Depth(int depth) {
-            _depth = depth;
-            return this;
-        }
-
-        public void Perform(GuiElement element, MouseEvent e) {
-            if(element.Parent.Environment is EditorEnvironment editorEnvironment) {
-                if(e.Position.X < element.Bounds.X + 24) {
-                    editorEnvironment.GetView<EditorHierarchyView>().ExpandCollapseEntity(_id);
-                } else {
-                    EditorBase editorBase = editorEnvironment.Scene.Systems.Get<EditorBase>();
-                    editorBase.EditingEntity.Clear();
-                    editorBase.EditingEntity.Add(_id);
-                    editorEnvironment.SwitchToView(editorEnvironment.GetView<EditorInspectorView>());
-                }
-            }
-        }
-
-        public IObjectPool Pool { get; set; }
-    }
-
-    public class ShowEntityContextMenu : IGuiAction {
-        private long _id;
-        
-        public ShowEntityContextMenu Id(long id) {
-            _id = id;
-            return this;
-        }
-
-        public void Perform(GuiElement element, MouseEvent e) {
-            var contextMenu = element.Parent.Environment.ContextMenu;
-            contextMenu.Reset(e.Position);
-            contextMenu.Button("Edit", 14).LeftAction<DebugAction>();
-            contextMenu.Button("Rename", 14).LeftAction<DebugAction>();
-            
-            contextMenu.Button("Create Child", 14).LeftAction<CreateEntityAction>().Id(_id);
-            
-            contextMenu.Button("Delete", 14).LeftAction<DeleteEntityAction>().Id(_id);
-            contextMenu.Show();
-        }
-        
-        public IObjectPool Pool { get; set; }
     }
 
     public class DebugAction : IGuiAction {

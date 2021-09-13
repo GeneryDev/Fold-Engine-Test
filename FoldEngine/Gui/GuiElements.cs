@@ -62,6 +62,7 @@ namespace FoldEngine.Gui {
         protected int _textAlignment = 0;
         protected int _textMargin = 4;
         protected ITexture _icon = null;
+        protected Color _iconColor = Color.White;
         protected Point _iconSize;
         protected Color _textColor;
         protected bool _shouldCache = true;
@@ -114,6 +115,7 @@ namespace FoldEngine.Gui {
             if(_icon != null) {
                 layer.Surface.Draw(new DrawRectInstruction() {
                     Texture = _icon,
+                    Color = _iconColor,
                     DestinationRectangle = new Rectangle(_text.Length > 0 ? x : (Bounds.Center.X - _iconSize.X/2), Bounds.Center.Y - _iconSize.Y/2,  _iconSize.X, _iconSize.Y)
                 });
                 x += _iconSize.X;
@@ -148,10 +150,15 @@ namespace FoldEngine.Gui {
             return this;
         }
 
-        public GuiLabel Icon(ITexture icon) {
+        public GuiLabel Icon(ITexture icon, Color color) {
             _icon = icon;
+            _iconColor = color;
             _iconSize = new Point(icon.Width, icon.Height);
             return this;
+        }
+
+        public GuiLabel Icon(ITexture icon) {
+            return Icon(icon, Color.White);
         }
 
         public GuiLabel UseTextCache(bool shouldCache) {
@@ -227,6 +234,11 @@ namespace FoldEngine.Gui {
 
         public new GuiButton TextMargin(int textMargin) {
             base.TextMargin(textMargin);
+            return this;
+        }
+
+        public new GuiButton Icon(ITexture icon, Color color) {
+            base.Icon(icon, color);
             return this;
         }
 
