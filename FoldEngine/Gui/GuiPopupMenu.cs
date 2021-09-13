@@ -9,8 +9,8 @@ namespace FoldEngine.Gui {
         
         public GuiPopupMenu(GuiEnvironment environment) : base(environment) { }
 
-        public void Reset(Point pos) {
-            this.Bounds = new Rectangle(pos, new Point(150, 300));
+        public void Reset(Point pos, int width = 150) {
+            this.Bounds = new Rectangle(pos, new Point(width, 300));
             base.Reset();
         }
 

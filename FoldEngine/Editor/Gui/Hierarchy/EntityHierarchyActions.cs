@@ -69,13 +69,19 @@ namespace FoldEngine.Editor.Views {
 
         public void Perform(GuiElement element, MouseEvent e) {
             var contextMenu = element.Parent.Environment.ContextMenu;
-            contextMenu.Reset(e.Position);
-            contextMenu.Button("Edit", 14).LeftAction<DebugAction>();
-            contextMenu.Button("Rename", 14).LeftAction<DebugAction>();
+            contextMenu.Reset(e.Position, 120);
+            contextMenu.Button("Copy", 9).TextMargin(20).TextAlignment(-1).LeftAction<DebugAction>();
+            contextMenu.Button("Paste", 9).TextMargin(20).TextAlignment(-1).LeftAction<DebugAction>();
             
-            contextMenu.Button("Create Child", 14).LeftAction<CreateEntityAction>().Id(_id);
+            contextMenu.Separator();
             
-            contextMenu.Button("Delete", 14).LeftAction<DeleteEntityAction>().Id(_id);
+            contextMenu.Button("Rename", 9).TextMargin(20).TextAlignment(-1).LeftAction<DebugAction>();
+            contextMenu.Button("Duplicate", 9).TextMargin(20).TextAlignment(-1).LeftAction<DebugAction>();
+            contextMenu.Button("Delete", 9).TextMargin(20).TextAlignment(-1).LeftAction<DebugAction>();
+            
+            contextMenu.Separator();
+            
+            contextMenu.Button("Create Child", 9).TextMargin(20).TextAlignment(-1).LeftAction<CreateEntityAction>().Id(_id);
             contextMenu.Show();
         }
         
