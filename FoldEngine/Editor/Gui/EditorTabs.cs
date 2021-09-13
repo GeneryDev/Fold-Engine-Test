@@ -1,4 +1,5 @@
 ﻿using System;
+using EntryProject.Util;
 using FoldEngine.Editor.Views;
 using FoldEngine.Graphics;
 using FoldEngine.Gui;
@@ -35,7 +36,7 @@ namespace FoldEngine.Editor.Gui {
             layoutPosition += new Point(Bounds.Width + Margin, 0);
         }
 
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
             if(Bounds.Contains(Environment.MousePos)) {
                 Environment.HoverTarget.Element = this;
             }
@@ -46,13 +47,16 @@ namespace FoldEngine.Editor.Gui {
 
             if(_dragging) {
                 if(Parent.Environment is EditorEnvironment editorEnvironment) {
-                    editorEnvironment.DraggingViewTab = this;
+                    if(!editorEnvironment.DraggingElements.Contains(this)) {
+                        editorEnvironment.DraggingElements.Add(this);
+                    }
                 }
             }
 
             var renderingBounds = Bounds;
             if(_dragging) {
-                renderingBounds = new Rectangle(Bounds.Location - Bounds.Center + Parent.Environment.MousePos, Bounds.Size);
+                offset += Parent.Environment.MousePos - Bounds.Center;
+                renderingBounds.Translate(offset);
             }
 
             Color defaultColor = _viewList.ActiveView == _view ? new Color(37, 37, 38) : Color.Transparent;
@@ -88,7 +92,7 @@ namespace FoldEngine.Editor.Gui {
                     _viewList.ActiveView = _view;
                 } else {
                     if(Parent.Environment is EditorEnvironment editorEnvironment) {
-                        editorEnvironment.DraggingViewTab = null;
+                        editorEnvironment.DraggingElements.Clear();
                         if(editorEnvironment.HoverViewListPanel != null) {
                             _viewList.RemoveView(_view);
                             editorEnvironment.HoverViewListPanel.AddView(_view);

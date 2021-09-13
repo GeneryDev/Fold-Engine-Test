@@ -61,7 +61,7 @@ namespace FoldEngine.Editor.Gui.Fields.Text {
         private Point TextRenderingStartPos => new Point(Bounds.X + 4, Bounds.Y + FontSize + 5);
 
 
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
             if(Bounds.Contains(Environment.MousePos)) {
                 Environment.HoverTarget.Element = this;
             }
@@ -69,7 +69,7 @@ namespace FoldEngine.Editor.Gui.Fields.Text {
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
                 Color = new Color(63, 63, 70),
-                DestinationRectangle = Bounds
+                DestinationRectangle = Bounds.Translate(offset)
             });
 
             if(Document.Dirty) {

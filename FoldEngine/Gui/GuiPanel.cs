@@ -155,7 +155,7 @@ namespace FoldEngine.Gui {
         public override void AdjustSpacing(GuiPanel parent) {
         }
 
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
             EndPreviousElement();
 
             if(Bounds.Contains(Environment.MousePos) && Environment is EditorEnvironment editorEnvironment) {

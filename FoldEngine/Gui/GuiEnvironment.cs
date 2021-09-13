@@ -25,6 +25,7 @@ namespace FoldEngine.Gui {
         public HoverTarget HoverTarget;
         public GuiElement FocusOwner { get; private set; }
         public ControlScheme ControlScheme = new ControlScheme("Gui");
+        public List<GuiElement> DraggingElements = new List<GuiElement>();
         
         public abstract List<GuiPanel> VisiblePanels { get; }
         

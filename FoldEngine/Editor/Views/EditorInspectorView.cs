@@ -177,7 +177,7 @@ namespace FoldEngine.Editor.Views {
         public override void AdjustSpacing(GuiPanel parent) {
         }
 
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
         }
 
         public override void Displace(ref Point layoutPosition) {
@@ -222,14 +222,14 @@ namespace FoldEngine.Editor.Views {
             base.OnMouseReleased(ref e);
         }
 
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
                 Color = new Color(63, 63, 70),
-                DestinationRectangle = Bounds
+                DestinationRectangle = Bounds.Translate(offset)
             });
             // _textColor = Rollover ? Color.CornflowerBlue : Color.White;
-            base.Render(renderer, layer);
+            base.Render(renderer, layer, offset);
         }
 
         public ComponentHeader ContextMenuAction(IGuiAction action) {

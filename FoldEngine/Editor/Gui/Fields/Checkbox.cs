@@ -18,7 +18,7 @@ namespace FoldEngine.Editor.Gui.Fields {
             Bounds.Width = Bounds.Height = 16;
         }
 
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
             if(Bounds.Contains(Environment.MousePos)) {
                 Environment.HoverTarget.Element = this;
             }
@@ -37,7 +37,7 @@ namespace FoldEngine.Editor.Gui.Fields {
             if(_checked) {
                 layer.Surface.Draw(new DrawRectInstruction() {
                     Texture = renderer.Textures["editor:checkmark"],
-                    DestinationRectangle = Bounds
+                    DestinationRectangle = Bounds.Translate(offset)
                 });
             }
         }

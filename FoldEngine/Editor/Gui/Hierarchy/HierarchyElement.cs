@@ -19,6 +19,7 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
         
         protected virtual Color SelectedColor => Color.CornflowerBlue;
 
+        protected bool _dragging = false;
         protected int _depth = 0;
         protected bool _expandable = false; 
         protected bool _expanded = false;
@@ -65,15 +66,31 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
             return this;
         }
 
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
             if(Bounds.Contains(Environment.MousePos)) {
                 Environment.HoverTarget.Element = this;
+            }
+            
+            if(Pressed(MouseEvent.LeftButton) && Environment.HoverTargetPrevious.Element != this) {
+                _dragging = true;
+            }
+
+            if(_dragging) {
+                if(Parent.Environment is EditorEnvironment editorEnvironment) {
+                    if(!editorEnvironment.DraggingElements.Contains(this)) {
+                        editorEnvironment.DraggingElements.Add(this);
+                    }
+                }
+            }
+
+            if(_dragging) {
+                offset += Parent.Environment.MousePos - Bounds.Center;
             }
 
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
                 Color = _selected ? SelectedColor : Pressed(MouseEvent.LeftButton) ? PressedColor : Rollover ? RolloverColor : NormalColor,
-                DestinationRectangle = Bounds
+                DestinationRectangle = Bounds.Translate(offset)
             });
 
             if(_expandable) {
@@ -81,11 +98,11 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
                     renderer.Textures[_expanded ? "editor:triangle.down" : "editor:triangle.right"];
                 layer.Surface.Draw(new DrawRectInstruction() {
                     Texture = triangleTexture,
-                    DestinationRectangle = ExpandBounds
+                    DestinationRectangle = ExpandBounds.Translate(offset)
                 });
             }
             
-            base.Render(renderer, layer);
+            base.Render(renderer, layer, offset);
         }
 
         public HierarchyElement ExpandAction(IGuiAction action) {
@@ -122,6 +139,12 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
         }
         
         public override void OnMouseReleased(ref MouseEvent e) {
+            if(_dragging && e.Button == MouseEvent.LeftButton) {
+                _dragging = false;
+                if(Parent.Environment is EditorEnvironment editorEnvironment) {
+                    editorEnvironment.DraggingElements.Clear();
+                }
+            }
             if(Bounds.Contains(e.Position)) {
                 switch(e.Button) {
                     case MouseEvent.LeftButton: {

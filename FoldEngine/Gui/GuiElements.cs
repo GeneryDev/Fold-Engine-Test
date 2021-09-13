@@ -20,7 +20,7 @@ namespace FoldEngine.Gui {
         public abstract void AdjustSpacing(GuiPanel parent);
 
         
-        public abstract void Render(IRenderingUnit renderer, IRenderingLayer layer);
+        public abstract void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default);
 
         
         public virtual void OnMousePressed(ref MouseEvent e) {
@@ -81,7 +81,7 @@ namespace FoldEngine.Gui {
             Margin = 0;
         }
 
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
             if(Bounds.Contains(Environment.MousePos)) {
                 Environment.HoverTarget.Element = this;
             }
@@ -116,13 +116,13 @@ namespace FoldEngine.Gui {
                 layer.Surface.Draw(new DrawRectInstruction() {
                     Texture = _icon,
                     Color = _iconColor,
-                    DestinationRectangle = new Rectangle(_text.Length > 0 ? x : (Bounds.Center.X - _iconSize.X/2), Bounds.Center.Y - _iconSize.Y/2,  _iconSize.X, _iconSize.Y)
+                    DestinationRectangle = new Rectangle(_text.Length > 0 ? x : (Bounds.Center.X - _iconSize.X/2), Bounds.Center.Y - _iconSize.Y/2,  _iconSize.X, _iconSize.Y).Translate(offset)
                 });
                 x += _iconSize.X;
                 x += 8;
             }
-            if(renderedText.HasValue) renderedText.DrawOnto(layer.Surface, new Point(x, Bounds.Center.Y + _fontSize / 2), _textColor);
-            else TextRenderer.Instance.DrawOnto(layer.Surface, new Point(x, Bounds.Center.Y + 3 * _fontSize / 7), _textColor);
+            if(renderedText.HasValue) renderedText.DrawOnto(layer.Surface, new Point(x, Bounds.Center.Y + _fontSize / 2) + offset, _textColor);
+            else TextRenderer.Instance.DrawOnto(layer.Surface, new Point(x, Bounds.Center.Y + 3 * _fontSize / 7) + offset, _textColor);
         }
 
         public GuiLabel Text(string text) {
@@ -187,7 +187,7 @@ namespace FoldEngine.Gui {
             Margin = 4;
         }
 
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
             if(Bounds.Contains(Environment.MousePos)) {
                 Environment.HoverTarget.Element = this;
             }
@@ -195,9 +195,9 @@ namespace FoldEngine.Gui {
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
                 Color = Pressed(MouseEvent.LeftButton) ? PressedColor : Rollover ? RolloverColor : NormalColor,
-                DestinationRectangle = Bounds
+                DestinationRectangle = Bounds.Translate(offset)
             });
-            base.Render(renderer, layer);
+            base.Render(renderer, layer, offset);
         }
 
         public override void OnMouseReleased(ref MouseEvent e) {
@@ -283,7 +283,7 @@ namespace FoldEngine.Gui {
             Margin = 0;
         }
         
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
         }
     }
 
@@ -305,7 +305,7 @@ namespace FoldEngine.Gui {
             Margin = 4;
         }
         
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
             var color = new Color(45, 45, 48);
             if(_label != null) {
                 RenderedText rendered = Parent.RenderString(_label, _fontSize);
@@ -315,12 +315,12 @@ namespace FoldEngine.Gui {
                 layer.Surface.Draw(new DrawRectInstruction() {
                     Texture = renderer.WhiteTexture,
                     Color = color,
-                    DestinationRectangle = new Rectangle(Bounds.X, Bounds.Center.Y - _thickness/2, lineWidth, _thickness)
+                    DestinationRectangle = new Rectangle(Bounds.X, Bounds.Center.Y - _thickness/2, lineWidth, _thickness).Translate(offset)
                 });
                 layer.Surface.Draw(new DrawRectInstruction() {
                     Texture = renderer.WhiteTexture,
                     Color = color,
-                    DestinationRectangle = new Rectangle(Bounds.Right - lineWidth, Bounds.Center.Y - _thickness/2, lineWidth, _thickness)
+                    DestinationRectangle = new Rectangle(Bounds.Right - lineWidth, Bounds.Center.Y - _thickness/2, lineWidth, _thickness).Translate(offset)
                 });
                 
                 rendered.DrawOnto(layer.Surface, new Point((int) (Bounds.Center.X - rendered.Width * _fontSize / 2), Bounds.Center.Y + 3 * _fontSize), Color.White);
@@ -329,7 +329,7 @@ namespace FoldEngine.Gui {
                 layer.Surface.Draw(new DrawRectInstruction() {
                     Texture = renderer.WhiteTexture,
                     Color = color,
-                    DestinationRectangle = new Rectangle(Bounds.Right - lineWidth, Bounds.Center.Y - _thickness/2, lineWidth, _thickness)
+                    DestinationRectangle = new Rectangle(Bounds.Right - lineWidth, Bounds.Center.Y - _thickness/2, lineWidth, _thickness).Translate(offset)
                 });
             }
         }

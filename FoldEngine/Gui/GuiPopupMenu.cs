@@ -27,16 +27,16 @@ namespace FoldEngine.Gui {
             Environment.VisiblePanels.Remove(this);
         }
         
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
             if(!Showing) return;
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
-                DestinationRectangle = Bounds.Grow(2),
+                DestinationRectangle = Bounds.Grow(2).Translate(offset),
                 Color = new Color(45, 45, 48)
             });
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
-                DestinationRectangle = Bounds,
+                DestinationRectangle = Bounds.Translate(offset),
                 Color = new Color(37, 37, 38)
             });
             
@@ -45,7 +45,7 @@ namespace FoldEngine.Gui {
                 Environment.HoverTarget.PopupMenu = this;
             }
             
-            base.Render(renderer, layer);
+            base.Render(renderer, layer, offset);
         }
     }
 }

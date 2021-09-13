@@ -33,6 +33,16 @@ namespace EntryProject.Util {
             );
         }
 
+        public static Rectangle Translate(this Rectangle rectangle, Point offset) {
+            (int x, int y, int width, int height) = rectangle;
+            return new Rectangle(
+                x + offset.X,
+                y + offset.Y,
+                width,
+                height
+            );
+        }
+
         public static Point Min(this Point a, Point b) {
             (int x, int y) = a;
             (int x2, int y2) = b;

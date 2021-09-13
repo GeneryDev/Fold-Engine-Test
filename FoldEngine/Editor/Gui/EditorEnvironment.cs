@@ -24,8 +24,7 @@ namespace FoldEngine.Editor.Gui {
 
         public sealed override List<GuiPanel> VisiblePanels { get; } = new List<GuiPanel>();
         public List<EditorView> AllViews = new List<EditorView>();
-        
-        public ViewTab DraggingViewTab { get; set; }
+
         public ViewListPanel HoverViewListPanel { get; set; }
 
         #region Dock Size Properties
@@ -260,8 +259,10 @@ namespace FoldEngine.Editor.Gui {
                 EastPanel.Bounds = bounds;
                 EastPanel.Render(renderer, baseLayer);
             }
-            
-            DraggingViewTab?.Render(renderer, overlayLayer);
+
+            foreach(GuiElement panel in DraggingElements) {
+                panel?.Render(renderer, overlayLayer);
+            }
 
             if(ContextMenu.Showing) {
                 ContextMenu.Render(renderer, overlayLayer);
@@ -309,7 +310,7 @@ namespace FoldEngine.Editor.Gui {
             ViewLists.Add(new ViewListPanel(editorEnvironment));
         }
         
-        private void RenderBackground(IRenderingUnit renderer, IRenderingLayer layer) {
+        private void RenderBackground(IRenderingUnit renderer, IRenderingLayer layer, Point offset) {
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
                 DestinationRectangle = Bounds,
@@ -322,9 +323,9 @@ namespace FoldEngine.Editor.Gui {
             });
         }
 
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
             Reset();
-            RenderBackground(renderer, layer);
+            RenderBackground(renderer, layer, offset);
             
             for(int i = 0; i < ViewLists.Count; i++) {
                 ViewListPanel viewList = ViewLists[i];
@@ -340,7 +341,7 @@ namespace FoldEngine.Editor.Gui {
             
             if(Side != default) Element<GuiResizer>().Side(-Side);
             
-            base.Render(renderer, layer);
+            base.Render(renderer, layer, offset);
         }
     }
 
@@ -351,7 +352,7 @@ namespace FoldEngine.Editor.Gui {
         
         public ViewListPanel(GuiEnvironment environment) : base(environment) { }
 
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
             if(Environment is EditorEnvironment editorEnvironment && Bounds.Contains(Environment.MousePos)) {
                 editorEnvironment.HoverViewListPanel = this;
             }
@@ -361,14 +362,14 @@ namespace FoldEngine.Editor.Gui {
                 layer.Surface.Draw(new DrawRectInstruction() {
                     Texture = renderer.WhiteTexture,
                     Color = bgColor.Value,
-                    DestinationRectangle = Bounds
+                    DestinationRectangle = Bounds.Translate(offset)
                 });
             }
             
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
                 Color = new Color(45, 45, 48),
-                DestinationRectangle = new Rectangle(Bounds.X, Bounds.Y, Bounds.Width, ViewTab.TabHeight)
+                DestinationRectangle = new Rectangle(Bounds.X, Bounds.Y, Bounds.Width, ViewTab.TabHeight).Translate(offset)
             });
             
             Reset();
@@ -395,7 +396,7 @@ namespace FoldEngine.Editor.Gui {
                 ActiveView.Render(renderer);
             }
             
-            base.Render(renderer, layer);
+            base.Render(renderer, layer, offset);
         }
 
         public void AddView(EditorView view) {
@@ -447,7 +448,7 @@ namespace FoldEngine.Editor.Gui {
         public override void Displace(ref Point layoutPosition) {
         }
         
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer) {
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
             if(Bounds.Contains(Environment.MousePos)) {
                 Environment.HoverTarget.Element = this;
             }
