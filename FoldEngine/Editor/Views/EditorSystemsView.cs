@@ -33,6 +33,7 @@ namespace FoldEngine.Editor.Views {
         
         public void Perform(GuiElement element, MouseEvent e) {
             if(element.Environment is EditorEnvironment editorEnvironment) {
+                editorEnvironment.Scene.Systems.Get<EditorBase>().EditingEntity.Clear();
                 editorEnvironment.GetView<EditorInspectorView>().SetObject(_system);
                 editorEnvironment.SwitchToView(editorEnvironment.GetView<EditorInspectorView>());
             }

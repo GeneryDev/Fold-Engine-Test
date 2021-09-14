@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using EntryProject.Editor.Gui.Hierarchy;
 using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
@@ -19,7 +20,7 @@ namespace FoldEngine.Editor.Views {
         
         private ComponentIterator<Transform> _transforms;
 
-        private List<long> _expandedEntities = new List<long>();
+        public Hierarchy<long> Hierarchy;
 
         public override string Icon => "editor:hierarchy";
         public override string Name => "Hierarchy";
@@ -29,6 +30,9 @@ namespace FoldEngine.Editor.Views {
         }
 
         public override void Render(IRenderingUnit renderer) {
+            if(Hierarchy == null) {
+                Hierarchy = new Hierarchy<long>(ContentPanel);
+            }
             ContentPanel.MayScroll = true;
             
             // ContentPanel.Label("Entities", 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
@@ -49,28 +53,26 @@ namespace FoldEngine.Editor.Views {
             long entityId = transform.EntityId;
             
             bool hasChildren = transform.FirstChildId != -1;
-            bool expanded = _expandedEntities.Contains(entityId);
+            bool expanded = Hierarchy.IsExpanded(entityId);
             
             Entity entity = new Entity(Scene, entityId);
 
             bool selected = Scene.Systems.Get<EditorBase>().EditingEntity.Contains(entity.EntityId);
 
             var button = panel.Element<HierarchyElement>()
-                .Entity(entity, depth)
-                .Icon(renderer.Textures["editor:cube"], selected ? Color.White : new Color(128, 128, 128))
-                .Expanded(expanded)
-                .Selected(selected)
-                ;
+                    .Hierarchy(Hierarchy)
+                    .Entity(entity, depth)
+                    .Icon(renderer.Textures["editor:cube"], selected ? Color.White : new Color(128, 128, 128))
+                    .Expanded(expanded)
+                    .Selected(selected)
+                    ;
+
             
             if(hasChildren && expanded) {
                 foreach(ComponentReference<Transform> childTransform in transform.Children) {
                     if(childTransform.Has()) RenderEntity(ref childTransform.Get(), panel, renderer, depth + 1);
                 }
             }
-        }
-
-        public void ExpandCollapseEntity(long entityId) {
-            if(!_expandedEntities.Remove(entityId)) _expandedEntities.Add(entityId);
         }
     }
 

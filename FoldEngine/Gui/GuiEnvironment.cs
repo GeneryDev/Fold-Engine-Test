@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using EntryProject.Editor.Gui.Hierarchy;
 using EntryProject.Util;
 using FoldEngine.Editor.Gui;
 using FoldEngine.Input;
@@ -153,6 +154,7 @@ namespace FoldEngine.Gui {
         public GuiPanel ScrollablePanel;
         public GuiElement Element;
         public GuiPopupMenu PopupMenu;
+        public IHierarchy Hierarchy;
     }
 
     public struct MouseEvent {

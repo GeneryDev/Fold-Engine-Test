@@ -16,7 +16,7 @@ namespace FoldEngine.Editor.Views {
         
         public void Perform(GuiElement element, MouseEvent e) {
             if(element.Parent.Environment is EditorEnvironment editorEnvironment) {
-                editorEnvironment.GetView<EditorHierarchyView>().ExpandCollapseEntity(_id);
+                editorEnvironment.GetView<EditorHierarchyView>().Hierarchy.ExpandCollapse(_id);
             }
         }
     }

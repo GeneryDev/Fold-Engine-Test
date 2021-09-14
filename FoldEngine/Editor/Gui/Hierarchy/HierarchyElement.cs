@@ -1,4 +1,6 @@
-﻿using EntryProject.Util;
+﻿using System;
+using EntryProject.Editor.Gui.Hierarchy;
+using EntryProject.Util;
 using FoldEngine.Editor.Views;
 using FoldEngine.Graphics;
 using FoldEngine.Gui;
@@ -12,6 +14,7 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
         private PooledValue<IGuiAction> _expandAction;
         private PooledValue<IGuiAction> _leftAction;
         private PooledValue<IGuiAction> _rightAction;
+        private PooledValue<HierarchyDragOntoAction> _dragOntoAction;
         
         protected virtual Color NormalColor => new Color(37, 37, 38);
         protected virtual Color RolloverColor => new Color(63, 63, 70);
@@ -19,6 +22,8 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
         
         protected virtual Color SelectedColor => Color.CornflowerBlue;
 
+        internal IHierarchy _hierarchy;
+        
         protected bool _dragging = false;
         protected int _depth = 0;
         protected bool _expandable = false; 
@@ -32,6 +37,7 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
             FontSize(14);
             TextAlignment(-1);
             _selected = false;
+            _hierarchy = null;
             _expandAction.Free();
             _leftAction.Free();
             _rightAction.Free();
@@ -53,6 +59,7 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
             ExpandAction<ExpandCollapseEntityAction>().Id(entity.EntityId);
             LeftAction<SelectEntityAction>().Id(entity.EntityId);
             RightAction<ShowEntityContextMenu>().Id(entity.EntityId);
+            DragOntoAction<HierarchyDragOntoAction<long>>().Id(entity.EntityId);
             return this;
         }
 
@@ -69,10 +76,12 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
             if(Bounds.Contains(Environment.MousePos)) {
                 Environment.HoverTarget.Element = this;
+                Environment.HoverTarget.Hierarchy = _hierarchy;
             }
             
             if(Pressed(MouseEvent.LeftButton) && Environment.HoverTargetPrevious.Element != this) {
                 _dragging = true;
+                if(_hierarchy != null) _hierarchy.Dragging = true;
             }
 
             if(_dragging) {
@@ -83,9 +92,9 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
                 }
             }
 
-            if(_dragging) {
-                offset += Parent.Environment.MousePos - Bounds.Center;
-            }
+            // if(_dragging) {
+            //     offset += Parent.Environment.MousePos - Bounds.Center;
+            // }
 
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
@@ -103,6 +112,27 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
             }
             
             base.Render(renderer, layer, offset);
+            
+            if(_hierarchy != null && _hierarchy.Dragging && Environment.HoverTarget.Element == this) {
+                int relative = 0;
+                if(Environment.MousePos.Y <= Bounds.Top + Bounds.Height / 3) {
+                    relative = -1;
+                } else if(Environment.MousePos.Y > Bounds.Bottom - Bounds.Height / 3) {
+                    relative = 1;
+                }
+                _dragOntoAction.Value?.Relative(relative).Perform(this, default);
+
+                if(relative != 0) {
+                    int lineCenterY = Bounds.Center.Y + (Bounds.Height / 2) * relative;
+                    int x = 4 + 16 * (_depth + 1) + 4;
+                    Rectangle lineBounds = new Rectangle(Bounds.Left + x, lineCenterY, Bounds.Width - x, 0);
+                    _hierarchy.DragLine = lineBounds;
+                }
+            }
+            
+            if(_dragging) {
+                _hierarchy?.DrawDragLine(renderer, layer);
+            }
         }
 
         public HierarchyElement ExpandAction(IGuiAction action) {
@@ -137,10 +167,22 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
             _rightAction.Value = action;
             return action;
         }
+
+        public HierarchyElement DragOntoAction(HierarchyDragOntoAction action) {
+            _dragOntoAction.Value = action;
+            return this;
+        }
+
+        public T DragOntoAction<T>() where T : HierarchyDragOntoAction, new() {
+            var action = Parent.Environment.ActionPool.Claim<T>();
+            _dragOntoAction.Value = action;
+            return action;
+        }
         
         public override void OnMouseReleased(ref MouseEvent e) {
             if(_dragging && e.Button == MouseEvent.LeftButton) {
                 _dragging = false;
+                if(_hierarchy != null) _hierarchy.Dragging = false;
                 if(Parent.Environment is EditorEnvironment editorEnvironment) {
                     editorEnvironment.DraggingElements.Clear();
                 }
@@ -171,6 +213,41 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
         public HierarchyElement Selected(bool selected) {
             _selected = selected;
             return this;
+        }
+
+        public HierarchyElement Hierarchy(IHierarchy hierarchy) {
+            _hierarchy = hierarchy;
+            return this;
+        }
+    }
+
+    public abstract class HierarchyDragOntoAction : IGuiAction {
+        protected int _relative = 0;
+
+        public HierarchyDragOntoAction Relative(int relative) {
+            _relative = relative;
+            return this;
+        }
+        
+        public IObjectPool Pool { get; set; }
+        public abstract void Perform(GuiElement element, MouseEvent e);
+    }
+
+    public class HierarchyDragOntoAction<T> : HierarchyDragOntoAction {
+        protected T _id;
+
+        public HierarchyDragOntoAction<T> Id(T id) {
+            _id = id;
+            return this;
+        }
+
+        public override void Perform(GuiElement element, MouseEvent e) {
+            if(element is HierarchyElement hierarchyElement) {
+                if(hierarchyElement._hierarchy is Hierarchy<T> hierarchy) {
+                    hierarchy.DragTargetId = _id;
+                    hierarchy.DragRelative = _relative;
+                }
+            }
         }
     }
 }
