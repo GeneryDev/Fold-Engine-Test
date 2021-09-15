@@ -8,14 +8,17 @@ using Microsoft.Xna.Framework;
 namespace EntryProject.Editor.Gui.Hierarchy {
     public interface IHierarchy {
         GuiEnvironment Environment { get; set; }
+        bool Pressed { get; set; }
         bool Dragging { get; set; }
         Rectangle DragLine { get; set; }
         void DrawDragLine(IRenderingUnit renderer, IRenderingLayer environmentBaseLayer);
     }
     public class Hierarchy<T> : IHierarchy {
         public GuiEnvironment Environment { get; set; }
+        public bool Pressed { get; set; }
         public bool Dragging { get; set; }
         public Rectangle DragLine { get; set; }
+
         public T DragTargetId = default;
         public int DragRelative = 0;
 
@@ -24,6 +27,7 @@ namespace EntryProject.Editor.Gui.Hierarchy {
         }
 
         public List<T> Expanded = new List<T>();
+        public List<T> Selected = new List<T>();
 
         public Hierarchy(GuiPanel parent) {
             Environment = parent.Environment;
@@ -31,6 +35,10 @@ namespace EntryProject.Editor.Gui.Hierarchy {
 
         public void ExpandCollapse(T id) {
             if(!Expanded.Remove(id)) Expanded.Add(id);
+        }
+
+        public bool IsSelected(T id) {
+            return Selected.Contains(id);
         }
 
         public bool IsExpanded(T id) {

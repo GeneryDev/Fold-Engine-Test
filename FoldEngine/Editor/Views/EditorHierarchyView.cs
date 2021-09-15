@@ -57,13 +57,14 @@ namespace FoldEngine.Editor.Views {
             
             Entity entity = new Entity(Scene, entityId);
 
-            bool selected = Scene.Systems.Get<EditorBase>().EditingEntity.Contains(entity.EntityId);
+            bool selected = Hierarchy.Pressed
+                ? Hierarchy.IsSelected(entityId)
+                : Scene.Systems.Get<EditorBase>().EditingEntity.Contains(entity.EntityId);
 
-            var button = panel.Element<HierarchyElement>()
+            var button = panel.Element<HierarchyElement<long>>()
                     .Hierarchy(Hierarchy)
                     .Entity(entity, depth)
                     .Icon(renderer.Textures["editor:cube"], selected ? Color.White : new Color(128, 128, 128))
-                    .Expanded(expanded)
                     .Selected(selected)
                     ;
 

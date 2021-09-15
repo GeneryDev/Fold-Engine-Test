@@ -1,6 +1,7 @@
 ﻿using System;
 using EntryProject.Util;
 using FoldEngine.Editor.Gui;
+using FoldEngine.Editor.Gui.Hierarchy;
 using FoldEngine.Gui;
 using Microsoft.Xna.Framework.Input;
 
@@ -20,17 +21,17 @@ namespace FoldEngine.Editor.Views {
             }
         }
     }
-    public class SelectEntityAction : IGuiAction {
+    public class SelectEntityDownAction : IGuiAction {
         private long _id;
         private int _depth;
 
-        public SelectEntityAction Id(long id) {
+        public SelectEntityDownAction Id(long id) {
             _id = id;
             return this;
         }
 
         public void Perform(GuiElement element, MouseEvent e) {
-            if(element.Parent.Environment is EditorEnvironment editorEnvironment) {
+            if(element.Parent.Environment is EditorEnvironment editorEnvironment && element is HierarchyElement<long> hierarchyElement) {
                 var editorBase = editorEnvironment.Scene.Systems.Get<EditorBase>();
                 bool wasSelected = editorBase.EditingEntity.Contains(_id);
 
@@ -38,8 +39,49 @@ namespace FoldEngine.Editor.Views {
                                || editorEnvironment.Scene.Core.InputUnit.Devices.Keyboard[Keys.RightControl].Down;
                 
                 bool shift = editorEnvironment.Scene.Core.InputUnit.Devices.Keyboard[Keys.LeftShift].Down
-                               || editorEnvironment.Scene.Core.InputUnit.Devices.Keyboard[Keys.RightShift].Down;
+                             || editorEnvironment.Scene.Core.InputUnit.Devices.Keyboard[Keys.RightShift].Down;
+
+                hierarchyElement._hierarchy.Selected.Clear();
+                hierarchyElement._hierarchy.Selected.AddRange(editorBase.EditingEntity);
                 
+                if(control) {
+                    if(wasSelected) {
+                        hierarchyElement._hierarchy.Selected.Remove(_id);
+                    } else {
+                        hierarchyElement._hierarchy.Selected.Add(_id);
+                    }
+                } else {
+                    if(wasSelected) {
+                    } else {
+                        hierarchyElement._hierarchy.Selected.Clear();
+                        hierarchyElement._hierarchy.Selected.Add(_id);
+                    }
+                }
+            }
+        }
+
+        public IObjectPool Pool { get; set; }
+    }
+    public class SelectEntityUpAction : IGuiAction {
+        private long _id;
+        private int _depth;
+
+        public SelectEntityUpAction Id(long id) {
+            _id = id;
+            return this;
+        }
+
+        public void Perform(GuiElement element, MouseEvent e) {
+            if(element.Parent.Environment is EditorEnvironment editorEnvironment && element is HierarchyElement<long> hierarchyElement) {
+                var editorBase = editorEnvironment.Scene.Systems.Get<EditorBase>();
+                bool wasSelected = editorBase.EditingEntity.Contains(_id);
+
+                bool control = editorEnvironment.Scene.Core.InputUnit.Devices.Keyboard[Keys.LeftControl].Down
+                               || editorEnvironment.Scene.Core.InputUnit.Devices.Keyboard[Keys.RightControl].Down;
+                
+                bool shift = editorEnvironment.Scene.Core.InputUnit.Devices.Keyboard[Keys.LeftShift].Down
+                             || editorEnvironment.Scene.Core.InputUnit.Devices.Keyboard[Keys.RightShift].Down;
+
                 if(control) {
                     if(wasSelected) {
                         editorBase.EditingEntity.Remove(_id);
