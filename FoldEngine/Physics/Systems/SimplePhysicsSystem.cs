@@ -177,11 +177,24 @@ namespace FoldEngine.Physics {
                                                               * (1 + restitution)
                                                               * physics.Mass;
 
-                                        Vector2 frictionForce =
+                                        Vector2 staticFriction =
                                             (Vector2) (surfaceNormalComplex.Normalized * Complex.Imaginary)
                                             * -velocityInNormalPerpendicular
-                                            * friction
                                             * physics.Mass;
+
+                                        bool staticCapped = false;
+                                        if(staticFriction.Length() > friction * normalForce.Length()) {
+                                            staticCapped = true;
+                                            staticFriction = staticFriction.Normalized() * friction * normalForce.Length();
+                                        }
+                                        
+                                        Vector2 kineticFriction =
+                                            ((Vector2) (surfaceNormalComplex.Normalized * Complex.Imaginary)
+                                             * -velocityInNormalPerpendicular).Normalized()
+                                            * friction
+                                            * normalForce.Length();
+
+                                        Vector2 frictionForce = staticCapped ? kineticFriction : staticFriction;
 
                                         // physics.ApplyForce(normalForce, default, ForceMode.Instant);
                                         // physics.ApplyForce(frictionForce, default, ForceMode.Instant);
