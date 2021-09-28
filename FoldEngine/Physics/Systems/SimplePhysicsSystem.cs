@@ -165,7 +165,7 @@ namespace FoldEngine.Physics {
 
                                         physics.ContactDisplacement += surfaceNormalSum / totalSurfaceNormalFaceLength * largestCrossSection;
 
-                                        float velocityInNormalDirection = (((Complex) (physics.PreviousVelocity - otherPhysics.PreviousVelocity)) / surfaceNormalComplex).A;
+                                        float velocityInNormalDirection = (((Complex) (physics.Velocity - otherPhysics.Velocity)) / surfaceNormalComplex).A;
                                         float velocityInTangentDirection = (((Complex) (physics.Velocity - otherPhysics.Velocity)) / surfaceNormalComplex).B;
                                         
                                         // Vector2 normalForce = ((Vector2)surfaceNormalComplex.Normalized) * physics.Mass * -velocityInNormalDirection;
@@ -174,7 +174,6 @@ namespace FoldEngine.Physics {
                                         Vector2 normalForce = (Vector2) surfaceNormalComplex.Normalized
                                                               * -damping
                                                               * velocityInNormalDirection
-                                                              * (1 + restitution)
                                                               * physics.Mass;
 
                                         Vector2 staticFriction =
@@ -200,6 +199,8 @@ namespace FoldEngine.Physics {
                                         // physics.ApplyForce(frictionForce, default, ForceMode.Instant);
 
                                         physics.Velocity += (normalForce + frictionForce) / physics.Mass;
+                                        
+                                        physics.ApplyForce(normalForce * restitution, default, ForceMode.Instant);
                                     }
                                 }
                             }
