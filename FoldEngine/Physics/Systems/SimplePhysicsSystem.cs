@@ -165,8 +165,8 @@ namespace FoldEngine.Physics {
 
                                         physics.ContactDisplacement += surfaceNormalSum / totalSurfaceNormalFaceLength * largestCrossSection;
 
-                                        float velocityInNormalDirection = (((Complex) (physics.Velocity - otherPhysics.Velocity)) / surfaceNormalComplex).A;
-                                        float velocityInNormalPerpendicular = (((Complex) (physics.Velocity - otherPhysics.Velocity)) / surfaceNormalComplex).B;
+                                        float velocityInNormalDirection = (((Complex) (physics.PreviousVelocity - otherPhysics.PreviousVelocity)) / surfaceNormalComplex).A;
+                                        float velocityInNormalPerpendicular = (((Complex) (physics.PreviousVelocity - otherPhysics.PreviousVelocity)) / surfaceNormalComplex).B;
                                         
                                         // Vector2 normalForce = ((Vector2)surfaceNormalComplex.Normalized) * physics.Mass * -velocityInNormalDirection;
                                         // physics.ApplyForce(normalForce, default, ForceMode.Continuous);
@@ -261,6 +261,7 @@ namespace FoldEngine.Physics {
 
                 physics.PreviousAcceleration = physics.AccelerationFromForce;
                 physics.AccelerationFromForce = default;
+                physics.PreviousVelocity = physics.Velocity;
                 physics.Torque = default;
             }
         }
