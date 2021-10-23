@@ -31,6 +31,8 @@ namespace FoldEngine.Physics {
         [HideInInspector]
         public Vector2 PreviousPosition;
         [HideInInspector]
+        public Vector2 PreviousVelocity;
+        [HideInInspector]
         public Vector2 AccelerationFromForce;
         [HideInInspector]
         public Vector2 PreviousAcceleration;

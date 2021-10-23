@@ -6,6 +6,13 @@ using FoldEngine.Interfaces;
 using Microsoft.Xna.Framework;
 
 namespace EntryProject.Editor.Gui.Hierarchy {
+    public enum HierarchyDropMode {
+        Before,
+        Inside,
+        FirstInside,
+        After
+    }
+    
     public interface IHierarchy {
         GuiEnvironment Environment { get; set; }
         bool Pressed { get; set; }
@@ -68,5 +75,7 @@ namespace EntryProject.Editor.Gui.Hierarchy {
                 });
             }
         }
+
+        public virtual void Drop() {}
     }
 }

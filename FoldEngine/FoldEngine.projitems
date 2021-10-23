@@ -51,6 +51,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Tools\RotateTool.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Tools\ScaleTool.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Tools\SelectTool.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\ChangeEntityHierarchyTransaction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\ComponentTransactions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\CreateEntityTransaction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Transactions\DeleteEntityTransaction.cs" />

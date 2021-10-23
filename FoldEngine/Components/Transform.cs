@@ -241,9 +241,12 @@ namespace FoldEngine.Components {
         /// <param name="entityId">The ID of the entity that should become this transform's parent</param>
         public void SetParent(long entityId) {
             if(!IsNotNull) throw new InvalidOperationException();
-            //TODO clearing children of old parent; ensuring root doesn't change.
+            if(ParentId == entityId) return;
+            if(ParentId != -1) {
+                Scene.Components.GetComponent<Transform>(ParentId).RemoveChild(_ownerId);
+            }
             ParentId = entityId;
-            AddChild(ref MutableParent, ref this);
+            if(entityId != -1) AddChild(ref MutableParent, ref this);
         }
 
         /// <summary>
@@ -434,6 +437,12 @@ namespace FoldEngine.Components {
             snapshot.LocalRotation = this.Rotation;
             snapshot.LocalScale = this.LocalScale;
             return snapshot;
+        }
+
+        public void RestoreSnapshot(Transform snapshot) {
+            this.Position = snapshot.LocalPosition;
+            this.Rotation = snapshot.LocalRotation;
+            this.LocalScale = snapshot.LocalScale;
         }
     }
 }

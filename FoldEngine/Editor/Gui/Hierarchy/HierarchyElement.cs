@@ -207,8 +207,8 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
         }
 
         public override void OnMouseReleased(ref MouseEvent e) {
-            _hierarchy.Pressed = false;
             if(_dragging && e.Button == MouseEvent.LeftButton) {
+                _hierarchy.Drop();
                 _dragging = false;
                 if(_hierarchy != null) _hierarchy.Dragging = false;
                 if(Parent.Environment is EditorEnvironment editorEnvironment) {
@@ -231,6 +231,7 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
                     }
                 }
             }
+            _hierarchy.Pressed = false;
         }
 
         public HierarchyElement<TI> Selected(bool selected) {

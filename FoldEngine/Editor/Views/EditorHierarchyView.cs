@@ -31,7 +31,7 @@ namespace FoldEngine.Editor.Views {
 
         public override void Render(IRenderingUnit renderer) {
             if(Hierarchy == null) {
-                Hierarchy = new Hierarchy<long>(ContentPanel);
+                Hierarchy = new EntityHierarchy(ContentPanel);
             }
             ContentPanel.MayScroll = true;
             
@@ -123,6 +123,45 @@ namespace FoldEngine.Editor.Views {
         
         public void Perform(GuiElement element, MouseEvent e) {
             ((EditorEnvironment) element.Environment).TransactionManager.InsertTransaction(new CreateEntityTransaction(_entityId));
+        }
+    }
+
+    public class EntityHierarchy : Hierarchy<long> {
+        public EntityHierarchy(GuiEnvironment environment) : base(environment) { }
+        public EntityHierarchy(GuiPanel parent) : base(parent) { }
+
+        public override void Drop() {
+            Console.WriteLine("Dropping: ");
+
+            HierarchyDropMode dropMode;
+            switch(DragRelative) {
+                case -1: dropMode = HierarchyDropMode.Before;
+                    break;
+                case 0: dropMode = HierarchyDropMode.Inside;
+                    break;
+                case 1: dropMode = IsExpanded(DragTargetId) ? HierarchyDropMode.FirstInside : HierarchyDropMode.After;
+                    break;
+                default: throw new InvalidOperationException($"DragRelative can only be -1, 0 or 1, was {DragRelative}");
+            }
+            
+            CompoundTransaction<EditorEnvironment> transactions = new CompoundTransaction<EditorEnvironment>();
+            
+            foreach(long id in Selected) {
+                var entity = new Entity(Environment.Scene, id);
+                var transaction = new ChangeEntityHierarchyTransaction(
+                    entityId: id,
+                    previousParent: entity.Transform.ParentId,
+                    previousNextSibling: entity.Transform.NextSiblingId,
+                    nextEntity: DragTargetId,
+                    nextRelationship: dropMode,
+                    snapshot: entity.Transform.CreateSnapshot()
+                    );
+                transactions.Append(() => transaction);
+            }
+
+            if(Environment is EditorEnvironment editorEnvironment) {
+                editorEnvironment.TransactionManager.InsertTransaction(transactions);
+            }
         }
     }
 }
