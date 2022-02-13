@@ -51,12 +51,22 @@ namespace FoldEngine.Rendering {
             (float viewX, float viewY) = view.Position;
             Complex cameraRotateScale = Complex.FromRotation(-view.Rotation);
 
-            var viewMatrix = new Matrix(
-                cameraRotateScale.A / view.LocalScale.X, cameraRotateScale.B / view.LocalScale.Y, 0, 0,
-                (cameraRotateScale * Complex.Imaginary).A / view.LocalScale.X,
-                (cameraRotateScale * Complex.Imaginary).B / view.LocalScale.Y, 0, 0,
+            //Translate
+            Matrix viewMatrix = new Matrix( //Translate
+                1, 0, 0, 0,
+                0, 1, 0, 0,
                 0, 0, 1, 0,
-                -viewX / view.LocalScale.X, -viewY / view.LocalScale.Y, 0, 1
+                -viewX, -viewY, 0, 1
+            ) * new Matrix( //Rotate
+                cameraRotateScale.A, cameraRotateScale.B, 0, 0,
+                -cameraRotateScale.B, cameraRotateScale.A, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            ) * new Matrix( //Scale
+                1/view.LocalScale.X, 0, 0, 0,
+                0, 1/view.LocalScale.Y, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
             );
 
             Owner.GizmoTransformMatrix = viewMatrix;
