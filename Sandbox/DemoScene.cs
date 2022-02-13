@@ -12,6 +12,7 @@ using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
 using FoldEngine.Physics;
 using FoldEngine.Rendering;
+using FoldEngine.Resources;
 using FoldEngine.Util;
 using Woofer;
 
@@ -37,10 +38,11 @@ namespace Sandbox {
             // cam.Transform.LocalPosition = Vector2.UnitY * -8;
             cam.Transform.SetParent(e1);
             cam.AddComponent<Camera>();
+            cam.GetComponent<Camera>().SnapPosition = 1 / 16f;
 
             {
                 ref MeshRenderable mr = ref e1.AddComponent<MeshRenderable>();
-                mr.MeshIdentifier = "square";
+                mr.MeshIdentifier = new ResourceLocation("square");
                 mr.TextureIdentifier = "main:beacon";
             }
             e1.Transform.Position += Vector2.UnitY * 64;
@@ -50,7 +52,7 @@ namespace Sandbox {
             
             {
                 ref MeshRenderable mr = ref e3.AddComponent<MeshRenderable>();
-                mr.MeshIdentifier = "square";
+                mr.MeshIdentifier = new ResourceLocation("square");
                 mr.TextureIdentifier = "main:beacon";
             }
             e3.Transform.Position += Vector2.UnitY * 60;
@@ -61,7 +63,7 @@ namespace Sandbox {
             
             {
                 ref MeshRenderable mr = ref e4.AddComponent<MeshRenderable>();
-                mr.MeshIdentifier = "square";
+                mr.MeshIdentifier = new ResourceLocation("square");
                 mr.TextureIdentifier = "main:beacon";
             }
             e4.Transform.Position += Vector2.UnitY * 60;
@@ -84,7 +86,7 @@ namespace Sandbox {
             
             {
                 ref MeshRenderable mr = ref e2.AddComponent<MeshRenderable>();
-                mr.MeshIdentifier = "square";
+                mr.MeshIdentifier = new ResourceLocation("square");
                 mr.TextureIdentifier = "main:pixel.white";
             }
             e2.Name = "Platform";
@@ -198,26 +200,25 @@ namespace Sandbox {
         }
 
         private void BuildMeshes() {
-            
-            Meshes.Start("square", MeshCollection.MeshInputType.Vertices)
+            Resources.Create<Mesh>("square").Start(Mesh.MeshInputType.Vertices)
                 .Vertex(new Vector2(-0.5f, -0.5f), new Vector2(0, 1))
                 .Vertex(new Vector2(-0.5f, 0.5f), new Vector2(0, 0))
                 .Vertex(new Vector2(0.5f, 0.5f), new Vector2(1, 0))
                 .Vertex(new Vector2(0.5f, -0.5f), new Vector2(1, 1))
                 .End();
             
-            Meshes.Start("circle", MeshCollection.MeshInputType.Vertices);
+            Mesh circle = Resources.Create<Mesh>("circle").Start(Mesh.MeshInputType.Vertices);
             const int segments = 12;
             Complex step = Complex.FromRotation(-(float) (Math.PI * 2 / segments));
             Complex current = new Complex(0.5f, 0);
             for(int i = 0; i < segments; i++) {
-                Meshes.Vertex(current, current + new Complex(0.5f, 0.5f));
+                circle.Vertex(current, current + new Complex(0.5f, 0.5f));
                 current *= step;
             }
-            Meshes.End();
+            circle.End();
             
             
-            Meshes.Start("weird", MeshCollection.MeshInputType.Vertices)
+            Resources.Create<Mesh>("weird").Start(Mesh.MeshInputType.Vertices)
                 .Vertex(new Vector2(-1, 0), Vector2.Zero)
                 .Vertex(new Vector2(-2, 1), Vector2.Zero)
                 .Vertex(new Vector2(0, 2), Vector2.Zero)

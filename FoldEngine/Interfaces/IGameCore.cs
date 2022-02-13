@@ -1,5 +1,6 @@
 ﻿using System;
 using FoldEngine.Commands;
+using FoldEngine.Resources;
 using FoldEngine.Scenes;
 
 namespace FoldEngine.Interfaces {
@@ -33,6 +34,11 @@ namespace FoldEngine.Interfaces {
         /// This Core's audio unit
         /// </summary>
         CommandQueue CommandQueue { get; }
+
+        /// <summary>
+        /// This Core's global resources
+        /// </summary>
+        ResourceCollections Resources { get; }
 
 
         /// <summary>

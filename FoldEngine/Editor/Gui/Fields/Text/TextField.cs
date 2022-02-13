@@ -14,6 +14,7 @@ using FoldEngine.Text;
 using FoldEngine.Util.Transactions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using ResourceLocation = FoldEngine.Resources.ResourceLocation;
 
 namespace FoldEngine.Editor.Gui.Fields.Text {
     public class TextField : GuiElement, IInspectorField {
@@ -161,6 +162,8 @@ namespace FoldEngine.Editor.Gui.Fields.Text {
         public bool EditValueForType(Type type, ref object value, int index) {
             if(type == typeof(string)) {
                 value = Document.Text;
+            } else if(type == typeof(ResourceLocation)) {
+                value = new ResourceLocation(Document.Text);
             } else if(type == typeof(int)) {
                 if(!int.TryParse(Document.Text, out int parsed)) return false;
                 value = parsed;

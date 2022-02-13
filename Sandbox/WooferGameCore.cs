@@ -8,6 +8,7 @@ using FoldEngine;
 using FoldEngine.Commands;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
+using FoldEngine.Resources;
 using FoldEngine.Scenes;
 
 using Sandbox;
@@ -26,6 +27,8 @@ namespace Woofer {
 
         public CommandQueue CommandQueue { get; private set; }
 
+        public ResourceCollections Resources { get; private set; }
+
         public float TimeScale => 1;
 
         public WooferGameCore() {
@@ -37,6 +40,7 @@ namespace Woofer {
             InputUnit = new InputUnit();
             AudioUnit = new AudioUnit();
             CommandQueue = new CommandQueue(this);
+            Resources = new ResourceCollections();
 
             InputUnit.Setup("Content/Config/input.json");
 

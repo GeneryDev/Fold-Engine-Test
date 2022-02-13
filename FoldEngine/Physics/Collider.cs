@@ -2,6 +2,7 @@
 using EntryProject.Editor.Inspector;
 using EntryProject.Util;
 using FoldEngine.Components;
+using FoldEngine.Resources;
 using FoldEngine.Scenes;
 using Microsoft.Xna.Framework;
 
@@ -12,7 +13,7 @@ namespace FoldEngine.Physics {
         public ColliderType Type;
         [ShowOnlyIf.Not(nameof(Type), ColliderType.None)]
         [ShowOnlyIf(nameof(Type), ColliderType.Mesh)]
-        public string MeshIdentifier;
+        public ResourceLocation MeshIdentifier;
         
         [ShowOnlyIf.Not(nameof(Type), ColliderType.None)]
         [ShowOnlyIf(nameof(Type), ColliderType.Box)]
@@ -44,7 +45,7 @@ namespace FoldEngine.Physics {
 
         public void SetMesh(string meshIdentifier) {
             Type = ColliderType.Mesh;
-            MeshIdentifier = meshIdentifier;
+            MeshIdentifier = new ResourceLocation(meshIdentifier);
         }
 
         public Vector2[] GetVertices(ref Transform transform) {
@@ -59,9 +60,9 @@ namespace FoldEngine.Physics {
                     transform.Apply(new Vector2(Width/2, -Height/2))
                 };
                 case ColliderType.Mesh: {
-                    Vector2[] vertices = new Vector2[transform.Scene.Meshes.GetVertexCountForMesh(MeshIdentifier)];
+                    Vector2[] vertices = new Vector2[transform.Scene.Resources.Get<Mesh>(ref MeshIdentifier, Mesh.Empty).GetVertexCount()];
                     int i = 0;
-                    foreach(Vector2 vertex in transform.Scene.Meshes.GetVerticesForMesh(MeshIdentifier)) {
+                    foreach(Vector2 vertex in transform.Scene.Resources.Get<Mesh>(ref MeshIdentifier, Mesh.Empty).GetVertices()) {
                         vertices[i] = transform.Apply(vertex);
                         i++;
                     }
@@ -87,13 +88,13 @@ namespace FoldEngine.Physics {
                     };
                 }
                 case ColliderType.Mesh: {
-                    Line[] faces = new Line[transform.Scene.Meshes.GetVertexCountForMesh(MeshIdentifier)];
+                    Line[] faces = new Line[transform.Scene.Resources.Get<Mesh>(ref MeshIdentifier, Mesh.Empty).GetVertexCount()];
                     int i = 0;
             
                     Vector2 firstVertex = default;
                     Vector2 prevVertex = default;
                     bool first = true;
-                    foreach(Vector2 localVertex in transform.Scene.Meshes.GetVerticesForMesh(MeshIdentifier)) {
+                    foreach(Vector2 localVertex in transform.Scene.Resources.Get<Mesh>(ref MeshIdentifier, Mesh.Empty).GetVertices()) {
                         Vector2 vertex = transform.Apply(localVertex);
                         if(first) {
                             firstVertex = vertex;
@@ -143,7 +144,7 @@ namespace FoldEngine.Physics {
                     return transform.Apply(new Vector2(Width / 2, Height / 2));
                 }
                 case ColliderType.Mesh: {
-                    return transform.Apply(transform.Scene.Meshes.GetFarthestVertexFromOrigin(MeshIdentifier));
+                    return transform.Apply(transform.Scene.Resources.Get<Mesh>(ref MeshIdentifier, Mesh.Empty).GetFarthestVertexFromOrigin());
                 }
                 default: throw new InvalidOperationException();
             }

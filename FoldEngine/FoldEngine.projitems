@@ -78,7 +78,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\DrawInstruction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\FontManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\GizmoBatch.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Graphics\MeshCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\RenderSurface.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\ITexture.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\TextureAtlas.cs" />
@@ -115,6 +114,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Physics\Physics.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Physics\Systems\AdvancedPhysicsSystem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Physics\Systems\SimplePhysicsSystem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Resources\Mesh.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Resources\ResourceCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Resources\ResourceCollections.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scenes\EntityIdRemapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\ISerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\LoadOperation.cs" />

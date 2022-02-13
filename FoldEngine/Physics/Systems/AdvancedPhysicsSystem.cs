@@ -2,6 +2,7 @@
 using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Interfaces;
+using FoldEngine.Resources;
 using FoldEngine.Systems;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
@@ -45,8 +46,8 @@ namespace FoldEngine.Physics {
                         ref Collider otherCollider = ref _colliders.GetComponent();
 
                         Polygon.PolygonIntersectionVertex[][] intersections = Polygon.ComputePolygonIntersection(
-                            Owner.Meshes, collider.MeshIdentifier, transform,
-                            otherCollider.MeshIdentifier, otherTransform);
+                            Owner.Resources.Get<Mesh>(ref collider.MeshIdentifier, Mesh.Empty), transform,
+                            Owner.Resources.Get<Mesh>(ref otherCollider.MeshIdentifier, Mesh.Empty), otherTransform);
 
                         if(intersections != null && intersections.Length > 0) {
 

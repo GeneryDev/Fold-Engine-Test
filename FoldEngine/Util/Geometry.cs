@@ -6,6 +6,7 @@ using System.Diagnostics.Contracts;
 using FoldEngine;
 using FoldEngine.Components;
 using FoldEngine.Graphics;
+using FoldEngine.Resources;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
@@ -126,21 +127,20 @@ namespace EntryProject.Util {
     public static class Polygon {
         [Pure]
         public static PolygonIntersectionVertex[][] ComputePolygonIntersection(
-            MeshCollection meshes,
-            string meshIdA,
+            Mesh meshA,
             Transform transformA,
-            string meshIdB,
+            Mesh meshB,
             Transform transformB) {
-            Vector2[] verticesA = new Vector2[meshes.GetVertexCountForMesh(meshIdA)];
-            Vector2[] verticesB = new Vector2[meshes.GetVertexCountForMesh(meshIdA)];
+            Vector2[] verticesA = new Vector2[meshA.GetVertexCount()];
+            Vector2[] verticesB = new Vector2[meshB.GetVertexCount()];
 
             int i = 0;
-            foreach(Vector2 vertex in meshes.GetVerticesForMesh(meshIdA)) {
+            foreach(Vector2 vertex in meshA.GetVertices()) {
                 verticesA[i] = transformA.Apply(vertex);
                 i++;
             }
             i = 0;
-            foreach(Vector2 vertex in meshes.GetVerticesForMesh(meshIdB)) {
+            foreach(Vector2 vertex in meshB.GetVertices()) {
                 verticesB[i] = transformB.Apply(vertex);
                 i++;
             }

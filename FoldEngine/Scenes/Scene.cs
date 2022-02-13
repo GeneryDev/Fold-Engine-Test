@@ -10,6 +10,7 @@ using FoldEngine.Events;
 using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
 using FoldEngine.Rendering;
+using FoldEngine.Resources;
 using FoldEngine.Serialization;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
@@ -26,7 +27,7 @@ namespace FoldEngine.Scenes
         public readonly EventMap Events;
         public readonly SystemMap Systems;
 
-        public readonly MeshCollection Meshes;
+        public readonly ResourceCollections Resources;
 
         private long _nextEntityId = 0;
 
@@ -57,7 +58,7 @@ namespace FoldEngine.Scenes
             Components = new ComponentMap(this);
             Events = new EventMap(this);
             Systems = new SystemMap(this);
-            Meshes = new MeshCollection();
+            Resources = new ResourceCollections(core.Resources);
         }
 
         private List<long> _deletedIds = new List<long>();

@@ -2,6 +2,7 @@
 using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
 using FoldEngine.Interfaces;
+using FoldEngine.Resources;
 using FoldEngine.Scenes;
 using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
@@ -50,7 +51,7 @@ namespace FoldEngine.Physics {
                     Vector2 firstVertex = default;
                     Vector2 prevVertex = default;
                     bool first = true;
-                    foreach(var localVertex in scene.Meshes.GetVerticesForMesh(collider.MeshIdentifier)) {
+                    foreach(var localVertex in scene.Resources.Get<Mesh>(ref collider.MeshIdentifier, Mesh.Empty).GetVertices()) {
                         Vector2 vertex = transform.Apply(localVertex);
                         if(first) {
                             firstVertex = vertex;

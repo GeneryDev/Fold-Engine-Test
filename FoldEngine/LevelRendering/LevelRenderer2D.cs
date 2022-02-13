@@ -4,6 +4,7 @@ using FoldEngine.Components;
 using FoldEngine.Editor;
 using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
+using FoldEngine.Resources;
 using FoldEngine.Scenes;
 using FoldEngine.Systems;
 using FoldEngine.Util;
@@ -49,6 +50,10 @@ namespace FoldEngine.Rendering {
 
         private void RenderCamera(Camera camera, Transform view, IRenderingUnit renderer, bool setMainCameraId = false) {
             (float viewX, float viewY) = view.Position;
+            if(camera.SnapPosition > 0) {
+                viewX = (float) (Math.Round(viewX / camera.SnapPosition) * camera.SnapPosition);
+                viewY = (float) (Math.Round(viewY / camera.SnapPosition) * camera.SnapPosition);
+            }
             Complex cameraRotateScale = Complex.FromRotation(-view.Rotation);
 
             //Translate
@@ -82,15 +87,20 @@ namespace FoldEngine.Rendering {
             _meshRenderables.Reset();
 
             while(_meshRenderables.Next()) {
-                ref Transform transform = ref _meshRenderables.GetCoComponent<Transform>();
+                Transform transform = _meshRenderables.GetCoComponent<Transform>();
                 ref MeshRenderable meshRenderable = ref _meshRenderables.GetComponent();
+                if(camera.SnapPosition > 0) {
+                    Vector2 pos = transform.Position;
+                    pos.X = (float) (Math.Round(pos.X / camera.SnapPosition) * camera.SnapPosition);
+                    pos.Y = (float) (Math.Round(pos.Y / camera.SnapPosition) * camera.SnapPosition);
+                    transform.Position = pos;
+                }
 
-                if(meshRenderable.MeshIdentifier == null || meshRenderable.TextureIdentifier == null) continue;
+                if(meshRenderable.MeshIdentifier.Identifier == null || meshRenderable.TextureIdentifier == null) continue;
 
                 ITexture texture = renderer.Textures[meshRenderable.TextureIdentifier];
 
-                foreach(MeshCollection.Triangle triangle in Owner.Meshes.GetTrianglesForMesh(meshRenderable
-                    .MeshIdentifier)) {
+                foreach(Mesh.Triangle triangle in Owner.Resources.Get<Mesh>(ref meshRenderable.MeshIdentifier, Mesh.Empty).GetTriangles()) {
                     Vector2 vertexA = triangle.A.Position.ToVector2().ApplyMatrixTransform(meshRenderable.Matrix);
                     Vector2 vertexB = triangle.B.Position.ToVector2().ApplyMatrixTransform(meshRenderable.Matrix);
                     Vector2 vertexC = triangle.C.Position.ToVector2().ApplyMatrixTransform(meshRenderable.Matrix);
@@ -116,12 +126,12 @@ namespace FoldEngine.Rendering {
         }
 
         public static void DrawOutline(Scene scene, Transform transform, MeshRenderable meshRenderable, Color outlineColor) {
-            if(meshRenderable.MeshIdentifier == null || meshRenderable.TextureIdentifier == null) return;
+            if(meshRenderable.MeshIdentifier.Identifier == null || meshRenderable.TextureIdentifier == null) return;
 
             Vector2 firstVertex = default;
             Vector2 prevVertex = default;
             bool first = true;
-            foreach(var localVertex in scene.Meshes.GetVerticesForMesh(meshRenderable.MeshIdentifier)) {
+            foreach(var localVertex in scene.Resources.Get<Mesh>(ref meshRenderable.MeshIdentifier, Mesh.Empty).GetVertices()) {
                 Vector2 vertex = transform.Apply(localVertex);
                 if(first) {
                     firstVertex = vertex;
@@ -142,7 +152,7 @@ namespace FoldEngine.Rendering {
                 ref Transform transform = ref _meshRenderables.GetCoComponent<Transform>();
                 ref MeshRenderable meshRenderable = ref _meshRenderables.GetComponent();
 
-                if(meshRenderable.MeshIdentifier == null || meshRenderable.TextureIdentifier == null) continue;
+                if(meshRenderable.MeshIdentifier.Identifier == null || meshRenderable.TextureIdentifier == null) continue;
 
                 if(meshRenderable.Contains(worldPos, ref transform)) {
                     return _meshRenderables.GetEntityId();

@@ -2,40 +2,49 @@
 using System.Collections.Generic;
 using System.Linq;
 using EntryProject.Util;
+using FoldEngine.Graphics;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
-namespace FoldEngine.Graphics {
-    public class MeshCollection {
-        private const int InitialSize = 256*3;
+namespace FoldEngine.Resources {
+    public class Mesh : Resource {
+        private const int InitialSize = 256;
         
         private MeshVertex[] _vertices;
         private int[] _indices;
-        
-        private readonly Dictionary<string, MeshInfo> _meshInfos = new Dictionary<string, MeshInfo>();
 
-        private string _currentMesh = null;
-        private int _nextVertexIndex = 0;
-        private int _nextTriangleIndex = 0;
+        private MeshInputType _inputType;
+        private int _nextVertexIndex;
+        private int _nextTriangleIndex;
+        private int _vertexCount;
+        private int _triangleCount;
+        private float _radiusSquared;
+        private Vector2 _farthestVertexFromOrigin;
 
-        public MeshCollection() {
+        public Mesh(int size) {
+            _vertices = new MeshVertex[size];
+            _indices = new int[size];
+        }
+
+        public Mesh() {
             _vertices = new MeshVertex[InitialSize];
             _indices = new int[InitialSize];
         }
 
-        public MeshCollection Start(string name, MeshInputType inputType) {
-            _meshInfos[name] = new MeshInfo() {VertexStartIndex = _nextVertexIndex, TriangleStartIndex = _nextTriangleIndex, VertexCount = 0, InputType = inputType};
-            _currentMesh = name;
+        public Mesh Start(MeshInputType inputType) {
+            _inputType = inputType;
+            _nextVertexIndex = _nextTriangleIndex = 0;
+            _vertexCount = 0;
+            _triangleCount = 0;
             
             return this;
         }
 
-        public MeshCollection Vertex(Vector3 pos, Vector2 uv, Color? color = null) {
+        public Mesh Vertex(Vector3 pos, Vector2 uv, Color? color = null) {
             return this.Vertex(new MeshVertex(pos, color ?? Color.White, uv));
         }
 
-        public MeshCollection Vertex(Vector3 pos, float friction = 1f, float restitution = 0f, bool enabled = true) {
+        public Mesh Vertex(Vector3 pos, float friction = 1f, float restitution = 0f, bool enabled = true) {
             return this.Vertex(new MeshVertex() {
                 Position = pos,
                 Friction = friction,
@@ -44,25 +53,23 @@ namespace FoldEngine.Graphics {
             });
         }
 
-        public MeshCollection Vertex(Vector2 pos, Vector2 uv, Color? color = null) {
+        public Mesh Vertex(Vector2 pos, Vector2 uv, Color? color = null) {
             return this.Vertex(new Vector3(pos, 0), uv, color);
         }
 
-        public MeshCollection Vertex(Vector2 pos, float friction = 1f, float restitution = 0f, bool enabled = true) {
+        public Mesh Vertex(Vector2 pos, float friction = 1f, float restitution = 0f, bool enabled = true) {
             return this.Vertex(new Vector3(pos, 0), friction, restitution, enabled);
         }
 
-        public MeshCollection Vertex(MeshVertex vertex) {
+        public Mesh Vertex(MeshVertex vertex) {
             _vertices[_nextVertexIndex] = vertex;
             
-            MeshInfo meshInfo = _meshInfos[_currentMesh];
-            meshInfo.VertexCount++;
+            _vertexCount++;
             float distanceSquared = vertex.Position.LengthSquared();
-            if(meshInfo.RadiusSquared < distanceSquared) {
-                meshInfo.RadiusSquared = distanceSquared;
-                meshInfo.FarthestVertexFromOrigin = vertex.Position.ToVector2();
+            if(_radiusSquared < distanceSquared) {
+                _radiusSquared = distanceSquared;
+                _farthestVertexFromOrigin = vertex.Position.ToVector2();
             }
-            _meshInfos[_currentMesh] = meshInfo;
             
             _nextVertexIndex++;
             
@@ -70,16 +77,15 @@ namespace FoldEngine.Graphics {
         }
 
         public void End() {
-            MeshInfo meshInfo = _meshInfos[_currentMesh];
-            switch(meshInfo.InputType) {
+            switch(_inputType) {
                 case MeshInputType.Triangles:
-                    if(meshInfo.VertexCount % 3 != 0) {
-                        throw new InvalidOperationException($"Mesh '{_currentMesh}' ended with {_meshInfos[_currentMesh].VertexCount} vertices; should be a multiple of 3.");
+                    if(_vertexCount % 3 != 0) {
+                        throw new InvalidOperationException($"Mesh '_name' ended with {_vertexCount} vertices; should be a multiple of 3.");
                     }
-                    for(int i = meshInfo.VertexStartIndex;
-                        i < meshInfo.VertexStartIndex + meshInfo.VertexCount - 2;
+                    for(int i = 0;
+                        i < _vertexCount - 2;
                         i += 3) {
-                        InsertTriangleIndices(i, i+1, i+2, ref meshInfo);
+                        InsertTriangleIndices(i, i+1, i+2);
                     }
 
                     break;
@@ -94,8 +100,8 @@ namespace FoldEngine.Graphics {
                     // }
                     
                     List<EarClippingNode> nodes = new List<EarClippingNode>();
-                    for(int i = meshInfo.VertexStartIndex;
-                        i < meshInfo.VertexStartIndex + meshInfo.VertexCount;
+                    for(int i = 0;
+                        i < _vertexCount;
                         i++) {
                         nodes.Add(new EarClippingNode(i, _vertices[i].Position));
                     }
@@ -104,7 +110,7 @@ namespace FoldEngine.Graphics {
                     
                     {
                         int topLeftMostIndex =
-                            nodes.OrderBy(n => n.Position.X).ThenBy(n => n.Position.Y).First().VertexIndex - meshInfo.VertexStartIndex;
+                            nodes.OrderBy(n => n.Position.X).ThenBy(n => n.Position.Y).First().VertexIndex;
                         int prevIndex = topLeftMostIndex - 1;
                         int nextIndex = topLeftMostIndex + 1;
                         if(prevIndex < 0) prevIndex = nodes.Count - 1;
@@ -160,7 +166,7 @@ namespace FoldEngine.Graphics {
                                 if(IsPointInsidePolygon(
                                     (nodes[prevIndex].Position + current.Position + nodes[nextIndex].Position) / 3,
                                     nodes)) {
-                                    InsertTriangleIndices(nodes[prevIndex].VertexIndex, nodes[i].VertexIndex, nodes[nextIndex].VertexIndex, ref meshInfo);
+                                    InsertTriangleIndices(nodes[prevIndex].VertexIndex, nodes[i].VertexIndex, nodes[nextIndex].VertexIndex);
                                     nodes.RemoveAt(i);
                                     i--;                                    
                                     anyRemoved = true;
@@ -177,9 +183,6 @@ namespace FoldEngine.Graphics {
 
                     break;
             }
-
-            _meshInfos[_currentMesh] = meshInfo;
-            _currentMesh = null;
         }
 
         private static bool IsPointInsidePolygon(Vector3 point, IReadOnlyList<EarClippingNode> nodes) {
@@ -199,134 +202,101 @@ namespace FoldEngine.Graphics {
             return hits % 2 != 0;
         }
 
-        private void InsertTriangleIndices(int a, int b, int c, ref MeshInfo meshInfo) {
+        private void InsertTriangleIndices(int a, int b, int c) {
             _indices[_nextTriangleIndex++] = a;
             _indices[_nextTriangleIndex++] = b;
             _indices[_nextTriangleIndex++] = c;
-            meshInfo.TriangleCount++;
+            _triangleCount++;
         }
 
-        public IEnumerable<MeshVertex> GetVertexInfoForMesh(string name) {
-            if(name == null || !_meshInfos.ContainsKey(name)) yield break;
-            MeshInfo meshInfo = _meshInfos[name];
-            for(int i = meshInfo.VertexStartIndex; i < meshInfo.VertexStartIndex + meshInfo.VertexCount; i++) {
+        public IEnumerable<MeshVertex> GetVertexInfo() {
+            for(int i = 0; i < _vertexCount; i++) {
                 yield return _vertices[i];
             }
         }
 
-        public IEnumerable<Vector2> GetVerticesForMesh(string name) {
-            if(name == null || !_meshInfos.ContainsKey(name)) yield break;
-            MeshInfo meshInfo = _meshInfos[name];
-            for(int i = meshInfo.VertexStartIndex; i < meshInfo.VertexStartIndex + meshInfo.VertexCount; i++) {
+        public IEnumerable<Vector2> GetVertices() {
+            for(int i = 0; i < _vertexCount; i++) {
                 yield return _vertices[i].Position.ToVector2();
             }
         }
 
-        public IEnumerable<Line> GetLinesForMesh(string name) {
-            if(name == null || !_meshInfos.ContainsKey(name)) yield break;
-            MeshInfo meshInfo = _meshInfos[name];
-            for(int i = meshInfo.VertexStartIndex; i < meshInfo.VertexStartIndex + meshInfo.VertexCount; i++) {
+        public IEnumerable<Line> GetLines() {
+            for(int i = 0; i < _vertexCount; i++) {
                 yield return new Line(_vertices[i].Position.ToVector2(),
                     _vertices[
-                            i + 1 < meshInfo.VertexStartIndex + meshInfo.VertexCount
+                            i + 1 < _vertexCount
                                 ? i + 1
-                                : meshInfo.VertexStartIndex]
+                                : 0]
                         .Position.ToVector2());
             }
         }
 
-        public IEnumerable<Tuple<Vector2, Vector2, Vector2>> GetVertexTriosForMesh(string name) {
-            if(name == null || !_meshInfos.ContainsKey(name)) yield break;
-            MeshInfo meshInfo = _meshInfos[name];
-            for(int i = meshInfo.VertexStartIndex; i < meshInfo.VertexStartIndex + meshInfo.VertexCount; i++) {
+        public IEnumerable<Tuple<Vector2, Vector2, Vector2>> GetVertexTrios() {
+            for(int i = 0; i < _vertexCount; i++) {
                 yield return new Tuple<Vector2, Vector2, Vector2>(
                     _vertices[
-                            i - 1 >= meshInfo.VertexStartIndex
+                            i - 1 >= 0
                                 ? i - 1
-                                : meshInfo.VertexStartIndex + meshInfo.VertexCount - 1]
+                                : _vertexCount - 1]
                         .Position.ToVector2(),
                     _vertices[i].Position.ToVector2(),
                     _vertices[
-                            i + 1 < meshInfo.VertexStartIndex + meshInfo.VertexCount
+                            i + 1 < _vertexCount
                                 ? i + 1
-                                : meshInfo.VertexStartIndex]
+                                : 0]
                         .Position.ToVector2()
                 );
             }
         }
 
-        public TriangleEnumerator GetTrianglesForMesh(string name) {
-            return name != null && _meshInfos.ContainsKey(name)
-                ? new TriangleEnumerator(this, _meshInfos[name])
-                : new TriangleEnumerator(this);
+        public TriangleEnumerator GetTriangles() {
+            return new TriangleEnumerator(this);
         }
 
-        public int GetVertexCountForMesh(string name) {
-            if(name == null || !_meshInfos.ContainsKey(name)) return 0;
-            return _meshInfos[name].VertexCount;
+        public int GetVertexCount() {
+            return _vertexCount;
         }
 
-        public float GetRadiusSquaredForMesh(string name) {
-            if(name == null || !_meshInfos.ContainsKey(name)) return 0;
-            return _meshInfos[name].RadiusSquared;
+        public float GetRadiusSquared() {
+            return _radiusSquared;
         }
 
-        public float GetRadiusForMesh(string name) {
-            if(name == null || !_meshInfos.ContainsKey(name)) return 0;
-            return _meshInfos[name].Radius;
+        public float GetRadius() {
+            return (float) Math.Sqrt(_radiusSquared);
         }
 
-        public Vector2 GetFarthestVertexFromOrigin(string name) {
-            if(name == null || !_meshInfos.ContainsKey(name)) return Vector2.Zero;
-            return _meshInfos[name].FarthestVertexFromOrigin;
+        public Vector2 GetFarthestVertexFromOrigin() {
+            return _farthestVertexFromOrigin;
         }
 
         public struct TriangleEnumerator {
             private int i;
-            private MeshCollection meshCollection;
-            private MeshInfo meshInfo;
+            private Mesh mesh;
 
-            internal TriangleEnumerator(MeshCollection meshCollection) {
-                this.meshCollection = meshCollection;
-                this.meshInfo = new MeshInfo();
-                i = 0;
-            }
-
-            internal TriangleEnumerator(MeshCollection meshCollection, MeshInfo meshInfo) {
-                this.meshCollection = meshCollection;
-                this.meshInfo = meshInfo;
-                i = meshInfo.TriangleStartIndex - 3;
+            internal TriangleEnumerator(Mesh mesh) {
+                this.mesh = mesh;
+                i = -3;
             }
 
             public bool MoveNext() {
-                if(meshInfo.TriangleCount == 0) return false;
+                if(mesh._triangleCount == 0) return false;
                 i += 3;
-                return i < meshInfo.TriangleStartIndex + meshInfo.TriangleCount * 3;
+                return i < mesh._triangleCount * 3;
             }
             
             public void Reset() {
-                i = meshInfo.TriangleStartIndex;
+                i = 0;
             }
 
-            public Triangle Current => new Triangle(meshCollection._vertices[meshCollection._indices[i]],
-                meshCollection._vertices[meshCollection._indices[i + 1]],
-                meshCollection._vertices[meshCollection._indices[i + 2]]);
+            public Triangle Current => new Triangle(mesh._vertices[mesh._indices[i]],
+                mesh._vertices[mesh._indices[i + 1]],
+                mesh._vertices[mesh._indices[i + 2]]);
             
 
             public TriangleEnumerator GetEnumerator() {
                 return this;
             }
-        }
-
-        internal struct MeshInfo {
-            public int VertexStartIndex;
-            public int TriangleStartIndex;
-            public int VertexCount;
-            public int TriangleCount;
-            public Vector2 FarthestVertexFromOrigin;
-            public float RadiusSquared;
-            public float Radius => (float) Math.Sqrt(RadiusSquared);
-            public MeshInputType InputType;
         }
 
         private struct EarClippingNode {
@@ -375,9 +345,7 @@ namespace FoldEngine.Graphics {
                 this.Restitution = 0;
             }
         }
-
-        public bool Exists(string identifier) {
-            return identifier != null && _meshInfos.ContainsKey(identifier);
-        }
+        
+        public static readonly Mesh Empty = new Mesh(0);
     }
 }
