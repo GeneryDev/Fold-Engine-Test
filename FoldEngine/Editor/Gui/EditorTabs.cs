@@ -56,8 +56,9 @@ namespace FoldEngine.Editor.Gui {
             var renderingBounds = Bounds;
             if(_dragging) {
                 offset += Parent.Environment.MousePos - Bounds.Center;
-                renderingBounds.Translate(offset);
+                renderingBounds = renderingBounds.Translate(offset);
             }
+
 
             Color defaultColor = _viewList.ActiveView == _view ? new Color(37, 37, 38) : Color.Transparent;
             
