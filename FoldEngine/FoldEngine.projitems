@@ -140,6 +140,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Util\ObjectPoolCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\OrderedList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\FieldCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\CachedValue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Transactions\CompoundTransaction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Transactions\ITransaction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Transactions\TransactionManager.cs" />

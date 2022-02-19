@@ -20,17 +20,17 @@ namespace FoldEngine.Physics {
             _colliders.Reset();
             while(_colliders.Next()) {
                 Transform transform = _colliders.GetCoComponent<Transform>();
-                Collider collider = _colliders.GetComponent();
+                ref Collider collider = ref _colliders.GetComponent();
                 
-                DrawColliderGizmos(Owner, transform, collider);
+                DrawColliderGizmos(Owner, transform, ref collider);
             }
         }
 
         public static void DrawColliderGizmos(Entity entity) {
-            if(entity.HasComponent<Collider>()) DrawColliderGizmos(entity.Scene, entity.Transform, entity.GetComponent<Collider>());
+            if(entity.HasComponent<Collider>()) DrawColliderGizmos(entity.Scene, entity.Transform, ref entity.GetComponent<Collider>());
         }
 
-        public static void DrawColliderGizmos(Scene scene, Transform transform, Collider collider) {
+        public static void DrawColliderGizmos(Scene scene, Transform transform, ref Collider collider) {
             Color colliderColor = new Color(102, 226, 148);
             switch(collider.Type) {
                 case ColliderType.Box: {
