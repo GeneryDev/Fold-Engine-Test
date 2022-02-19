@@ -200,6 +200,7 @@ namespace Sandbox {
         }
 
         private void BuildMeshes() {
+            Console.WriteLine("BUILDING MESHES");
             Resources.Create<Mesh>("square").Start(Mesh.MeshInputType.Vertices)
                 .Vertex(new Vector2(-0.5f, -0.5f), new Vector2(0, 1))
                 .Vertex(new Vector2(-0.5f, 0.5f), new Vector2(0, 0))

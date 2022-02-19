@@ -61,7 +61,7 @@ namespace FoldEngine.Components {
 
             BackupSet = new BackupComponentSet();
 
-            Console.WriteLine("Creating component set for type " + typeof(T));
+            // Console.WriteLine("Creating component set for type " + typeof(T));
         }
 
         public ref T Get(long entityId) {
@@ -279,7 +279,7 @@ namespace FoldEngine.Components {
                     if(reader.Options.Has(DeserializeRemapIds.Instance)) {
                         entityId = reader.Options.Get(DeserializeRemapIds.Instance).TransformId(entityId);
                     }
-                    Console.WriteLine($"{ComponentType} for entity id " + entityId);
+                    // Console.WriteLine($"{ComponentType} for entity id " + entityId);
                     if(!Has((int)entityId)) CreateFor(entityId);
                     ComponentSerializer.Deserialize<T>(this, entityId, reader);
                 }

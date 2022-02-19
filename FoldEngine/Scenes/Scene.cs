@@ -28,6 +28,7 @@ namespace FoldEngine.Scenes
         public readonly SystemMap Systems;
 
         public readonly ResourceCollections Resources;
+        public readonly ResourceCollections TempResources;
 
         private long _nextEntityId = 0;
 
@@ -59,6 +60,7 @@ namespace FoldEngine.Scenes
             Events = new EventMap(this);
             Systems = new SystemMap(this);
             Resources = new ResourceCollections(core.Resources);
+            TempResources = new ResourceCollections(Resources);
         }
 
         private List<long> _deletedIds = new List<long>();
@@ -107,7 +109,7 @@ namespace FoldEngine.Scenes
 
             ref Transform transform = ref Components.CreateComponent<Transform>(newEntityId);
             Components.CreateComponent<EntityName>(newEntityId).Name = name;
-            Console.WriteLine($"Created entity {newEntityId}");
+            // Console.WriteLine($"Created entity {newEntityId}");
             return newEntityId;
         }
 
@@ -280,7 +282,7 @@ namespace FoldEngine.Scenes
             if(Reclaim(entityId)) {
                 ref Transform transform = ref Components.CreateComponent<Transform>(entityId);
                 Components.CreateComponent<EntityName>(entityId).Name = name;
-                Console.WriteLine($"Created entity {entityId}");
+                // Console.WriteLine($"Created entity {entityId}");
                 return true;
             }
 

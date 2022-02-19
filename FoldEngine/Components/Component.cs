@@ -93,7 +93,7 @@ namespace FoldEngine.Components
         {
             if(_customInitializers != null && _customInitializers.ContainsKey(typeof(T)))
             {
-                Console.WriteLine($"Initializing component of type {typeof(T)}");
+                // Console.WriteLine($"Initializing component of type {typeof(T)}");
                 component = (T) _customInitializers[typeof(T)].Invoke(scene, entityId);
             }
         }
