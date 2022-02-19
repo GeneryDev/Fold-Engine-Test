@@ -22,10 +22,12 @@ namespace FoldEngine.Resources {
         }
 
         public T Get(ref ResourceLocation location, T def = null) {
+            if(location.Identifier == null) return def;
             return Resources[location.Identifier] ?? def;
         }
 
         public bool Exists(ref ResourceLocation location) {
+            if(location.Identifier == null) return false;
             return Resources.ContainsKey(location.Identifier);
         }
 
