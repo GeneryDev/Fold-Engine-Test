@@ -44,5 +44,38 @@ namespace FoldEngine.Scenes {
         public void RemoveComponent<T>() where T : struct {
             Scene.Components.RemoveComponent<T>(EntityId);
         }
+
+        public bool IsAncestorOf(Entity other) {
+            if(!ReferenceEquals(Scene, other.Scene)) return false;
+            while(other.Transform.HasParent) {
+                other = new Entity(Scene, other.Transform.ParentId);
+                if(other.EntityId == EntityId) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool Equals(Entity other) {
+            return ReferenceEquals(Scene, other.Scene)
+                   && EntityId == other.EntityId;
+        }
+
+        public override bool Equals(object obj) {
+            return obj is Entity other && Equals(other);
+        }
+
+        public override int GetHashCode() {
+            return (int)EntityId;
+        }
+        
+        public static bool operator ==(Entity a, Entity b) {
+            return a.Equals(b);
+        }
+        
+        public static bool operator !=(Entity a, Entity b) {
+            return !a.Equals(b);
+        }
     }
 }

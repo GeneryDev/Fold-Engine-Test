@@ -145,7 +145,17 @@ namespace FoldEngine.Editor.Views {
             }
             
             CompoundTransaction<EditorEnvironment> transactions = new CompoundTransaction<EditorEnvironment>();
+
+            var dragTargetEntity = new Entity(Environment.Scene, DragTargetId);
             
+            foreach(long id in Selected) {
+                var selectedEntity = new Entity(Environment.Scene, id);
+                if(dragTargetEntity == selectedEntity || selectedEntity.IsAncestorOf(dragTargetEntity)) {
+                    Console.WriteLine("Cannot drag something into itself");
+                    return;
+                }
+            }
+
             foreach(long id in Selected) {
                 var entity = new Entity(Environment.Scene, id);
                 var transaction = new ChangeEntityHierarchyTransaction(

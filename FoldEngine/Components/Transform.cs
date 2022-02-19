@@ -165,6 +165,8 @@ namespace FoldEngine.Components {
             }
         }
 
+        public bool HasParent => ParentId != -1;
+
         /// <summary>
         /// Returns a read-only reference to this transform's next sibling, or RootTransform if this transform has no next sibling.
         /// </summary>
