@@ -15,7 +15,6 @@ namespace FoldEngine.Commands {
         public void Execute(IGameCore core) {
             Directory.GetParent(TargetPath).Create();
             var saveOp = new SaveOperation(TargetPath);
-            saveOp.Options.Set(SerializeOnlyEntities.Instance, new List<long>() {1, 4});
             
             core.ActiveScene.Save(saveOp);
             

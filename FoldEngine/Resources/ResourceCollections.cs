@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using FoldEngine.Serialization;
 
 namespace FoldEngine.Resources {
-    public class ResourceCollections {
+    public class ResourceCollections : ISelfSerializer {
         public ResourceCollections Parent;
         
         private Dictionary<Type, IResourceCollection> _collections = new Dictionary<Type, IResourceCollection>();
@@ -19,6 +20,12 @@ namespace FoldEngine.Resources {
             return (ResourceCollection<T>) (_collections.ContainsKey(type)
                 ? _collections[type]
                 : createIfMissing ? (_collections[type] = new ResourceCollection<T>()) : null);
+        }
+
+        private IResourceCollection CollectionFor(Type type, bool createIfMissing = false) {
+            return _collections.ContainsKey(type)
+                ? _collections[type]
+                : createIfMissing ? (_collections[type] = Resource.CreateCollectionForType(type)) : null;
         }
 
         public IResourceCollection FindOwner<T>(ref ResourceLocation location) where T : Resource, new() {
@@ -39,6 +46,35 @@ namespace FoldEngine.Resources {
 
         public T Create<T>(string identifier) where T : Resource, new() {
             return CollectionFor<T>(true).Create(identifier);
+        }
+
+        public void Serialize(SaveOperation writer) {
+            writer.WriteCompound((ref SaveOperation.Compound c) => {
+                foreach(KeyValuePair<Type, IResourceCollection> entry in _collections) {
+                    if(entry.Value.IsEmpty) continue;
+                    c.WriteMember(entry.Value.ResourceType.FullName, (ISelfSerializer) entry.Value);
+                }
+            });
+        }
+
+        private void Clear() {
+            _collections.Clear();
+        }
+
+        public void Deserialize(LoadOperation reader) {
+            Clear();
+            reader.ReadCompound(c => {
+                foreach(string rawResourceType in c.MemberNames) {
+                    var resourceType = Type.GetType(rawResourceType);
+                    if(resourceType == null) {
+                        Console.WriteLine("[WARN] Unknown resource type: " + rawResourceType + ". Skipping");
+                        continue;
+                    }
+
+                    c.StartReadMember(rawResourceType);
+                    CollectionFor(resourceType, createIfMissing: true).Deserialize(reader);
+                }
+            });
         }
     }
 }

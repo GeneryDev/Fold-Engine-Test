@@ -152,8 +152,6 @@ namespace FoldEngine.Components {
         /// <summary>
         /// Called at the end of the update cycle, will update all the connected views
         /// to reflect the components that have been added or removed during that update.
-        /// 
-        /// TODO
         /// </summary>
         internal void Flush() {
             foreach(ComponentSet set in Sets.Values) {

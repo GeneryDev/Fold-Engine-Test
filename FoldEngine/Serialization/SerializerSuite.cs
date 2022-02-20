@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
+using FoldEngine.Resources;
 
 namespace FoldEngine.Serialization {
     public class SerializerSuite {
@@ -72,7 +74,11 @@ namespace FoldEngine.Serialization {
             }
         }
         public void Write<T>(T element, SaveOperation writer) {
-            GetSerializer<T>().Serialize(element, writer);
+            if(typeof(T).GetCustomAttribute(typeof(GenericSerializable)) != null) {
+                GenericSerializer.Serialize(element, writer);
+            } else {
+                GetSerializer<T>().Serialize(element, writer);
+            }
         }
         public void Write<T>(List<T> element, SaveOperation writer) {
             GetListSerializer<T>().Serialize(element, writer);

@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using EntryProject.Util;
 using FoldEngine.Graphics;
+using FoldEngine.Serialization;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Resources {
-    public class Mesh : Resource {
+    public class Mesh : Resource, ISelfSerializer {
         private const int InitialSize = 256;
         
-        private MeshVertex[] _vertices;
-        private int[] _indices;
+        public MeshVertex[] Vertices;
+        public int[] Indices;
 
         private MeshInputType _inputType;
         private int _nextVertexIndex;
@@ -22,16 +23,17 @@ namespace FoldEngine.Resources {
         private Vector2 _farthestVertexFromOrigin;
 
         public Mesh(int size) {
-            _vertices = new MeshVertex[size];
-            _indices = new int[size];
+            Vertices = new MeshVertex[size];
+            Indices = new int[size];
         }
 
         public Mesh() {
-            _vertices = new MeshVertex[InitialSize];
-            _indices = new int[InitialSize];
         }
 
         public Mesh Start(MeshInputType inputType) {
+            Vertices = new MeshVertex[InitialSize];
+            Indices = new int[InitialSize];
+            
             _inputType = inputType;
             _nextVertexIndex = _nextTriangleIndex = 0;
             _vertexCount = 0;
@@ -62,7 +64,7 @@ namespace FoldEngine.Resources {
         }
 
         public Mesh Vertex(MeshVertex vertex) {
-            _vertices[_nextVertexIndex] = vertex;
+            Vertices[_nextVertexIndex] = vertex;
             
             _vertexCount++;
             float distanceSquared = vertex.Position.LengthSquared();
@@ -103,7 +105,7 @@ namespace FoldEngine.Resources {
                     for(int i = 0;
                         i < _vertexCount;
                         i++) {
-                        nodes.Add(new EarClippingNode(i, _vertices[i].Position));
+                        nodes.Add(new EarClippingNode(i, Vertices[i].Position));
                     }
 
                     bool clockwise = true;
@@ -203,28 +205,28 @@ namespace FoldEngine.Resources {
         }
 
         private void InsertTriangleIndices(int a, int b, int c) {
-            _indices[_nextTriangleIndex++] = a;
-            _indices[_nextTriangleIndex++] = b;
-            _indices[_nextTriangleIndex++] = c;
+            Indices[_nextTriangleIndex++] = a;
+            Indices[_nextTriangleIndex++] = b;
+            Indices[_nextTriangleIndex++] = c;
             _triangleCount++;
         }
 
         public IEnumerable<MeshVertex> GetVertexInfo() {
             for(int i = 0; i < _vertexCount; i++) {
-                yield return _vertices[i];
+                yield return Vertices[i];
             }
         }
 
         public IEnumerable<Vector2> GetVertices() {
             for(int i = 0; i < _vertexCount; i++) {
-                yield return _vertices[i].Position.ToVector2();
+                yield return Vertices[i].Position.ToVector2();
             }
         }
 
         public IEnumerable<Line> GetLines() {
             for(int i = 0; i < _vertexCount; i++) {
-                yield return new Line(_vertices[i].Position.ToVector2(),
-                    _vertices[
+                yield return new Line(Vertices[i].Position.ToVector2(),
+                    Vertices[
                             i + 1 < _vertexCount
                                 ? i + 1
                                 : 0]
@@ -235,13 +237,13 @@ namespace FoldEngine.Resources {
         public IEnumerable<Tuple<Vector2, Vector2, Vector2>> GetVertexTrios() {
             for(int i = 0; i < _vertexCount; i++) {
                 yield return new Tuple<Vector2, Vector2, Vector2>(
-                    _vertices[
+                    Vertices[
                             i - 1 >= 0
                                 ? i - 1
                                 : _vertexCount - 1]
                         .Position.ToVector2(),
-                    _vertices[i].Position.ToVector2(),
-                    _vertices[
+                    Vertices[i].Position.ToVector2(),
+                    Vertices[
                             i + 1 < _vertexCount
                                 ? i + 1
                                 : 0]
@@ -289,9 +291,9 @@ namespace FoldEngine.Resources {
                 i = 0;
             }
 
-            public Triangle Current => new Triangle(mesh._vertices[mesh._indices[i]],
-                mesh._vertices[mesh._indices[i + 1]],
-                mesh._vertices[mesh._indices[i + 2]]);
+            public Triangle Current => new Triangle(mesh.Vertices[mesh.Indices[i]],
+                mesh.Vertices[mesh.Indices[i + 1]],
+                mesh.Vertices[mesh.Indices[i + 2]]);
             
 
             public TriangleEnumerator GetEnumerator() {
@@ -325,6 +327,7 @@ namespace FoldEngine.Resources {
             }
         }
 
+        [GenericSerializable]
         public struct MeshVertex {
             public Vector3 Position;
             public bool Enabled;
@@ -344,6 +347,38 @@ namespace FoldEngine.Resources {
                 this.Friction = 1;
                 this.Restitution = 0;
             }
+        }
+        
+        public void Serialize(SaveOperation writer) {
+            writer.WriteArray(((ref SaveOperation.Array arr) => {
+                for(int i = 0; i < _vertexCount; i++) {
+                    arr.WriteMember(Vertices[i]);
+                }
+            }));
+            writer.WriteArray(((ref SaveOperation.Array arr) => {
+                for(int i = 0; i < _triangleCount*3; i++) {
+                    arr.WriteMember(Indices[i]);
+                }
+            }));
+        }
+
+        public void Deserialize(LoadOperation reader) {
+            reader.ReadArray(a => {
+                Vertices = new MeshVertex[a.MemberCount];
+                _vertexCount = Vertices.Length;
+                for(int i = 0; i < a.MemberCount; i++) {
+                    a.StartReadMember(i);
+                    Vertices[i] = GenericSerializer.Deserialize(new MeshVertex(), reader);
+                }
+            });
+            reader.ReadArray(a => {
+                Indices = new int[a.MemberCount];
+                _triangleCount = Indices.Length / 3;
+                for(int i = 0; i < a.MemberCount; i++) {
+                    a.StartReadMember(i);
+                    Indices[i] = reader.ReadInt32();
+                }
+            });
         }
         
         public static readonly Mesh Empty = new Mesh(0);

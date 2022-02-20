@@ -238,6 +238,7 @@ namespace FoldEngine.Scenes
                     c.WriteMember(nameof(_nextEntityId), _nextEntityId);
                     c.WriteMember(nameof(_deletedIds), _deletedIds);
                     c.WriteMember(nameof(Systems), (ISelfSerializer) Systems);
+                    c.WriteMember(nameof(Resources), (ISelfSerializer) Resources);
                 }
 
                 c.WriteMember(nameof(Components), (ISelfSerializer) Components);
@@ -262,6 +263,7 @@ namespace FoldEngine.Scenes
 
                 if(c.HasMember(nameof(Systems))) c.DeserializeMember(nameof(Systems), Systems);
                 if(c.HasMember(nameof(Components))) c.DeserializeMember(nameof(Components), Components);
+                if(c.HasMember(nameof(Resources))) c.DeserializeMember(nameof(Resources), Resources);
             });
         }
 

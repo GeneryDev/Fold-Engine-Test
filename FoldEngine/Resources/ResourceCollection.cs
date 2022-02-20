@@ -1,11 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using EntryProject.Util;
+using FoldEngine.Components;
+using FoldEngine.Scenes;
+using FoldEngine.Serialization;
 
 namespace FoldEngine.Resources {
 
-    public interface IResourceCollection {
+    public interface IResourceCollection : ISelfSerializer {
         bool Exists(ref ResourceLocation location);
+        bool IsEmpty { get; }
+        Type ResourceType { get; }
     }
 
     public class ResourceCollection<T> : IResourceCollection where T : Resource, new() {
@@ -15,7 +21,10 @@ namespace FoldEngine.Resources {
         // recalculated from the identifier string or not.
         protected int Generation = 1;
 
+        public Type ResourceType => typeof(T);
         protected readonly List<T> Resources = new List<T>();
+
+        public bool IsEmpty => Resources.Count == 0;
 
         private int IndexForIdentifier(string identifier) {
             Console.WriteLine("Retrieving index for identifier '" + identifier + "'");
@@ -65,11 +74,32 @@ namespace FoldEngine.Resources {
 
             Generation++;
         }
+
+        public void Serialize(SaveOperation writer) {
+            writer.WriteCompound((ref SaveOperation.Compound c) => {
+                foreach(T entry in Resources) {
+                    c.WriteMember(entry.Identifier, () => {
+                        GenericSerializer.Serialize(entry, writer);
+                    });
+                }
+            });
+        }
+
+        public void Deserialize(LoadOperation reader) {
+            reader.ReadCompound(c => {
+                foreach(string identifier in c.MemberNames) {
+                    T newT = Create(identifier);
+                    c.StartReadMember(identifier);
+                    GenericSerializer.Deserialize(newT, reader);
+                }
+            });
+        }
     }
 
     public struct ResourceLocation {
+        [DoNotSerialize]
         public string Identifier;
-        
+        [DoNotSerialize]
         public CachedValue<int> IndexIntoCollection;
 
         public ResourceLocation(string identifier) {
@@ -81,5 +111,18 @@ namespace FoldEngine.Resources {
     public abstract class Resource {
         public string Identifier { get; protected internal set; }
         protected internal CachedValue<int> SystemsKeepingAlive;
+        
+        
+        
+        private static readonly Dictionary<Type, ConstructorInfo> Constructors = new Dictionary<Type, ConstructorInfo>();
+        
+        public static IResourceCollection CreateCollectionForType(Type resourceType) {
+            if(!Constructors.ContainsKey(resourceType)) {
+                Constructors[resourceType] =
+                    typeof(ResourceCollection<>).MakeGenericType(resourceType).GetConstructor(new Type[0]);
+            }
+
+            return (IResourceCollection) Constructors[resourceType].Invoke(new object[0]);
+        }
     }
 }
