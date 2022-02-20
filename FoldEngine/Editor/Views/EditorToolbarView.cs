@@ -73,6 +73,7 @@ namespace FoldEngine.Editor.Views {
                 Play(element.Environment as EditorEnvironment);
             } else {
                 Stop(element.Environment as EditorEnvironment);
+                GC.Collect(GC.MaxGeneration);
             }
         }
 

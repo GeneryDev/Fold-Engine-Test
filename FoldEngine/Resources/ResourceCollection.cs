@@ -112,7 +112,9 @@ namespace FoldEngine.Resources {
         public string Identifier { get; protected internal set; }
         protected internal CachedValue<int> SystemsKeepingAlive;
         
-        
+        ~Resource() {
+            Console.WriteLine("Destroyed " + Identifier);
+        }
         
         private static readonly Dictionary<Type, ConstructorInfo> Constructors = new Dictionary<Type, ConstructorInfo>();
         
