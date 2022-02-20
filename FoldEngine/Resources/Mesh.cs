@@ -350,34 +350,40 @@ namespace FoldEngine.Resources {
         }
         
         public void Serialize(SaveOperation writer) {
-            writer.WriteArray(((ref SaveOperation.Array arr) => {
-                for(int i = 0; i < _vertexCount; i++) {
-                    arr.WriteMember(Vertices[i]);
-                }
-            }));
-            writer.WriteArray(((ref SaveOperation.Array arr) => {
-                for(int i = 0; i < _triangleCount*3; i++) {
-                    arr.WriteMember(Indices[i]);
-                }
-            }));
+            writer.WriteCompound((ref SaveOperation.Compound c) => {
+                c.WriteMember("Vertices", () => writer.WriteArray(((ref SaveOperation.Array arr) => {
+                    for(int i = 0; i < _vertexCount; i++) {
+                        arr.WriteMember(Vertices[i]);
+                    }
+                })));
+                c.WriteMember("Indices", () => writer.WriteArray(((ref SaveOperation.Array arr) => {
+                    for(int i = 0; i < _triangleCount*3; i++) {
+                        arr.WriteMember(Indices[i]);
+                    }
+                })));
+            });
         }
 
         public void Deserialize(LoadOperation reader) {
-            reader.ReadArray(a => {
-                Vertices = new MeshVertex[a.MemberCount];
-                _vertexCount = Vertices.Length;
-                for(int i = 0; i < a.MemberCount; i++) {
-                    a.StartReadMember(i);
-                    Vertices[i] = GenericSerializer.Deserialize(new MeshVertex(), reader);
-                }
-            });
-            reader.ReadArray(a => {
-                Indices = new int[a.MemberCount];
-                _triangleCount = Indices.Length / 3;
-                for(int i = 0; i < a.MemberCount; i++) {
-                    a.StartReadMember(i);
-                    Indices[i] = reader.ReadInt32();
-                }
+            reader.ReadCompound(c => {
+                c.StartReadMember("Vertices");
+                reader.ReadArray(a => {
+                    Vertices = new MeshVertex[a.MemberCount];
+                    _vertexCount = Vertices.Length;
+                    for(int i = 0; i < a.MemberCount; i++) {
+                        a.StartReadMember(i);
+                        Vertices[i] = GenericSerializer.Deserialize(new MeshVertex(), reader);
+                    }
+                });
+                c.StartReadMember("Indices");
+                reader.ReadArray(a => {
+                    Indices = new int[a.MemberCount];
+                    _triangleCount = Indices.Length / 3;
+                    for(int i = 0; i < a.MemberCount; i++) {
+                        a.StartReadMember(i);
+                        Indices[i] = reader.ReadInt32();
+                    }
+                });
             });
         }
         
