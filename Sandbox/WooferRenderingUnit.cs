@@ -192,6 +192,24 @@ namespace Woofer
             Fonts.LoadFont("default.9");
             
             Console.WriteLine("Fonts loaded");
+            
+            
+            Textures.UnloadTexture("test");
+            Textures.UnloadTexture("ancient_debris_side");
+            Textures.UnloadTexture("armor_stand");
+            Textures.UnloadTexture("bamboo_stem");
+            Textures.UnloadTexture("barrel_top");
+            Textures.UnloadTexture("beacon");
+            Textures.UnloadTexture("bed_feet_end");
+            Textures.UnloadTexture("end_portal_colors");
+            Textures.UnloadTexture("guardian");
+            Textures.UnloadTexture("pillager");
+            Textures.UnloadTexture("witch");
+            Textures.UnloadTexture("clouds");
+            Textures.UnloadTexture("campfire_smoke");
+            Textures.UnloadTexture("soul");
+            Textures.UnloadTexture("particles");
+            Textures.UnloadTexture("four");
         }
 
         public Rectangle GetGroupBounds(RenderGroup renderGroup) {

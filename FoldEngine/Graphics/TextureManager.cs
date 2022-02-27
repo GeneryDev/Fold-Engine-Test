@@ -60,5 +60,9 @@ namespace FoldEngine.Graphics
             this[parentName + "." + childName] = subTexture;
             return subTexture;
         }
+
+        public void UnloadTexture(string name) {
+            _sprites.Remove(name);
+        }
     }
 }
