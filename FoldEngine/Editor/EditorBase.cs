@@ -38,9 +38,11 @@ namespace FoldEngine.Editor {
             Environment.AddView<EditorSystemsView>(Environment.WestPanel);
             Environment.AddView<EditorInspectorView>(Environment.EastPanel);
             Environment.AddView<EditorGameView>(Environment.CenterPanel);
+            Environment.AddView<EditorResourcesView>(Environment.SouthPanel);
             Environment.AddView<EditorTestView>(Environment.SouthPanel);
 
             Environment.WestPanel.ViewLists[0].ActiveView = Environment.GetView<EditorHierarchyView>();
+            Environment.SouthPanel.ViewLists[0].ActiveView = Environment.GetView<EditorResourcesView>();
         }
 
         public override void OnInput() {

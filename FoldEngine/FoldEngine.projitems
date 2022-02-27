@@ -59,6 +59,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorGameView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorHierarchyView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorInspectorView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorResourcesView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorToolbarView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorSystemsView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorTestView.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Components\ComponentMap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\RenderGroup.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\ResizableRenderGroup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IO\Data.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LevelRendering\Camera.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LevelRendering\DebugRendering.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LevelRendering\LevelRenderer2D.cs" />

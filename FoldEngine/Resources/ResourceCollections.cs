@@ -76,5 +76,11 @@ namespace FoldEngine.Resources {
                 }
             });
         }
+
+        public void SaveAll() {
+            foreach(IResourceCollection collection in _collections.Values) {
+                collection.Save();
+            }
+        }
     }
 }

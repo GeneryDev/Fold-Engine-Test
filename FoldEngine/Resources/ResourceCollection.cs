@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Reflection;
 using EntryProject.Util;
 using FoldEngine.Components;
+using FoldEngine.IO;
 using FoldEngine.Scenes;
 using FoldEngine.Serialization;
 
@@ -12,6 +15,7 @@ namespace FoldEngine.Resources {
         bool Exists(ref ResourceLocation location);
         bool IsEmpty { get; }
         Type ResourceType { get; }
+        void Save();
     }
 
     public class ResourceCollection<T> : IResourceCollection where T : Resource, new() {
@@ -22,6 +26,7 @@ namespace FoldEngine.Resources {
         protected int Generation = 1;
 
         public Type ResourceType => typeof(T);
+
         protected readonly List<T> Resources = new List<T>();
 
         public bool IsEmpty => Resources.Count == 0;
@@ -71,7 +76,6 @@ namespace FoldEngine.Resources {
         }
 
         public void Unload(T t) {
-
             Generation++;
         }
 
@@ -94,6 +98,12 @@ namespace FoldEngine.Resources {
                 }
             });
         }
+        
+        public void Save() {
+            foreach(T resource in Resources) {
+                resource.Save();
+            }
+        }
     }
 
     public struct ResourceLocation {
@@ -112,10 +122,6 @@ namespace FoldEngine.Resources {
         public string Identifier { get; protected internal set; }
         protected internal CachedValue<int> SystemsKeepingAlive;
         
-        ~Resource() {
-            Console.WriteLine("Destroyed " + Identifier);
-        }
-        
         private static readonly Dictionary<Type, ConstructorInfo> Constructors = new Dictionary<Type, ConstructorInfo>();
         
         public static IResourceCollection CreateCollectionForType(Type resourceType) {
@@ -125,6 +131,20 @@ namespace FoldEngine.Resources {
             }
 
             return (IResourceCollection) Constructors[resourceType].Invoke(new object[0]);
+        }
+
+
+        public void Save() {
+            string resourceFolder = Path.Combine("resources", GetType().Name.ToLower(CultureInfo.InvariantCulture));
+            string path = Path.Combine(resourceFolder, Identifier);
+            path = Path.ChangeExtension(path, "foldresource");
+            Save(path);
+        }
+
+        public void Save(string path) {
+            var writer = new SaveOperation(Data.Out.Stream(path));
+            GenericSerializer.Serialize(this, writer);
+            writer.Close();            
         }
     }
 }

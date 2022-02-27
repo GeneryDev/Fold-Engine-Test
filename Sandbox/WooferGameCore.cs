@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using FoldEngine;
 using FoldEngine.Commands;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
+using FoldEngine.IO;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
 
@@ -43,7 +45,6 @@ namespace Woofer {
             Resources = new ResourceCollections();
 
             InputUnit.Setup("Content/Config/input.json");
-
         }
 
         public void Initialize() {
@@ -71,6 +72,12 @@ namespace Woofer {
 
         public static void Main() {
             Console.WriteLine("Started");
+#if DEBUG
+            Console.WriteLine("Command Line Arguments: " + Environment.GetCommandLineArgs().Length);
+            for(int i = 0; i < Environment.GetCommandLineArgs().Length; i++) {
+                Console.WriteLine($"[{i}]: " + Environment.GetCommandLineArgs()[i]);
+            }
+#endif
             FoldGameEntry.StartGame(new WooferGameCore());
         }
     }
