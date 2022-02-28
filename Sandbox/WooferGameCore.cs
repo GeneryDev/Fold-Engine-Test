@@ -17,19 +17,21 @@ using Sandbox;
 
 namespace Woofer {
     public class WooferGameCore : IGameCore {
-        public FoldGame FoldGame { get; set; }
+        public FoldGame FoldGame { get; }
 
-        public IRenderingUnit RenderingUnit { get; private set; }
+        public IRenderingUnit RenderingUnit { get; }
 
-        public Scene ActiveScene { get; private set; }
+        public Scene ActiveScene { get; }
 
-        public InputUnit InputUnit { get; private set; }
+        public InputUnit InputUnit { get; }
 
-        public AudioUnit AudioUnit { get; private set; }
+        public AudioUnit AudioUnit { get; }
 
-        public CommandQueue CommandQueue { get; private set; }
+        public CommandQueue CommandQueue { get; }
 
-        public ResourceCollections Resources { get; private set; }
+        public ResourceCollections Resources { get; }
+
+        public ResourceIndex ResourceIndex { get; }
 
         public float TimeScale => 1;
 
@@ -43,8 +45,11 @@ namespace Woofer {
             AudioUnit = new AudioUnit();
             CommandQueue = new CommandQueue(this);
             Resources = new ResourceCollections();
+            ResourceIndex = new ResourceIndex();
+            ResourceIndex.Update();
 
             InputUnit.Setup("Content/Config/input.json");
+            
         }
 
         public void Initialize() {

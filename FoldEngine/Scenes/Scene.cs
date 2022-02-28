@@ -20,6 +20,8 @@ using Woofer;
 namespace FoldEngine.Scenes
 {
     public class Scene {
+        public const string Extension = "foldscene";
+        
         public readonly IGameCore Core;
         public string Name { get; set; } = "Scene";
 

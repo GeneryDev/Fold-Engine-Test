@@ -64,9 +64,9 @@ namespace Sandbox.Systems {
 
 
             if(Owner.Core.InputUnit.Players[0].Get<ButtonAction>("quicksave").Consume()) {
-                Owner.Core.CommandQueue.Enqueue(new SaveSceneCommand(Path.Combine(TargetDirectory, "scene.foldscene")));
+                Owner.Core.CommandQueue.Enqueue(new SaveSceneCommand(Path.ChangeExtension(Path.Combine(TargetDirectory, "scene"), Scene.Extension)));
             } else if(Owner.Core.InputUnit.Players[0].Get<ButtonAction>("quickload").Consume()) {
-                Owner.Core.CommandQueue.Enqueue(new LoadSceneCommand(Path.Combine(TargetDirectory, "scene.foldscene")));
+                Owner.Core.CommandQueue.Enqueue(new LoadSceneCommand(Path.ChangeExtension(Path.Combine(TargetDirectory, "scene"), Scene.Extension)));
             }
             
             _livingComponents.Reset();

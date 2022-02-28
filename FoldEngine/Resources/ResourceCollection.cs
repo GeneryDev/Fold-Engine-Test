@@ -119,6 +119,8 @@ namespace FoldEngine.Resources {
     }
     
     public abstract class Resource {
+        public const string Extension = "foldresource";
+        
         public string Identifier { get; protected internal set; }
         protected internal CachedValue<int> SystemsKeepingAlive;
         
@@ -135,9 +137,9 @@ namespace FoldEngine.Resources {
 
 
         public void Save() {
-            string resourceFolder = Path.Combine("resources", GetType().Name.ToLower(CultureInfo.InvariantCulture));
+            string resourceFolder = Path.Combine("resources", AttributeOf(GetType()).DirectoryName);
             string path = Path.Combine(resourceFolder, Identifier);
-            path = Path.ChangeExtension(path, "foldresource");
+            path = Path.ChangeExtension(path, Extension);
             Save(path);
         }
 
@@ -145,6 +147,42 @@ namespace FoldEngine.Resources {
             var writer = new SaveOperation(Data.Out.Stream(path));
             GenericSerializer.Serialize(this, writer);
             writer.Close();            
+        }
+        
+        private static Dictionary<Type, ResourceAttribute> _attributes;
+
+        private static void Populate() {
+            if(_attributes != null) return;
+            _attributes = new Dictionary<Type, ResourceAttribute>();
+            
+            var assembly = Assembly.GetEntryAssembly();
+            foreach(Type type in assembly.GetTypes()) {
+                if(type.IsSubclassOf(typeof(Resource))) {
+                    _attributes[type] = type.GetCustomAttribute<ResourceAttribute>() ?? new ResourceAttribute(type.Name.ToLowerInvariant());
+                }
+            }
+        }
+
+        public static ResourceAttribute AttributeOf(Type type) {
+            Populate();
+            return _attributes[type];
+        }
+
+        public static ResourceAttribute AttributeOf<T>() where T : Resource {
+            return AttributeOf(typeof(T));
+        }
+
+        public static Dictionary<Type, ResourceAttribute>.KeyCollection GetAllTypes() {
+            Populate();
+            return _attributes.Keys;
+        }
+    }
+
+    public sealed class ResourceAttribute : Attribute {
+        public readonly string DirectoryName;
+
+        public ResourceAttribute(string directoryName) {
+            DirectoryName = directoryName;
         }
     }
 }

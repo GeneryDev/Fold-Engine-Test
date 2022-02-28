@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -19,6 +20,26 @@ namespace FoldEngine.IO {
                 path = InData(path);
                 return File.ReadAllText(path, DefaultEncoding);
             }
+            public static byte[] ReadBytes(string path) {
+                path = InData(path);
+                return File.ReadAllBytes(path);
+            }
+            public static FileStream Stream(string path) {
+                path = InData(path);
+                return File.OpenRead(path);
+            }
+            public static bool Exists(string path) {
+                path = InData(path);
+                return File.Exists(path) || Directory.Exists(path);
+            }
+            public static bool IsDirectory(string path) {
+                path = InData(path);
+                return Directory.Exists(path);
+            }
+            public static IEnumerable<string> ListEntries(string path) {
+                path = InData(path);
+                return Directory.EnumerateFileSystemEntries(path);
+            }
         }
 
         public static class Out {
@@ -32,8 +53,12 @@ namespace FoldEngine.IO {
                 PrepareForWriting(path);
                 File.WriteAllText(path, contents, DefaultEncoding);
             }
-
-            public static Stream Stream(string path) {
+            public static void WriteBytes(string path, byte[] contents) {
+                path = InData(path);
+                PrepareForWriting(path);
+                File.WriteAllBytes(path, contents);
+            }
+            public static FileStream Stream(string path) {
                 path = InData(path);
                 PrepareForWriting(path);
                 return File.OpenWrite(path);

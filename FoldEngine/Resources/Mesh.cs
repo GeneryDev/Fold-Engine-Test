@@ -8,6 +8,7 @@ using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Resources {
+    [Resource("mesh")]
     public class Mesh : Resource, ISelfSerializer {
         private const int InitialSize = 256;
         

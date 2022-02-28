@@ -8,7 +8,7 @@ namespace FoldEngine.Interfaces {
     /// Declares a master interface consisting of the data needed for a game to function
     /// </summary>
     public interface IGameCore {
-        FoldGame FoldGame { get; set; }
+        FoldGame FoldGame { get; }
         
         /// <summary>
         /// The scene that is currently being played
@@ -39,6 +39,11 @@ namespace FoldEngine.Interfaces {
         /// This Core's global resources
         /// </summary>
         ResourceCollections Resources { get; }
+
+        /// <summary>
+        /// This Core's global resource index, listing all resources available in disk.
+        /// </summary>
+        ResourceIndex ResourceIndex { get; }
 
 
         /// <summary>

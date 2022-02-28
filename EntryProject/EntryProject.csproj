@@ -112,6 +112,12 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\data\**\*">
+      <Link>data\%(RecursiveDir)/%(FileName)%(Extension)</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="Content\Config\input.json" />
     <Content Include="Content\Fonts\default.7.json" />
     <Content Include="Content\Fonts\default.9.json" />
