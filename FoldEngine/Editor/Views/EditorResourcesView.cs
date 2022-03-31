@@ -12,18 +12,11 @@ namespace FoldEngine.Editor.Views {
         
         public override void Render(IRenderingUnit renderer) {
             ContentPanel.MayScroll = true;
-            
-            ContentPanel.Button("Save All", 14).LeftAction<SaveResourcesAction>();
-        }
-        
-        private class SaveResourcesAction : IGuiAction {
-        
-            public void Perform(GuiElement element, MouseEvent e) {
-                element.Environment.Scene.Resources.SaveAll();
+
+            if(ContentPanel.Button("Save All", 14).IsPressed()) {
+                Scene.Resources.SaveAll();
                 Console.WriteLine("Save resources!");
             }
-
-            public IObjectPool Pool { get; set; }
         }
     }
 }

@@ -14,7 +14,7 @@ namespace FoldEngine.Physics {
         private ComponentIterator<Physics> _physicsObjects;
         private ComponentIterator<Collider> _colliders;
 
-        public Vector2 Gravity = new Vector2(0, -400f);
+        public Vector2 Gravity = new Vector2(0, -40f);
         
         internal override void Initialize() {
             _physicsObjects = CreateComponentIterator<Physics>(IterationFlags.None);
@@ -30,7 +30,7 @@ namespace FoldEngine.Physics {
                 ref Physics physics = ref _physicsObjects.GetComponent();
 
                 if(!physics.Static) {
-                    physics.Velocity += Gravity * physics.GravityMultiplier * Time.FixedDeltaTime;                    
+                    physics.ApplyForce(Gravity * physics.GravityMultiplier, Vector2.Zero, ForceMode.Continuous);
                 }
 
                 if(_physicsObjects.HasCoComponent<Collider>()) {
@@ -46,11 +46,11 @@ namespace FoldEngine.Physics {
                         ref Collider otherCollider = ref _colliders.GetComponent();
 
                         Polygon.PolygonIntersectionVertex[][] intersections = Polygon.ComputePolygonIntersection(
-                            Owner.Resources.Get<Mesh>(ref collider.MeshIdentifier, Mesh.Empty), transform,
-                            Owner.Resources.Get<Mesh>(ref otherCollider.MeshIdentifier, Mesh.Empty), otherTransform);
+                            collider.GetVertices(ref transform),
+                            otherCollider.GetVertices(ref otherTransform)
+                            );
 
                         if(intersections != null && intersections.Length > 0) {
-
                             if(!physics.Static) {
                                 Vector2 relativeVelocity = physics.Velocity - otherPhysics.Velocity;
                                 Vector2 moveDirection = relativeVelocity.Normalized();
@@ -63,6 +63,8 @@ namespace FoldEngine.Physics {
                                 int verticesCountedForTotalContactVertexVelocity = 0;
 
                                 Vector2 currentPos = transform.Position;
+                                Complex rotationByTorque =
+                                    Complex.FromRotation(physics.AngularVelocity * Time.FixedDeltaTime);
                                 
                                 for(int i = 0; i < intersections.Length; i++) {
                                     maxDisplacement = Math.Max(maxDisplacement,
@@ -76,8 +78,6 @@ namespace FoldEngine.Physics {
                                         Owner.DrawGizmo(vertex.Position, intersections[i][(j + 1) % intersections[i].Length].Position, Color.Gray);
 
                                         if(vertex.IsFromA && !vertex.IsFromB) {
-                                            Complex rotationByTorque =
-                                                Complex.FromRotation(physics.AngularVelocity * Time.FixedDeltaTime);
                                             Vector2 projectedNextVertexPosition =
                                                 ((Complex) (vertex.Position - currentPos) * rotationByTorque)
                                                 + (Complex) currentPos;
@@ -142,12 +142,14 @@ namespace FoldEngine.Physics {
 
                                 // Console.WriteLine($"maxDisplacement = {maxDisplacement}");
                                 if(!maxDisplacement.Equals(float.NaN) && verticesCountedForTotalContactVertexVelocity != 0) {
-                                    // transform.Position -= moveDirection * maxDisplacement;
+                                    transform.Position -= moveDirection * maxDisplacement;
                                     // physics.ContactDisplacement = -(totalContactVertexVelocity / verticesCountedForTotalContactVertexVelocity).Normalized() * maxDisplacement;
                                 }
                                 
                                 if(totalNormals != 0 && normalSum.Length() > 0) {
                                     Vector2 surfaceNormal = (normalSum / totalNormals).Normalized();
+                                    Owner.Events.Invoke(new CollisionEvent(_physicsObjects.GetEntityId(), _colliders.GetEntityId(), surfaceNormal));
+                                    Owner.Events.Invoke(new CollisionEvent(_colliders.GetEntityId(), _physicsObjects.GetEntityId(), -surfaceNormal));
                                     // Console.WriteLine($"surfaceNormal = {surfaceNormal}");
                                     // Console.WriteLine($"physics.Velocity (before) = {physics.Velocity}");
                                     Vector2 expectedVelocity =

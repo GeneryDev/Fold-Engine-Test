@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using EntryProject.Editor.Inspector;
-using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
 using FoldEngine.Editor.Gui.Fields;
@@ -242,40 +241,21 @@ namespace FoldEngine.Editor.Views {
 
         public static readonly InspectorElementProvider EnumInspectorElementProvider =
             (parentPanel, member, startingValue) => {
-                parentPanel.Element<ValueDropdown>()
+                if(parentPanel.Element<ValueDropdown>()
                     .FieldSpacing(ComponentMemberLabel.LabelWidth, 1)
                     .Text(startingValue.ToString())
                     .FontSize(9)
-                    .LeftAction<ShowEnumDropdownAction>().Type(member.FieldInfo.FieldType).Member(member)
-                    ;
+                    .IsPressed(out Point p)) {
+
+                    parentPanel.Environment.ContextMenu.Show(p, m => {
+                        m.Reset();
+                        foreach(object value in member.FieldInfo.FieldType.GetEnumValues()) {
+                            m.Button(value.ToString(), 9).LeftAction(member.CreateAction(m).ForcedValue(value));
+                        }
+                    });
+                }
             };
 
         public delegate bool ComponentPredicate(Scene scene, long id, object obj);
-    }
-
-    public class ShowEnumDropdownAction : IGuiAction {
-        private Type _type;
-        private ComponentMember _member;
-
-        public ShowEnumDropdownAction Type(Type type) {
-            _type = type;
-            return this;
-        }
-        public ShowEnumDropdownAction Member(ComponentMember member) {
-            _member = member;
-            return this;
-        }
-
-        public IObjectPool Pool { get; set; }
-        public void Perform(GuiElement element, MouseEvent e) {
-            GuiPopupMenu contextMenu = element.Parent.Environment.ContextMenu;
-            contextMenu.Reset(e.Position);
-
-            foreach(object value in _type.GetEnumValues()) {
-                contextMenu.Button(value.ToString(), 9).LeftAction(_member.CreateAction(contextMenu).ForcedValue(value));
-            }
-            
-            contextMenu.Show();
-        }
     }
 }

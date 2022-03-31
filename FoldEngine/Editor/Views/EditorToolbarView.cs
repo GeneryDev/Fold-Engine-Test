@@ -22,59 +22,40 @@ namespace FoldEngine.Editor.Views {
 
         public override void Render(IRenderingUnit renderer) {
             foreach(EditorTool tool in ((EditorEnvironment) ContentPanel.Environment).Tools) {
-                ContentPanel.Element<ToolbarButton>()
+                if(ContentPanel.Element<ToolbarButton>()
                     .Down(tool == ((EditorEnvironment) ContentPanel.Environment).ActiveTool)
                     .Text("")
                     .FontSize(14)
                     .Icon(renderer.Textures[tool.Icon])
-                    .LeftAction<SelectToolAction>()
-                    .Tool(tool);
+                    .IsPressed()) {
+                    ((EditorEnvironment) ContentPanel.Environment).SelectedTool = tool;
+                }
             }
             
             // ContentPanel.Label(Scene.Name, 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
             // ContentPanel.Element<ToolbarButton>().Text("Save").FontSize(14).Icon(renderer.Textures["editor:cog"]);
             // ContentPanel.Separator();
-            ContentPanel.Element<ToolbarButton>().Text("").FontSize(14).Icon(renderer.Textures["editor:play"]).LeftAction<PlayStopAction>();
-            ContentPanel.Element<ToolbarButton>().Down(Scene.Paused).Text("").FontSize(14).Icon(renderer.Textures["editor:pause"]).LeftAction<PauseAction>();
+            if(ContentPanel.Element<ToolbarButton>().Text("").FontSize(14).Icon(renderer.Textures["editor:play"]).IsPressed()) {
+                if(_storedScene == null) {
+                    Play(ContentPanel.Environment as EditorEnvironment);
+                } else {
+                    Stop(ContentPanel.Environment as EditorEnvironment);
+                    GC.Collect(GC.MaxGeneration);
+                }
+            }
+
+            if(ContentPanel.Element<ToolbarButton>()
+                .Down(Scene.Paused)
+                .Text("")
+                .FontSize(14)
+                .Icon(renderer.Textures["editor:pause"])
+                .IsPressed()) {
+                Scene.Paused = !Scene.Paused;
+            }
             // ContentPanel.Button("Entities").Action(SceneEditor.Actions.ChangeToMenu, 1);
             // ContentPanel.Button("Systems").Action(SceneEditor.Actions.ChangeToMenu, 2);
             // ContentPanel.Button("Edit Save Data").Action(SceneEditor.Actions.Test, 0);
             // ContentPanel.Element<ToolbarButton>().Text("Quit").FontSize(14);
-        }
-    }
-
-    public class SelectToolAction : IGuiAction {
-        private EditorTool _tool;
-        
-        public SelectToolAction Tool(EditorTool tool) {
-            _tool = tool;
-            return this;
-        }
-        
-        public IObjectPool Pool { get; set; }
-        public void Perform(GuiElement element, MouseEvent e) {
-            if(element.Environment is EditorEnvironment editorEnvironment) {
-                editorEnvironment.SelectedTool = _tool;
-            }
-        }
-    }
-
-    public class PauseAction : IGuiAction {
-        public IObjectPool Pool { get; set; }
-        public void Perform(GuiElement element, MouseEvent e) {
-            element.Environment.Scene.Paused = !element.Environment.Scene.Paused;
-        }
-    }
-
-    public class PlayStopAction : IGuiAction {
-        public IObjectPool Pool { get; set; }
-        public void Perform(GuiElement element, MouseEvent e) {
-            if(_storedScene == null) {
-                Play(element.Environment as EditorEnvironment);
-            } else {
-                Stop(element.Environment as EditorEnvironment);
-                GC.Collect(GC.MaxGeneration);
-            }
         }
 
         private static byte[] _storedScene = null;

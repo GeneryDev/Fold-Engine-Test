@@ -95,7 +95,8 @@ namespace FoldEngine.Gui {
                         var evt = new MouseEvent() {
                             Type = MouseEventType.Pressed,
                             Position = MousePos,
-                            Button = buttonIndex
+                            Button = buttonIndex,
+                            When = Time.Now
                         };
                         
                         panel.OnMousePressed(ref evt);
@@ -103,18 +104,23 @@ namespace FoldEngine.Gui {
                     }
                 }
             } else if(mouseButton.Released) {
-                DismissPopups();
+                if(ContextMenu.Showing) {
+                    _dismissPopupsWhen = Time.Frame + 2;
+                }
 
                 var evt = new MouseEvent() {
                     Type = MouseEventType.Released,
                     Position = MousePos,
-                    Button = buttonIndex
+                    Button = buttonIndex,
+                    When = Time.Now
                 };
                 
                 _pressedPanels[buttonIndex]?.OnMouseReleased(ref evt);
                 _pressedPanels[buttonIndex] = null;
             }
         }
+
+        private long _dismissPopupsWhen;
 
         public void DismissPopups() {
             if(ContextMenu.Showing) {
@@ -133,6 +139,10 @@ namespace FoldEngine.Gui {
 
             HoverTargetPrevious = HoverTarget;
             HoverTarget = default;
+            
+            if(_dismissPopupsWhen == Time.Frame) {
+                DismissPopups();
+            }
         }
 
         public void SetFocusedElement(GuiElement element) {
@@ -161,6 +171,7 @@ namespace FoldEngine.Gui {
         public Point Position;
         public MouseEventType Type;
         public int Button;
+        public long When;
 
         public bool Consumed;
 

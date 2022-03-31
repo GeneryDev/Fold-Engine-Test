@@ -39,5 +39,9 @@ namespace FoldEngine.Input {
             }
             throw new ArgumentException(name);
         }
+
+        public bool ControlDown => this[Keys.LeftControl].Down || this[Keys.RightControl].Down;
+        public bool ShiftDown => this[Keys.LeftShift].Down || this[Keys.RightShift].Down;
+        public bool AltDown => this[Keys.LeftAlt].Down || this[Keys.RightAlt].Down;
     }
 }

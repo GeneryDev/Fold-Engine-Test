@@ -15,30 +15,16 @@ namespace FoldEngine.Editor.Views {
             
             ContentPanel.Button("Add System", 14);
             ContentPanel.Separator();
+
+            var editorEnvironment = (EditorEnvironment) ContentPanel.Environment;
             
             foreach(GameSystem sys in Scene.Systems.AllSystems) {
-                ContentPanel.Button(sys.SystemName, 14).TextAlignment(-1).LeftAction<ViewSystemAction>().System(sys);
+                if(ContentPanel.Button(sys.SystemName, 14).TextAlignment(-1).IsPressed()) {
+                    editorEnvironment.Scene.Systems.Get<EditorBase>().EditingEntity.Clear();
+                    editorEnvironment.GetView<EditorInspectorView>().SetObject(sys);
+                    editorEnvironment.SwitchToView(editorEnvironment.GetView<EditorInspectorView>());
+                }
             }
         }
-    }
-    
-
-    public class ViewSystemAction : IGuiAction {
-        private GameSystem _system;
-
-        public ViewSystemAction System(GameSystem system) {
-            _system = system;
-            return this;
-        }
-        
-        public void Perform(GuiElement element, MouseEvent e) {
-            if(element.Environment is EditorEnvironment editorEnvironment) {
-                editorEnvironment.Scene.Systems.Get<EditorBase>().EditingEntity.Clear();
-                editorEnvironment.GetView<EditorInspectorView>().SetObject(_system);
-                editorEnvironment.SwitchToView(editorEnvironment.GetView<EditorInspectorView>());
-            }
-        }
-
-        public IObjectPool Pool { get; set; }
     }
 }

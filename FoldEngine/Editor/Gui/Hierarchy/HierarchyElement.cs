@@ -11,10 +11,7 @@ using Microsoft.Xna.Framework;
 namespace FoldEngine.Editor.Gui.Hierarchy {
     public class HierarchyElement<TI> : GuiLabel {
         
-        private PooledValue<IGuiAction> _expandAction;
-        private PooledValue<IGuiAction> _leftDownAction;
-        private PooledValue<IGuiAction> _leftUpAction;
-        private PooledValue<IGuiAction> _rightAction;
+        private HierarchyEvent _lastEvent;
         
         protected virtual Color NormalColor => new Color(37, 37, 38);
         protected virtual Color RolloverColor => new Color(63, 63, 70);
@@ -40,10 +37,6 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
             _selected = false;
             _hierarchy = null;
             _id = default;
-            _expandAction.Free();
-            _leftDownAction.Free();
-            _leftUpAction.Free();
-            _rightAction.Free();
         }
 
         public override void AdjustSpacing(GuiPanel parent) {
@@ -62,10 +55,6 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
                 TextMargin(4 + 16 * (depth+1) + 4);
                 _expandable = entity.Transform.FirstChildId != -1;
                 _depth = depth;
-                ExpandAction<ExpandCollapseEntityAction>().Id(entity.EntityId);
-                LeftDownAction<SelectEntityDownAction>().Id(entity.EntityId);
-                LeftUpAction<SelectEntityUpAction>().Id(entity.EntityId);
-                RightAction<ShowEntityContextMenu>().Id(entity.EntityId);
             } else {
                 throw new ArgumentException("Cannot run HierarchyElement.Entity on an element whose ID Type is not long");
             }
@@ -152,56 +141,26 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
             }
         }
 
-        public HierarchyElement<TI> ExpandAction(IGuiAction action) {
-            _expandAction.Value = action;
-            return this;
+        public HierarchyEventType GetEvent(out Point p) {
+            HierarchyEventType rv = GetEvent();
+            p = rv != HierarchyEventType.None ? _lastEvent.Event.Position : default;
+            return rv;
         }
 
-        public T ExpandAction<T>() where T : IGuiAction, new() {
-            var action = Parent.Environment.ActionPool.Claim<T>();
-            _expandAction.Value = action;
-            return action;
+        public HierarchyEventType GetEvent() {
+            if(_lastEvent.Type != HierarchyEventType.None && _lastEvent.Event.When != 0 && Time.Now >= _lastEvent.Event.When && !_lastEvent.Event.Consumed) {
+                _lastEvent.Event.Consumed = true;
+                return _lastEvent.Type;
+            }
+            return HierarchyEventType.None;
         }
-
-        public HierarchyElement<TI> LeftDownAction(IGuiAction action) {
-            _leftDownAction.Value = action;
-            return this;
-        }
-
-        public T LeftDownAction<T>() where T : IGuiAction, new() {
-            var action = Parent.Environment.ActionPool.Claim<T>();
-            _leftDownAction.Value = action;
-            return action;
-        }
-
-        public HierarchyElement<TI> LeftUpAction(IGuiAction action) {
-            _leftUpAction.Value = action;
-            return this;
-        }
-
-        public T LeftUpAction<T>() where T : IGuiAction, new() {
-            var action = Parent.Environment.ActionPool.Claim<T>();
-            _leftUpAction.Value = action;
-            return action;
-        }
-
-        public HierarchyElement<TI> RightAction(IGuiAction action) {
-            _rightAction.Value = action;
-            return this;
-        }
-
-        public T RightAction<T>() where T : IGuiAction, new() {
-            var action = Parent.Environment.ActionPool.Claim<T>();
-            _rightAction.Value = action;
-            return action;
-        }
-
+        
         public override void OnMousePressed(ref MouseEvent e) {
             _hierarchy.Pressed = true;
             if(e.Button == MouseEvent.LeftButton) {
                 if(_expandable && ExpandBounds.Contains(e.Position)) {
                 } else {
-                    _leftDownAction.Value?.Perform(this, e);
+                    _lastEvent = new HierarchyEvent(e, HierarchyEventType.Down);
                 }
             }
         }
@@ -219,14 +178,14 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
                 switch(e.Button) {
                     case MouseEvent.LeftButton: {
                         if(_expandable && ExpandBounds.Contains(e.Position)) {
-                            _expandAction.Value?.Perform(this, e);
+                            _lastEvent = new HierarchyEvent(e, HierarchyEventType.Expand);
                         } else {
-                            _leftUpAction.Value?.Perform(this, e);
+                            _lastEvent = new HierarchyEvent(e, HierarchyEventType.Up);
                         }
                         break;
                     }
                     case MouseEvent.RightButton: {
-                        _rightAction.Value?.Perform(this, e);
+                        _lastEvent = new HierarchyEvent(e, HierarchyEventType.Context);
                         break;
                     }
                 }
@@ -242,6 +201,24 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
         public HierarchyElement<TI> Hierarchy(Hierarchy<TI> hierarchy) {
             _hierarchy = hierarchy;
             return this;
+        }
+
+        public struct HierarchyEvent {
+            public MouseEvent Event;
+            public readonly HierarchyEventType Type;
+
+            public HierarchyEvent(MouseEvent e, HierarchyEventType type) {
+                this.Event = e;
+                this.Type = type;
+            }
+        }
+
+        public enum HierarchyEventType {
+            None,
+            Expand,
+            Down,
+            Up,
+            Context
         }
     }
 }

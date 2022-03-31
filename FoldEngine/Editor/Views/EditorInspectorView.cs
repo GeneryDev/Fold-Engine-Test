@@ -1,6 +1,4 @@
-﻿using System;
-using System.Globalization;
-using System.Reflection;
+﻿using System.Globalization;
 using System.Runtime.CompilerServices;
 using EntryProject.Util;
 using FoldEngine.Components;
@@ -51,9 +49,6 @@ namespace FoldEngine.Editor.Views {
 
                     ContentPanel.Element<ComponentHeader>()
                         .Info(componentInfo)
-                        .Id(id)
-                        .ContextMenuAction<ShowComponentMenuAction>()
-                        .Info(componentInfo)
                         .Id(id);
 
                     // ContentPanel.Label(componentInfo.Name, 14).TextAlignment(-1);
@@ -83,7 +78,16 @@ namespace FoldEngine.Editor.Views {
                 }
             }
 
-            ContentPanel.Button("Add Component", 14).LeftAction<ShowAddComponentMenuAction>().Id(id);
+            if(ContentPanel.Button("Add Component", 14).IsPressed(out Point p)) {
+                GuiPopupMenu contextMenu = ContentPanel.Environment.ContextMenu;
+                contextMenu.Show(p, m => {
+                    foreach(ComponentSet set in Scene.Components.Sets.Values) {
+                        if(!set.Has(id) && m.Button(set.ComponentType.Name, 9).IsPressed()) {
+                            ((EditorEnvironment) ContentPanel.Environment).TransactionManager.InsertTransaction(new AddComponentTransaction(set.ComponentType, id));
+                        }
+                    }
+                });
+            }
         }
 
         private void RenderObjectView(IRenderingUnit renderer) {
@@ -108,41 +112,6 @@ namespace FoldEngine.Editor.Views {
 
         public void SetObject(object obj) {
             _object = obj;
-        }
-    }
-    
-    public class TestAction : IGuiAction {
-        private long _id;
-        private FieldInfo _fieldInfo;
-        private ComponentSet _set;
-
-        public TestAction Id(long id) {
-            _id = id;
-            return this;
-        }
-        
-        public TestAction FieldInfo(FieldInfo fieldInfo) {
-            _fieldInfo = fieldInfo;
-            return this;
-        }
-
-        public TestAction ComponentSet(ComponentSet set) {
-            _set = set;
-            return this;
-        }
-
-        public IObjectPool Pool { get; set; }
-        
-        public void Perform(GuiElement element, MouseEvent e) {
-            bool oldValue = (bool) _set.GetFieldValue((int) _id, _fieldInfo);
-            bool newValue = !oldValue;
-            ((EditorEnvironment) element.Parent.Environment).TransactionManager.InsertTransaction(new SetComponentFieldTransaction() {
-                ComponentType = _set.ComponentType,
-                EntityId = _id,
-                FieldInfo = _fieldInfo,
-                OldValue = oldValue,
-                NewValue = newValue
-            });
         }
     }
 
@@ -190,13 +159,6 @@ namespace FoldEngine.Editor.Views {
         private ComponentInfo _info;
         private long _id;
 
-        private PooledValue<IGuiAction> _contextMenuAction;
-
-        public override void Reset(GuiPanel parent) {
-            base.Reset(parent);
-            _contextMenuAction.Free();
-        }
-
         public ComponentHeader Info(ComponentInfo info) {
             _info = info;
             Text(info.Name);
@@ -217,7 +179,11 @@ namespace FoldEngine.Editor.Views {
 
         public override void OnMouseReleased(ref MouseEvent e) {
             if(e.Button == MouseEvent.RightButton) {
-                _contextMenuAction.Value?.Perform(this, e);
+                Environment.ContextMenu.Show(e.Position, m => {
+                    if(m.Button("Remove", 14).IsPressed()) {
+                        ((EditorEnvironment) Environment).TransactionManager.InsertTransaction(new RemoveComponentTransaction(_info.ComponentType, _id));
+                    };
+                });
             }
             base.OnMouseReleased(ref e);
         }
@@ -230,107 +196,6 @@ namespace FoldEngine.Editor.Views {
             });
             // _textColor = Rollover ? Color.CornflowerBlue : Color.White;
             base.Render(renderer, layer, offset);
-        }
-
-        public ComponentHeader ContextMenuAction(IGuiAction action) {
-            _contextMenuAction.Value = action;
-            return this;
-        }
-
-        public T ContextMenuAction<T>() where T : IGuiAction, new() {
-            var action = Parent.Environment.ActionPool.Claim<T>();
-            _contextMenuAction.Value = action;
-            return action;
-        }
-    }
-    
-    public class ShowAddComponentMenuAction : IGuiAction {
-        private long _id;
-
-        public ShowAddComponentMenuAction Id(long id) {
-            _id = id;
-            return this;
-        }
-        
-        public IObjectPool Pool { get; set; }
-        
-        public void Perform(GuiElement element, MouseEvent e) {
-            GuiPopupMenu contextMenu = element.Parent.Environment.ContextMenu;
-            contextMenu.Reset(e.Position);
-
-            foreach(ComponentSet set in element.Environment.Scene.Components.Sets.Values) {
-                if(!set.Has(_id)) contextMenu.Button(set.ComponentType.Name, 9).LeftAction<AddComponentAction>().Id(_id).Type(set.ComponentType);
-            }
-            
-            contextMenu.Show();
-        }
-    }
-    
-    public class AddComponentAction : IGuiAction {
-        private Type _type;
-        private long _id;
-
-        public AddComponentAction Type(Type type) {
-            _type = type;
-            return this;
-        }
-
-        public AddComponentAction Id(long id) {
-            _id = id;
-            return this;
-        }
-        
-        public IObjectPool Pool { get; set; }
-        
-        public void Perform(GuiElement element, MouseEvent e) {
-            ((EditorEnvironment) element.Environment).TransactionManager.InsertTransaction(new AddComponentTransaction(_type, _id));
-        }
-    }
-    
-    public class ShowComponentMenuAction : IGuiAction {
-        private ComponentInfo _info;
-        private long _id;
-
-        public ShowComponentMenuAction Info(ComponentInfo info) {
-            _info = info;
-            return this;
-        }
-
-        public ShowComponentMenuAction Id(long id) {
-            _id = id;
-            return this;
-        }
-        
-        public IObjectPool Pool { get; set; }
-        
-        public void Perform(GuiElement element, MouseEvent e) {
-            GuiPopupMenu contextMenu = element.Parent.Environment.ContextMenu;
-            contextMenu.Reset(e.Position);
-
-            contextMenu.Button("Remove", 14).LeftAction<RemoveComponentAction>().Id(_id).Type(_info.ComponentType);
-            
-            contextMenu.Show();
-        }
-    }
-    
-    public class RemoveComponentAction : IGuiAction {
-        private Type _type;
-        private long _id;
-
-        public RemoveComponentAction Type(Type type) {
-            _type = type;
-            return this;
-        }
-
-        public RemoveComponentAction Id(long id) {
-            _id = id;
-            return this;
-        }
-        
-        public IObjectPool Pool { get; set; }
-        
-        public void Perform(GuiElement element, MouseEvent e) {
-            ((EditorEnvironment) element.Environment).TransactionManager.InsertTransaction(new RemoveComponentTransaction(_type, _id));
         }
     }
 }

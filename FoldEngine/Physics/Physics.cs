@@ -66,7 +66,6 @@ namespace FoldEngine.Physics {
                 force /= Time.FixedDeltaTime;
             }
 
-            // if(mode == ForceMode.Instant) force /= Time.FixedDeltaTime;
             Complex diff = ((((Complex) force.Normalized()) / (Complex) point.Normalized())).Normalized;
             if(point == Vector2.Zero) diff = force.Normalized();
             

@@ -1,4 +1,5 @@
-﻿using EntryProject.Util;
+﻿using System;
+using EntryProject.Util;
 using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
 using Microsoft.Xna.Framework;
@@ -6,18 +7,15 @@ using Microsoft.Xna.Framework;
 namespace FoldEngine.Gui {
     public class GuiPopupMenu : GuiPanel {
         public bool Showing = false;
+        private Action<GuiPopupMenu> _renderer; 
         
         public GuiPopupMenu(GuiEnvironment environment) : base(environment) { }
 
-        public void Reset(Point pos, int width = 150) {
+        public void Show(Point pos, Action<GuiPopupMenu> renderer, int width = 150) {
             this.Bounds = new Rectangle(pos, new Point(width, 300));
-            base.Reset();
-        }
-
-        public void Show() {
-            EndPreviousElement();
-            // Bounds = new Rectangle(pos, new Point(150, 300));
-            Bounds.Size = ContentSize;
+            _renderer = renderer;
+            _renderer(this);
+            
             Showing = true;
             Environment.VisiblePanels.Add(this);
         }
@@ -29,6 +27,11 @@ namespace FoldEngine.Gui {
         
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
             if(!Showing) return;
+            Reset();
+            _renderer(this);
+            EndPreviousElement();
+            // Bounds = new Rectangle(pos, new Point(150, 300));
+            Bounds.Size = ContentSize;
             layer.Surface.Draw(new DrawRectInstruction() {
                 Texture = renderer.WhiteTexture,
                 DestinationRectangle = Bounds.Grow(2).Translate(offset),

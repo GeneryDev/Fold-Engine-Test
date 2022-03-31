@@ -170,7 +170,8 @@ namespace FoldEngine.Gui {
     public class GuiButton : GuiLabel {
 
         private PooledValue<IGuiAction> _leftAction;
-        private PooledValue<IGuiAction> _rightAction;
+
+        private MouseEvent _lastEvent;
 
         protected virtual Color NormalColor => new Color(37, 37, 38);
         protected virtual Color RolloverColor => Color.CornflowerBlue;
@@ -179,7 +180,6 @@ namespace FoldEngine.Gui {
         public override void Reset(GuiPanel parent) {
             base.Reset(parent);
             _leftAction.Free();
-            _rightAction.Free();
         }
 
         public override void AdjustSpacing(GuiPanel parent) {
@@ -204,11 +204,12 @@ namespace FoldEngine.Gui {
             if(Bounds.Contains(e.Position)) {
                 switch(e.Button) {
                     case MouseEvent.LeftButton: {
+                        _lastEvent = e;
                         _leftAction.Value?.Perform(this, e);
                         break;
                     }
                     case MouseEvent.RightButton: {
-                        _rightAction.Value?.Perform(this, e);
+                        _lastEvent = e;
                         break;
                     }
                 }
@@ -247,6 +248,20 @@ namespace FoldEngine.Gui {
             return this;
         }
 
+        public bool IsPressed() {
+            if(_lastEvent.Button == MouseEvent.LeftButton && _lastEvent.When != 0 && Time.Now >= _lastEvent.When && !_lastEvent.Consumed) {
+                _lastEvent.Consumed = true;
+                return true;
+            }
+            return false;
+        }
+
+        public bool IsPressed(out Point position) {
+            bool pressed = IsPressed();
+            position = pressed ? _lastEvent.Position : default;
+            return pressed;
+        }
+
         public GuiButton LeftAction(IGuiAction action) {
             _leftAction.Value = action;
             return this;
@@ -255,17 +270,6 @@ namespace FoldEngine.Gui {
         public T LeftAction<T>() where T : IGuiAction, new() {
             var action = Parent.Environment.ActionPool.Claim<T>();
             _leftAction.Value = action;
-            return action;
-        }
-
-        public GuiButton RightAction(IGuiAction action) {
-            _rightAction.Value = action;
-            return this;
-        }
-
-        public T RightAction<T>() where T : IGuiAction, new() {
-            var action = Parent.Environment.ActionPool.Claim<T>();
-            _rightAction.Value = action;
             return action;
         }
     }
