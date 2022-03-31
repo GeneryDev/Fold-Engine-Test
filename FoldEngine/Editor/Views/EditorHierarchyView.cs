@@ -182,10 +182,13 @@ namespace FoldEngine.Editor.Views {
     }
 
     public class EntityHierarchy : Hierarchy<long> {
+        public override long DefaultId { get; } = -1;
+
         public EntityHierarchy(GuiEnvironment environment) : base(environment) { }
         public EntityHierarchy(GuiPanel parent) : base(parent) { }
 
         public override void Drop() {
+            if(DragTargetId == -1) return;
             Console.WriteLine("Dropping: ");
 
             HierarchyDropMode dropMode;

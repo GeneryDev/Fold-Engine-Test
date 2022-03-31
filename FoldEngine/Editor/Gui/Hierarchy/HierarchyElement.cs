@@ -27,6 +27,7 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
         protected int _depth = 0;
         protected bool _expandable = false; 
         protected bool _selected = false;
+        protected bool _depress = false;
 
         protected Rectangle ExpandBounds;
 
@@ -77,6 +78,10 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
         }
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
+            if(_depress) {
+                _depress = false;
+                _hierarchy.Pressed = false;
+            }
             if(Bounds.Contains(Environment.MousePos)) {
                 Environment.HoverTarget.Element = this;
                 Environment.HoverTarget.Hierarchy = _hierarchy;
@@ -156,8 +161,9 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
         }
         
         public override void OnMousePressed(ref MouseEvent e) {
-            _hierarchy.Pressed = true;
             if(e.Button == MouseEvent.LeftButton) {
+                _hierarchy.Pressed = true;
+                _hierarchy.DragTargetId = _hierarchy.DefaultId;
                 if(_expandable && ExpandBounds.Contains(e.Position)) {
                 } else {
                     _lastEvent = new HierarchyEvent(e, HierarchyEventType.Down);
@@ -190,7 +196,8 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
                     }
                 }
             }
-            _hierarchy.Pressed = false;
+
+            _depress = true;
         }
 
         public HierarchyElement<TI> Selected(bool selected) {

@@ -26,11 +26,13 @@ namespace EntryProject.Editor.Gui.Hierarchy {
         public bool Dragging { get; set; }
         public Rectangle DragLine { get; set; }
 
+        public virtual T DefaultId { get; } = default;
         public T DragTargetId = default;
         public int DragRelative = 0;
 
         public Hierarchy(GuiEnvironment environment) {
             this.Environment = environment;
+            this.DragTargetId = DefaultId;
         }
 
         public List<T> Expanded = new List<T>();
