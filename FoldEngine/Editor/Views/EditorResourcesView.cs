@@ -17,9 +17,11 @@ namespace FoldEngine.Editor.Views {
                 Scene.Resources.SaveAll();
                 Console.WriteLine("Save resources!");
             }
-            if(ContentPanel.Button("Unload All", 14).IsPressed()) {
-                Scene.Resources.UnloadAll();
-                Console.WriteLine("Unloaded all resources!");
+            if(ContentPanel.Button("Invalidate Caches", 14).IsPressed()) {
+                Scene.Resources.InvalidateCaches();
+            }
+            if(ContentPanel.Button("Invoke GC", 14).IsPressed()) {
+                GC.Collect(GC.MaxGeneration);
             }
         }
     }

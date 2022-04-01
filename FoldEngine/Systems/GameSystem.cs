@@ -18,7 +18,7 @@ namespace FoldEngine.Systems {
         public string SystemName => _attribute.SystemName;
         public ProcessingCycles ProcessingCycles => _attribute.ProcessingCycles;
         public bool RunWhenPaused => _attribute.RunWhenPaused;
-        private List<EventUnsubscriber> EventUnsubscribers = new List<EventUnsubscriber>();
+        private readonly List<EventUnsubscriber> _eventUnsubscribers = new List<EventUnsubscriber>();
 
         protected GameSystem() {
             _attribute = (GameSystemAttribute) this.GetType().GetCustomAttribute(typeof(GameSystemAttribute));
@@ -28,6 +28,8 @@ namespace FoldEngine.Systems {
         public virtual void OnUpdate() { }
         public virtual void OnFixedUpdate() { }
         public virtual void OnRender(IRenderingUnit renderer) { }
+        
+        public virtual void PollResources() {}
 
         protected MultiComponentIterator CreateComponentIterator(params Type[] watchingTypes) {
             return Owner.Components.CreateMultiIterator(watchingTypes);
@@ -47,14 +49,14 @@ namespace FoldEngine.Systems {
 
 
         internal void UnsubscribeFromEvents() {
-            foreach(EventUnsubscriber obj in EventUnsubscribers) {
+            foreach(EventUnsubscriber obj in _eventUnsubscribers) {
                 obj.Unsubscribe();
             }
-            EventUnsubscribers.Clear();
+            _eventUnsubscribers.Clear();
         }
         
         protected void Subscribe<T>(Event.EventListener<T> action) where T : struct {
-            EventUnsubscribers.Add(Owner.Events.Subscribe(action));
+            _eventUnsubscribers.Add(Owner.Events.Subscribe(action));
         }
         
         

@@ -16,8 +16,9 @@ namespace FoldEngine.Resources {
         bool IsEmpty { get; }
         Type ResourceType { get; }
         void Save();
-        void Unload();
+        void InvalidateCaches();
         void Insert(Resource resource);
+        void UnloadUnused(int pollGeneration);
     }
 
     public class ResourceCollection<T> : IResourceCollection where T : Resource, new() {
@@ -76,12 +77,24 @@ namespace FoldEngine.Resources {
                 GenericSerializer.Deserialize(newT, reader);
             }
             Resources.Add(newT);
-            Generation++;
+            InvalidateCaches();
             return newT;
         }
 
         public void Insert(Resource resource) {
             Insert((T)resource);
+        }
+
+        public void UnloadUnused(int pollGeneration) {
+            for(int i = 0; i < Resources.Count; i++) {
+                T resource = Resources[i];
+                if(resource.SystemsKeepingAlive.Get(pollGeneration) == 0) {
+                    Console.WriteLine("UNLOADING UNUSED RESOURCE " + resource.Identifier);
+                    Resources.RemoveAt(i);
+                    i--;
+                }
+            }
+            InvalidateCaches();
         }
 
         public void Insert(T resource) {
@@ -90,10 +103,10 @@ namespace FoldEngine.Resources {
             if(existingIndex != -1) throw new ArgumentException("Resource '" + identifier + "' already exists!");
             
             Resources.Add(resource);
-            Generation++;
+            InvalidateCaches();
         }
 
-        public void Unload() {
+        public void InvalidateCaches() {
             Generation++;
         }
 
@@ -152,6 +165,11 @@ namespace FoldEngine.Resources {
             return (IResourceCollection) Constructors[resourceType].Invoke(new object[0]);
         }
 
+#if DEBUG
+        ~Resource() {
+            Console.WriteLine("Finalized resource " + Identifier);
+        }
+#endif
 
         public void Save() {
             string resourceFolder = Path.Combine("resources", AttributeOf(GetType()).DirectoryName);

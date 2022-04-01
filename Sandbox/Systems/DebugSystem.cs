@@ -179,6 +179,13 @@ namespace Sandbox.Systems {
             }
         }
 
+        public override void PollResources() {
+            _livingComponents.Reset();
+            while(_livingComponents.Next()) {
+                Owner.Resources.KeepLoaded<TestResource>(ref _livingComponents.GetComponent().Resource);
+            }
+        }
+
         public override void SubscribeToEvents() {
             Subscribe((ref CollisionEvent collision) => {
                 if(Owner.Components.HasComponent<Living>(collision.First) && Vector2.Dot(collision.Normal, Vector2.UnitY) > 0.5f) {

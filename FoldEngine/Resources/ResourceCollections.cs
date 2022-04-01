@@ -3,13 +3,18 @@ using System.Collections.Generic;
 using System.Threading;
 using FoldEngine.Interfaces;
 using FoldEngine.Serialization;
+using FoldEngine.Systems;
 
 namespace FoldEngine.Resources {
     public class ResourceCollections : ISelfSerializer {
+        protected ResourceCollections Root => Parent != null ? Parent.Root : this;
+        
         private readonly IGameCore _core;
         
         private ResourceLoader _loader;
         public ResourceCollections Parent;
+
+        private int _pollGeneration = 0;
         
         private Dictionary<Type, IResourceCollection> _collections = new Dictionary<Type, IResourceCollection>();
 
@@ -50,10 +55,15 @@ namespace FoldEngine.Resources {
             if(collection != null) {
                 return ((ResourceCollection<T>) collection).Get(ref identifier, def);
             } else {
-                (Parent ?? this).StartLoad<T>(identifier.Identifier);
+                Root.StartLoad<T>(identifier.Identifier);
             }
 
             return def;
+        }
+
+        public void KeepLoaded<T>(ref ResourceIdentifier identifier) where T : Resource, new() {
+            T resource = Get<T>(ref identifier);
+            resource?.SystemsKeepingAlive.Set(resource.SystemsKeepingAlive.Get(Root._pollGeneration) + 1, Root._pollGeneration);
         }
 
         public T Create<T>(string identifier) where T : Resource, new() {
@@ -108,13 +118,13 @@ namespace FoldEngine.Resources {
             }
         }
 
-        public void UnloadAll() {
+        public void InvalidateCaches() {
 
             foreach(IResourceCollection collection in _collections.Values) {
-                collection.Unload();
+                collection.InvalidateCaches();
             }
 
-            Parent?.UnloadAll();
+            Parent?.InvalidateCaches();
         }
 
         public void SaveAll() {
@@ -135,6 +145,20 @@ namespace FoldEngine.Resources {
         }
 
         public void Update() {
+            
+            _pollGeneration++;
+
+            if(_core.ActiveScene != null) {
+                foreach(GameSystem sys in _core.ActiveScene.Systems.AllSystems) {
+                    sys.PollResources();
+                }
+            }
+            
+            foreach(IResourceCollection collection in _collections.Values) {
+                collection.UnloadUnused(_pollGeneration);
+            }
+            
+            
             _loader.Update();
         }
     }
