@@ -18,7 +18,7 @@ namespace FoldEngine.Resources {
         void Save();
         void InvalidateCaches();
         void Insert(Resource resource);
-        void UnloadUnused(int pollGeneration);
+        void UnloadUnused();
     }
 
     public class ResourceCollection<T> : IResourceCollection where T : Resource, new() {
@@ -58,7 +58,13 @@ namespace FoldEngine.Resources {
             UpdateResourceIdentifier(ref identifier);
             
             int indexIntoCollection = identifier.IndexIntoCollection.Get(Generation) - 1;
-            return indexIntoCollection != -1 ? Resources[indexIntoCollection] : def;
+            if(indexIntoCollection != -1) {
+                T resource = Resources[indexIntoCollection];
+                resource.LastAccessTime = Time.Now;
+                return resource;
+            }
+
+            return def;
         }
 
         public bool Exists(ResourceIdentifier identifier) {
@@ -85,10 +91,11 @@ namespace FoldEngine.Resources {
             Insert((T)resource);
         }
 
-        public void UnloadUnused(int pollGeneration) {
+        public void UnloadUnused() {
+            int unloadTime = Resource.AttributeOf<T>()?.UnloadTime ?? 5000;
             for(int i = 0; i < Resources.Count; i++) {
                 T resource = Resources[i];
-                if(resource.SystemsKeepingAlive.Get(pollGeneration) == 0) {
+                if(Time.Now >= resource.LastAccessTime + unloadTime) {
                     Console.WriteLine("UNLOADING UNUSED RESOURCE " + resource.Identifier);
                     Resources.RemoveAt(i);
                     i--;
@@ -152,7 +159,7 @@ namespace FoldEngine.Resources {
         public const string Extension = "foldresource";
         
         public string Identifier { get; protected internal set; }
-        protected internal CachedValue<int> SystemsKeepingAlive;
+        protected internal long LastAccessTime = Time.Now;
         
         private static readonly Dictionary<Type, ConstructorInfo> Constructors = new Dictionary<Type, ConstructorInfo>();
         
@@ -215,9 +222,11 @@ namespace FoldEngine.Resources {
 
     public sealed class ResourceAttribute : Attribute {
         public readonly string DirectoryName;
+        public readonly int UnloadTime; //ms
 
-        public ResourceAttribute(string directoryName) {
+        public ResourceAttribute(string directoryName, int unloadTime = 5000) {
             DirectoryName = directoryName;
+            UnloadTime = unloadTime;
         }
     }
 }

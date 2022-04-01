@@ -13,8 +13,6 @@ namespace FoldEngine.Resources {
         
         private ResourceLoader _loader;
         public ResourceCollections Parent;
-
-        private int _pollGeneration = 0;
         
         private Dictionary<Type, IResourceCollection> _collections = new Dictionary<Type, IResourceCollection>();
 
@@ -97,8 +95,7 @@ namespace FoldEngine.Resources {
         /// <param name="preload">Whether to start loading the resource if not already in memory</param>
         public void KeepLoaded<T>(ref ResourceIdentifier identifier, bool preload = false) where T : Resource, new() {
             if(!preload && !Exists<T>(ref identifier)) return;
-            var resource = Get<T>(ref identifier);
-            resource?.SystemsKeepingAlive.Set(resource.SystemsKeepingAlive.Get(Root._pollGeneration) + 1, Root._pollGeneration);
+            Get<T>(ref identifier);
         }
 
         /// <summary>
@@ -219,7 +216,6 @@ namespace FoldEngine.Resources {
 
         private long _lastPollTime = 0;
         private void PollResources() {
-            _pollGeneration++;
             _lastPollTime = Time.Now;
 
             if(_core.ActiveScene != null) {
@@ -229,7 +225,7 @@ namespace FoldEngine.Resources {
             }            
             
             foreach(IResourceCollection collection in _collections.Values) {
-                collection.UnloadUnused(_pollGeneration);
+                collection.UnloadUnused();
             }
         }
 

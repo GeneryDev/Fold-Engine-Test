@@ -76,7 +76,7 @@ namespace FoldEngine.Resources {
                 reader = new LoadOperation(Data.In.Stream(task.Path));
                 var resource = new T {Identifier = task.Identifier};
                 GenericSerializer.Deserialize(resource, reader);
-                Thread.Sleep(1000);
+                // Thread.Sleep(1000);
                 reader.Close();
 
                 task.CompletedResource = resource;
