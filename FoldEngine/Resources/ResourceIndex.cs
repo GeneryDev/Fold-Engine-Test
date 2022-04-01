@@ -17,7 +17,7 @@ namespace FoldEngine.Resources {
                 Dictionary<string, string> paths = _identifierToPathMap[type] = new Dictionary<string, string>();
                 Update(paths, Path.Combine("resources", Resource.AttributeOf(type).DirectoryName));
                 foreach(KeyValuePair<string, string> id in paths) {
-                    Console.WriteLine($"    {id.Key}");
+                    Console.WriteLine($"    {id.Key} at {id.Value}");
                 }
             }
         }
@@ -34,6 +34,14 @@ namespace FoldEngine.Resources {
                 
                 paths[id] = path;
             }
+        }
+
+        public bool Exists(Type type, string identifier) {
+            return _identifierToPathMap.ContainsKey(type) && _identifierToPathMap[type].ContainsKey(identifier);
+        }
+
+        public string GetPathForIdentifier(Type type, string identifier) {
+            return _identifierToPathMap.ContainsKey(type) && _identifierToPathMap[type].ContainsKey(identifier) ? _identifierToPathMap[type][identifier] : null;
         }
     }
 }

@@ -66,6 +66,7 @@ namespace FoldEngine.Editor.Views {
             var stream = new MemoryStream();
                 
             var saveOp = new SaveOperation(stream);
+            saveOp.Options.Set(SerializeTempResources.Instance, true);
             environment.Scene.Save(saveOp);
             
             saveOp.Close();

@@ -120,6 +120,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Resources\ResourceCollections.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Resources\GenericSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Resources\ResourceIndex.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Resources\ResourceLoader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scenes\EntityIdRemapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\Attributes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\ISerializer.cs" />

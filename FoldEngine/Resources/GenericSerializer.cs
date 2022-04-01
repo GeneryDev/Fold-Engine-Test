@@ -6,13 +6,13 @@ using FoldEngine.Serialization;
 
 namespace FoldEngine.Resources {
     public class GenericSerializer {
-        public static void Serialize<T>(T obj, SaveOperation writer) {
+        public static void Serialize(object obj, SaveOperation writer) {
             if(obj is ISelfSerializer serializer) {
                 serializer.Serialize(writer);
                 return;
             }
             writer.WriteCompound((ref SaveOperation.Compound c) => {
-                foreach(FieldInfo fieldInfo in typeof(T).GetFields()) {
+                foreach(FieldInfo fieldInfo in obj.GetType().GetFields()) {
                     if(fieldInfo.IsStatic) continue;
                     if(fieldInfo.GetCustomAttribute<DoNotSerialize>() != null) continue;
                     

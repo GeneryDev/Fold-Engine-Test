@@ -13,7 +13,7 @@ namespace FoldEngine.Physics {
         public ColliderType Type;
         [ShowOnlyIf.Not(nameof(Type), ColliderType.None)]
         [ShowOnlyIf(nameof(Type), ColliderType.Mesh)]
-        public ResourceLocation MeshIdentifier;
+        public ResourceIdentifier MeshIdentifier;
         
         [ShowOnlyIf.Not(nameof(Type), ColliderType.None)]
         [ShowOnlyIf(nameof(Type), ColliderType.Box)]
@@ -45,7 +45,7 @@ namespace FoldEngine.Physics {
 
         public void SetMesh(string meshIdentifier) {
             Type = ColliderType.Mesh;
-            MeshIdentifier = new ResourceLocation(meshIdentifier);
+            MeshIdentifier = new ResourceIdentifier(meshIdentifier);
         }
 
         public Vector2[] GetVertices(ref Transform transform) {

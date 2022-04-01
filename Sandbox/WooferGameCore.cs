@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EntryProject.Util.JsonSerialization;
 using FoldEngine;
 using FoldEngine.Commands;
 using FoldEngine.Input;
@@ -40,16 +34,16 @@ namespace Woofer {
             FoldGame = new FoldGame(this);
             
             RenderingUnit = new WooferRenderingUnit(this);
-            ActiveScene = new DemoScene(this);
             InputUnit = new InputUnit();
             AudioUnit = new AudioUnit();
             CommandQueue = new CommandQueue(this);
-            Resources = new ResourceCollections();
+            Resources = new ResourceCollections(this);
             ResourceIndex = new ResourceIndex();
             ResourceIndex.Update();
 
             InputUnit.Setup("Content/Config/input.json");
             
+            ActiveScene = new DemoScene(this);
         }
 
         public void Initialize() {

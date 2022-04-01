@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Editor;
 using FoldEngine.Events;
-using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
-using FoldEngine.Rendering;
 using FoldEngine.Resources;
 using FoldEngine.Serialization;
 using FoldEngine.Util;
@@ -30,7 +25,6 @@ namespace FoldEngine.Scenes
         public readonly SystemMap Systems;
 
         public readonly ResourceCollections Resources;
-        public readonly ResourceCollections TempResources;
 
         private long _nextEntityId = 0;
 
@@ -62,7 +56,6 @@ namespace FoldEngine.Scenes
             Events = new EventMap(this);
             Systems = new SystemMap(this);
             Resources = new ResourceCollections(core.Resources);
-            TempResources = new ResourceCollections(Resources);
         }
 
         private List<long> _deletedIds = new List<long>();
@@ -240,7 +233,9 @@ namespace FoldEngine.Scenes
                     c.WriteMember(nameof(_nextEntityId), _nextEntityId);
                     c.WriteMember(nameof(_deletedIds), _deletedIds);
                     c.WriteMember(nameof(Systems), (ISelfSerializer) Systems);
-                    c.WriteMember(nameof(Resources), (ISelfSerializer) Resources);
+                    if(writer.Options.Get(SerializeTempResources.Instance)) {
+                        c.WriteMember(nameof(Resources), (ISelfSerializer) Resources);
+                    }
                 }
 
                 c.WriteMember(nameof(Components), (ISelfSerializer) Components);
@@ -299,6 +294,9 @@ namespace FoldEngine.Scenes
     }
     public class SerializeOnlyComponents : Field<List<Type>> {
         public static readonly SerializeOnlyComponents Instance = new SerializeOnlyComponents();
+    }
+    public class SerializeTempResources : Field<bool> {
+        public static readonly SerializeTempResources Instance = new SerializeTempResources();
     }
 
     

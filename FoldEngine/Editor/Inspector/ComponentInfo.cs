@@ -10,9 +10,9 @@ using FoldEngine.Editor.Gui.Fields.Text;
 using FoldEngine.Editor.Inspector;
 using FoldEngine.Gui;
 using FoldEngine.Physics;
+using FoldEngine.Resources;
 using FoldEngine.Scenes;
 using Microsoft.Xna.Framework;
-using ResourceLocation = FoldEngine.Resources.ResourceLocation;
 
 namespace FoldEngine.Editor.Views {
     public class ComponentInfo {
@@ -194,9 +194,9 @@ namespace FoldEngine.Editor.Views {
             SetDefaultInspectorElementProvider<long>(textFieldProvider);
             SetDefaultInspectorElementProvider<float>(textFieldProvider);
             SetDefaultInspectorElementProvider<double>(textFieldProvider);
-            SetDefaultInspectorElementProvider<ResourceLocation>((parentPanel, member, startingValue) => parentPanel.Element<TextField>()
+            SetDefaultInspectorElementProvider<ResourceIdentifier>((parentPanel, member, startingValue) => parentPanel.Element<TextField>()
                 .FieldSpacing(ComponentMemberLabel.LabelWidth)
-                .Value(((ResourceLocation) startingValue).Identifier ?? "")
+                .Value(((ResourceIdentifier) startingValue).Identifier ?? "")
                 .EditedAction(member.CreateAction(parentPanel))
             );
 

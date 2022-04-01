@@ -120,8 +120,9 @@ namespace FoldEngine {
             _core.InputUnit.Update();
             _core.Input();
 
+            _core.Resources.Update();
+            
             _core.Update();
-
 
 
             base.Update(gameTime);

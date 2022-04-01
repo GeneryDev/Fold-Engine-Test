@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using FoldEngine;
 using FoldEngine.Events;
 using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
-using FoldEngine.Util;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using FoldEngine.Resources;
 
 namespace Sandbox.Components
 {
@@ -12,6 +13,8 @@ namespace Sandbox.Components
         public int Health;
         public int MaxHealth;
         public bool Grounded;
+
+        public ResourceIdentifier Resource;
 
         public override string ToString()
         {

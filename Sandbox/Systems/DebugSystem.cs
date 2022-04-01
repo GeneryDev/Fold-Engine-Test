@@ -1,10 +1,12 @@
 ﻿using System;
 using System.IO;
+using EntryProject.Resources;
 using FoldEngine;
 using FoldEngine.Audio;
 using FoldEngine.Commands;
 using FoldEngine.Components;
 using FoldEngine.Events;
+using FoldEngine.Graphics;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Physics;
@@ -161,6 +163,20 @@ namespace Sandbox.Systems {
             
             renderer.Fonts["default"].DrawString($"FPS:{Time.FramesPerSecond}", renderer.MainGroup["screen"].Surface, new Point(0, 2*8), Color.Yellow, 14);
             // renderer.Fonts["default"].DrawString($"Normal:{_lastNormal}", renderer.MainGroup["screen"].Surface, new Point(0, 2*8 * 6), Color.Yellow, 14);
+            
+            _livingComponents.Reset();
+            while(_livingComponents.Next()) {
+                IRenderingLayer layer = renderer.WorldLayer;
+                Color? color = Owner.Resources.Get<TestResource>(ref _livingComponents.GetComponent().Resource)?.color;
+                layer.Surface.Draw(new DrawTriangleInstruction(
+                    renderer.WhiteTexture,
+                    new Vector2(0, 0), new Vector2(10, 0),
+                    new Vector2(0, 10),
+                    new Vector2(0, 0), new Vector2(1, 0),
+                    new Vector2(0, 1),
+                    color
+                    ));
+            }
         }
 
         public override void SubscribeToEvents() {

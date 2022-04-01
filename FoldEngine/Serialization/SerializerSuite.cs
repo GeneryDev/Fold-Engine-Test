@@ -30,7 +30,7 @@ namespace FoldEngine.Serialization {
             AddSerializer(new PrimitiveSerializer<bool>());
             
             AddSerializer(new StringSerializer());
-            AddSerializer(new ResourceLocationSerializer());
+            AddSerializer(new ResourceIdentifierSerializer());
             
             AddSerializer(new Vector2Serializer());
             AddSerializer(new Vector3Serializer());

@@ -13,17 +13,17 @@ namespace FoldEngine.Serialization {
             return reader.ReadString();
         }
     }
-    public class ResourceLocationSerializer : Serializer<ResourceLocation> {
-        public override Type WorkingType => typeof(ResourceLocation);
+    public class ResourceIdentifierSerializer : Serializer<ResourceIdentifier> {
+        public override Type WorkingType => typeof(ResourceIdentifier);
 
-        public override void Serialize(ResourceLocation t, SaveOperation writer) {
+        public override void Serialize(ResourceIdentifier t, SaveOperation writer) {
             writer.Write(t.Identifier ?? "");
         }
 
-        public override ResourceLocation Deserialize(LoadOperation reader) {
+        public override ResourceIdentifier Deserialize(LoadOperation reader) {
             string identifier = reader.ReadString();
             if(identifier.Length == 0) identifier = null;
-            return new ResourceLocation(identifier);
+            return new ResourceIdentifier(identifier);
         }
     }
 }

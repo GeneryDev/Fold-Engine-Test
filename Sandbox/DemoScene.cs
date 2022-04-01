@@ -6,6 +6,7 @@ using Sandbox.Systems;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using EntryProject.Resources;
 using FoldEngine.Audio;
 using FoldEngine.Editor;
 using FoldEngine.Graphics;
@@ -42,7 +43,7 @@ namespace Sandbox {
 
             {
                 ref MeshRenderable mr = ref e1.AddComponent<MeshRenderable>();
-                mr.MeshIdentifier = new ResourceLocation("square");
+                mr.MeshIdentifier = new ResourceIdentifier("square");
                 mr.TextureIdentifier = "main:beacon";
             }
             e1.Transform.Position += Vector2.UnitY * 64;
@@ -52,7 +53,7 @@ namespace Sandbox {
             
             {
                 ref MeshRenderable mr = ref e3.AddComponent<MeshRenderable>();
-                mr.MeshIdentifier = new ResourceLocation("square");
+                mr.MeshIdentifier = new ResourceIdentifier("square");
                 mr.TextureIdentifier = "main:beacon";
             }
             e3.Transform.Position += Vector2.UnitY * 60;
@@ -63,7 +64,7 @@ namespace Sandbox {
             
             {
                 ref MeshRenderable mr = ref e4.AddComponent<MeshRenderable>();
-                mr.MeshIdentifier = new ResourceLocation("square");
+                mr.MeshIdentifier = new ResourceIdentifier("square");
                 mr.TextureIdentifier = "main:beacon";
             }
             e4.Transform.Position += Vector2.UnitY * 60;
@@ -86,7 +87,7 @@ namespace Sandbox {
             
             {
                 ref MeshRenderable mr = ref e2.AddComponent<MeshRenderable>();
-                mr.MeshIdentifier = new ResourceLocation("square");
+                mr.MeshIdentifier = new ResourceIdentifier("square");
                 mr.TextureIdentifier = "main:pixel.white";
             }
             e2.Name = "Platform";
@@ -227,6 +228,9 @@ namespace Sandbox {
                 .Vertex(new Vector2(0, -2), Vector2.Zero)
                 .Vertex(new Vector2(-2, -1), Vector2.Zero)
                 .End();
+            
+            // Resources.Create<TestResource>("red").color = new Color(255, 0, 0);
+            // Resources.Create<TestResource>("blue").color = new Color(0, 0, 255);
         }
 
         public DemoScene(IGameCore core) : base(core) { }

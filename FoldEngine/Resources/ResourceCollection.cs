@@ -12,10 +12,12 @@ using FoldEngine.Serialization;
 namespace FoldEngine.Resources {
 
     public interface IResourceCollection : ISelfSerializer {
-        bool Exists(ref ResourceLocation location);
+        bool Exists(ResourceIdentifier identifier);
         bool IsEmpty { get; }
         Type ResourceType { get; }
         void Save();
+        void Unload();
+        void Insert(Resource resource);
     }
 
     public class ResourceCollection<T> : IResourceCollection where T : Resource, new() {
@@ -32,7 +34,7 @@ namespace FoldEngine.Resources {
         public bool IsEmpty => Resources.Count == 0;
 
         private int IndexForIdentifier(string identifier) {
-            Console.WriteLine("Retrieving index for identifier '" + identifier + "'");
+            // Console.WriteLine("Retrieving index for identifier '" + identifier + "'");
             for(int i = 0; i < Resources.Count; i++) {
                 if(Resources[i].Identifier == identifier) return i;
             }
@@ -40,42 +42,58 @@ namespace FoldEngine.Resources {
             return -1;
         }
 
-        private void UpdateResourceLocation(ref ResourceLocation location) {
-            if(!location.IndexIntoCollection.IsValid(Generation)) {
-                int indexIntoCollection = location.IndexIntoCollection.Get(Generation) - 1;
+        private void UpdateResourceIdentifier(ref ResourceIdentifier identifier) {
+            if(!identifier.IndexIntoCollection.IsValid(Generation)) {
+                int indexIntoCollection = identifier.IndexIntoCollection.Get(Generation) - 1;
                 if(indexIntoCollection == -1) {
-                    indexIntoCollection = IndexForIdentifier(location.Identifier);
-                    location.IndexIntoCollection.Set(indexIntoCollection + 1, Generation);
+                    indexIntoCollection = IndexForIdentifier(identifier.Identifier);
+                    identifier.IndexIntoCollection.Set(indexIntoCollection + 1, Generation);
                 }
             }
         }
 
-        public T Get(ref ResourceLocation location, T def = null) {
-            if(location.Identifier == null) return def;
-            UpdateResourceLocation(ref location);
+        public T Get(ref ResourceIdentifier identifier, T def = null) {
+            if(identifier.Identifier == null) return def;
+            UpdateResourceIdentifier(ref identifier);
             
-            int indexIntoCollection = location.IndexIntoCollection.Get(Generation) - 1;
+            int indexIntoCollection = identifier.IndexIntoCollection.Get(Generation) - 1;
             return indexIntoCollection != -1 ? Resources[indexIntoCollection] : def;
         }
 
-        public bool Exists(ref ResourceLocation location) {
-            if(location.Identifier == null) return false;
-            UpdateResourceLocation(ref location);
+        public bool Exists(ResourceIdentifier identifier) {
+            if(identifier.Identifier == null) return false;
+            UpdateResourceIdentifier(ref identifier);
             
-            return location.IndexIntoCollection.Get(Generation) != -1;
+            return identifier.IndexIntoCollection.Get(Generation) - 1 != -1;
         }
 
-        public T Create(string identifier) {
+        public T Create(string identifier, LoadOperation reader = null) {
             int existingIndex = IndexForIdentifier(identifier);
             if(existingIndex != -1) throw new ArgumentException("Resource '" + identifier + "' already exists!");
             var newT = new T();
             newT.Identifier = identifier;
+            if(reader != null) {
+                GenericSerializer.Deserialize(newT, reader);
+            }
             Resources.Add(newT);
             Generation++;
             return newT;
         }
 
-        public void Unload(T t) {
+        public void Insert(Resource resource) {
+            Insert((T)resource);
+        }
+
+        public void Insert(T resource) {
+            string identifier = resource.Identifier;
+            int existingIndex = IndexForIdentifier(identifier);
+            if(existingIndex != -1) throw new ArgumentException("Resource '" + identifier + "' already exists!");
+            
+            Resources.Add(resource);
+            Generation++;
+        }
+
+        public void Unload() {
             Generation++;
         }
 
@@ -92,9 +110,8 @@ namespace FoldEngine.Resources {
         public void Deserialize(LoadOperation reader) {
             reader.ReadCompound(c => {
                 foreach(string identifier in c.MemberNames) {
-                    T newT = Create(identifier);
                     c.StartReadMember(identifier);
-                    GenericSerializer.Deserialize(newT, reader);
+                    Create(identifier, reader);
                 }
             });
         }
@@ -106,13 +123,13 @@ namespace FoldEngine.Resources {
         }
     }
 
-    public struct ResourceLocation {
+    public struct ResourceIdentifier {
         [DoNotSerialize]
         public string Identifier;
         [DoNotSerialize]
         public CachedValue<int> IndexIntoCollection;
 
-        public ResourceLocation(string identifier) {
+        public ResourceIdentifier(string identifier) {
             Identifier = identifier;
             IndexIntoCollection = default;
         }
