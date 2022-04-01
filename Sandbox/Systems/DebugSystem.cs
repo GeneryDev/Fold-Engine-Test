@@ -10,6 +10,7 @@ using FoldEngine.Graphics;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Physics;
+using FoldEngine.Rendering;
 using FoldEngine.Scenes;
 using FoldEngine.Serialization;
 using FoldEngine.Systems;
@@ -82,6 +83,12 @@ namespace Sandbox.Systems {
                         soundInstance.Pan = MathHelper.Clamp(moveX, -1, 1);
                         soundInstance.PlayOnce();
                         physics.ApplyForce(Vector2.UnitY * 8 * physics.Mass,default, ForceMode.Instant);
+
+                        long entityId = _livingComponents.GetEntityId();
+                        
+                        Owner.Resources.Load<TestResource>(ref _livingComponents.GetComponent().Resource2, r => {
+                            Owner.Components.GetComponent<MeshRenderable>(entityId).Color = ((TestResource) r).color;
+                        });
                     }
 
                     _moveForce = default;
@@ -183,6 +190,7 @@ namespace Sandbox.Systems {
             _livingComponents.Reset();
             while(_livingComponents.Next()) {
                 Owner.Resources.KeepLoaded<TestResource>(ref _livingComponents.GetComponent().Resource);
+                Owner.Resources.KeepLoaded<TestResource>(ref _livingComponents.GetComponent().Resource2);
             }
         }
 

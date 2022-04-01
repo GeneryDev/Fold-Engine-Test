@@ -15,6 +15,7 @@ namespace Sandbox.Components
         public bool Grounded;
 
         public ResourceIdentifier Resource;
+        public ResourceIdentifier Resource2;
 
         public override string ToString()
         {

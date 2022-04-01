@@ -59,6 +59,15 @@ namespace FoldEngine.Resources {
         private void StartLoading<T>(ResourceLoadTask task) where T : Resource, new() {
             ThreadPool.QueueUserWorkItem(_ => Load<T>(task));
         }
+        
+        //MAIN THREAD
+        public void AddLoadCallback<T>(string identifier, ResourceCollections.OnResourceLoaded callback) where T : Resource, new() {
+            foreach(ResourceLoadTask task in _activeTasks) {
+                if(task.Type == typeof(T) && task.Identifier == identifier) {
+                    task.Callbacks.Add(callback);
+                }
+            }
+        }
 
         //WORK THREAD
         private void Load<T>(ResourceLoadTask task) where T : Resource, new() {
@@ -67,6 +76,7 @@ namespace FoldEngine.Resources {
                 reader = new LoadOperation(Data.In.Stream(task.Path));
                 var resource = new T {Identifier = task.Identifier};
                 GenericSerializer.Deserialize(resource, reader);
+                Thread.Sleep(1000);
                 reader.Close();
 
                 task.CompletedResource = resource;
@@ -114,11 +124,16 @@ namespace FoldEngine.Resources {
             task.Type = null;
             task.CompletedResource = null;
             task.Status = ResourceStatus.Inactive;
+            task.Callbacks.Clear();
         }
 
         //MAIN THREAD
         private void TaskCompleted(ResourceLoadTask task) {
             _resources.Insert(task.CompletedResource);
+
+            foreach(ResourceCollections.OnResourceLoaded callback in task.Callbacks) {
+                callback(task.CompletedResource);
+            }
             
             task.Status = ResourceStatus.Inactive;
         }
@@ -127,6 +142,7 @@ namespace FoldEngine.Resources {
         private void TaskError(ResourceLoadTask task) {
             task.Status = ResourceStatus.Inactive;
         }
+
     }
 
     public class ResourceLoadTask {
@@ -135,6 +151,7 @@ namespace FoldEngine.Resources {
         public string Path;
         public Resource CompletedResource;
         public ResourceStatus Status;
+        public readonly List<ResourceCollections.OnResourceLoaded> Callbacks = new List<ResourceCollections.OnResourceLoaded>();
     }
 
     public enum ResourceStatus {
