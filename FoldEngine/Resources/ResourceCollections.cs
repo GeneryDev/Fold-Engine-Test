@@ -144,18 +144,26 @@ namespace FoldEngine.Resources {
             // }
         }
 
-        public void Update() {
-            
+        private long _lastPollTime = 0;
+        private void PollResources() {
             _pollGeneration++;
+            _lastPollTime = Time.Now;
 
             if(_core.ActiveScene != null) {
                 foreach(GameSystem sys in _core.ActiveScene.Systems.AllSystems) {
                     sys.PollResources();
                 }
-            }
+            }            
             
             foreach(IResourceCollection collection in _collections.Values) {
                 collection.UnloadUnused(_pollGeneration);
+            }
+        }
+
+        public void Update() {
+
+            if(Time.Now > _lastPollTime + 5_000) {
+                PollResources();
             }
             
             
