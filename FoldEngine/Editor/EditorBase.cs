@@ -31,7 +31,7 @@ namespace FoldEngine.Editor {
         }
 
         internal override void Initialize() {
-            Environment = new EditorEnvironment(Owner);
+            Environment = new EditorEnvironment(Scene);
 
             Environment.AddView<EditorToolbarView>(Environment.NorthPanel);
             Environment.AddView<EditorHierarchyView>(Environment.WestPanel);
@@ -46,7 +46,7 @@ namespace FoldEngine.Editor {
         }
 
         public override void OnInput() {
-            Environment.Input(Owner.Core.InputUnit);
+            Environment.Input(Scene.Core.InputUnit);
         }
 
         public override void OnUpdate() {
@@ -57,8 +57,8 @@ namespace FoldEngine.Editor {
             Environment.Render(renderer, renderer.RootGroup["editor_gui"], renderer.RootGroup["editor_gui_overlay"]);
 
             foreach(long entityId in EditingEntity) {
-                if(Owner.Components.HasComponent<Transform>(entityId)) {
-                    Entity entity = new Entity(Owner, entityId);
+                if(Scene.Components.HasComponent<Transform>(entityId)) {
+                    Entity entity = new Entity(Scene, entityId);
                 
                     LevelRenderer2D.DrawOutline(entity);
                     ColliderGizmoRenderer.DrawColliderGizmos(entity);

@@ -30,7 +30,7 @@ namespace Sandbox.Systems {
         private ComponentIterator<Living> _livingComponents;
 
         internal override void Initialize() {
-            _livingComponents = Owner.Components.CreateIterator<Living>(IterationFlags.None);
+            _livingComponents = Scene.Components.CreateIterator<Living>(IterationFlags.None);
         }
 
         private Vector2 _previousMouseWorldPos;
@@ -55,24 +55,24 @@ namespace Sandbox.Systems {
         }
 
         public override void OnInput() {
-            float moveX = Owner.Core.InputUnit.Players[0].Get<AnalogAction>("movement.axis.x");
-            if(Owner.Core.InputUnit.Players[0].Get<ButtonAction>("movement.sprint").Down) {
+            float moveX = Scene.Core.InputUnit.Players[0].Get<AnalogAction>("movement.axis.x");
+            if(Scene.Core.InputUnit.Players[0].Get<ButtonAction>("movement.sprint").Down) {
                 moveX *= 2;
             }
             
-            if(Owner.Core.InputUnit.Players[0].Get<ChangeAction>("editor.zoom.in")) {
-                Owner.MainCameraTransform.LocalScale /= 1.2f;
-                Console.WriteLine("Scale is now: " + Owner.MainCameraTransform.LocalScale.X);
-            } else if(Owner.Core.InputUnit.Players[0].Get<ChangeAction>("editor.zoom.out")) {
-                Owner.MainCameraTransform.LocalScale *= 1.2f;
-                Console.WriteLine("Scale is now: " + Owner.MainCameraTransform.LocalScale.X);
+            if(Scene.Core.InputUnit.Players[0].Get<ChangeAction>("editor.zoom.in")) {
+                Scene.MainCameraTransform.LocalScale /= 1.2f;
+                Console.WriteLine("Scale is now: " + Scene.MainCameraTransform.LocalScale.X);
+            } else if(Scene.Core.InputUnit.Players[0].Get<ChangeAction>("editor.zoom.out")) {
+                Scene.MainCameraTransform.LocalScale *= 1.2f;
+                Console.WriteLine("Scale is now: " + Scene.MainCameraTransform.LocalScale.X);
             }
 
 
-            if(Owner.Core.InputUnit.Players[0].Get<ButtonAction>("quicksave").Consume()) {
-                Owner.Core.CommandQueue.Enqueue(new SaveSceneCommand(Path.ChangeExtension(Path.Combine(TargetDirectory, "scene"), Scene.Extension)));
-            } else if(Owner.Core.InputUnit.Players[0].Get<ButtonAction>("quickload").Consume()) {
-                Owner.Core.CommandQueue.Enqueue(new LoadSceneCommand(Path.ChangeExtension(Path.Combine(TargetDirectory, "scene"), Scene.Extension)));
+            if(Scene.Core.InputUnit.Players[0].Get<ButtonAction>("quicksave").Consume()) {
+                Scene.Core.CommandQueue.Enqueue(new SaveSceneCommand(Path.ChangeExtension(Path.Combine(TargetDirectory, "scene"), Scene.Extension)));
+            } else if(Scene.Core.InputUnit.Players[0].Get<ButtonAction>("quickload").Consume()) {
+                Scene.Core.CommandQueue.Enqueue(new LoadSceneCommand(Path.ChangeExtension(Path.Combine(TargetDirectory, "scene"), Scene.Extension)));
             }
             
             _livingComponents.Reset();
@@ -81,7 +81,7 @@ namespace Sandbox.Systems {
                 if(_livingComponents.HasCoComponent<Physics>()) {
                     // Console.WriteLine("living + physics component");
                     ref var physics = ref _livingComponents.GetCoComponent<Physics>();
-                    if(_livingComponents.GetComponent().Grounded && Owner.Core.InputUnit.Players[0].Get<ButtonAction>("movement.jump").Consume()) {
+                    if(_livingComponents.GetComponent().Grounded && Scene.Core.InputUnit.Players[0].Get<ButtonAction>("movement.jump").Consume()) {
                         // SoundInstance soundInstance = Owner.Core.AudioUnit.CreateInstance("Audio/failure");
                         // soundInstance.Pan = MathHelper.Clamp(moveX, -1, 1);
                         // soundInstance.PlayOnce();
@@ -93,14 +93,14 @@ namespace Sandbox.Systems {
 
                         long entityId = _livingComponents.GetEntityId();
                         
-                        Owner.Resources.Load<Sound>(ref _livingComponents.GetComponent().JumpSound, r => {
+                        Scene.Resources.Load<Sound>(ref _livingComponents.GetComponent().JumpSound, r => {
                             Console.WriteLine($"Sound: {r}");
-                            SoundInstance soundInstance = Owner.Core.AudioUnit.CreateInstance((Sound)r);
+                            SoundInstance soundInstance = Scene.Core.AudioUnit.CreateInstance((Sound)r);
                             soundInstance.PlayOnce();
                         });
                         
-                        Owner.Resources.Load<TestResource>(ref _livingComponents.GetComponent().Resource2, r => {
-                            Owner.Components.GetComponent<MeshRenderable>(entityId).Color = ((TestResource) r).Color;
+                        Scene.Resources.Load<TestResource>(ref _livingComponents.GetComponent().Resource2, r => {
+                            Scene.Components.GetComponent<MeshRenderable>(entityId).Color = ((TestResource) r).Color;
                         });
                     }
 
@@ -187,9 +187,9 @@ namespace Sandbox.Systems {
             _livingComponents.Reset();
             while(_livingComponents.Next()) {
                 IRenderingLayer layer = renderer.WorldLayer;
-                var resource = Owner.Resources.Get<TestResource>(ref _livingComponents.GetComponent().Resource);
+                var resource = Scene.Resources.Get<TestResource>(ref _livingComponents.GetComponent().Resource);
                 Color? color = resource?.Color;
-                bool desaturated = Owner.Core.ResourceIndex.GroupContains("#desaturated", resource);
+                bool desaturated = Scene.Core.ResourceIndex.GroupContains("#desaturated", resource);
                 layer.Surface.Draw(new DrawTriangleInstruction(
                     renderer.WhiteTexture,
                     new Vector2(0, 0), new Vector2(desaturated ? 20 : 10, 0),
@@ -203,8 +203,8 @@ namespace Sandbox.Systems {
 
         public override void SubscribeToEvents() {
             Subscribe((ref CollisionEvent collision) => {
-                if(Owner.Components.HasComponent<Living>(collision.First) && Vector2.Dot(collision.Normal, Vector2.UnitY) > 0.5f) {
-                    Owner.Components.GetComponent<Living>(collision.First).Grounded = true;
+                if(Scene.Components.HasComponent<Living>(collision.First) && Vector2.Dot(collision.Normal, Vector2.UnitY) > 0.5f) {
+                    Scene.Components.GetComponent<Living>(collision.First).Grounded = true;
                     _lastNormal = collision.Normal;
                 }
             });

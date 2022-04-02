@@ -29,9 +29,9 @@ namespace FoldEngine.Rendering {
 
             _cameras.Reset();
 
-            if(Owner.EditorComponents != null) {
+            if(Scene.EditorComponents != null) {
                 anyCamera = true;
-                RenderCamera(Owner.EditorComponents.EditorCamera, Owner.EditorComponents.EditorTransform, renderer, false);
+                RenderCamera(Scene.EditorComponents.EditorCamera, Scene.EditorComponents.EditorTransform, renderer, false);
             } else {
                 while(_cameras.Next()) {
                     anyCamera = true;
@@ -74,9 +74,9 @@ namespace FoldEngine.Rendering {
                 0, 0, 0, 1
             );
 
-            Owner.GizmoTransformMatrix = viewMatrix;
+            Scene.GizmoTransformMatrix = viewMatrix;
             if(setMainCameraId) {
-                Owner.MainCameraId = _cameras.GetEntityId();
+                Scene.MainCameraId = _cameras.GetEntityId();
             }
 
             IRenderingLayer layer = !string.IsNullOrEmpty(camera.RenderToLayer)
@@ -100,7 +100,7 @@ namespace FoldEngine.Rendering {
 
                 ITexture texture = renderer.Textures[meshRenderable.TextureIdentifier];
 
-                foreach(Mesh.Triangle triangle in Owner.Resources.Get<Mesh>(ref meshRenderable.MeshIdentifier, Mesh.Empty).GetTriangles()) {
+                foreach(Mesh.Triangle triangle in Scene.Resources.Get<Mesh>(ref meshRenderable.MeshIdentifier, Mesh.Empty).GetTriangles()) {
                     Vector2 vertexA = triangle.A.Position.ToVector2().ApplyMatrixTransform(meshRenderable.Matrix);
                     Vector2 vertexB = triangle.B.Position.ToVector2().ApplyMatrixTransform(meshRenderable.Matrix);
                     Vector2 vertexC = triangle.C.Position.ToVector2().ApplyMatrixTransform(meshRenderable.Matrix);

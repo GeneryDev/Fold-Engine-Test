@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Systems {
     public abstract class GameSystem {
-        public Scene Owner { get; internal set; }
+        public Scene Scene { get; internal set; }
 
         private readonly GameSystemAttribute _attribute;
         public string SystemName => _attribute.SystemName;
@@ -32,15 +32,15 @@ namespace FoldEngine.Systems {
         public virtual void PollResources() {}
 
         protected MultiComponentIterator CreateComponentIterator(params Type[] watchingTypes) {
-            return Owner.Components.CreateMultiIterator(watchingTypes);
+            return Scene.Components.CreateMultiIterator(watchingTypes);
         }
 
         protected ComponentIterator CreateComponentIterator(Type watchingType, IterationFlags flags) {
-            return Owner.Components.CreateIterator(watchingType, flags);
+            return Scene.Components.CreateIterator(watchingType, flags);
         }
 
         protected ComponentIterator<T> CreateComponentIterator<T>(IterationFlags flags) where T : struct {
-            return Owner.Components.CreateIterator<T>(flags);
+            return Scene.Components.CreateIterator<T>(flags);
         }
 
         internal virtual void Initialize() { }
@@ -56,7 +56,7 @@ namespace FoldEngine.Systems {
         }
         
         protected void Subscribe<T>(Event.EventListener<T> action) where T : struct {
-            _eventUnsubscribers.Add(Owner.Events.Subscribe(action));
+            _eventUnsubscribers.Add(Scene.Events.Subscribe(action));
         }
         
         

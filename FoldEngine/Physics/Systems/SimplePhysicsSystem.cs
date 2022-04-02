@@ -130,7 +130,7 @@ namespace FoldEngine.Physics {
                                         }
                                         //Draw gizmos
                                         if(DrawCollisionGizmos) {
-                                            Owner.DrawGizmo(current.Position, next.Position, Color.Fuchsia, zOrder: 1);
+                                            Scene.DrawGizmo(current.Position, next.Position, Color.Fuchsia, zOrder: 1);
                                         }
                                     }
 
@@ -155,12 +155,12 @@ namespace FoldEngine.Physics {
                                 if(!largestCrossSection.Equals(float.NaN) && totalSurfaceNormalFaceLength > 0) {
                                     Complex surfaceNormalComplex = surfaceNormalSum / totalSurfaceNormalFaceLength;
                                     
-                                    Owner.Events.Invoke(new CollisionEvent(_physicsObjects.GetEntityId(), _colliders.GetEntityId(), surfaceNormalComplex));
-                                    Owner.Events.Invoke(new CollisionEvent(_colliders.GetEntityId(), _physicsObjects.GetEntityId(), -(Vector2)surfaceNormalComplex));
+                                    Scene.Events.Invoke(new CollisionEvent(_physicsObjects.GetEntityId(), _colliders.GetEntityId(), surfaceNormalComplex));
+                                    Scene.Events.Invoke(new CollisionEvent(_colliders.GetEntityId(), _physicsObjects.GetEntityId(), -(Vector2)surfaceNormalComplex));
 
                                     if(!physics.Static) {
                                         if(DrawCollisionGizmos) {
-                                            Owner.DrawGizmo(tempNormalStart, tempNormalStart + surfaceNormalSum / totalSurfaceNormalFaceLength, Color.Gold);
+                                            Scene.DrawGizmo(tempNormalStart, tempNormalStart + surfaceNormalSum / totalSurfaceNormalFaceLength, Color.Gold);
                                         }
 
                                         physics.ContactDisplacement += surfaceNormalSum / totalSurfaceNormalFaceLength * largestCrossSection;

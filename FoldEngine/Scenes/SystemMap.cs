@@ -78,7 +78,7 @@ namespace FoldEngine.Scenes
                 _renderSystems.Add(sys);
             }
 
-            sys.Owner = _owner;
+            sys.Scene = _owner;
             sys.Initialize();
             sys.SubscribeToEvents();
         }
@@ -91,7 +91,7 @@ namespace FoldEngine.Scenes
             _renderSystems.Remove(sys);
 
             sys.UnsubscribeFromEvents();
-            sys.Owner = null;
+            sys.Scene = null;
         }
 
         internal void Flush() {

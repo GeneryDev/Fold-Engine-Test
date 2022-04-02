@@ -13,7 +13,7 @@ namespace FoldEngine.Physics {
         private ComponentIterator<Collider> _colliders;
 
         internal override void Initialize() {
-            _colliders = Owner.Components.CreateIterator<Collider>(IterationFlags.None);
+            _colliders = Scene.Components.CreateIterator<Collider>(IterationFlags.None);
         }
 
         public override void OnRender(IRenderingUnit renderer) {
@@ -22,7 +22,7 @@ namespace FoldEngine.Physics {
                 Transform transform = _colliders.GetCoComponent<Transform>();
                 ref Collider collider = ref _colliders.GetComponent();
                 
-                DrawColliderGizmos(Owner, transform, ref collider);
+                DrawColliderGizmos(Scene, transform, ref collider);
             }
         }
 

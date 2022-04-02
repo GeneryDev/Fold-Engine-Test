@@ -75,7 +75,7 @@ namespace FoldEngine.Physics {
 
                                     for(int j = 0; j < intersections[i].Length; j++) {
                                         Polygon.PolygonIntersectionVertex vertex = intersections[i][j];
-                                        Owner.DrawGizmo(vertex.Position, intersections[i][(j + 1) % intersections[i].Length].Position, Color.Gray);
+                                        Scene.DrawGizmo(vertex.Position, intersections[i][(j + 1) % intersections[i].Length].Position, Color.Gray);
 
                                         if(vertex.IsFromA && !vertex.IsFromB) {
                                             Vector2 projectedNextVertexPosition =
@@ -90,7 +90,7 @@ namespace FoldEngine.Physics {
                                             verticesCountedForVelocity++;
                                             verticesCountedForTotalContactVertexVelocity++;
 
-                                            Owner.DrawGizmo(vertex.Position, vertex.Position + vertexVelocity, Color.Blue);
+                                            Scene.DrawGizmo(vertex.Position, vertex.Position + vertexVelocity, Color.Blue);
                                         }
                                     }
 
@@ -148,8 +148,8 @@ namespace FoldEngine.Physics {
                                 
                                 if(totalNormals != 0 && normalSum.Length() > 0) {
                                     Vector2 surfaceNormal = (normalSum / totalNormals).Normalized();
-                                    Owner.Events.Invoke(new CollisionEvent(_physicsObjects.GetEntityId(), _colliders.GetEntityId(), surfaceNormal));
-                                    Owner.Events.Invoke(new CollisionEvent(_colliders.GetEntityId(), _physicsObjects.GetEntityId(), -surfaceNormal));
+                                    Scene.Events.Invoke(new CollisionEvent(_physicsObjects.GetEntityId(), _colliders.GetEntityId(), surfaceNormal));
+                                    Scene.Events.Invoke(new CollisionEvent(_colliders.GetEntityId(), _physicsObjects.GetEntityId(), -surfaceNormal));
                                     // Console.WriteLine($"surfaceNormal = {surfaceNormal}");
                                     // Console.WriteLine($"physics.Velocity (before) = {physics.Velocity}");
                                     Vector2 expectedVelocity =
