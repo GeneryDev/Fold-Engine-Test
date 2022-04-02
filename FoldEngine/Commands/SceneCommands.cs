@@ -32,7 +32,7 @@ namespace FoldEngine.Commands {
         public void Execute(IGameCore core) {
             var loadOp = new LoadOperation(SourcePath);
             
-            // loadOp.Options.Set(DeserializeClearScene.Instance, true);
+            loadOp.Options.Set(DeserializeClearScene.Instance, true);
             loadOp.Options.Set(DeserializeRemapIds.Instance, new EntityIdRemapper(core.ActiveScene));
             
             core.ActiveScene.Load(loadOp);
