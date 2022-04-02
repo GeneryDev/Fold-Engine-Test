@@ -103,7 +103,7 @@ namespace FoldEngine.Components {
 
         public ref T Create(long entityId) {
             if((int)entityId < MinId || (int)entityId >= MaxId) {
-                Console.WriteLine("Resizing ComponentSet to fit new entity ID");
+                // Console.WriteLine("Resizing ComponentSet to fit new entity ID");
                 //Resize sparse array to fit new entity ID
                 int newMinId = Math.Min(MinId, (int)entityId);
                 int newMaxId = Math.Max(MaxId, (int)entityId + 1);

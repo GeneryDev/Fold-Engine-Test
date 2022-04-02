@@ -70,22 +70,16 @@ namespace FoldEngine.Resources {
         }
 
         //WORK THREAD
-        private void Load<T>(ResourceLoadTask task) where T : Resource, new() {
-            LoadOperation reader = null;
+        private static void Load<T>(ResourceLoadTask task) where T : Resource, new() {
             try {
-                reader = new LoadOperation(Data.In.Stream(task.Path));
                 var resource = new T {Identifier = task.Identifier};
-                GenericSerializer.Deserialize(resource, reader);
-                // Thread.Sleep(1000);
-                reader.Close();
+                resource.DeserializeResource(Data.In.Stream(task.Path));
 
                 task.CompletedResource = resource;
                 task.Status = ResourceStatus.Complete;
             } catch(Exception x) {
                 Console.WriteLine("Could not load resource '" + task.Identifier + "': " + x.Message);
                 task.Status = ResourceStatus.Error;
-            } finally {
-                reader?.Close();
             }
         }
 

@@ -13,22 +13,24 @@ namespace FoldEngine.Resources {
             Console.WriteLine("Resources available: ");
             
             foreach(Type type in Resource.GetAllTypes()) {
+                ResourceAttribute resourceAttribute = Resource.AttributeOf(type);
+                
                 Console.WriteLine($"  {type}:");
                 Dictionary<string, string> paths = _identifierToPathMap[type] = new Dictionary<string, string>();
-                Update(paths, Path.Combine("resources", Resource.AttributeOf(type).DirectoryName));
+                Update(paths, Path.Combine("resources", resourceAttribute.DirectoryName), resourceAttribute);
                 foreach(KeyValuePair<string, string> id in paths) {
                     Console.WriteLine($"    {id.Key} at {id.Value}");
                 }
             }
         }
 
-        private void Update(Dictionary<string, string> paths, string path, string relativeTo = null) {
+        private void Update(Dictionary<string, string> paths, string path, ResourceAttribute resourceAttribute, string relativeTo = null) {
             relativeTo = relativeTo ?? path;
             if(Data.In.IsDirectory(path)) {
                 foreach(string entry in Data.In.ListEntries(path)) {
-                    Update(paths, Path.Combine(path, Path.GetFileName(entry)), relativeTo);
+                    Update(paths, Path.Combine(path, Path.GetFileName(entry)), resourceAttribute, relativeTo);
                 }
-            } else if(Path.GetExtension(path) == "." + Resource.Extension) {
+            } else if(Path.GetExtension(path) == "." + resourceAttribute.Extension) {
                 string id = Path.ChangeExtension(path.Substring(relativeTo.Length+1), null)
                     .Replace(Path.DirectorySeparatorChar, '/');
                 

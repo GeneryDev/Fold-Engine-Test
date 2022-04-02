@@ -16,6 +16,8 @@ namespace Sandbox.Components
 
         public ResourceIdentifier Resource;
         public ResourceIdentifier Resource2;
+        
+        public ResourceIdentifier JumpSound;
 
         public override string ToString()
         {

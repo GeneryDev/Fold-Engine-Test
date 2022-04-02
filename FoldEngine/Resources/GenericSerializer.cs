@@ -5,7 +5,7 @@ using FoldEngine.Scenes;
 using FoldEngine.Serialization;
 
 namespace FoldEngine.Resources {
-    public class GenericSerializer {
+    public static class GenericSerializer {
         public static void Serialize(object obj, SaveOperation writer) {
             if(obj is ISelfSerializer serializer) {
                 serializer.Serialize(writer);
@@ -32,7 +32,7 @@ namespace FoldEngine.Resources {
 
             object boxed = obj;
             reader.ReadCompound(c => {
-                foreach(FieldInfo fieldInfo in typeof(T).GetFields()) {
+                foreach(FieldInfo fieldInfo in obj.GetType().GetFields()) {
                     if(fieldInfo.IsStatic) continue;
                     if(c.HasMember(fieldInfo.Name)) {
                         object value = DeserializeComponentField(fieldInfo.Name, fieldInfo, reader, c);

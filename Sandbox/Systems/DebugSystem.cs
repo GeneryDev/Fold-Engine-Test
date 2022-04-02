@@ -79,15 +79,20 @@ namespace Sandbox.Systems {
                     // Console.WriteLine("living + physics component");
                     ref var physics = ref _livingComponents.GetCoComponent<Physics>();
                     if(_livingComponents.GetComponent().Grounded && Owner.Core.InputUnit.Players[0].Get<ButtonAction>("movement.jump").Consume()) {
-                        SoundInstance soundInstance = Owner.Core.AudioUnit.CreateInstance("Audio/failure");
-                        soundInstance.Pan = MathHelper.Clamp(moveX, -1, 1);
-                        soundInstance.PlayOnce();
+                        // SoundInstance soundInstance = Owner.Core.AudioUnit.CreateInstance("Audio/failure");
+                        // soundInstance.Pan = MathHelper.Clamp(moveX, -1, 1);
+                        // soundInstance.PlayOnce();
                         physics.ApplyForce(Vector2.UnitY * 8 * physics.Mass,default, ForceMode.Instant);
 
                         long entityId = _livingComponents.GetEntityId();
                         
+                        Owner.Resources.Load<Sound>(ref _livingComponents.GetComponent().JumpSound, r => {
+                            Console.WriteLine($"Sound: {r}");
+                            Owner.Core.AudioUnit.CreateInstance((Sound)r).PlayOnce();
+                        });
+                        
                         Owner.Resources.Load<TestResource>(ref _livingComponents.GetComponent().Resource2, r => {
-                            Owner.Components.GetComponent<MeshRenderable>(entityId).Color = ((TestResource) r).color;
+                            Owner.Components.GetComponent<MeshRenderable>(entityId).Color = ((TestResource) r).Color;
                         });
                     }
 
@@ -174,7 +179,7 @@ namespace Sandbox.Systems {
             _livingComponents.Reset();
             while(_livingComponents.Next()) {
                 IRenderingLayer layer = renderer.WorldLayer;
-                Color? color = Owner.Resources.Get<TestResource>(ref _livingComponents.GetComponent().Resource)?.color;
+                Color? color = Owner.Resources.Get<TestResource>(ref _livingComponents.GetComponent().Resource)?.Color;
                 layer.Surface.Draw(new DrawTriangleInstruction(
                     renderer.WhiteTexture,
                     new Vector2(0, 0), new Vector2(10, 0),

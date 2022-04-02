@@ -53,8 +53,8 @@ namespace Woofer {
 
         public void LoadContent() {
             Console.WriteLine("Loading Core Content");
-            AudioUnit.Load("Audio/failure");
-            AudioUnit.Load("Audio/music");
+            // AudioUnit.Load("Audio/failure");
+            // AudioUnit.Load("Audio/music");
         }
 
         public void Input() {

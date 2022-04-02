@@ -60,7 +60,7 @@ namespace FoldEngine.Resources {
             int indexIntoCollection = identifier.IndexIntoCollection.Get(Generation) - 1;
             if(indexIntoCollection != -1) {
                 T resource = Resources[indexIntoCollection];
-                resource.LastAccessTime = Time.Now;
+                resource.Access();
                 return resource;
             }
 
@@ -77,10 +77,9 @@ namespace FoldEngine.Resources {
         public T Create(string identifier, LoadOperation reader = null) {
             int existingIndex = IndexForIdentifier(identifier);
             if(existingIndex != -1) throw new ArgumentException("Resource '" + identifier + "' already exists!");
-            var newT = new T();
-            newT.Identifier = identifier;
+            var newT = new T {Identifier = identifier};
             if(reader != null) {
-                GenericSerializer.Deserialize(newT, reader);
+                newT.DeserializeResource(reader);
             }
             Resources.Add(newT);
             InvalidateCaches();
@@ -96,6 +95,7 @@ namespace FoldEngine.Resources {
             for(int i = 0; i < Resources.Count; i++) {
                 T resource = Resources[i];
                 if(Time.Now >= resource.LastAccessTime + unloadTime) {
+                    resource.Unload();
                     Console.WriteLine("UNLOADING UNUSED RESOURCE " + resource.Identifier);
                     Resources.RemoveAt(i);
                     i--;
@@ -121,7 +121,7 @@ namespace FoldEngine.Resources {
             writer.WriteCompound((ref SaveOperation.Compound c) => {
                 foreach(T entry in Resources) {
                     c.WriteMember(entry.Identifier, () => {
-                        GenericSerializer.Serialize(entry, writer);
+                        entry.SerializeResource(writer);
                     });
                 }
             });
@@ -156,8 +156,6 @@ namespace FoldEngine.Resources {
     }
     
     public abstract class Resource {
-        public const string Extension = "foldresource";
-        
         public string Identifier { get; protected internal set; }
         protected internal long LastAccessTime = Time.Now;
         
@@ -172,23 +170,51 @@ namespace FoldEngine.Resources {
             return (IResourceCollection) Constructors[resourceType].Invoke(new object[0]);
         }
 
+        public virtual void Access() {
+            LastAccessTime = Time.Now;
+        }
+
+        public virtual void Unload() {
+        }
+
 #if DEBUG
         ~Resource() {
             Console.WriteLine("Finalized resource " + Identifier);
         }
 #endif
 
+        public virtual void SerializeResource(SaveOperation writer) {
+            GenericSerializer.Serialize(this, writer);
+        }
+
+        public virtual void DeserializeResource(LoadOperation reader) {
+            GenericSerializer.Deserialize(this, reader);
+        }
+
+        public virtual void DeserializeResource(Stream stream) {
+            var reader = new LoadOperation(stream);
+            try {
+                GenericSerializer.Deserialize(this, reader);
+            } finally {
+                reader.Close();
+            }
+        }
+
         public void Save() {
-            string resourceFolder = Path.Combine("resources", AttributeOf(GetType()).DirectoryName);
+            ResourceAttribute resourceAttribute = AttributeOf(GetType());
+            string resourceFolder = Path.Combine("resources", resourceAttribute.DirectoryName);
             string path = Path.Combine(resourceFolder, Identifier);
-            path = Path.ChangeExtension(path, Extension);
+            path = Path.ChangeExtension(path, resourceAttribute.Extension);
             Save(path);
         }
 
         public void Save(string path) {
             var writer = new SaveOperation(Data.Out.Stream(path));
-            GenericSerializer.Serialize(this, writer);
-            writer.Close();            
+            try {
+                SerializeResource(writer);
+            } finally {
+                writer.Close();            
+            }
         }
         
         private static Dictionary<Type, ResourceAttribute> _attributes;
@@ -222,11 +248,13 @@ namespace FoldEngine.Resources {
 
     public sealed class ResourceAttribute : Attribute {
         public readonly string DirectoryName;
+        public readonly string Extension;
         public readonly int UnloadTime; //ms
 
-        public ResourceAttribute(string directoryName, int unloadTime = 5000) {
+        public ResourceAttribute(string directoryName, int unloadTime = 5000, string extension = "foldresource") {
             DirectoryName = directoryName;
             UnloadTime = unloadTime;
+            Extension = extension;
         }
     }
 }

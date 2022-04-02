@@ -1,19 +1,43 @@
 ﻿using System;
+using System.IO;
 using FoldEngine.Interfaces;
+using FoldEngine.Resources;
+using FoldEngine.Serialization;
 using Microsoft.Xna.Framework.Audio;
 
 namespace FoldEngine.Audio {
+    [Resource(directoryName: "sound", extension: "wav")]
+    public class Sound : Resource {
+        internal SoundEffect Effect;
+
+        public override void Unload() {
+            Effect.Dispose();
+        }
+
+        public override void DeserializeResource(Stream stream) {
+            Effect = SoundEffect.FromStream(stream);
+        }
+
+        public override void DeserializeResource(LoadOperation reader) {
+            throw new InvalidOperationException("Sound Effects cannot be deserialized");
+        }
+
+        public override void SerializeResource(SaveOperation writer) {
+            throw new InvalidOperationException("Sound Effects cannot be serialized");
+        }
+    }
+
     public class SoundInstance {
         private readonly AudioUnit _unit;
         private readonly SoundEffectInstance _instance;
-        public readonly string Name;
+        private readonly Sound _sound;
         internal bool FreeOnStop = false;
         internal bool InUse = false;
 
-        public SoundInstance(AudioUnit unit, SoundEffectInstance instance, string name) {
+        public SoundInstance(AudioUnit unit, Sound sound) {
             _unit = unit;
-            _instance = instance;
-            Name = name;
+            _sound = sound;
+            _instance = sound.Effect.CreateInstance();
             // Console.WriteLine($"Created SoundInstance {name}");
         }
 
@@ -68,6 +92,10 @@ namespace FoldEngine.Audio {
         }
 
         public void Update() {
+            if(Playing) {
+                _sound.Access();
+            }
+            
             if(FreeOnStop && !Playing) {
                 Free();
             }

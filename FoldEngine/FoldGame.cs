@@ -46,8 +46,6 @@ namespace FoldEngine {
             _core.RenderingUnit.Effects = new EffectManager(Content);
             _core.RenderingUnit.Fonts = new FontManager(_core.RenderingUnit.Textures);
 
-            _core.AudioUnit._content = Content;
-
             _core.Initialize();
             
             (Graphics.PreferredBackBufferWidth, Graphics.PreferredBackBufferHeight) = _core.RenderingUnit.WindowSize;

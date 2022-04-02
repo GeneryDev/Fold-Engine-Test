@@ -1,9 +1,11 @@
 ﻿using FoldEngine.Resources;
+using FoldEngine.Serialization;
 using Microsoft.Xna.Framework;
 
 namespace EntryProject.Resources {
     [Resource("test")]
     public class TestResource : Resource {
-        public Color color;
+        [FormerlySerializedAs("color")]
+        public Color Color;
     }
 }
