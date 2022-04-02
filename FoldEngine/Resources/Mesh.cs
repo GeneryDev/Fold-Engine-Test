@@ -388,6 +388,6 @@ namespace FoldEngine.Resources {
             });
         }
         
-        public static readonly Mesh Empty = new Mesh(0);
+        public static readonly Mesh Empty = new Mesh(0) {Identifier = "__EMPTY"};
     }
 }

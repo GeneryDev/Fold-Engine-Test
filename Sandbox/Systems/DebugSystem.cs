@@ -12,6 +12,7 @@ using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Physics;
 using FoldEngine.Rendering;
+using FoldEngine.Resources;
 using FoldEngine.Scenes;
 using FoldEngine.Serialization;
 using FoldEngine.Systems;
@@ -186,10 +187,12 @@ namespace Sandbox.Systems {
             _livingComponents.Reset();
             while(_livingComponents.Next()) {
                 IRenderingLayer layer = renderer.WorldLayer;
-                Color? color = Owner.Resources.Get<TestResource>(ref _livingComponents.GetComponent().Resource)?.Color;
+                var resource = Owner.Resources.Get<TestResource>(ref _livingComponents.GetComponent().Resource);
+                Color? color = resource?.Color;
+                bool desaturated = Owner.Core.ResourceIndex.GroupContains("#desaturated", resource);
                 layer.Surface.Draw(new DrawTriangleInstruction(
                     renderer.WhiteTexture,
-                    new Vector2(0, 0), new Vector2(10, 0),
+                    new Vector2(0, 0), new Vector2(desaturated ? 20 : 10, 0),
                     new Vector2(0, 10),
                     new Vector2(0, 0), new Vector2(1, 0),
                     new Vector2(0, 1),
