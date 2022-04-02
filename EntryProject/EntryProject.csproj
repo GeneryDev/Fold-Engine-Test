@@ -45,6 +45,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="ChaiFoxes.FMODAudio.Desktop, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\ChaiFoxes.FMODAudio.Desktop.2.0.0\lib\net452\ChaiFoxes.FMODAudio.Desktop.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="MonoGame.Framework">
       <HintPath>$(MonoGameInstallDirectory)\MonoGame\v3.0\Assemblies\DesktopGL\MonoGame.Framework.dll</HintPath>
     </Reference>
@@ -115,6 +119,54 @@
     <Content Include="..\data\**\*">
       <Link>data\%(RecursiveDir)/%(FileName)%(Extension)</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\fmod.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\fmodstudio.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\libfmod.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\libfmod.so.11">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\libfmod.so.11.22">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\libfmodstudio.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\libfmodstudio.so.11">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\libfmodstudio.so.11.22">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\fmod.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\fmodstudio.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\libfmod.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\libfmod.so.11">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\libfmod.so.11.22">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\libfmodstudio.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\libfmodstudio.so.11">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\libfmodstudio.so.11.22">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>

@@ -73,7 +73,7 @@ namespace FoldEngine.Resources {
         private static void Load<T>(ResourceLoadTask task) where T : Resource, new() {
             try {
                 var resource = new T {Identifier = task.Identifier};
-                resource.DeserializeResource(Data.In.Stream(task.Path));
+                resource.DeserializeResource(task.Path);
 
                 task.CompletedResource = resource;
                 task.Status = ResourceStatus.Complete;

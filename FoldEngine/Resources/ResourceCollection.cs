@@ -191,8 +191,8 @@ namespace FoldEngine.Resources {
             GenericSerializer.Deserialize(this, reader);
         }
 
-        public virtual void DeserializeResource(Stream stream) {
-            var reader = new LoadOperation(stream);
+        public virtual void DeserializeResource(string path) {
+            var reader = new LoadOperation(Data.In.Stream(path));
             try {
                 GenericSerializer.Deserialize(this, reader);
             } finally {
@@ -204,7 +204,7 @@ namespace FoldEngine.Resources {
             ResourceAttribute resourceAttribute = AttributeOf(GetType());
             string resourceFolder = Path.Combine("resources", resourceAttribute.DirectoryName);
             string path = Path.Combine(resourceFolder, Identifier);
-            path = Path.ChangeExtension(path, resourceAttribute.Extension);
+            path = Path.ChangeExtension(path, resourceAttribute.Extensions[0]);
             Save(path);
         }
 
@@ -248,13 +248,17 @@ namespace FoldEngine.Resources {
 
     public sealed class ResourceAttribute : Attribute {
         public readonly string DirectoryName;
-        public readonly string Extension;
+        public readonly string[] Extensions;
         public readonly int UnloadTime; //ms
 
-        public ResourceAttribute(string directoryName, int unloadTime = 5000, string extension = "foldresource") {
+        public ResourceAttribute(string directoryName, int unloadTime = 5000, params string[] extensions) {
             DirectoryName = directoryName;
             UnloadTime = unloadTime;
-            Extension = extension;
+            if(extensions == null || extensions.Length == 0) {
+                Extensions = new [] {"foldresource"};
+            } else {
+                Extensions = extensions;
+            }
         }
     }
 }

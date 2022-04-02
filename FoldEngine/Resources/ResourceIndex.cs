@@ -30,11 +30,17 @@ namespace FoldEngine.Resources {
                 foreach(string entry in Data.In.ListEntries(path)) {
                     Update(paths, Path.Combine(path, Path.GetFileName(entry)), resourceAttribute, relativeTo);
                 }
-            } else if(Path.GetExtension(path) == "." + resourceAttribute.Extension) {
-                string id = Path.ChangeExtension(path.Substring(relativeTo.Length+1), null)
-                    .Replace(Path.DirectorySeparatorChar, '/');
-                
-                paths[id] = path;
+            } else {
+                string extension = Path.GetExtension(path);
+                foreach(string expectedExtension in resourceAttribute.Extensions) {
+                    if(extension == "." + expectedExtension) {
+                        string id = Path.ChangeExtension(path.Substring(relativeTo.Length+1), null)
+                            .Replace(Path.DirectorySeparatorChar, '/');
+                    
+                        paths[id] = path;
+                        break;
+                    }
+                }
             }
         }
 

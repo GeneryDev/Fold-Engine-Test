@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using ChaiFoxes.FMODAudio;
 using EntryProject.Resources;
 using FoldEngine;
 using FoldEngine.Audio;
@@ -19,6 +20,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Sandbox.Components;
 using Mouse = Microsoft.Xna.Framework.Input.Mouse;
+using Sound = FoldEngine.Audio.Sound;
 
 namespace Sandbox.Systems {
     [GameSystem("sandbox:test", ProcessingCycles.Input | ProcessingCycles.FixedUpdate | ProcessingCycles.Render)]
@@ -83,12 +85,17 @@ namespace Sandbox.Systems {
                         // soundInstance.Pan = MathHelper.Clamp(moveX, -1, 1);
                         // soundInstance.PlayOnce();
                         physics.ApplyForce(Vector2.UnitY * 8 * physics.Mass,default, ForceMode.Instant);
+                        
+                        // ChaiFoxes.FMODAudio.Sound testSound = CoreSystem.LoadSound("resources/sound/Beats of Water Drops.mp3");
+                        // Channel channel = testSound.Play();
+                        // channel.LowPass = 0.25f;
 
                         long entityId = _livingComponents.GetEntityId();
                         
                         Owner.Resources.Load<Sound>(ref _livingComponents.GetComponent().JumpSound, r => {
                             Console.WriteLine($"Sound: {r}");
-                            Owner.Core.AudioUnit.CreateInstance((Sound)r).PlayOnce();
+                            SoundInstance soundInstance = Owner.Core.AudioUnit.CreateInstance((Sound)r);
+                            soundInstance.PlayOnce();
                         });
                         
                         Owner.Resources.Load<TestResource>(ref _livingComponents.GetComponent().Resource2, r => {

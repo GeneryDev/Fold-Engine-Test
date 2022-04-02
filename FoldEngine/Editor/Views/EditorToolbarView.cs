@@ -40,6 +40,7 @@ namespace FoldEngine.Editor.Views {
                     Play(ContentPanel.Environment as EditorEnvironment);
                 } else {
                     Stop(ContentPanel.Environment as EditorEnvironment);
+                    Scene.Core.AudioUnit.StopAll();
                     GC.Collect(GC.MaxGeneration);
                 }
             }

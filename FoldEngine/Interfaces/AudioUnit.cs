@@ -1,19 +1,22 @@
 ﻿using System.Collections.Generic;
+using ChaiFoxes.FMODAudio;
 using FoldEngine.Audio;
 using FoldEngine.Resources;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Woofer;
+using Sound = FoldEngine.Audio.Sound;
 
 namespace FoldEngine.Interfaces {
     public class AudioUnit {
         private readonly List<SoundInstance> _instances = new List<SoundInstance>();
 
         public AudioUnit() {
+            FMODManager.Init(FMODMode.Core, "data");
         }
 
         public SoundInstance CreateInstance(Sound sound) {
-            var instance = new SoundInstance(this, sound) {InUse = true};
+            var instance = new SoundInstance(this, sound);
             _instances.Add(instance);
             
             return instance;
