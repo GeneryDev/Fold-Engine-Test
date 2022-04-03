@@ -5,8 +5,10 @@ using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
 using FoldEngine.Editor.Gui.Hierarchy;
 using FoldEngine.Editor.Transactions;
+using FoldEngine.Graphics;
 using FoldEngine.Gui;
 using FoldEngine.Interfaces;
+using FoldEngine.Resources;
 using FoldEngine.Scenes;
 using FoldEngine.Systems;
 using FoldEngine.Util.Transactions;
@@ -22,8 +24,11 @@ namespace FoldEngine.Editor.Views {
 
         public Hierarchy<long> Hierarchy;
 
-        public override string Icon => "editor:hierarchy";
         public override string Name => "Hierarchy";
+
+        public EditorHierarchyView() {
+            Icon = new ResourceIdentifier("editor/hierarchy");
+        }
 
         public override void Initialize() {
             _transforms = Scene.Components.CreateIterator<Transform>(IterationFlags.None);
@@ -75,7 +80,7 @@ namespace FoldEngine.Editor.Views {
                 : Scene.Systems.Get<EditorBase>().EditingEntity.Contains(entity.EntityId);
             
             button
-                .Icon(renderer.Textures["editor:cube"], selected ? Color.White : new Color(128, 128, 128))
+                .Icon(Scene.Resources.Get<TextureR>(ref EditorIcons.Cube), selected ? Color.White : new Color(128, 128, 128))
                 .Selected(selected)
                 ;
             

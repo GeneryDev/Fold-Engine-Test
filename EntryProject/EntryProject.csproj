@@ -219,6 +219,9 @@
     <Content Update="..\data\resources\font\groups\default.json">
       <Link>data\resources\font\groups\default.json</Link>
     </Content>
+    <Content Update="..\data\resources\texture\groups\editor.json">
+      <Link>data\resources\texture\groups\editor.json</Link>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\Config\input.json" />

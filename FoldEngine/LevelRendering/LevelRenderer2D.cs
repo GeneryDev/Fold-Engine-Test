@@ -73,19 +73,19 @@ namespace FoldEngine.Rendering {
                 0, 0, 1, 0,
                 0, 0, 0, 1
             );
-
+            
             Scene.GizmoTransformMatrix = viewMatrix;
             if(setMainCameraId) {
                 Scene.MainCameraId = _cameras.GetEntityId();
             }
-
+            
             IRenderingLayer layer = !string.IsNullOrEmpty(camera.RenderToLayer)
                 ? renderer.MainGroup[camera.RenderToLayer]
                 : renderer.WorldLayer;
             if(layer == null) return;
-
+            
             _meshRenderables.Reset();
-
+            
             while(_meshRenderables.Next()) {
                 Transform transform = _meshRenderables.GetCoComponent<Transform>();
                 ref MeshRenderable meshRenderable = ref _meshRenderables.GetComponent();
@@ -95,16 +95,17 @@ namespace FoldEngine.Rendering {
                     pos.Y = (float) (Math.Round(pos.Y / camera.SnapPosition) * camera.SnapPosition);
                     transform.Position = pos;
                 }
-
-                if(meshRenderable.MeshIdentifier.Identifier == null || meshRenderable.TextureIdentifier == null) continue;
-
-                ITexture texture = renderer.Textures[meshRenderable.TextureIdentifier];
-
+                
+                if(meshRenderable.MeshIdentifier.Identifier == null || meshRenderable.TextureIdentifier.Identifier == null) continue;
+                
+                ITexture texture = Scene.Resources.Get<TextureR>(ref meshRenderable.TextureIdentifier, TextureR.Missing);
+                if(texture == null) continue;
+                
                 foreach(Mesh.Triangle triangle in Scene.Resources.Get<Mesh>(ref meshRenderable.MeshIdentifier, Mesh.Empty).GetTriangles()) {
                     Vector2 vertexA = triangle.A.Position.ToVector2().ApplyMatrixTransform(meshRenderable.Matrix);
                     Vector2 vertexB = triangle.B.Position.ToVector2().ApplyMatrixTransform(meshRenderable.Matrix);
                     Vector2 vertexC = triangle.C.Position.ToVector2().ApplyMatrixTransform(meshRenderable.Matrix);
-
+                
                     layer.Surface.Draw(new DrawTriangleInstruction(
                         texture,
                         layer.CameraToLayer(transform.Apply(vertexA).ApplyMatrixTransform(viewMatrix)),
@@ -126,7 +127,7 @@ namespace FoldEngine.Rendering {
         }
 
         public static void DrawOutline(Scene scene, Transform transform, MeshRenderable meshRenderable, Color outlineColor) {
-            if(meshRenderable.MeshIdentifier.Identifier == null || meshRenderable.TextureIdentifier == null) return;
+            if(meshRenderable.MeshIdentifier.Identifier == null || meshRenderable.TextureIdentifier.Identifier == null) return;
 
             Vector2 firstVertex = default;
             Vector2 prevVertex = default;
@@ -152,7 +153,7 @@ namespace FoldEngine.Rendering {
                 ref Transform transform = ref _meshRenderables.GetCoComponent<Transform>();
                 ref MeshRenderable meshRenderable = ref _meshRenderables.GetComponent();
 
-                if(meshRenderable.MeshIdentifier.Identifier == null || meshRenderable.TextureIdentifier == null) continue;
+                if(meshRenderable.MeshIdentifier.Identifier == null || meshRenderable.TextureIdentifier.Identifier == null) continue;
 
                 if(meshRenderable.Contains(worldPos, ref transform)) {
                     return _meshRenderables.GetEntityId();

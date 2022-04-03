@@ -114,7 +114,7 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
 
             if(_expandable) {
                 ITexture triangleTexture =
-                    renderer.Textures[(_hierarchy?.IsExpanded(_id) ?? false) ? "editor:triangle.down" : "editor:triangle.right"];
+                    Environment.Scene.Resources.Get<TextureR>(ref ((_hierarchy?.IsExpanded(_id) ?? false) ? ref EditorIcons.TriangleDown : ref EditorIcons.TriangleRight), null);
                 layer.Surface.Draw(new DrawRectInstruction() {
                     Texture = triangleTexture,
                     DestinationRectangle = ExpandBounds.Translate(offset)

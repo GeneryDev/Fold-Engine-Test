@@ -45,7 +45,6 @@ namespace FoldEngine {
         /// and initialize them as well.
         /// </summary>
         protected override void Initialize() {
-            _core.RenderingUnit.Textures = new TextureManager(GraphicsDevice, Content);
             _core.RenderingUnit.Effects = new EffectManager(Content);
             _core.RenderingUnit.Fonts = new FontManager(_core);
 

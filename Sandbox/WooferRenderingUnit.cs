@@ -15,7 +15,6 @@ namespace Woofer
         public IGameCore Core { get; private set; }
         private Point _windowSize = new Point(1280, 720);
 
-        public TextureManager Textures { get; set; }
         public EffectManager Effects { get; set; }
         public FontManager Fonts { get; set; }
 
@@ -112,95 +111,12 @@ namespace Woofer
         }
 
         public void LoadContent() {
-            Console.WriteLine("Loading Rendering Unit Content");
-            Textures.LoadTexture("test");
-            Textures.LoadTexture("ancient_debris_side");
-            Textures.LoadTexture("armor_stand");
-            Textures.LoadTexture("bamboo_stem");
-            Textures.LoadTexture("barrel_top");
-            Textures.LoadTexture("beacon");
-            Textures.LoadTexture("bed_feet_end");
-            Textures.LoadTexture("end_portal_colors");
-            Textures.LoadTexture("guardian");
-            Textures.LoadTexture("pillager");
-            Textures.LoadTexture("witch");
-            Textures.LoadTexture("clouds");
-            Textures.LoadTexture("campfire_smoke");
-            Textures.LoadTexture("soul");
-            Textures.LoadTexture("particles");
-            Textures.LoadTexture("four");
-
-            TextureAtlas atlas = Textures.CreateAtlas("main");
-            atlas.AddTexture("test", Textures["test"]);
-            atlas.AddTexture("ancient_debris_side", Textures["ancient_debris_side"]);
-            atlas.AddTexture("armor_stand", Textures["armor_stand"]);
-            atlas.AddTexture("bamboo_stem", Textures["bamboo_stem"]);
-            atlas.AddTexture("barrel_top", Textures["barrel_top"]);
-            atlas.AddTexture("beacon", Textures["beacon"]);
-            atlas.AddTexture("bed_feet_end", Textures["bed_feet_end"]);
-            atlas.AddTexture("end_portal_colors", Textures["end_portal_colors"]);
-            atlas.AddTexture("guardian", Textures["guardian"]);
-            atlas.AddTexture("pillager", Textures["pillager"]);
-            atlas.AddTexture("witch", Textures["witch"]);
-            atlas.AddTexture("clouds", Textures["clouds"]);
-            atlas.AddTexture("campfire_smoke", Textures["campfire_smoke"]);
-            atlas.AddTexture("soul", Textures["soul"]);
-            atlas.AddTexture("particles", Textures["particles"]);
-            atlas.AddTexture("pixel", Textures["four"]);
-            atlas.Pack();
-
-            Textures.CreateSubTexture("main:soul", "start", new Rectangle(0, 0, 16, 16));
-            Textures.CreateSubTexture("main:pixel", "black_transparent", new Rectangle(0, 0, 1, 1));
-            Textures.CreateSubTexture("main:pixel", "white_transparent", new Rectangle(1, 0, 1, 1));
-            Textures.CreateSubTexture("main:pixel", "black", new Rectangle(0, 1, 1, 1));
-            WhiteTexture = Textures.CreateSubTexture("main:pixel", "white", new Rectangle(1, 1, 1, 1));
-
-
-
-
-            TextureAtlas editorAtlas = Textures.CreateAtlas("editor");
-            editorAtlas.AddTexture("cog", "editor/cog");
-            editorAtlas.AddTexture("blank", "editor/blank");
-            editorAtlas.AddTexture("triangle.right", "editor/triangle.right");
-            editorAtlas.AddTexture("triangle.down", "editor/triangle.down");
-            editorAtlas.AddTexture("cube", "editor/cube");
-            editorAtlas.AddTexture("hierarchy", "editor/hierarchy");
-            editorAtlas.AddTexture("info", "editor/info");
-            editorAtlas.AddTexture("checkmark", "editor/checkmark");
-            editorAtlas.AddTexture("play", "editor/play");
-            editorAtlas.AddTexture("pause", "editor/pause");
-            editorAtlas.AddTexture("cursor", "editor/cursor");
-            editorAtlas.AddTexture("hand", "editor/hand");
-            editorAtlas.AddTexture("move", "editor/move");
-            editorAtlas.AddTexture("scale", "editor/scale");
-            editorAtlas.AddTexture("rotate", "editor/rotate");
-            editorAtlas.Pack();
-
-
-            Console.WriteLine("Textures and atlases loaded");
-
-
+            TextureR.CreateConstants();
+            WhiteTexture = TextureR.White;
+            
             Console.WriteLine("Loading Fonts");
             Fonts.LoadAll();
             Console.WriteLine("Fonts loaded");
-            
-            
-            Textures.UnloadTexture("test");
-            Textures.UnloadTexture("ancient_debris_side");
-            Textures.UnloadTexture("armor_stand");
-            Textures.UnloadTexture("bamboo_stem");
-            Textures.UnloadTexture("barrel_top");
-            Textures.UnloadTexture("beacon");
-            Textures.UnloadTexture("bed_feet_end");
-            Textures.UnloadTexture("end_portal_colors");
-            Textures.UnloadTexture("guardian");
-            Textures.UnloadTexture("pillager");
-            Textures.UnloadTexture("witch");
-            Textures.UnloadTexture("clouds");
-            Textures.UnloadTexture("campfire_smoke");
-            Textures.UnloadTexture("soul");
-            Textures.UnloadTexture("particles");
-            Textures.UnloadTexture("four");
         }
 
         public Rectangle GetGroupBounds(RenderGroup renderGroup) {

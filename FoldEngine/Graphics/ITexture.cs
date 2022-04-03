@@ -100,6 +100,12 @@ namespace FoldEngine.Graphics
             return this;
         }
 
+        private TextureR ConstantTexture(Color[] colors) {
+            RenderTarget2D tex = new RenderTarget2D(FoldGame.Game.GraphicsDevice, (int) Math.Sqrt(colors.Length), (int) Math.Sqrt(colors.Length));
+            tex.SetData(colors);
+            return Direct(tex);
+        }
+
         public Texture2D Source => _texture ?? _parent.Source;
         public int Width => _bounds.Width;
         public int Height => _bounds.Height;
@@ -147,8 +153,12 @@ namespace FoldEngine.Graphics
         
         public override bool CanSerialize => false;
         
-        // RenderTarget2D nullTexture = new RenderTarget2D(device, 2, 2);
-        // nullTexture.SetData(new Color[] { Color.Magenta, Color.Black, Color.Black, Color.Magenta });
-        // _sprites["null"] = new FoldEngine.Graphics.DirectTexture(nullTexture);
+        public static TextureR White;
+        public static TextureR Missing;
+
+        public static void CreateConstants() {
+            White = new TextureR().ConstantTexture(new Color[] { Color.White });
+            Missing = new TextureR().ConstantTexture(new Color[] { Color.Magenta, Color.Black, Color.Black, Color.Magenta });
+        }
     }
 }

@@ -14,8 +14,6 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Tools {
     public class MoveTool : SelectTool {
-        public override string Icon => "editor:move";
-
         private Transform _movePivot;
         private bool _dragging = false;
 
@@ -26,7 +24,9 @@ namespace FoldEngine.Editor.Tools {
         private List<Vector2> _pressEntityPivotPosition = new List<Vector2>();
         private List<SetEntityTransformTransaction> _transactions = new List<SetEntityTransformTransaction>();
 
-        public MoveTool(EditorEnvironment environment) : base(environment) { }
+        public MoveTool(EditorEnvironment environment) : base(environment) {
+            Icon = EditorIcons.Move;
+        }
 
         public override void OnMousePressed(ref MouseEvent e) {
             if(_selectedGizmo != default) {

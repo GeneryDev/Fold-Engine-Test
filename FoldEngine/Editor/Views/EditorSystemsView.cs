@@ -3,13 +3,17 @@ using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
 using FoldEngine.Gui;
 using FoldEngine.Interfaces;
+using FoldEngine.Resources;
 using FoldEngine.Systems;
 using Woofer;
 
 namespace FoldEngine.Editor.Views {
     public class EditorSystemsView : EditorView {
-        public override string Icon => "editor:cog";
         public override string Name => "Systems";
+
+        public EditorSystemsView() {
+            Icon = new ResourceIdentifier("editor/cog");
+        }
         public override void Render(IRenderingUnit renderer) {
             ContentPanel.MayScroll = true;
             

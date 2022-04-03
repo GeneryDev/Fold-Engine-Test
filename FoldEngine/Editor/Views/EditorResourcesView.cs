@@ -3,12 +3,16 @@ using EntryProject.Util;
 using FoldEngine.Editor.Gui;
 using FoldEngine.Gui;
 using FoldEngine.Interfaces;
+using FoldEngine.Resources;
 using FoldEngine.Systems;
 
 namespace FoldEngine.Editor.Views {
     public class EditorResourcesView : EditorView {
-        public override string Icon => "editor:checkmark";
         public override string Name => "Resources";
+
+        public EditorResourcesView() {
+            Icon = new ResourceIdentifier("editor/checkmark");
+        }
         
         public override void Render(IRenderingUnit renderer) {
             ContentPanel.MayScroll = true;

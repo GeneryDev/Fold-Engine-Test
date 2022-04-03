@@ -36,6 +36,7 @@ namespace FoldEngine.Graphics
 
         public void Draw(DrawQuadInstruction instruction)
         {
+            if(instruction.Texture == null) return;
             TriBatch.DrawQuad(
                 instruction.Texture.Source,
                 instruction.A,
@@ -53,8 +54,8 @@ namespace FoldEngine.Graphics
             );
         }
 
-        public void Draw(DrawTriangleInstruction instruction)
-        {
+        public void Draw(DrawTriangleInstruction instruction) {
+            if(instruction.Texture == null) return;
             TriBatch.DrawTriangle(
                 instruction.Texture.Source,
                 instruction.A,

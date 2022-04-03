@@ -5,12 +5,16 @@ using FoldEngine.Editor.Tools;
 using FoldEngine.Gui;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
+using FoldEngine.Resources;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Views {
     public class EditorGameView : EditorView {
-        public override string Icon => "editor:play";
         public override string Name => "Game";
+
+        public EditorGameView() {
+            Icon = new ResourceIdentifier("editor/play");
+        }
 
         public override bool UseMargin => false;
         public override Color? BackgroundColor => Color.Black;

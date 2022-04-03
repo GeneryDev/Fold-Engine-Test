@@ -13,7 +13,6 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Tools {
     public class ScaleTool : SelectTool {
-        public override string Icon => "editor:scale";
 
         private Transform _movePivot;
         private bool _dragging = false;
@@ -25,7 +24,9 @@ namespace FoldEngine.Editor.Tools {
         private List<Vector2> _pressEntityScale = new List<Vector2>();
         private List<SetEntityTransformTransaction> _transactions = new List<SetEntityTransformTransaction>();
 
-        public ScaleTool(EditorEnvironment environment) : base(environment) { }
+        public ScaleTool(EditorEnvironment environment) : base(environment) {
+            Icon = EditorIcons.Scale;
+        }
 
         public override void OnMousePressed(ref MouseEvent e) {
             if(_selectedGizmo != default) {

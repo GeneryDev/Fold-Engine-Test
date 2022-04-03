@@ -24,6 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Components\Transform.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\EditorBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\EditorComponents.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\EditorIcons.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Gui\EditorEnvironment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Gui\EditorTabs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Gui\Fields\Checkbox.cs" />
@@ -83,7 +84,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\RenderSurface.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\ITexture.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\TextureAtlas.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Graphics\TextureManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\TriangleBatch.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Gui\GuiPopupMenu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Input\IAction.cs" />

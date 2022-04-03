@@ -14,7 +14,6 @@ using Microsoft.Xna.Framework.Input;
 
 namespace FoldEngine.Editor.Tools {
     public class RotateTool : SelectTool {
-        public override string Icon => "editor:rotate";
 
         private Transform _movePivot;
         private bool _dragging = false;
@@ -29,7 +28,9 @@ namespace FoldEngine.Editor.Tools {
         private List<float> _pressEntityRotation = new List<float>();
         private List<SetEntityTransformTransaction> _transactions = new List<SetEntityTransformTransaction>();
 
-        public RotateTool(EditorEnvironment environment) : base(environment) { }
+        public RotateTool(EditorEnvironment environment) : base(environment) {
+            Icon = EditorIcons.Rotate;
+        }
 
         public override void OnMousePressed(ref MouseEvent e) {
             if(hoveringRing) {

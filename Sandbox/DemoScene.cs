@@ -27,7 +27,7 @@ namespace Sandbox {
             Systems.Add<TextureAtlasSystem>();
             Systems.Add<SimplePhysicsSystem>();
             Systems.Add<LevelRenderer2D>();
-            // Systems.Add<ColliderGizmoRenderer>();
+            Systems.Add<ColliderGizmoRenderer>();
             Systems.Add<DebugSystem>();
             
             Entity e0 = CreateEntity("Entity 0");
@@ -46,7 +46,7 @@ namespace Sandbox {
             {
                 ref MeshRenderable mr = ref e1.AddComponent<MeshRenderable>();
                 mr.MeshIdentifier = new ResourceIdentifier("square");
-                mr.TextureIdentifier = "main:beacon";
+                mr.TextureIdentifier = new ResourceIdentifier("terrain/amethyst_block");
             }
             e1.Transform.Position += Vector2.UnitY * 64;
             e1.AddComponent<Physics>();
@@ -56,7 +56,7 @@ namespace Sandbox {
             {
                 ref MeshRenderable mr = ref e3.AddComponent<MeshRenderable>();
                 mr.MeshIdentifier = new ResourceIdentifier("square");
-                mr.TextureIdentifier = "main:beacon";
+                mr.TextureIdentifier = new ResourceIdentifier("terrain/amethyst_block");
             }
             e3.Transform.Position += Vector2.UnitY * 60;
             e3.Transform.Position += Vector2.UnitX * -0.7f;
@@ -67,7 +67,7 @@ namespace Sandbox {
             {
                 ref MeshRenderable mr = ref e4.AddComponent<MeshRenderable>();
                 mr.MeshIdentifier = new ResourceIdentifier("square");
-                mr.TextureIdentifier = "main:beacon";
+                mr.TextureIdentifier = new ResourceIdentifier("terrain/amethyst_block");
             }
             e4.Transform.Position += Vector2.UnitY * 60;
             e4.Transform.Position += Vector2.UnitX * 0.7f;
@@ -90,7 +90,7 @@ namespace Sandbox {
             {
                 ref MeshRenderable mr = ref e2.AddComponent<MeshRenderable>();
                 mr.MeshIdentifier = new ResourceIdentifier("square");
-                mr.TextureIdentifier = "main:pixel.white";
+                mr.TextureIdentifier = new ResourceIdentifier("white");
             }
             e2.Name = "Platform";
             e2.Transform.Position += Vector2.UnitY * 57;

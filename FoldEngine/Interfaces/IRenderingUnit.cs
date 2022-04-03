@@ -9,7 +9,6 @@ namespace FoldEngine.Interfaces
     public interface IRenderingUnit {
         IGameCore Core { get; }
         
-        TextureManager Textures { get; set; }
         EffectManager Effects { get; set; }
         FontManager Fonts { get; set; }
 

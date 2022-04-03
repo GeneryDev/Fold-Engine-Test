@@ -10,9 +10,10 @@ using Microsoft.Xna.Framework.Input;
 
 namespace FoldEngine.Editor.Tools {
     public class SelectTool : EditorTool {
-        public override string Icon => "editor:cursor";
-        
-        public SelectTool(EditorEnvironment environment) : base(environment) { }
+
+        public SelectTool(EditorEnvironment environment) : base(environment) {
+            Icon = EditorIcons.Cursor;
+        }
         
         public override void OnInput(ControlScheme controls) {
         }

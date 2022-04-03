@@ -40,7 +40,7 @@ namespace FoldEngine.Rendering {
                 Vector2 perpendicularA = (Vector2)(((Complex) (lineA.To - lineA.From)).Normalized * Complex.Imaginary) * thickness/2;
 
                 layer.Surface.Draw(new DrawQuadInstruction(
-                    renderer.Textures["main:pixel.white"],
+                    renderer.WhiteTexture,
                     layer.CameraToLayer(
                         (Complex) (lineA.From - perpendicularA - cameraPos)
                         * cameraRotNegativeComplex),
@@ -65,7 +65,7 @@ namespace FoldEngine.Rendering {
                     Vector2 perpendicularB = (Vector2)(((Complex) (lineB.To - lineB.From)).Normalized * Complex.Imaginary) * thickness/2;
 
                     layer.Surface.Draw(new DrawQuadInstruction(
-                        renderer.Textures["main:pixel.white"],
+                        renderer.WhiteTexture,
                         layer.CameraToLayer(
                             (Complex) (lineB.From - perpendicularB - cameraPos)
                             * cameraRotNegativeComplex),
@@ -95,7 +95,7 @@ namespace FoldEngine.Rendering {
                     }
 
                     layer.Surface.Draw(new DrawQuadInstruction(
-                        renderer.Textures["main:pixel.white"],
+                        renderer.WhiteTexture,
                         layer.CameraToLayer(
                             (Complex) (intersection + new Vector2(1,-1)*thickness - cameraPos)
                             * cameraRotNegativeComplex),
@@ -124,7 +124,7 @@ namespace FoldEngine.Rendering {
                             renderer.WindowLayer.LayerToCamera(Mouse.GetState().Position.ToVector2()), true);
                     
                     layer.Surface.Draw(new DrawQuadInstruction(
-                        renderer.Textures["main:pixel.white"],
+                        renderer.WhiteTexture,
                         layer.CameraToLayer(
                             (Complex) (snapped + new Vector2(1,-1)*thickness - cameraPos)
                             * cameraRotNegativeComplex),

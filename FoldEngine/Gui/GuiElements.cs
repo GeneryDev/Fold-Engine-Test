@@ -152,8 +152,10 @@ namespace FoldEngine.Gui {
 
         public GuiLabel Icon(ITexture icon, Color color) {
             _icon = icon;
-            _iconColor = color;
-            _iconSize = new Point(icon.Width, icon.Height);
+            if(icon != null) {
+                _iconColor = color;
+                _iconSize = new Point(icon.Width, icon.Height);
+            }
             return this;
         }
 

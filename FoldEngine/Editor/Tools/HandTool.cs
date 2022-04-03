@@ -7,10 +7,13 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Tools {
     public class HandTool : EditorTool {
-        public override string Icon => "editor:hand";
         
         private bool _dragging = false;
         private Vector2 _dragStartWorldPos;
+
+        public HandTool(EditorEnvironment environment) : base(environment) {
+            Icon = EditorIcons.Cursor;
+        }
 
         public override void OnMousePressed(ref MouseEvent e) {
             if(Scene.EditorComponents == null) return;
@@ -40,7 +43,5 @@ namespace FoldEngine.Editor.Tools {
                 cameraTransform.Position = cameraTransform.Apply(-cameraRelativePos);
             }
         }
-
-        public HandTool(EditorEnvironment environment) : base(environment) { }
     }
 }

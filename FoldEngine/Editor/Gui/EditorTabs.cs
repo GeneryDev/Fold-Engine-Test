@@ -73,7 +73,7 @@ namespace FoldEngine.Editor.Gui {
             var iconSize = new Point(8, 8);
 
             layer.Surface.Draw(new DrawRectInstruction() {
-                Texture = renderer.Textures[_view.Icon],
+                Texture = Environment.Scene.Core.Resources.Get<TextureR>(ref _view.Icon),
                 DestinationRectangle = new Rectangle(x, renderingBounds.Center.Y - iconSize.Y/2,  iconSize.X, iconSize.Y)
             });
             x += iconSize.X;

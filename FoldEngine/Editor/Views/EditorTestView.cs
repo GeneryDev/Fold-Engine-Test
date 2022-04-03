@@ -1,12 +1,16 @@
 ﻿using FoldEngine.Graphics;
 using FoldEngine.Gui;
 using FoldEngine.Interfaces;
+using FoldEngine.Resources;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace FoldEngine.Editor.Views {
     public class EditorTestView : EditorView {
-        public override string Icon => "editor:pause";
+        
+        public EditorTestView() {
+            Icon = new ResourceIdentifier("editor/pause");
+        }
         public override string Name => "Test";
 
         public override bool UseMargin => false;

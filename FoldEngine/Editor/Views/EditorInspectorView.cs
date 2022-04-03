@@ -9,14 +9,18 @@ using FoldEngine.Editor.Transactions;
 using FoldEngine.Graphics;
 using FoldEngine.Gui;
 using FoldEngine.Interfaces;
+using FoldEngine.Resources;
 using Microsoft.Xna.Framework;
 using Shard.Util;
 
 namespace FoldEngine.Editor.Views {
     public class EditorInspectorView : EditorView {
-        public override string Icon => "editor:info";
         public override string Name => "Inspector";
 
+        public EditorInspectorView() {
+            Icon = new ResourceIdentifier("editor/info");
+        }
+        
         private object _object = null;
 
         public override void Render(IRenderingUnit renderer) {
@@ -36,7 +40,7 @@ namespace FoldEngine.Editor.Views {
         private void RenderEntityView(IRenderingUnit renderer, long id) {
             ContentPanel.Label(Scene.Components.GetComponent<EntityName>(id).Name, 14)
                 .TextAlignment(-1)
-                .Icon(renderer.Textures["editor:cube"]);
+                .Icon(Scene.Resources.Get<TextureR>(ref EditorIcons.Cube));
             ContentPanel.Label($"ID: {id}", 7).TextAlignment(-1);
             ContentPanel.Spacing(12);
 
@@ -96,7 +100,7 @@ namespace FoldEngine.Editor.Views {
             
             ContentPanel.Label(info.Name, 14)
                 .TextAlignment(-1)
-                .Icon(renderer.Textures["editor:cog"]);
+                .Icon(Scene.Resources.Get<TextureR>(ref EditorIcons.Cog));
             ContentPanel.Spacing(12);
             
 

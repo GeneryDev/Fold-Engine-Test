@@ -10,7 +10,7 @@ namespace FoldEngine.Rendering {
     [Component("fold:mesh_renderable")]
     [ComponentInitializer(typeof(MeshRenderable), nameof(InitializeComponent))]
     public struct MeshRenderable {
-        public string TextureIdentifier;
+        public ResourceIdentifier TextureIdentifier;
         public ResourceIdentifier MeshIdentifier;
         public Matrix Matrix;
         public Vector2 UVOffset;
