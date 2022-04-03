@@ -225,23 +225,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\Config\input.json" />
-    <Content Include="Content\Textures\ancient_debris_side.png" />
-    <Content Include="Content\Textures\armor_stand.png" />
-    <Content Include="Content\Textures\bamboo_stem.png" />
-    <Content Include="Content\Textures\barrel_top.png" />
-    <Content Include="Content\Textures\beacon.png" />
-    <Content Include="Content\Textures\bed_feet_end.png" />
-    <Content Include="Content\Textures\campfire_smoke.png" />
-    <Content Include="Content\Textures\clouds.png" />
-    <Content Include="Content\Textures\end_portal_colors.png" />
-    <Content Include="Content\Textures\fonts\default\ascii.png" />
-    <Content Include="Content\Textures\four.png" />
-    <Content Include="Content\Textures\guardian.png" />
-    <Content Include="Content\Textures\particles.png" />
-    <Content Include="Content\Textures\pillager.png" />
-    <Content Include="Content\Textures\soul.png" />
-    <Content Include="Content\Textures\test.png" />
-    <Content Include="Content\Textures\witch.png" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\Fonts" />
