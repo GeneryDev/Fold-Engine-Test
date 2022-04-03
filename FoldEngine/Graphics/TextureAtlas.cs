@@ -75,9 +75,9 @@ namespace FoldEngine.Graphics {
             
             TargetTexture = new RenderTarget2D(FoldGame.Game.GraphicsDevice, finalWidth, finalHeight);
 
-            TextureR atlas = _resources.Create<TextureR>("__atlas." + Name).Direct(TargetTexture);
+            Texture atlas = _resources.Create<Texture>("__atlas." + Name).Direct(TargetTexture);
             foreach(KeyValuePair<string, Rectangle> pair in _textureBounds) {
-                _resources.Create<TextureR>(pair.Key).Atlased(atlas, pair.Value);
+                _resources.Create<Texture>(pair.Key).Atlased(atlas, pair.Value);
             }
             
             FoldGame.Game.GraphicsDevice.SetRenderTarget(TargetTexture);

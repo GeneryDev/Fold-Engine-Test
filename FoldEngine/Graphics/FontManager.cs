@@ -64,7 +64,7 @@ namespace FoldEngine.Graphics {
                     
                     var sourceIdentifier = new ResourceIdentifier($"font/{definition.Identifier}/{sourceName}");
                     
-                    _core.Resources.Load<TextureR>(ref sourceIdentifier, t => {
+                    _core.Resources.Load<Texture>(ref sourceIdentifier, t => {
                         t.NeverUnload();
                         
                         int sourceIndex = bitmapFont.AddTextureSource(sourceName, (ITexture) t);

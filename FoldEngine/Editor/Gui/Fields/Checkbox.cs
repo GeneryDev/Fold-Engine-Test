@@ -36,7 +36,7 @@ namespace FoldEngine.Editor.Gui.Fields {
 
             if(_checked) {
                 layer.Surface.Draw(new DrawRectInstruction() {
-                    Texture = Environment.Scene.Resources.Get<TextureR>(ref EditorIcons.Checkmark),
+                    Texture = Environment.Scene.Resources.Get<Texture>(ref EditorIcons.Checkmark),
                     DestinationRectangle = Bounds.Translate(offset)
                 });
             }

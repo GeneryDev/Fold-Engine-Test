@@ -80,27 +80,27 @@ namespace FoldEngine.Graphics
     }
 
     [Resource(directoryName: "texture", extensions: "png")]
-    public class TextureR : Resource, ITexture {
+    public class Texture : Resource, ITexture {
         private Microsoft.Xna.Framework.Graphics.Texture2D _texture;
-        private TextureR _parent;
+        private Texture _parent;
         private Rectangle _bounds;
         private bool _unloaded = false;
 
-        public TextureR Direct(Texture2D texture) {
+        public Texture Direct(Texture2D texture) {
             _texture = texture;
             _parent = null;
             _bounds = new Rectangle(0, 0, texture.Width, texture.Height);
             return this;
         }
 
-        public TextureR Atlased(TextureR parent, Rectangle bounds) {
+        public Texture Atlased(Texture parent, Rectangle bounds) {
             _texture = null;
             _parent = parent;
             _bounds = bounds;
             return this;
         }
 
-        private TextureR ConstantTexture(Color[] colors) {
+        private Texture ConstantTexture(Color[] colors) {
             RenderTarget2D tex = new RenderTarget2D(FoldGame.Game.GraphicsDevice, (int) Math.Sqrt(colors.Length), (int) Math.Sqrt(colors.Length));
             tex.SetData(colors);
             return Direct(tex);
@@ -153,12 +153,12 @@ namespace FoldEngine.Graphics
         
         public override bool CanSerialize => false;
         
-        public static TextureR White;
-        public static TextureR Missing;
+        public static Texture White;
+        public static Texture Missing;
 
         public static void CreateConstants() {
-            White = new TextureR().ConstantTexture(new Color[] { Color.White });
-            Missing = new TextureR().ConstantTexture(new Color[] { Color.Magenta, Color.Black, Color.Black, Color.Magenta });
+            White = new Texture().ConstantTexture(new Color[] { Color.White });
+            Missing = new Texture().ConstantTexture(new Color[] { Color.Magenta, Color.Black, Color.Black, Color.Magenta });
         }
     }
 }

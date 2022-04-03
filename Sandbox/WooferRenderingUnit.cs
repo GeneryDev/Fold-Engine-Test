@@ -8,6 +8,7 @@ using FoldEngine.Resources;
 using FoldEngine.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Texture = FoldEngine.Graphics.Texture;
 
 namespace Woofer
 {
@@ -111,8 +112,8 @@ namespace Woofer
         }
 
         public void LoadContent() {
-            TextureR.CreateConstants();
-            WhiteTexture = TextureR.White;
+            Texture.CreateConstants();
+            WhiteTexture = Texture.White;
             
             Console.WriteLine("Loading Fonts");
             Fonts.LoadAll();

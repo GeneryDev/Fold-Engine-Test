@@ -12,6 +12,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Sandbox.Components;
+using Texture = FoldEngine.Graphics.Texture;
 
 namespace FoldEngine.Rendering {
     [GameSystem("fold:level_renderer.2d", ProcessingCycles.Render, runWhenPaused: true)]
@@ -98,7 +99,7 @@ namespace FoldEngine.Rendering {
                 
                 if(meshRenderable.MeshIdentifier.Identifier == null || meshRenderable.TextureIdentifier.Identifier == null) continue;
                 
-                ITexture texture = Scene.Resources.Get<TextureR>(ref meshRenderable.TextureIdentifier, TextureR.Missing);
+                ITexture texture = Scene.Resources.Get<Texture>(ref meshRenderable.TextureIdentifier, Texture.Missing);
                 if(texture == null) continue;
                 
                 foreach(Mesh.Triangle triangle in Scene.Resources.Get<Mesh>(ref meshRenderable.MeshIdentifier, Mesh.Empty).GetTriangles()) {

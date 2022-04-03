@@ -31,7 +31,7 @@ namespace FoldEngine.Editor.Views {
                     .Down(tool == ((EditorEnvironment) ContentPanel.Environment).ActiveTool)
                     .Text("")
                     .FontSize(14)
-                    .Icon(Scene.Resources.Get<TextureR>(ref tool.Icon))
+                    .Icon(Scene.Resources.Get<Texture>(ref tool.Icon))
                     .IsPressed()) {
                     ((EditorEnvironment) ContentPanel.Environment).SelectedTool = tool;
                 }
@@ -40,7 +40,7 @@ namespace FoldEngine.Editor.Views {
             // ContentPanel.Label(Scene.Name, 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
             // ContentPanel.Element<ToolbarButton>().Text("Save").FontSize(14).Icon(renderer.Textures["editor:cog"]);
             // ContentPanel.Separator();
-            if(ContentPanel.Element<ToolbarButton>().Text("").FontSize(14).Icon(Scene.Resources.Get<TextureR>(ref EditorIcons.Play)).IsPressed()) {
+            if(ContentPanel.Element<ToolbarButton>().Text("").FontSize(14).Icon(Scene.Resources.Get<Texture>(ref EditorIcons.Play)).IsPressed()) {
                 if(_storedScene == null) {
                     Play(ContentPanel.Environment as EditorEnvironment);
                 } else {
@@ -54,7 +54,7 @@ namespace FoldEngine.Editor.Views {
                 .Down(Scene.Paused)
                 .Text("")
                 .FontSize(14)
-                .Icon(Scene.Resources.Get<TextureR>(ref EditorIcons.Pause))
+                .Icon(Scene.Resources.Get<Texture>(ref EditorIcons.Pause))
                 .IsPressed()) {
                 Scene.Paused = !Scene.Paused;
             }

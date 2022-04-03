@@ -40,7 +40,7 @@ namespace FoldEngine.Editor.Views {
         private void RenderEntityView(IRenderingUnit renderer, long id) {
             ContentPanel.Label(Scene.Components.GetComponent<EntityName>(id).Name, 14)
                 .TextAlignment(-1)
-                .Icon(Scene.Resources.Get<TextureR>(ref EditorIcons.Cube));
+                .Icon(Scene.Resources.Get<Texture>(ref EditorIcons.Cube));
             ContentPanel.Label($"ID: {id}", 7).TextAlignment(-1);
             ContentPanel.Spacing(12);
 
@@ -100,7 +100,7 @@ namespace FoldEngine.Editor.Views {
             
             ContentPanel.Label(info.Name, 14)
                 .TextAlignment(-1)
-                .Icon(Scene.Resources.Get<TextureR>(ref EditorIcons.Cog));
+                .Icon(Scene.Resources.Get<Texture>(ref EditorIcons.Cog));
             ContentPanel.Spacing(12);
             
 

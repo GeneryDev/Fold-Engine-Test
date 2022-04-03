@@ -80,7 +80,7 @@ namespace FoldEngine.Editor.Views {
                 : Scene.Systems.Get<EditorBase>().EditingEntity.Contains(entity.EntityId);
             
             button
-                .Icon(Scene.Resources.Get<TextureR>(ref EditorIcons.Cube), selected ? Color.White : new Color(128, 128, 128))
+                .Icon(Scene.Resources.Get<Texture>(ref EditorIcons.Cube), selected ? Color.White : new Color(128, 128, 128))
                 .Selected(selected)
                 ;
             

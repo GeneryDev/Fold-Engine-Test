@@ -323,7 +323,7 @@ namespace FoldEngine.Graphics {
 
         private bool WireframeMode = false;
 
-        private void FlushVertexArray(int numVertices, Effect effect, Texture texture) {
+        private void FlushVertexArray(int numVertices, Effect effect, Microsoft.Xna.Framework.Graphics.Texture texture) {
             var primitiveType = PrimitiveType.TriangleList;
             var primitiveCount = numVertices / 3;
 

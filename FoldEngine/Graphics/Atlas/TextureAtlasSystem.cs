@@ -20,18 +20,18 @@ namespace FoldEngine.Graphics.Atlas {
                 ref TextureAtlasComponent atlasComponent = ref _atlases.GetComponent();
                 if(atlasComponent.Generated) continue;
                 if(atlasComponent.Group == null || !atlasComponent.Group.StartsWith("#")) continue;
-                if(Scene.Core.ResourceIndex.Exists<TextureR>(atlasComponent.Group)) {
+                if(Scene.Core.ResourceIndex.Exists<Texture>(atlasComponent.Group)) {
                     if(atlasComponent.Atlas == null) {
                         atlasComponent.Atlas = new TextureAtlas(atlasComponent.Group, Scene.Resources);
                         
-                        foreach(string rawIdentifier in Scene.Core.ResourceIndex.GetIdentifiersInGroup<TextureR>(atlasComponent
+                        foreach(string rawIdentifier in Scene.Core.ResourceIndex.GetIdentifiersInGroup<Texture>(atlasComponent
                             .Group)) {
                             atlasComponent.WaitingForLoad++;
                             var identifier = new ResourceIdentifier(rawIdentifier);
-                            Scene.Resources.Load<TextureR>(ref identifier, texture => {
+                            Scene.Resources.Load<Texture>(ref identifier, texture => {
                                 ref TextureAtlasComponent atlasComponent1 = ref Scene.Components.GetComponent<TextureAtlasComponent>(entityId);
                                 atlasComponent1.WaitingForLoad--;
-                                atlasComponent1.Atlas.AddTexture(texture.Identifier, (TextureR) texture);
+                                atlasComponent1.Atlas.AddTexture(texture.Identifier, (Texture) texture);
                             });
                         }
                     } else if(atlasComponent.WaitingForLoad == 0) {
@@ -52,11 +52,11 @@ namespace FoldEngine.Graphics.Atlas {
                 if(atlasComponent.Group == null || !atlasComponent.Group.StartsWith("#")) continue;
                 if(atlasComponent.Atlas == null) continue;
                 
-                if(Scene.Core.ResourceIndex.Exists<TextureR>(atlasComponent.Group)) {
-                    foreach(string rawIdentifier in Scene.Core.ResourceIndex.GetIdentifiersInGroup<TextureR>(atlasComponent
+                if(Scene.Core.ResourceIndex.Exists<Texture>(atlasComponent.Group)) {
+                    foreach(string rawIdentifier in Scene.Core.ResourceIndex.GetIdentifiersInGroup<Texture>(atlasComponent
                         .Group)) {
                         var identifier = new ResourceIdentifier(rawIdentifier);
-                        Scene.Resources.KeepLoaded<TextureR>(ref identifier);
+                        Scene.Resources.KeepLoaded<Texture>(ref identifier);
                     }
                 }
             }
