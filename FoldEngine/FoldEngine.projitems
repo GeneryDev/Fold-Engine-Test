@@ -63,6 +63,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorSystemsView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorTestView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Views\EditorView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\Atlas\TextureAtlasComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\Atlas\TextureAtlasSystem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\EffectManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Gui\GuiAction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Gui\GuiElements.cs" />

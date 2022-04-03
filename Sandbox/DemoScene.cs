@@ -10,6 +10,7 @@ using EntryProject.Resources;
 using FoldEngine.Audio;
 using FoldEngine.Editor;
 using FoldEngine.Graphics;
+using FoldEngine.Graphics.Atlas;
 using FoldEngine.Interfaces;
 using FoldEngine.Physics;
 using FoldEngine.Rendering;
@@ -23,6 +24,7 @@ namespace Sandbox {
         public override void Initialize() {
             BuildMeshes();
             
+            Systems.Add<TextureAtlasSystem>();
             Systems.Add<SimplePhysicsSystem>();
             Systems.Add<LevelRenderer2D>();
             // Systems.Add<ColliderGizmoRenderer>();

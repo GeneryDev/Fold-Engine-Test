@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using EntryProject.Util;
 using FoldEngine.Components;
@@ -81,9 +82,9 @@ namespace FoldEngine.Editor.Views {
             if(ContentPanel.Button("Add Component", 14).IsPressed(out Point p)) {
                 GuiPopupMenu contextMenu = ContentPanel.Environment.ContextMenu;
                 contextMenu.Show(p, m => {
-                    foreach(ComponentSet set in Scene.Components.Sets.Values) {
-                        if(!set.Has(id) && m.Button(set.ComponentType.Name, 9).IsPressed()) {
-                            ((EditorEnvironment) ContentPanel.Environment).TransactionManager.InsertTransaction(new AddComponentTransaction(set.ComponentType, id));
+                    foreach(Type type in Component.GetAllTypes()) {
+                        if(!Scene.Components.HasComponent(type, id) && m.Button(type.Name, 9).IsPressed()) {
+                            ((EditorEnvironment) ContentPanel.Environment).TransactionManager.InsertTransaction(new AddComponentTransaction(type, id));
                         }
                     }
                 });

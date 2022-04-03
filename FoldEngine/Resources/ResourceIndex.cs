@@ -180,7 +180,11 @@ namespace FoldEngine.Resources {
         }
 
         public bool Exists(Type type, string identifier) {
-            return _identifierToPathMap.ContainsKey(type) && _identifierToPathMap[type].ContainsKey(identifier);
+            return (_identifierToPathMap.ContainsKey(type) && _identifierToPathMap[type].ContainsKey(identifier)) || (_groups.ContainsKey(type) && _groups[type].ContainsKey(identifier));
+        }
+
+        public bool Exists<T>(string identifier) where T : Resource {
+            return Exists(typeof(T), identifier);
         }
 
         public string GetPathForIdentifier(Type type, string identifier) {

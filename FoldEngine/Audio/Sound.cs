@@ -15,13 +15,16 @@ namespace FoldEngine.Audio {
     public class Sound : Resource {
         internal ChaiFoxes.FMODAudio.Sound Effect;
 
-        public override void Unload() {
+        public override bool Unload() {
             Effect.Dispose();
+            return true;
         }
 
         public override void DeserializeResource(string path) {
             Effect = CoreSystem.LoadSound(path);
         }
+
+        public override bool CanSerialize => false;
 
         public override void DeserializeResource(LoadOperation reader) {
             throw new InvalidOperationException("Sound Effects cannot be deserialized");

@@ -12,6 +12,8 @@ namespace FoldEngine {
     /// This is the main type for your game.
     /// </summary>
     public class FoldGame : Game {
+        public static FoldGame Game;
+        
         public readonly GraphicsDeviceManager Graphics;
         private SpriteBatch _spriteBatch;
 
@@ -23,6 +25,7 @@ namespace FoldEngine {
 
         public FoldGame(IGameCore core) {
             this._core = core;
+            Game = this;
 
             Graphics = new GraphicsDeviceManager(this);
             Graphics.GraphicsProfile = GraphicsProfile.HiDef;

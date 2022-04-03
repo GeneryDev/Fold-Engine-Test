@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 using System.Linq;
+using FoldEngine.Resources;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Graphics {
     public class TextureAtlas {
         public string Name { get; }
         private readonly TextureManager _parent;
+        private readonly ResourceCollections _resources;
         private SpriteBatch _batch;
         private RenderTarget2D TargetTexture;
         private List<KeyValuePair<string, ITexture>> _containedTextures = new List<KeyValuePair<string, ITexture>>();
@@ -18,7 +20,15 @@ namespace FoldEngine.Graphics {
         public TextureAtlas(string name, TextureManager parent) {
             Name = name;
             _parent = parent;
-            _batch = new SpriteBatch(parent._device);
+            _resources = null;
+            _batch = new SpriteBatch(FoldGame.Game.GraphicsDevice);
+        }
+
+        public TextureAtlas(string name, ResourceCollections resources) {
+            Name = name;
+            _parent = null;
+            _resources = resources;
+            _batch = new SpriteBatch(FoldGame.Game.GraphicsDevice);
         }
 
         public void AddTexture(string identifier, string path) {
@@ -76,17 +86,24 @@ namespace FoldEngine.Graphics {
             int finalWidth = (int) Math.Pow(2, Math.Ceiling(Math.Log(usedRect.Width) / Math.Log(2)));
             int finalHeight = (int) Math.Pow(2, Math.Ceiling(Math.Log(usedRect.Height) / Math.Log(2)));
             
-            TargetTexture = new RenderTarget2D(_parent._device, finalWidth, finalHeight);
+            TargetTexture = new RenderTarget2D(FoldGame.Game.GraphicsDevice, finalWidth, finalHeight);
 
-            _parent[this.Name] = new DirectTexture(TargetTexture);
-            foreach(KeyValuePair<string, Rectangle> pair in _textureBounds) {
-                _parent[this.Name + ":" + pair.Key] = new AtlasedTexture(TargetTexture, pair.Value);
+            if(_parent != null) {
+                _parent[this.Name] = new DirectTexture(TargetTexture);
+                foreach(KeyValuePair<string, Rectangle> pair in _textureBounds) {
+                    _parent[this.Name + ":" + pair.Key] = new AtlasedTexture(TargetTexture, pair.Value);
+                }
+            } else {
+                TextureR atlas = _resources.Create<TextureR>("__atlas." + Name).Direct(TargetTexture);
+                foreach(KeyValuePair<string, Rectangle> pair in _textureBounds) {
+                    _resources.Create<TextureR>(pair.Key).Atlased(atlas, pair.Value);
+                }
             }
             
-            _parent._device.SetRenderTarget(TargetTexture);
-            _parent._device.Clear(Color.TransparentBlack);
+            FoldGame.Game.GraphicsDevice.SetRenderTarget(TargetTexture);
+            FoldGame.Game.GraphicsDevice.Clear(Color.TransparentBlack);
             _batch.End();
-            _parent._device.SetRenderTarget(null);
+            FoldGame.Game.GraphicsDevice.SetRenderTarget(null);
         }
     }
 }

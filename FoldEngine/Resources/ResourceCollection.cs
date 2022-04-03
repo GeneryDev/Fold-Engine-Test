@@ -95,10 +95,11 @@ namespace FoldEngine.Resources {
             for(int i = 0; i < Resources.Count; i++) {
                 T resource = Resources[i];
                 if(Time.Now >= resource.LastAccessTime + unloadTime) {
-                    resource.Unload();
-                    Console.WriteLine("UNLOADING UNUSED RESOURCE " + resource.Identifier);
-                    Resources.RemoveAt(i);
-                    i--;
+                    if(resource.Unload()) {
+                        Console.WriteLine("UNLOADING UNUSED RESOURCE " + resource.Identifier);
+                        Resources.RemoveAt(i);
+                        i--;
+                    }
                 }
             }
             InvalidateCaches();
@@ -120,9 +121,11 @@ namespace FoldEngine.Resources {
         public void Serialize(SaveOperation writer) {
             writer.WriteCompound((ref SaveOperation.Compound c) => {
                 foreach(T entry in Resources) {
-                    c.WriteMember(entry.Identifier, () => {
-                        entry.SerializeResource(writer);
-                    });
+                    if(entry.CanSerialize) {
+                        c.WriteMember(entry.Identifier, () => {
+                            entry.SerializeResource(writer);
+                        });
+                    }
                 }
             });
         }
@@ -174,7 +177,8 @@ namespace FoldEngine.Resources {
             LastAccessTime = Time.Now;
         }
 
-        public virtual void Unload() {
+        public virtual bool Unload() {
+            return true;
         }
 
 #if DEBUG
@@ -182,6 +186,8 @@ namespace FoldEngine.Resources {
             Console.WriteLine("Finalized resource " + Identifier);
         }
 #endif
+
+        public virtual bool CanSerialize { get; } = true;
 
         public virtual void SerializeResource(SaveOperation writer) {
             GenericSerializer.Serialize(this, writer);

@@ -104,6 +104,10 @@ namespace FoldEngine.Components
 
             return (ComponentSet) _componentSetConstructors[componentType].Invoke(new object[] {scene, startingId});
         }
+
+        public static IEnumerable<Type> GetAllTypes() {
+            return _identifierToTypeMap.Values;
+        }
     }
 
     public sealed class ComponentAttribute : Attribute

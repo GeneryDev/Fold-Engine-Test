@@ -14,6 +14,7 @@ namespace Sandbox.Components
         public int MaxHealth;
         public bool Grounded;
 
+        public ResourceIdentifier Texture;
         public ResourceIdentifier Resource;
         public ResourceIdentifier Resource2;
         

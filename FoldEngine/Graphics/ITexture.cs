@@ -1,4 +1,8 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using System;
+using FoldEngine.IO;
+using FoldEngine.Resources;
+using FoldEngine.Serialization;
+using Microsoft.Xna.Framework.Graphics;
 
 using Microsoft.Xna.Framework;
 
@@ -72,6 +76,83 @@ namespace FoldEngine.Graphics
                 (Bounds.X + Width*uv.X) / Texture.Width,
                 (Bounds.Y + Height*uv.Y) / Texture.Height
                 );
+        }
+    }
+
+    [Resource(directoryName: "texture", extensions: "png")]
+    public class TextureR : Resource, ITexture {
+        private Microsoft.Xna.Framework.Graphics.Texture2D _texture;
+        private TextureR _parent;
+        private Rectangle _bounds;
+        private bool _unloaded = false;
+
+        public TextureR Direct(Texture2D texture) {
+            _texture = texture;
+            _parent = null;
+            _bounds = new Rectangle(0, 0, texture.Width, texture.Height);
+            return this;
+        }
+
+        public TextureR Atlased(TextureR parent, Rectangle bounds) {
+            _texture = null;
+            _parent = parent;
+            _bounds = bounds;
+            return this;
+        }
+
+        public Texture2D Source => _texture ?? _parent.Source;
+        public int Width => _bounds.Width;
+        public int Height => _bounds.Height;
+        
+        public void DrawOnto(SpriteBatch batch, Vector2 pos) {
+            batch.Draw(_texture, pos, _bounds, Color.White);
+        }
+
+        public void DrawOnto(SpriteBatch batch, Rectangle pos) {
+            batch.Draw(_texture, pos, _bounds, Color.White);
+        }
+
+        public Vector2 ToSourceUV(Vector2 uv) {
+            return _texture != null
+                ? uv
+                : new Vector2(
+                    (_bounds.X + Width * uv.X) / Source.Width,
+                    (_bounds.Y + Height * uv.Y) / Source.Height
+                );
+        }
+
+        public Rectangle CreateSubBounds(Rectangle bounds) {
+            return _texture != null
+                ? bounds
+                : new Rectangle(_bounds.X + bounds.X, _bounds.Y + bounds.Y, bounds.Width, bounds.Height);;
+        }
+
+        public override void Access() {
+            base.Access();
+            _parent?.Access();
+        }
+
+        public override bool Unload() {
+            if(_parent == null || _parent._unloaded) {
+                _texture?.Dispose();
+                _unloaded = true;
+                return true;
+            }
+            return false;
+        }
+
+        public override void DeserializeResource(string path) {
+            Direct(Texture2D.FromStream(FoldGame.Game.GraphicsDevice, Data.In.Stream(path)));
+        }
+        
+        public override bool CanSerialize => false;
+
+        public override void DeserializeResource(LoadOperation reader) {
+            throw new InvalidOperationException("Textures cannot be deserialized");
+        }
+
+        public override void SerializeResource(SaveOperation writer) {
+            throw new InvalidOperationException("Textures cannot be serialized");
         }
     }
 }

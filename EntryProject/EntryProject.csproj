@@ -168,6 +168,48 @@
     <Content Include="x86\libfmodstudio.so.11.22">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Update="..\data\resources\textures\amethyst_block.png">
+      <Link>data\resources\textures\amethyst_block.png</Link>
+    </Content>
+    <Content Update="..\data\resources\texture\terrain\amethyst_block.png">
+      <Link>data\resources\texture\terrain\amethyst_block.png</Link>
+    </Content>
+    <Content Update="..\data\resources\texture\terrain\ancient_debris_side.png">
+      <Link>data\resources\texture\terrain\ancient_debris_side.png</Link>
+    </Content>
+    <Content Update="..\data\resources\texture\terrain\azalea_leaves_opaque.png">
+      <Link>data\resources\texture\terrain\azalea_leaves_opaque.png</Link>
+    </Content>
+    <Content Update="..\data\resources\texture\terrain\bamboo_stem.png">
+      <Link>data\resources\texture\terrain\bamboo_stem.png</Link>
+    </Content>
+    <Content Update="..\data\resources\texture\terrain\bee_nest_front.png">
+      <Link>data\resources\texture\terrain\bee_nest_front.png</Link>
+    </Content>
+    <Content Update="..\data\resources\texture\terrain\blue_ice.png">
+      <Link>data\resources\texture\terrain\blue_ice.png</Link>
+    </Content>
+    <Content Update="..\data\resources\texture\terrain\calcite.png">
+      <Link>data\resources\texture\terrain\calcite.png</Link>
+    </Content>
+    <Content Update="..\data\resources\texture\terrain\clay.png">
+      <Link>data\resources\texture\terrain\clay.png</Link>
+    </Content>
+    <Content Update="..\data\resources\texture\terrain\copper_block.png">
+      <Link>data\resources\texture\terrain\copper_block.png</Link>
+    </Content>
+    <Content Update="..\data\resources\texture\terrain\diamond_block.png">
+      <Link>data\resources\texture\terrain\diamond_block.png</Link>
+    </Content>
+    <Content Update="..\data\resources\texture\terrain\emerald_block.png">
+      <Link>data\resources\texture\terrain\emerald_block.png</Link>
+    </Content>
+    <Content Update="..\data\resources\texture\terrain\glass.png">
+      <Link>data\resources\texture\terrain\glass.png</Link>
+    </Content>
+    <Content Update="..\data\resources\texture\group\terrain.json">
+      <Link>data\resources\texture\group\terrain.json</Link>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\Config\input.json" />

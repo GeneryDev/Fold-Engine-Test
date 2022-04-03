@@ -190,8 +190,9 @@ namespace Sandbox.Systems {
                 var resource = Scene.Resources.Get<TestResource>(ref _livingComponents.GetComponent().Resource);
                 Color? color = resource?.Color;
                 bool desaturated = Scene.Core.ResourceIndex.GroupContains("#desaturated", resource);
+                ITexture tex = Scene.Resources.Get<TextureR>(ref _livingComponents.GetComponent().Texture, null) ?? renderer.WhiteTexture;
                 layer.Surface.Draw(new DrawTriangleInstruction(
-                    renderer.WhiteTexture,
+                    tex,
                     new Vector2(0, 0), new Vector2(desaturated ? 20 : 10, 0),
                     new Vector2(0, 10),
                     new Vector2(0, 0), new Vector2(1, 0),
