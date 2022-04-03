@@ -12,6 +12,8 @@ namespace FoldEngine.Text {
         public int LineHeight = 10;
         public float DefaultSize = 9;
         
+        public int Generation { get; private set; }
+        
         public GlyphInfo this[char c] {
             get => GlyphBlocks[c / 256]?.Glyphs[c % 256] ?? default;
             set {
@@ -27,6 +29,17 @@ namespace FoldEngine.Text {
         public void DrawString(string text, RenderSurface surface, Point start, Color color, float size) {
             TextRenderer.Instance.Start(this, text, size);
             TextRenderer.Instance.DrawOnto(surface, start, color);
+        }
+
+        public int AddTextureSource(string sourceName, ITexture texture) {
+            Generation++;
+            if(!TextureNames.Contains(sourceName)) {
+                TextureSources.Add(texture);
+                TextureNames.Add(sourceName);
+                return TextureNames.Count - 1;
+            } else {
+                return TextureNames.IndexOf(sourceName);
+            }
         }
     }
 

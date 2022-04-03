@@ -146,13 +146,9 @@ namespace FoldEngine.Graphics
         }
         
         public override bool CanSerialize => false;
-
-        public override void DeserializeResource(LoadOperation reader) {
-            throw new InvalidOperationException("Textures cannot be deserialized");
-        }
-
-        public override void SerializeResource(SaveOperation writer) {
-            throw new InvalidOperationException("Textures cannot be serialized");
-        }
+        
+        // RenderTarget2D nullTexture = new RenderTarget2D(device, 2, 2);
+        // nullTexture.SetData(new Color[] { Color.Magenta, Color.Black, Color.Black, Color.Magenta });
+        // _sprites["null"] = new FoldEngine.Graphics.DirectTexture(nullTexture);
     }
 }

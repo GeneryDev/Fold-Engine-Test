@@ -7,8 +7,10 @@ using Newtonsoft.Json.Linq;
 
 namespace FoldEngine.Resources {
     public class ResourceIndex {
+        private const string GroupDirectoryName = "groups";
         private Dictionary<Type, Dictionary<string, string>> _identifierToPathMap = new Dictionary<Type, Dictionary<string, string>>();
         private Dictionary<Type, Dictionary<string, HashSet<string>>> _groups = new Dictionary<Type, Dictionary<string, HashSet<string>>>();
+
 
         public void Update() {
             _identifierToPathMap.Clear();
@@ -23,7 +25,7 @@ namespace FoldEngine.Resources {
                 ScanResources(paths, Path.Combine("resources", resourceAttribute.DirectoryName), resourceAttribute);
                 
                 Dictionary<string, HashSet<string>> groups = _groups[type] = new Dictionary<string, HashSet<string>>();
-                ScanGroups(groups, paths, groupsNeedExpanding, Path.Combine("resources", resourceAttribute.DirectoryName, "groups"), resourceAttribute);
+                ScanGroups(groups, paths, groupsNeedExpanding, Path.Combine("resources", resourceAttribute.DirectoryName, GroupDirectoryName), resourceAttribute);
 
                 while(groupsNeedExpanding.Count > 0) {
                     string groupId = null;
@@ -71,6 +73,7 @@ namespace FoldEngine.Resources {
             relativeTo = relativeTo ?? path;
             if(Data.In.IsDirectory(path)) {
                 foreach(string entry in Data.In.ListEntries(path)) {
+                    if(relativeTo == path && Path.GetFileName(entry) == GroupDirectoryName) continue;
                     ScanResources(paths, Path.Combine(path, Path.GetFileName(entry)), resourceAttribute, relativeTo);
                 }
             } else if(Data.In.Exists(path)) {
@@ -200,6 +203,19 @@ namespace FoldEngine.Resources {
                    && _groups.ContainsKey(type)
                    && _groups[type].ContainsKey(group)
                    && _groups[type][group].Contains(resource.Identifier);
+        }
+        
+        public IEnumerable<string> GetIdentifiers<T>() {
+            Type type = typeof(T);
+            return GetIdentifiers(type);
+        }
+        
+        public IEnumerable<string> GetIdentifiers(Type type) {
+            if(_groups.ContainsKey(type)) {
+                foreach(string value in _identifierToPathMap[type].Keys) {
+                    yield return value;
+                }
+            }
         }
         
         public IEnumerable<string> GetIdentifiersInGroup<T>(string group) {

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using FoldEngine.Interfaces;
+using FoldEngine.IO;
+using FoldEngine.Resources;
 using FoldEngine.Text;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json.Linq;
@@ -13,11 +16,11 @@ using Shard.Scripts.Types.Functions;
 
 namespace FoldEngine.Graphics {
     public class FontManager {
-        private TextureManager _textureManager;
+        private IGameCore _core;
         private Dictionary<string, IFont> _fonts = new Dictionary<string, IFont>();
 
-        public FontManager(TextureManager textureManager) {
-            _textureManager = textureManager;
+        public FontManager(IGameCore core) {
+            _core = core;
         }
         
         public IFont this[string name]
@@ -34,15 +37,11 @@ namespace FoldEngine.Graphics {
             private set => _fonts[name] = value;
         }
 
-        public BitmapFont LoadFont(string name) {
+        public BitmapFont LoadFont(FontDefinition definition) {
             BitmapFont bitmapFont = new BitmapFont();
-            _fonts[name] = bitmapFont;
-            
-            JObject root = JObject.Parse(File.OpenText($"Content/Fonts/{name}.json").ReadToEnd())["font"] as JObject;
+            _fonts[definition.Identifier] = bitmapFont;
 
-            if(root == null) {
-                throw new FormatException($"Expected \"font\" object in font {name}");
-            }
+            JObject root = definition.Root;
             
             bitmapFont.LineHeight = root["line_height"]?.Value<int>() ?? bitmapFont.LineHeight;
             bitmapFont.DefaultSize = root["default_size"]?.Value<float>() ?? 9;
@@ -58,66 +57,64 @@ namespace FoldEngine.Graphics {
                     throw new InvalidOperationException($"Cannot create a font set named {setName}: another non-set font with that name already exists");
                 }
             }
-            
-            var charsArr = root["characters"] as JArray;
-            if(charsArr != null) {
+
+            if(root["characters"] is JArray charsArr) {
                 foreach(JObject rawCharEntry in charsArr) {
                     string sourceName = (string) rawCharEntry["source"];
-                    int sourceIndex;
                     
-                    if(!bitmapFont.TextureNames.Contains(sourceName)) {
-                        string sourcePath = $"fonts/{name}/{sourceName}";
-                        bitmapFont.TextureSources.Add(_textureManager[sourcePath]);
-                        bitmapFont.TextureNames.Add(sourceName);
-                        sourceIndex = bitmapFont.TextureNames.Count - 1;
-                    } else {
-                        sourceIndex = bitmapFont.TextureNames.IndexOf(sourceName);
-                    }
-
-                    FontContextInfo.SourceTex = bitmapFont.TextureSources[sourceIndex].Source;
-
-                    JToken charOrRange = rawCharEntry["char"];
-                    char start;
-                    char end;
-                    if(charOrRange is JArray rawRange) {
-                        start = ((string) rawRange[0])[0];
-                        end = ((string) rawRange[1])[0];
-                    } if(charOrRange is JObject rawRangeObj) {
-                        start = ((string) rawRangeObj["from"])[0];
-                        end = ((string) rawRangeObj["to"])[0];
-                    } else {
-                        start = end = ((string) charOrRange)[0];
-                    }
-                    FontContextInfo.RangeFrom = start;
-                    FontContextInfo.RangeTo = end;
-
-                    var heightEvaluator = EvaluatorInt(rawCharEntry["height"]);
-                    var ascentEvaluator = EvaluatorInt(rawCharEntry["ascent"]);
-                    var widthEvaluator = EvaluatorInt(rawCharEntry["width"]);
-                    var advancementEvaluator = EvaluatorInt(rawCharEntry["advancement"]);
-
-                    var rawUVArr = rawCharEntry["uv"] as JArray;
+                    var sourceIdentifier = new ResourceIdentifier($"font/{definition.Identifier}/{sourceName}");
                     
-                    var uvXEvaluator = EvaluatorInt(rawUVArr[0]);
-                    var uvYEvaluator = EvaluatorInt(rawUVArr[1]);
-
-                    for(char c = start; c <= end; c++) {
-                        GlyphInfo glyphInfo = new GlyphInfo() {NotNull = true};
-                        glyphInfo.SourceIndex = sourceIndex;
-
-                        glyphInfo.Height = glyphInfo.Source.Height = FontContextInfo.Height = heightEvaluator(c);
-                        glyphInfo.Ascent = ascentEvaluator(c);
+                    _core.Resources.Load<TextureR>(ref sourceIdentifier, t => {
+                        t.NeverUnload();
                         
-                        glyphInfo.Source.X = FontContextInfo.UVX = uvXEvaluator(c);
-                        glyphInfo.Source.Y = FontContextInfo.UVY = uvYEvaluator(c);
-                        
-                        glyphInfo.Width = glyphInfo.Source.Width = widthEvaluator(c);
-                        glyphInfo.Advancement = advancementEvaluator(c);
+                        int sourceIndex = bitmapFont.AddTextureSource(sourceName, (ITexture) t);
 
-                        bitmapFont[c] = glyphInfo;
-                    }
+                        FontContextInfo.SourceTex = bitmapFont.TextureSources[sourceIndex].Source;
+
+                        JToken charOrRange = rawCharEntry["char"];
+                        char start;
+                        char end;
+                        if(charOrRange is JArray rawRange) {
+                            start = ((string) rawRange[0])[0];
+                            end = ((string) rawRange[1])[0];
+                        } if(charOrRange is JObject rawRangeObj) {
+                            start = ((string) rawRangeObj["from"])[0];
+                            end = ((string) rawRangeObj["to"])[0];
+                        } else {
+                            start = end = ((string) charOrRange)[0];
+                        }
+                        FontContextInfo.RangeFrom = start;
+                        FontContextInfo.RangeTo = end;
+
+                        var heightEvaluator = EvaluatorInt(rawCharEntry["height"]);
+                        var ascentEvaluator = EvaluatorInt(rawCharEntry["ascent"]);
+                        var widthEvaluator = EvaluatorInt(rawCharEntry["width"]);
+                        var advancementEvaluator = EvaluatorInt(rawCharEntry["advancement"]);
+
+                        var rawUVArr = rawCharEntry["uv"] as JArray;
+                        
+                        var uvXEvaluator = EvaluatorInt(rawUVArr[0]);
+                        var uvYEvaluator = EvaluatorInt(rawUVArr[1]);
+
+                        for(char c = start; c <= end; c++) {
+                            GlyphInfo glyphInfo = new GlyphInfo() {NotNull = true};
+                            glyphInfo.SourceIndex = sourceIndex;
+
+                            glyphInfo.Height = glyphInfo.Source.Height = FontContextInfo.Height = heightEvaluator(c);
+                            glyphInfo.Ascent = ascentEvaluator(c);
+                            
+                            glyphInfo.Source.X = FontContextInfo.UVX = uvXEvaluator(c);
+                            glyphInfo.Source.Y = FontContextInfo.UVY = uvYEvaluator(c);
+                            
+                            glyphInfo.Width = glyphInfo.Source.Width = widthEvaluator(c);
+                            glyphInfo.Advancement = advancementEvaluator(c);
+
+                            bitmapFont[c] = glyphInfo;
+                        }
+                        
+                        FontContextInfo.Clear();
+                    });
                     
-                    FontContextInfo.Clear();
                 }
             }
             // Console.WriteLine(root);
@@ -252,6 +249,15 @@ namespace FoldEngine.Graphics {
                 }
                 
                 script.EvaluationStack.Push(0);
+            }
+        }
+
+        public void LoadAll() {
+            foreach(string fontName in _core.ResourceIndex.GetIdentifiers<FontDefinition>()) {
+                var identifier = new ResourceIdentifier(fontName);
+                _core.Resources.Load<FontDefinition>(ref identifier, d => {
+                    LoadFont((FontDefinition) d);
+                });
             }
         }
     }

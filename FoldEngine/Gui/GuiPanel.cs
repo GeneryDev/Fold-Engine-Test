@@ -134,7 +134,8 @@ namespace FoldEngine.Gui {
                 if(useCache) RenderedStrings[str] = rendered;
                 return rendered;
             }
-            return RenderedStrings[str];
+
+            return RenderedStrings[str] = RenderedStrings[str].Update();
         }
         public RenderedText DrawString(string str, RenderSurface surface, Point start, Color color, float size) {
             Environment.Renderer.Fonts["default"].DrawString(str, surface, start, color, size);

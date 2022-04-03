@@ -25,14 +25,6 @@ namespace FoldEngine.Audio {
         }
 
         public override bool CanSerialize => false;
-
-        public override void DeserializeResource(LoadOperation reader) {
-            throw new InvalidOperationException("Sound Effects cannot be deserialized");
-        }
-
-        public override void SerializeResource(SaveOperation writer) {
-            throw new InvalidOperationException("Sound Effects cannot be serialized");
-        }
     }
 
     public class SoundInstance {

@@ -79,6 +79,9 @@ namespace FoldEngine.Text {
             output = default;
 
             output.BitmapFont = _bitmapFont;
+            output.Text = _text;
+            output.Size = _size;
+            output.Generation = _bitmapFont.Generation;
             output.Glyphs = _glyphs.ToArray();
             output.Width = Width;
             output.Height = Height;

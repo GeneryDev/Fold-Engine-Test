@@ -5,6 +5,9 @@ using Microsoft.Xna.Framework;
 namespace FoldEngine.Text {
     public struct RenderedText {
         public BitmapFont BitmapFont;
+        public string Text;
+        public float Size;
+        public int Generation;
         public RenderedTextGlyph[] Glyphs;
         public int Width;
         public int Height;
@@ -15,6 +18,13 @@ namespace FoldEngine.Text {
             foreach(RenderedTextGlyph glyph in Glyphs) {
                 glyph.DrawOnto(surface, start, color, scale, BitmapFont);
             }
+        }
+
+        public RenderedText Update() {
+            if(Generation != BitmapFont.Generation) {
+                TextRenderer.Instance.Render(BitmapFont, Text, out this, Size);
+            }
+            return this;
         }
     }
 

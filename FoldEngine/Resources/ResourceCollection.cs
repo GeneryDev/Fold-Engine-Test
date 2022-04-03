@@ -94,7 +94,7 @@ namespace FoldEngine.Resources {
             int unloadTime = Resource.AttributeOf<T>()?.UnloadTime ?? 5000;
             for(int i = 0; i < Resources.Count; i++) {
                 T resource = Resources[i];
-                if(Time.Now >= resource.LastAccessTime + unloadTime) {
+                if(Time.Now - unloadTime >= resource.LastAccessTime) {
                     if(resource.Unload()) {
                         Console.WriteLine("UNLOADING UNUSED RESOURCE " + resource.Identifier);
                         Resources.RemoveAt(i);
@@ -174,7 +174,11 @@ namespace FoldEngine.Resources {
         }
 
         public virtual void Access() {
-            LastAccessTime = Time.Now;
+            if(LastAccessTime < Time.Now) LastAccessTime = Time.Now;
+        }
+
+        public void NeverUnload() {
+            LastAccessTime = long.MaxValue;
         }
 
         public virtual bool Unload() {
@@ -190,10 +194,12 @@ namespace FoldEngine.Resources {
         public virtual bool CanSerialize { get; } = true;
 
         public virtual void SerializeResource(SaveOperation writer) {
+            if(!CanSerialize) throw new InvalidOperationException($"{GetType().Name} cannot be serialized");
             GenericSerializer.Serialize(this, writer);
         }
 
         public virtual void DeserializeResource(LoadOperation reader) {
+            if(!CanSerialize) throw new InvalidOperationException($"{GetType().Name} cannot be deserialized");
             GenericSerializer.Deserialize(this, reader);
         }
 

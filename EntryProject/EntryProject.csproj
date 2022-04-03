@@ -210,11 +210,18 @@
     <Content Update="..\data\resources\texture\group\terrain.json">
       <Link>data\resources\texture\group\terrain.json</Link>
     </Content>
+    <Content Update="..\data\resources\font\default.7.json">
+      <Link>data\resources\font\default.7.json</Link>
+    </Content>
+    <Content Update="..\data\resources\font\default.9.json">
+      <Link>data\resources\font\default.9.json</Link>
+    </Content>
+    <Content Update="..\data\resources\font\groups\default.json">
+      <Link>data\resources\font\groups\default.json</Link>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\Config\input.json" />
-    <Content Include="Content\Fonts\default.7.json" />
-    <Content Include="Content\Fonts\default.9.json" />
     <Content Include="Content\Textures\ancient_debris_side.png" />
     <Content Include="Content\Textures\armor_stand.png" />
     <Content Include="Content\Textures\bamboo_stem.png" />
@@ -232,6 +239,9 @@
     <Content Include="Content\Textures\soul.png" />
     <Content Include="Content\Textures\test.png" />
     <Content Include="Content\Textures\witch.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Content\Fonts" />
   </ItemGroup>
   <Import Project="..\Sandbox\Sandbox.projitems" Label="Shared" />
   <Import Project="..\FoldEngine\FoldEngine.projitems" Label="Shared" />

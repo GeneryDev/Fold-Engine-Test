@@ -22,12 +22,6 @@
 /processorParam:DebugMode=Auto
 /build:Effects/testfx.fx
 
-#begin Fonts/default.7.json
-/copy:Fonts/default.7.json
-
-#begin Fonts/default.9.json
-/copy:Fonts/default.9.json
-
 #begin Textures/ancient_debris_side.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -315,30 +309,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Textures/end_portal_colors.png
-
-#begin Textures/fonts/default.7/ascii.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Textures/fonts/default.7/ascii.png
-
-#begin Textures/fonts/default.9/ascii.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Textures/fonts/default.9/ascii.png
 
 #begin Textures/four.png
 /importer:TextureImporter

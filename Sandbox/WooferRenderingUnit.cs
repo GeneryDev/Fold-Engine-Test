@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using FoldEngine.Events;
 using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
-
+using FoldEngine.Resources;
+using FoldEngine.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -180,12 +181,7 @@ namespace Woofer
 
 
             Console.WriteLine("Loading Fonts");
-            
-            Textures.LoadTexture("fonts/default.7/ascii");
-            Textures.LoadTexture("fonts/default.9/ascii");
-            Fonts.LoadFont("default.7");
-            Fonts.LoadFont("default.9");
-            
+            Fonts.LoadAll();
             Console.WriteLine("Fonts loaded");
             
             

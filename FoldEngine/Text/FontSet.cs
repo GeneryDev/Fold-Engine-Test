@@ -6,12 +6,14 @@ using Microsoft.Xna.Framework;
 namespace FoldEngine.Text {
     public class FontSet : IFont {
         private List<FontSetEntry> _entries = new List<FontSetEntry>();
+        public int Generation { get; private set; }
 
         public FontSet AddFont(IFont font, float defaultSize) {
             _entries.Add(new FontSetEntry() {
                 Font = font,
                 DefaultSize = defaultSize
             });
+            Generation++;
             return this;
         }
 

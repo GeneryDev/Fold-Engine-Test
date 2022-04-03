@@ -136,6 +136,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\Serializers\VectorSerializers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\BitmapFont.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\Font.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text\FontDefinition.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\FontSet.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\TextRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\RenderedText.cs" />
