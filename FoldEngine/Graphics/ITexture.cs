@@ -100,7 +100,8 @@ namespace FoldEngine.Graphics
             return this;
         }
 
-        private Texture ConstantTexture(Color[] colors) {
+        private Texture ConstantTexture(string identifier, Color[] colors) {
+            this.Identifier = identifier;
             RenderTarget2D tex = new RenderTarget2D(FoldGame.Game.GraphicsDevice, (int) Math.Sqrt(colors.Length), (int) Math.Sqrt(colors.Length));
             tex.SetData(colors);
             return Direct(tex);
@@ -157,8 +158,8 @@ namespace FoldEngine.Graphics
         public static Texture Missing;
 
         public static void CreateConstants() {
-            White = new Texture().ConstantTexture(new Color[] { Color.White });
-            Missing = new Texture().ConstantTexture(new Color[] { Color.Magenta, Color.Black, Color.Black, Color.Magenta });
+            White = new Texture().ConstantTexture("__WHITE", new Color[] { Color.White });
+            Missing = new Texture().ConstantTexture("__MISSING", new Color[] { Color.Magenta, Color.Black, Color.Black, Color.Magenta });
         }
     }
 }

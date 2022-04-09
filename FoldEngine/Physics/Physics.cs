@@ -11,7 +11,7 @@ namespace FoldEngine.Physics {
     [Component("fold:physics")]
     [ComponentInitializer(typeof(Physics), nameof(InitializeComponent))]
     public struct Physics {
-        public static readonly bool DrawForceGizmos = true;
+        public static readonly bool DrawForceGizmos = false;
         
         private Scene _scene;
         private long _entityId;

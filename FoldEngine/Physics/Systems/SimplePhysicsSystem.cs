@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using EntryProject.Util;
@@ -15,13 +16,15 @@ using Shard.Scripts.Instructions;
 namespace FoldEngine.Physics {
     [GameSystem("fold:physics.simple", ProcessingCycles.FixedUpdate)]
     public class SimplePhysicsSystem : GameSystem {
-        public static readonly bool DrawCollisionGizmos = false;
+        public static readonly bool DrawCollisionGizmos = true;
         
         private ComponentIterator<Physics> _physicsObjects;
         private ComponentIterator<Collider> _colliders;
         
         public Vector2 Gravity = new Vector2(0, -27);
-        public float FaceNormalVelocityDotTolerance = 1f;
+        public float FaceNormalVelocityDotTolerance = 0f;
+
+        private List<CollisionEvent> _collisions = new List<CollisionEvent>();
         
         internal override void Initialize() {
             _physicsObjects = CreateComponentIterator<Physics>(IterationFlags.None);
@@ -31,11 +34,13 @@ namespace FoldEngine.Physics {
         public override void OnFixedUpdate() {
             ApplyDynamics();
             CalculateForcesAndCollision();
-            ApplyContactDisplacement();
+            if(_collisions.Count > 0) CollisionResponse();
+            // ApplyContactDisplacement();
             ApplyAndResetForces();
         }
 
         private void CalculateForcesAndCollision() {
+            _collisions.Clear();
             _physicsObjects.Reset();
             while(_physicsObjects.Next()) {
                 ref Transform transform = ref _physicsObjects.GetCoComponent<Transform>();
@@ -46,6 +51,9 @@ namespace FoldEngine.Physics {
 
                 if(!physics.Static) {
                     physics.ApplyForce(Gravity * physics.GravityMultiplier * physics.Mass, default, ForceMode.Continuous);
+                }
+                if(DrawCollisionGizmos) {
+                    Scene.DrawGizmo(transformPosition, transformPosition + physics.Velocity.Normalized() * 1, Color.Gold, zOrder: 1);
                 }
 
                 Collider collider = default;
@@ -82,11 +90,10 @@ namespace FoldEngine.Physics {
                                     otherCollider.GetVertices(ref otherTransform));
                             
                             Vector2 moveDirection = relativeVelocity.Normalized();
-                            float largestCrossSection = 0;
-                            Vector2 surfaceNormalSum = default;
-                            Vector2 surfaceNormalSumFallback = default;
-                            float totalSurfaceNormalFaceLength = 0;
-                            float totalSurfaceNormalFaceLengthFallback = 0;
+                            float largestNormalDepth = 0;
+                            float largestMoveDepth = 0;
+                            Vector2 surfaceNormal = default;
+                            float maxSurfaceNormalFaceLength = 0;
 
                             Vector2 tempNormalStart = default;
                             
@@ -117,11 +124,17 @@ namespace FoldEngine.Physics {
 
                                             if(validFace) {
                                                 if(current.IsFromA && next.IsFromA) {
-                                                    surfaceNormalSumFallback += normal * faceLength;
-                                                    totalSurfaceNormalFaceLengthFallback += faceLength;
+                                                    if(maxSurfaceNormalFaceLength == 0) {
+                                                        surfaceNormal = normal;
+                                                        maxSurfaceNormalFaceLength = faceLength;
+                                                    }
+                                                    // surfaceNormalSumFallback += normal * faceLength;
+                                                    // totalSurfaceNormalFaceLengthFallback += faceLength;
                                                 } else {
-                                                    surfaceNormalSum += normal * faceLength;
-                                                    totalSurfaceNormalFaceLength += faceLength;
+                                                    if(faceLength > maxSurfaceNormalFaceLength) {
+                                                        surfaceNormal = normal;
+                                                        maxSurfaceNormalFaceLength = faceLength;
+                                                    }
                                                 }
                                                 
                                                 tempNormalStart = current.Position;
@@ -134,74 +147,32 @@ namespace FoldEngine.Physics {
                                         }
                                     }
 
-                                    if(totalSurfaceNormalFaceLength == 0) {
-                                        totalSurfaceNormalFaceLength = totalSurfaceNormalFaceLengthFallback;
-                                        surfaceNormalSum = surfaceNormalSumFallback;
-                                    }
-
-                                    if(totalSurfaceNormalFaceLength != 0) {
-                                        float crossSection = Polygon.ComputeLargestCrossSection(intersection, surfaceNormalSum / totalSurfaceNormalFaceLength);
-                                        largestCrossSection = Math.Max(crossSection, largestCrossSection);
+                                    if(maxSurfaceNormalFaceLength != 0) {
+                                        float moveDepth = Polygon.ComputeLargestCrossSection(intersection, moveDirection);
+                                        largestMoveDepth = Math.Max(moveDepth, largestMoveDepth);
+                                        
+                                        float normalDepth = Polygon.ComputeLargestCrossSection(intersection, surfaceNormal);
+                                        largestNormalDepth = Math.Max(normalDepth, largestNormalDepth);
                                     }
                                 }
                             
-                                // Line gizmoLine = new Line(transformPosition, otherTransform.Position);
-                                // Owner.DrawGizmo(gizmoLine.From + gizmoLine.Normal * 0.1f, gizmoLine.To + gizmoLine.Normal * 0.1f, Color.Red, Color.Black);
+                                Line gizmoLine = new Line(tempNormalStart, tempNormalStart + surfaceNormal);
+                                Scene.DrawGizmo(gizmoLine.From + gizmoLine.Normal * 0.1f, gizmoLine.To + gizmoLine.Normal * 0.1f, Color.Red, Color.Black);
                                 
-                                float restitution = Math.Max(physics.Restitution, otherPhysics.Restitution);
-                                float friction = otherPhysics.Friction;
-                                float damping = 1f;
-                            
-                                if(!largestCrossSection.Equals(float.NaN) && totalSurfaceNormalFaceLength > 0) {
-                                    Complex surfaceNormalComplex = surfaceNormalSum / totalSurfaceNormalFaceLength;
+                                if(!largestMoveDepth.Equals(float.NaN) && maxSurfaceNormalFaceLength > 0) {
+                                    Complex surfaceNormalComplex = surfaceNormal;
+                                    if(largestNormalDepth <= 0) continue;
+                                    if(Math.Abs(Vector2.Dot(moveDirection, surfaceNormal)) <= 0.01f) continue;
                                     
-                                    Scene.Events.Invoke(new CollisionEvent(_physicsObjects.GetEntityId(), _colliders.GetEntityId(), surfaceNormalComplex));
-                                    Scene.Events.Invoke(new CollisionEvent(_colliders.GetEntityId(), _physicsObjects.GetEntityId(), -(Vector2)surfaceNormalComplex));
-
-                                    if(!physics.Static) {
-                                        if(DrawCollisionGizmos) {
-                                            Scene.DrawGizmo(tempNormalStart, tempNormalStart + surfaceNormalSum / totalSurfaceNormalFaceLength, Color.Gold);
-                                        }
-
-                                        physics.ContactDisplacement += surfaceNormalSum / totalSurfaceNormalFaceLength * largestCrossSection;
-
-                                        float velocityInNormalDirection = (((Complex) (physics.Velocity - otherPhysics.Velocity)) / surfaceNormalComplex).A;
-                                        float velocityInTangentDirection = (((Complex) (physics.Velocity - otherPhysics.Velocity)) / surfaceNormalComplex).B;
-                                        
-                                        // Vector2 normalForce = ((Vector2)surfaceNormalComplex.Normalized) * physics.Mass * -velocityInNormalDirection;
-                                        // physics.ApplyForce(normalForce, default, ForceMode.Continuous);
-
-                                        Vector2 normalForce = (Vector2) surfaceNormalComplex.Normalized
-                                                              * -damping
-                                                              * velocityInNormalDirection
-                                                              * physics.Mass;
-
-                                        Vector2 staticFriction =
-                                            (Vector2) (surfaceNormalComplex.Normalized * Complex.Imaginary)
-                                            * -velocityInTangentDirection
-                                            * physics.Mass;
-
-                                        bool staticCapped = false;
-                                        if(staticFriction.Length() > friction * normalForce.Length()) {
-                                            staticCapped = true;
-                                            staticFriction = staticFriction.Normalized() * friction * normalForce.Length();
-                                        }
-                                        
-                                        Vector2 kineticFriction =
-                                            ((Vector2) (surfaceNormalComplex.Normalized * Complex.Imaginary)
-                                             * -velocityInTangentDirection).Normalized()
-                                            * friction
-                                            * normalForce.Length();
-
-                                        Vector2 frictionForce = staticCapped ? kineticFriction : staticFriction;
-
-                                        // physics.ApplyForce(normalForce, default, ForceMode.Instant);
-                                        // physics.ApplyForce(frictionForce, default, ForceMode.Instant);
-
-                                        physics.Velocity += (normalForce + frictionForce) / physics.Mass;
-                                        
-                                        physics.ApplyForce(normalForce * restitution, default, ForceMode.Instant);
-                                    }
+                                    _collisions.Add(new CollisionEvent() {
+                                        First = _physicsObjects.GetEntityId(),
+                                        Second = _colliders.GetEntityId(),
+                                        Normal = surfaceNormalComplex,
+                                        Direction = moveDirection,
+                                        NormalDepth = largestNormalDepth,
+                                        DirectionDepth = largestMoveDepth,
+                                        Separation = relativeVelocity.Length() - largestMoveDepth
+                                    });
                                 }
                             }
                         }
@@ -210,7 +181,7 @@ namespace FoldEngine.Physics {
             }
         }
         
-        private const bool UseVerletIntegration = false;
+        private const bool UseVerletIntegration = true;
 
         private void ApplyDynamics() {
             _physicsObjects.Reset();
@@ -232,17 +203,95 @@ namespace FoldEngine.Physics {
             }
         }
 
-        private void ApplyContactDisplacement() {
-            _physicsObjects.Reset();
-            while(_physicsObjects.Next()) {
-                ref Transform transform = ref _physicsObjects.GetCoComponent<Transform>();
-                ref Physics physics = ref _physicsObjects.GetComponent();
+        private static readonly Comparison<CollisionEvent> SortBySeparation = (a, b) => Math.Sign(b.Separation - a.Separation);
 
-                if(!physics.Static) {
-                    transform.Position += physics.ContactDisplacement;
+        private void CollisionResponse() {
+            // if(_collisions.Count > 3 && Keyboard.GetState().IsKeyDown(Keys.A)) {
+            //     Console.WriteLine("COLLISION");
+            // }
+            _collisions.Sort(SortBySeparation);
+
+            foreach(CollisionEvent collision in _collisions) {
+                Entity a = new Entity(Scene, collision.First);
+                Entity b = new Entity(Scene, collision.Second);
+
+                ref Physics physicsA = ref a.GetComponent<Physics>();
+                ref Physics physicsB = ref b.GetComponent<Physics>();
+
+                if(!physicsA.Static) {
+                    float friction = physicsB.Friction;
+                    float restitution = Math.Max(physicsA.Restitution, physicsB.Restitution);
+                    if(AttemptDisplacement(a, ref physicsA, -collision.Direction.Normalized() * collision.DirectionDepth, collision.Normal.Normalized(), friction)) {
+                        ApplyContactForces(ref physicsA, ref physicsB, collision.Normal, friction, restitution);
+                    }
                 }
-                physics.ContactDisplacement = default;
+                
+                Scene.Events.Invoke(collision);
             }
+        }
+
+        private bool AttemptDisplacement(Entity entity, ref Physics physics, Vector2 amount, Vector2 surfaceNormal, float friction) {
+            Complex normalComplex = surfaceNormal;
+            
+            float displacementInNormalDirection = ((Complex)amount / normalComplex).A;
+            float displacementInTangentDirection = ((Complex)amount / normalComplex).B;
+            displacementInTangentDirection *= (friction * Time.FixedDeltaTime);
+            
+            amount = new Complex(displacementInNormalDirection, displacementInTangentDirection) * normalComplex;
+
+            
+            float remainingDisplacement = amount.Length() - ((Complex)physics.ContactDisplacement / (Complex) amount.Normalized()).A;
+            if(remainingDisplacement > 0) {
+                Vector2 amountToDisplace = amount.Normalized() * remainingDisplacement;
+                physics.ContactDisplacement += amountToDisplace;
+                entity.Transform.Position += amountToDisplace;
+                return true;
+            }
+
+            return false;
+        }
+
+        private void ApplyContactForces(ref Physics physicsA, ref Physics physicsB, Vector2 normal, float friction, float restitution) {
+            Complex normalComplex = normal;
+            
+            float damping = 1f;
+            
+            float velocityInNormalDirection = (((Complex) (physicsA.Velocity - physicsB.Velocity)) / normalComplex).A;
+            float velocityInTangentDirection = (((Complex) (physicsA.Velocity - physicsB.Velocity)) / normalComplex).B;
+            
+            // Vector2 normalForce = ((Vector2)surfaceNormalComplex.Normalized) * physics.Mass * -velocityInNormalDirection;
+            // physics.ApplyForce(normalForce, default, ForceMode.Continuous);
+            
+            Vector2 normalForce = normal.Normalized()
+                                  * -damping
+                                  * velocityInNormalDirection
+                                  * physicsA.Mass;
+            
+            Vector2 staticFriction =
+                (Vector2) (normalComplex.Normalized * Complex.Imaginary)
+                * -velocityInTangentDirection
+                * physicsA.Mass;
+            
+            bool staticCapped = false;
+            if(staticFriction.Length() > friction * normalForce.Length()) {
+                staticCapped = true;
+                staticFriction = staticFriction.Normalized() * friction * normalForce.Length();
+            }
+            
+            Vector2 kineticFriction =
+                ((Vector2) (normalComplex.Normalized * Complex.Imaginary)
+                 * -velocityInTangentDirection).Normalized()
+                * friction
+                * normalForce.Length();
+            
+            Vector2 frictionForce = staticCapped ? kineticFriction : staticFriction;
+            
+            // physics.ApplyForce(normalForce, default, ForceMode.Instant);
+            // physics.ApplyForce(frictionForce, default, ForceMode.Instant);
+            
+            physicsA.Velocity += (normalForce + frictionForce) / physicsA.Mass;
+            
+            physicsA.ApplyForce(normalForce * restitution, default, ForceMode.Instant);
         }
 
         private void ApplyAndResetForces() {
@@ -264,6 +313,8 @@ namespace FoldEngine.Physics {
                 physics.AccelerationFromForce = default;
                 physics.PreviousVelocity = physics.Velocity;
                 physics.Torque = default;
+
+                physics.ContactDisplacement = default;
             }
         }
     }
@@ -273,11 +324,19 @@ namespace FoldEngine.Physics {
         public long First;
         public long Second;
         public Vector2 Normal;
+        public Vector2 Direction;
+        public float NormalDepth;
+        public float DirectionDepth;
+        public float Separation;
 
-        public CollisionEvent(long first, long second, Vector2 normal) {
+        public CollisionEvent(long first, long second, Vector2 normal, float depth = 0, float separation = 0) {
             this.First = first;
             this.Second = second;
             this.Normal = normal;
+            this.Direction = normal;
+            this.NormalDepth = depth;
+            this.DirectionDepth = depth;
+            this.Separation = separation;
         }
     }
 }

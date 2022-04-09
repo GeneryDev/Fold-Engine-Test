@@ -27,7 +27,7 @@ namespace Sandbox {
             Systems.Add<TextureAtlasSystem>();
             Systems.Add<SimplePhysicsSystem>();
             Systems.Add<LevelRenderer2D>();
-            Systems.Add<ColliderGizmoRenderer>();
+            // Systems.Add<ColliderGizmoRenderer>();
             Systems.Add<DebugSystem>();
             
             Entity e0 = CreateEntity("Entity 0");
@@ -48,6 +48,7 @@ namespace Sandbox {
                 mr.MeshIdentifier = new ResourceIdentifier("square");
                 mr.TextureIdentifier = new ResourceIdentifier("terrain/amethyst_block");
             }
+            e1.Transform.Position += Vector2.UnitX * 0.3f;
             e1.Transform.Position += Vector2.UnitY * 64;
             e1.AddComponent<Physics>();
             e1.AddComponent<Collider>().SetBox(1, 1);
@@ -58,7 +59,7 @@ namespace Sandbox {
                 mr.MeshIdentifier = new ResourceIdentifier("square");
                 mr.TextureIdentifier = new ResourceIdentifier("terrain/amethyst_block");
             }
-            e3.Transform.Position += Vector2.UnitY * 60;
+            e3.Transform.Position += Vector2.UnitY * 59.75f;
             e3.Transform.Position += Vector2.UnitX * -0.7f;
             e3.AddComponent<Physics>().Static = true;
             e3.AddComponent<Collider>().SetBox(1, 1);
@@ -69,7 +70,7 @@ namespace Sandbox {
                 mr.MeshIdentifier = new ResourceIdentifier("square");
                 mr.TextureIdentifier = new ResourceIdentifier("terrain/amethyst_block");
             }
-            e4.Transform.Position += Vector2.UnitY * 60;
+            e4.Transform.Position += Vector2.UnitY * 59.75f;
             e4.Transform.Position += Vector2.UnitX * 0.7f;
             e4.AddComponent<Physics>().Static = true;
             e4.AddComponent<Collider>().SetBox(1, 1);
