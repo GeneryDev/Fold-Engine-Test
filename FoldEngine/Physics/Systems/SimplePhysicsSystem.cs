@@ -24,8 +24,6 @@ namespace FoldEngine.Physics {
         public Vector2 Gravity = new Vector2(0, -27);
         public float FaceNormalVelocityDotTolerance = 0f;
 
-        private List<CollisionEvent> _collisions = new List<CollisionEvent>();
-        
         internal override void Initialize() {
             _physicsObjects = CreateComponentIterator<Physics>(IterationFlags.None);
             _colliders = CreateComponentIterator<Collider>(IterationFlags.None);
@@ -34,13 +32,10 @@ namespace FoldEngine.Physics {
         public override void OnFixedUpdate() {
             ApplyDynamics();
             CollisionDetectionAndResponse();
-            // CalculateForcesAndCollision();
-            // if(_collisions.Count > 0) CollisionResponse();
-            // ApplyContactDisplacement();
             ApplyAndResetForces();
         }
         
-        private List<IntersectionData> _nearbyIntersections = new List<IntersectionData>();
+        private readonly List<IntersectionData> _nearbyIntersections = new List<IntersectionData>();
 
         private void CollisionDetectionAndResponse() {
             _physicsObjects.Reset();
@@ -50,6 +45,7 @@ namespace FoldEngine.Physics {
                 
                 Vector2 transformPosition = transform.Position;
                 
+                //Apply gravity
                 if(!physics.Static) {
                     physics.ApplyForce(Gravity * physics.GravityMultiplier * physics.Mass, default, ForceMode.Continuous);
                 }
@@ -57,17 +53,15 @@ namespace FoldEngine.Physics {
                     Scene.DrawGizmo(transformPosition, transformPosition + physics.Velocity.Normalized() * 1, Color.Gold, zOrder: 1);
                 }
                 
+                //Skip if no collider
                 Collider collider = default;
-
                 if(_physicsObjects.HasCoComponent<Collider>()) {
                     collider = _physicsObjects.GetCoComponent<Collider>();
                 }
-
                 if(collider.Type == ColliderType.None) continue;
                 
-                float colliderReach = collider.GetReach(ref transform);
-                
                 //Get list of nearby colliders
+                float colliderReach = collider.GetReach(ref transform);
                 _nearbyIntersections.Clear();
                 
                 _colliders.Reset();
@@ -98,7 +92,7 @@ namespace FoldEngine.Physics {
                 if(_nearbyIntersections.Count == 0) continue;
                 
                 //Calculate initial intersection of each nearby collider
-                CalculateIntersections(collider.GetVertices(ref transform), physics.Velocity, physics.PreviousPosition - transformPosition);
+                CalculateIntersections(collider.GetVertices(ref transform), physics.Velocity);
 
                 while(_nearbyIntersections.Count > 0) {
                     // if(_nearbyIntersections[0].Intersections == null) break; //No more intersections
@@ -111,18 +105,17 @@ namespace FoldEngine.Physics {
                     CollisionResponse(_nearbyIntersections[i], new Entity(Scene, _physicsObjects.GetEntityId()));
                     
                     _nearbyIntersections.RemoveAt(i);
-                    CalculateIntersections(collider.GetVertices(ref transform), physics.Velocity, physics.PreviousPosition - transform.Position);
+                    CalculateIntersections(collider.GetVertices(ref transform), physics.Velocity);
                 }
             }
         }
 
-        private void CalculateIntersections(Vector2[] colliderVertices, Vector2 velocity, Vector2 positionDelta) {
+        private void CalculateIntersections(Vector2[] colliderVertices, Vector2 velocity) {
             for(int i = 0; i < _nearbyIntersections.Count; i++) {
                 IntersectionData data = _nearbyIntersections[i];
                 Entity other = new Entity(Scene, data.Other);
 
                 ref Transform otherTransform = ref other.Transform;
-                ref Physics otherPhysics = ref other.GetComponent<Physics>();
                 ref Collider otherCollider = ref other.GetComponent<Collider>();
                     
                 Polygon.PolygonIntersectionVertex[][] intersections =
@@ -130,7 +123,6 @@ namespace FoldEngine.Physics {
                         otherCollider.GetVertices(ref otherTransform));
                 if(intersections != null && intersections.Length == 0) intersections = null;
                 data.Intersections = intersections;
-                data.Area = -1;
 
                 if(data.Intersections != null) {
                     float area = 0;
@@ -157,34 +149,18 @@ namespace FoldEngine.Physics {
                     } else {
                         data.SortKey = 0;
                     }
-                    
-                    Vector2 vecBToCompare = velocity.Normalized();
-
-                    if(!float.IsNaN(vecBToCompare.X)) {
-                        data.SortKeyB = -(((Complex) data.ContactPoint) / (Complex) vecBToCompare).A;
-                    } else {
-                        data.SortKeyB = 0;
-                    }
                 }
 
                 _nearbyIntersections[i] = data;
             }
-            // _nearbyIntersections.Sort((a, b) => Math.Sign(a.Area - b.Area)); //ascending, bad surface behavior, good squishing behavior
-            // _nearbyIntersections.Sort((a, b) => Math.Sign(b.Area - a.Area)); //descending, good surface behavior, bad squishing behavior
-            _nearbyIntersections.Sort((a, b) => {
-                int signA = Math.Sign(b.SortKey - a.SortKey);
-                if(signA != 0) return signA;
-                return Math.Sign(b.SortKeyB - a.SortKeyB);
-            });
+            _nearbyIntersections.Sort(SortByKey);
         }
 
         private void CollisionResponse(IntersectionData data, Entity entity) {
             ref Transform transform = ref entity.Transform;
             ref Physics physics = ref entity.GetComponent<Physics>();
-            ref Collider collider = ref entity.GetComponent<Collider>();
 
             Entity other = new Entity(entity.Scene, data.Other);
-            ref Transform otherTransform = ref other.Transform;
             ref Physics otherPhysics = ref other.GetComponent<Physics>();
             ref Collider otherCollider = ref other.GetComponent<Collider>();
             
@@ -198,7 +174,7 @@ namespace FoldEngine.Physics {
             Vector2 surfaceNormal = default;
             float maxSurfaceNormalFaceLength = 0;
 
-            Vector2 tempNormalStart = default;
+            // Vector2 tempNormalStart = default;
 
             foreach(Polygon.PolygonIntersectionVertex[] intersection in data.Intersections) {
                 for(int i = 0; i < intersection.Length; i++) {
@@ -210,8 +186,6 @@ namespace FoldEngine.Physics {
                     Vector2 normal = face.Normal;
 
                     float normalMoveDot = Vector2.Dot(normal, moveDirection);
-
-                    // Console.WriteLine(normalMoveDot);
 
                     if((current.IsFromB && next.IsFromB)
                        && normalMoveDot <= FaceNormalVelocityDotTolerance) {
@@ -230,9 +204,6 @@ namespace FoldEngine.Physics {
                                     surfaceNormal = normal;
                                     maxSurfaceNormalFaceLength = faceLength;
                                 }
-
-                                // surfaceNormalSumFallback += normal * faceLength;
-                                // totalSurfaceNormalFaceLengthFallback += faceLength;
                             } else {
                                 if(faceLength > maxSurfaceNormalFaceLength) {
                                     surfaceNormal = normal;
@@ -240,7 +211,7 @@ namespace FoldEngine.Physics {
                                 }
                             }
 
-                            tempNormalStart = current.Position;
+                            // tempNormalStart = current.Position;
                         }
 
                     }
@@ -260,9 +231,9 @@ namespace FoldEngine.Physics {
                 }
             }
 
-            Line gizmoLine = new Line(tempNormalStart, tempNormalStart + surfaceNormal);
-            Scene.DrawGizmo(gizmoLine.From + gizmoLine.Normal * 0.1f, gizmoLine.To + gizmoLine.Normal * 0.1f,
-                Color.Red, Color.Black);
+            // Line gizmoLine = new Line(tempNormalStart, tempNormalStart + surfaceNormal);
+            // Scene.DrawGizmo(gizmoLine.From + gizmoLine.Normal * 0.1f, gizmoLine.To + gizmoLine.Normal * 0.1f,
+            //     Color.Red, Color.Black);
 
             if(!largestMoveDepth.Equals(float.NaN) && maxSurfaceNormalFaceLength > 0) {
                 Complex surfaceNormalComplex = surfaceNormal;
@@ -282,7 +253,7 @@ namespace FoldEngine.Physics {
                 if(!physics.Static) {
                     float friction = otherPhysics.Friction;
                     float restitution = Math.Max(physics.Restitution, otherPhysics.Restitution);
-                    if(AttemptDisplacement(entity, ref physics, -collision.Direction.Normalized() * collision.DirectionDepth, collision.Normal.Normalized(), friction)) {
+                    if(AttemptDisplacement(entity, -collision.Direction.Normalized() * collision.DirectionDepth, collision.Normal.Normalized(), friction)) {
                         ApplyContactForces(ref physics, ref otherPhysics, collision.Normal, friction, restitution);
                     }
                 }
@@ -291,148 +262,6 @@ namespace FoldEngine.Physics {
             }
         }
 
-        private void CalculateForcesAndCollision() {
-            _collisions.Clear();
-            _physicsObjects.Reset();
-            while(_physicsObjects.Next()) {
-                ref Transform transform = ref _physicsObjects.GetCoComponent<Transform>();
-                ref Physics physics = ref _physicsObjects.GetComponent();
-
-                Vector2 transformPosition = transform.Position;
-                float positionDelta = (transform.Position - physics.PreviousPosition).Length();
-
-                if(!physics.Static) {
-                    physics.ApplyForce(Gravity * physics.GravityMultiplier * physics.Mass, default, ForceMode.Continuous);
-                }
-                if(DrawCollisionGizmos) {
-                    Scene.DrawGizmo(transformPosition, transformPosition + physics.Velocity.Normalized() * 1, Color.Gold, zOrder: 1);
-                }
-
-                Collider collider = default;
-
-                if(_physicsObjects.HasCoComponent<Collider>()) {
-                    collider = _physicsObjects.GetCoComponent<Collider>();
-                }
-
-                if(collider.Type != ColliderType.None) {
-                    Vector2[] colliderVertices = collider.GetVertices(ref transform);
-                    float colliderReach = collider.GetReach(ref transform);
-
-                    _colliders.Reset();
-                    while(_colliders.Next()) {
-                        if(_colliders.GetEntityId() == _physicsObjects.GetEntityId()) continue; //Skip if self
-                        
-                        ref Transform otherTransform = ref _colliders.GetCoComponent<Transform>();
-                        if(!_colliders.HasCoComponent<Physics>()) continue;
-                        ref Physics otherPhysics = ref _colliders.GetCoComponent<Physics>();
-                        ref Collider otherCollider = ref _colliders.GetComponent();
-                        if(otherCollider.Type == ColliderType.None) continue;
-                        
-                        //Skip if too far
-                        float otherColliderReach = otherCollider.GetReach(ref otherTransform);
-                        if(Vector2.DistanceSquared(transformPosition, otherTransform.Position)
-                           > Math.Pow(colliderReach + otherColliderReach, 2)) continue;
-                        
-                        Vector2 relativeVelocity = physics.Velocity - otherPhysics.Velocity;
-
-                        if(relativeVelocity != default) {
-                            //Compute intersections
-                            Polygon.PolygonIntersectionVertex[][] intersections =
-                                Polygon.ComputePolygonIntersection(colliderVertices,
-                                    otherCollider.GetVertices(ref otherTransform));
-                            
-                            Vector2 moveDirection = relativeVelocity.Normalized();
-                            float largestNormalDepth = 0;
-                            float largestMoveDepth = 0;
-                            Vector2 surfaceNormal = default;
-                            float maxSurfaceNormalFaceLength = 0;
-
-                            Vector2 tempNormalStart = default;
-                            
-                            if(intersections != null && intersections.Length != 0) {
-                                foreach(Polygon.PolygonIntersectionVertex[] intersection in intersections) {
-                                    for(int i = 0; i < intersection.Length; i++) {
-                                        Polygon.PolygonIntersectionVertex current = intersection[i];
-                                        Polygon.PolygonIntersectionVertex next = intersection[(i+1) % intersection.Length];
-
-                                        var face = new Line(current.Position, next.Position);
-                                        float faceLength = face.Magnitude;
-                                        Vector2 normal = face.Normal;
-
-                                        float normalMoveDot = Vector2.Dot(normal, moveDirection);
-
-                                        // Console.WriteLine(normalMoveDot);
-                                        
-                                        if((current.IsFromB && next.IsFromB)
-                                           && normalMoveDot <= FaceNormalVelocityDotTolerance) {
-                                            
-                                            bool validFace;
-
-                                            if(otherCollider.ThickFaces) validFace = true;
-                                            else {
-                                                float crossSection = Polygon.ComputeLargestCrossSection(intersection, normal);
-                                                validFace = positionDelta >= crossSection - otherCollider.ThinFaceTolerance;
-                                            }
-
-                                            if(validFace) {
-                                                if(current.IsFromA && next.IsFromA) {
-                                                    if(maxSurfaceNormalFaceLength == 0) {
-                                                        surfaceNormal = normal;
-                                                        maxSurfaceNormalFaceLength = faceLength;
-                                                    }
-                                                    // surfaceNormalSumFallback += normal * faceLength;
-                                                    // totalSurfaceNormalFaceLengthFallback += faceLength;
-                                                } else {
-                                                    if(faceLength > maxSurfaceNormalFaceLength) {
-                                                        surfaceNormal = normal;
-                                                        maxSurfaceNormalFaceLength = faceLength;
-                                                    }
-                                                }
-                                                
-                                                tempNormalStart = current.Position;
-                                            }
-                                            
-                                        }
-                                        //Draw gizmos
-                                        if(DrawCollisionGizmos) {
-                                            Scene.DrawGizmo(current.Position, next.Position, Color.Fuchsia, zOrder: 1);
-                                        }
-                                    }
-
-                                    if(maxSurfaceNormalFaceLength != 0) {
-                                        float moveDepth = Polygon.ComputeLargestCrossSection(intersection, moveDirection);
-                                        largestMoveDepth = Math.Max(moveDepth, largestMoveDepth);
-                                        
-                                        float normalDepth = Polygon.ComputeLargestCrossSection(intersection, surfaceNormal);
-                                        largestNormalDepth = Math.Max(normalDepth, largestNormalDepth);
-                                    }
-                                }
-                            
-                                Line gizmoLine = new Line(tempNormalStart, tempNormalStart + surfaceNormal);
-                                Scene.DrawGizmo(gizmoLine.From + gizmoLine.Normal * 0.1f, gizmoLine.To + gizmoLine.Normal * 0.1f, Color.Red, Color.Black);
-                                
-                                if(!largestMoveDepth.Equals(float.NaN) && maxSurfaceNormalFaceLength > 0) {
-                                    Complex surfaceNormalComplex = surfaceNormal;
-                                    if(largestNormalDepth <= 0) continue;
-                                    if(Math.Abs(Vector2.Dot(moveDirection, surfaceNormal)) <= 0.01f) continue;
-                                    
-                                    _collisions.Add(new CollisionEvent() {
-                                        First = _physicsObjects.GetEntityId(),
-                                        Second = _colliders.GetEntityId(),
-                                        Normal = surfaceNormalComplex,
-                                        Direction = moveDirection,
-                                        NormalDepth = largestNormalDepth,
-                                        DirectionDepth = largestMoveDepth,
-                                        Separation = relativeVelocity.Length() - largestMoveDepth
-                                    });
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
         private const bool UseVerletIntegration = true;
 
         private void ApplyDynamics() {
@@ -455,34 +284,12 @@ namespace FoldEngine.Physics {
             }
         }
 
-        private static readonly Comparison<CollisionEvent> SortBySeparation = (a, b) => Math.Sign(b.Separation - a.Separation);
+        private static readonly Comparison<IntersectionData> SortByKey = (a, b) => {
+            int byKey = Math.Sign(b.SortKey - a.SortKey);
+            return byKey != 0 ? byKey : Math.Sign(b.Area - a.Area);
+        };
 
-        private void CollisionResponse() {
-            // if(_collisions.Count > 3 && Keyboard.GetState().IsKeyDown(Keys.A)) {
-            //     Console.WriteLine("COLLISION");
-            // }
-            _collisions.Sort(SortBySeparation);
-
-            foreach(CollisionEvent collision in _collisions) {
-                Entity a = new Entity(Scene, collision.First);
-                Entity b = new Entity(Scene, collision.Second);
-
-                ref Physics physicsA = ref a.GetComponent<Physics>();
-                ref Physics physicsB = ref b.GetComponent<Physics>();
-
-                if(!physicsA.Static) {
-                    float friction = physicsB.Friction;
-                    float restitution = Math.Max(physicsA.Restitution, physicsB.Restitution);
-                    if(AttemptDisplacement(a, ref physicsA, -collision.Direction.Normalized() * collision.DirectionDepth, collision.Normal.Normalized(), friction)) {
-                        ApplyContactForces(ref physicsA, ref physicsB, collision.Normal, friction, restitution);
-                    }
-                }
-                
-                Scene.Events.Invoke(collision);
-            }
-        }
-
-        private bool AttemptDisplacement(Entity entity, ref Physics physics, Vector2 amount, Vector2 surfaceNormal, float friction) {
+        private bool AttemptDisplacement(Entity entity, Vector2 amount, Vector2 surfaceNormal, float friction) {
             Complex normalComplex = surfaceNormal;
             
             float displacementInNormalDirection = ((Complex)amount / normalComplex).A;
@@ -491,20 +298,8 @@ namespace FoldEngine.Physics {
             
             amount = new Complex(displacementInNormalDirection, displacementInTangentDirection) * normalComplex;
 
-            if(true) {
-                entity.Transform.Position += amount;
-                return true;
-            }
-            
-            float remainingDisplacement = amount.Length() - ((Complex)physics.ContactDisplacement / (Complex) amount.Normalized()).A;
-            if(remainingDisplacement > 0) {
-                Vector2 amountToDisplace = amount.Normalized() * remainingDisplacement;
-                physics.ContactDisplacement += amountToDisplace;
-                entity.Transform.Position += amountToDisplace;
-                return true;
-            }
-
-            return false;
+            entity.Transform.Position += amount;
+            return true;
         }
 
         private void ApplyContactForces(ref Physics physicsA, ref Physics physicsB, Vector2 normal, float friction, float restitution) {
@@ -514,9 +309,6 @@ namespace FoldEngine.Physics {
             
             float velocityInNormalDirection = (((Complex) (physicsA.Velocity - physicsB.Velocity)) / normalComplex).A;
             float velocityInTangentDirection = (((Complex) (physicsA.Velocity - physicsB.Velocity)) / normalComplex).B;
-            
-            // Vector2 normalForce = ((Vector2)surfaceNormalComplex.Normalized) * physics.Mass * -velocityInNormalDirection;
-            // physics.ApplyForce(normalForce, default, ForceMode.Continuous);
             
             Vector2 normalForce = normal.Normalized()
                                   * -damping
@@ -577,18 +369,16 @@ namespace FoldEngine.Physics {
         private struct IntersectionData {
             public long Other;
             public Polygon.PolygonIntersectionVertex[][] Intersections;
-            public float Area;
             public Vector2 ContactPoint;
             public float SortKey;
-            public float SortKeyB;
+            public float Area;
 
             public IntersectionData(long otherId) {
                 Other = otherId;
                 Intersections = null;
-                Area = 0;
                 ContactPoint = default;
                 SortKey = 0;
-                SortKeyB = 0;
+                Area = 0;
             }
         }
     }
