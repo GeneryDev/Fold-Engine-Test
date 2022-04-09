@@ -262,7 +262,7 @@ namespace FoldEngine.Physics {
             }
         }
 
-        private const bool UseVerletIntegration = true;
+        private const bool UseVerletIntegration = false;
 
         private void ApplyDynamics() {
             _physicsObjects.Reset();
@@ -333,13 +333,15 @@ namespace FoldEngine.Physics {
                 * normalForce.Length();
             
             Vector2 frictionForce = staticCapped ? kineticFriction : staticFriction;
+
+            if(UseVerletIntegration) {
+                physicsA.Velocity += (normalForce + frictionForce) / physicsA.Mass;
+            } else {
+                physicsA.ApplyForce(normalForce, default, ForceMode.Instant);
+                physicsA.ApplyForce(frictionForce, default, ForceMode.Instant);
+            }
             
-            // physics.ApplyForce(normalForce, default, ForceMode.Instant);
-            // physics.ApplyForce(frictionForce, default, ForceMode.Instant);
-            
-            physicsA.Velocity += (normalForce + frictionForce) / physicsA.Mass;
-            
-            physicsA.ApplyForce(normalForce * restitution, default, ForceMode.Instant);
+            physicsA.ApplyForce(normalForce * restitution, default, ForceMode.Instant); //TODO
         }
 
         private void ApplyAndResetForces() {
