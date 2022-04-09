@@ -97,7 +97,7 @@ namespace Sandbox {
             e2.Transform.Position += Vector2.UnitY * 57;
             e2.Transform.LocalScale = new Vector2(9, 4);
             e2.AddComponent<Physics>().Static = true;
-            e2.AddComponent<Collider>().ThickFaces = false;
+            e2.AddComponent<Collider>().ThickFaces = true;
 
 
 

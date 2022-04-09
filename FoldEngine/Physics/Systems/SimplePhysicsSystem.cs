@@ -33,10 +33,262 @@ namespace FoldEngine.Physics {
         
         public override void OnFixedUpdate() {
             ApplyDynamics();
-            CalculateForcesAndCollision();
-            if(_collisions.Count > 0) CollisionResponse();
+            CollisionDetectionAndResponse();
+            // CalculateForcesAndCollision();
+            // if(_collisions.Count > 0) CollisionResponse();
             // ApplyContactDisplacement();
             ApplyAndResetForces();
+        }
+        
+        private List<IntersectionData> _nearbyIntersections = new List<IntersectionData>();
+
+        private void CollisionDetectionAndResponse() {
+            _physicsObjects.Reset();
+            while(_physicsObjects.Next()) {
+                ref Transform transform = ref _physicsObjects.GetCoComponent<Transform>();
+                ref Physics physics = ref _physicsObjects.GetComponent();
+                
+                Vector2 transformPosition = transform.Position;
+                
+                if(!physics.Static) {
+                    physics.ApplyForce(Gravity * physics.GravityMultiplier * physics.Mass, default, ForceMode.Continuous);
+                }
+                if(DrawCollisionGizmos) {
+                    Scene.DrawGizmo(transformPosition, transformPosition + physics.Velocity.Normalized() * 1, Color.Gold, zOrder: 1);
+                }
+                
+                Collider collider = default;
+
+                if(_physicsObjects.HasCoComponent<Collider>()) {
+                    collider = _physicsObjects.GetCoComponent<Collider>();
+                }
+
+                if(collider.Type == ColliderType.None) continue;
+                
+                float colliderReach = collider.GetReach(ref transform);
+                
+                //Get list of nearby colliders
+                _nearbyIntersections.Clear();
+                
+                _colliders.Reset();
+                while(_colliders.Next()) {
+                    //Skip if self
+                    if(_colliders.GetEntityId() == _physicsObjects.GetEntityId()) continue;
+                    
+                    ref Collider otherCollider = ref _colliders.GetComponent();
+                    //Skip if no collider
+                    if(otherCollider.Type == ColliderType.None) continue;
+
+                    //Skip static-static pairs
+                    if(physics.Static) {
+                        if(!_colliders.HasCoComponent<Physics>()) continue; 
+                        ref Physics otherPhysics = ref _colliders.GetCoComponent<Physics>();
+                        if(otherPhysics.Static) continue;
+                    }
+                    
+                    //Skip if too far
+                    ref Transform otherTransform = ref _colliders.GetCoComponent<Transform>();
+                    float otherColliderReach = otherCollider.GetReach(ref otherTransform);
+                    if(Vector2.DistanceSquared(transformPosition, otherTransform.Position)
+                       > Math.Pow(colliderReach + otherColliderReach, 2)) continue;
+                    
+                    _nearbyIntersections.Add(new IntersectionData(_colliders.GetEntityId()));
+                }
+
+                if(_nearbyIntersections.Count == 0) continue;
+                
+                //Calculate initial intersection of each nearby collider
+                CalculateIntersections(collider.GetVertices(ref transform), physics.Velocity, physics.PreviousPosition - transformPosition);
+
+                while(_nearbyIntersections.Count > 0) {
+                    // if(_nearbyIntersections[0].Intersections == null) break; //No more intersections
+                    int i = 0;
+                    for(; i < _nearbyIntersections.Count; i++) {
+                        if(_nearbyIntersections[i].Intersections != null) break;
+                    }
+                    if(i >= _nearbyIntersections.Count) break;
+                    
+                    CollisionResponse(_nearbyIntersections[i], new Entity(Scene, _physicsObjects.GetEntityId()));
+                    
+                    _nearbyIntersections.RemoveAt(i);
+                    CalculateIntersections(collider.GetVertices(ref transform), physics.Velocity, physics.PreviousPosition - transform.Position);
+                }
+            }
+        }
+
+        private void CalculateIntersections(Vector2[] colliderVertices, Vector2 velocity, Vector2 positionDelta) {
+            for(int i = 0; i < _nearbyIntersections.Count; i++) {
+                IntersectionData data = _nearbyIntersections[i];
+                Entity other = new Entity(Scene, data.Other);
+
+                ref Transform otherTransform = ref other.Transform;
+                ref Physics otherPhysics = ref other.GetComponent<Physics>();
+                ref Collider otherCollider = ref other.GetComponent<Collider>();
+                    
+                Polygon.PolygonIntersectionVertex[][] intersections =
+                    Polygon.ComputePolygonIntersection(colliderVertices,
+                        otherCollider.GetVertices(ref otherTransform));
+                if(intersections != null && intersections.Length == 0) intersections = null;
+                data.Intersections = intersections;
+                data.Area = -1;
+
+                if(data.Intersections != null) {
+                    float area = 0;
+                    foreach(Polygon.PolygonIntersectionVertex[] intersection in data.Intersections) {
+                        area += Polygon.ComputePolygonArea(intersection);
+
+                        for(int j = 0; j < intersection.Length; j++) {
+                            
+                            Polygon.PolygonIntersectionVertex current = intersection[j];
+                            Polygon.PolygonIntersectionVertex next = intersection[(j + 1) % intersection.Length];
+                            
+                            if(current.IsFromB && next.IsFromB) {
+                                data.ContactPoint = current.Position;
+                            }
+                        }
+                    }
+
+                    data.Area = area;
+
+                    Vector2 vecAToCompare = Gravity.Normalized();
+
+                    if(!float.IsNaN(vecAToCompare.X)) {
+                        data.SortKey = -(((Complex) data.ContactPoint) / (Complex) vecAToCompare).A;
+                    } else {
+                        data.SortKey = 0;
+                    }
+                    
+                    Vector2 vecBToCompare = velocity.Normalized();
+
+                    if(!float.IsNaN(vecBToCompare.X)) {
+                        data.SortKeyB = -(((Complex) data.ContactPoint) / (Complex) vecBToCompare).A;
+                    } else {
+                        data.SortKeyB = 0;
+                    }
+                }
+
+                _nearbyIntersections[i] = data;
+            }
+            // _nearbyIntersections.Sort((a, b) => Math.Sign(a.Area - b.Area)); //ascending, bad surface behavior, good squishing behavior
+            // _nearbyIntersections.Sort((a, b) => Math.Sign(b.Area - a.Area)); //descending, good surface behavior, bad squishing behavior
+            _nearbyIntersections.Sort((a, b) => {
+                int signA = Math.Sign(b.SortKey - a.SortKey);
+                if(signA != 0) return signA;
+                return Math.Sign(b.SortKeyB - a.SortKeyB);
+            });
+        }
+
+        private void CollisionResponse(IntersectionData data, Entity entity) {
+            ref Transform transform = ref entity.Transform;
+            ref Physics physics = ref entity.GetComponent<Physics>();
+            ref Collider collider = ref entity.GetComponent<Collider>();
+
+            Entity other = new Entity(entity.Scene, data.Other);
+            ref Transform otherTransform = ref other.Transform;
+            ref Physics otherPhysics = ref other.GetComponent<Physics>();
+            ref Collider otherCollider = ref other.GetComponent<Collider>();
+            
+            float positionDelta = (transform.Position - physics.PreviousPosition).Length();
+            Vector2 relativeVelocity = physics.Velocity - otherPhysics.Velocity;
+            if(relativeVelocity == default) return;
+            
+            Vector2 moveDirection = relativeVelocity.Normalized();
+            float largestNormalDepth = 0;
+            float largestMoveDepth = 0;
+            Vector2 surfaceNormal = default;
+            float maxSurfaceNormalFaceLength = 0;
+
+            Vector2 tempNormalStart = default;
+
+            foreach(Polygon.PolygonIntersectionVertex[] intersection in data.Intersections) {
+                for(int i = 0; i < intersection.Length; i++) {
+                    Polygon.PolygonIntersectionVertex current = intersection[i];
+                    Polygon.PolygonIntersectionVertex next = intersection[(i + 1) % intersection.Length];
+
+                    var face = new Line(current.Position, next.Position);
+                    float faceLength = face.Magnitude;
+                    Vector2 normal = face.Normal;
+
+                    float normalMoveDot = Vector2.Dot(normal, moveDirection);
+
+                    // Console.WriteLine(normalMoveDot);
+
+                    if((current.IsFromB && next.IsFromB)
+                       && normalMoveDot <= FaceNormalVelocityDotTolerance) {
+
+                        bool validFace;
+
+                        if(otherCollider.ThickFaces) validFace = true;
+                        else {
+                            float crossSection = Polygon.ComputeLargestCrossSection(intersection, normal);
+                            validFace = positionDelta >= crossSection - otherCollider.ThinFaceTolerance;
+                        }
+
+                        if(validFace) {
+                            if(current.IsFromA && next.IsFromA) {
+                                if(maxSurfaceNormalFaceLength == 0) {
+                                    surfaceNormal = normal;
+                                    maxSurfaceNormalFaceLength = faceLength;
+                                }
+
+                                // surfaceNormalSumFallback += normal * faceLength;
+                                // totalSurfaceNormalFaceLengthFallback += faceLength;
+                            } else {
+                                if(faceLength > maxSurfaceNormalFaceLength) {
+                                    surfaceNormal = normal;
+                                    maxSurfaceNormalFaceLength = faceLength;
+                                }
+                            }
+
+                            tempNormalStart = current.Position;
+                        }
+
+                    }
+
+                    //Draw gizmos
+                    if(DrawCollisionGizmos) {
+                        Scene.DrawGizmo(current.Position, next.Position, Color.Fuchsia, zOrder: 1);
+                    }
+                }
+
+                if(maxSurfaceNormalFaceLength != 0) {
+                    float moveDepth = Polygon.ComputeLargestCrossSection(intersection, moveDirection);
+                    largestMoveDepth = Math.Max(moveDepth, largestMoveDepth);
+
+                    float normalDepth = Polygon.ComputeLargestCrossSection(intersection, surfaceNormal);
+                    largestNormalDepth = Math.Max(normalDepth, largestNormalDepth);
+                }
+            }
+
+            Line gizmoLine = new Line(tempNormalStart, tempNormalStart + surfaceNormal);
+            Scene.DrawGizmo(gizmoLine.From + gizmoLine.Normal * 0.1f, gizmoLine.To + gizmoLine.Normal * 0.1f,
+                Color.Red, Color.Black);
+
+            if(!largestMoveDepth.Equals(float.NaN) && maxSurfaceNormalFaceLength > 0) {
+                Complex surfaceNormalComplex = surfaceNormal;
+                if(largestNormalDepth <= 0) return;
+                if(Math.Abs(Vector2.Dot(moveDirection, surfaceNormal)) <= 0.01f) return;
+
+                var collision = new CollisionEvent() {
+                    First = entity.EntityId,
+                    Second = other.EntityId,
+                    Normal = surfaceNormalComplex,
+                    Direction = moveDirection,
+                    NormalDepth = largestNormalDepth,
+                    DirectionDepth = largestMoveDepth,
+                    Separation = relativeVelocity.Length() - largestMoveDepth
+                };
+                
+                if(!physics.Static) {
+                    float friction = otherPhysics.Friction;
+                    float restitution = Math.Max(physics.Restitution, otherPhysics.Restitution);
+                    if(AttemptDisplacement(entity, ref physics, -collision.Direction.Normalized() * collision.DirectionDepth, collision.Normal.Normalized(), friction)) {
+                        ApplyContactForces(ref physics, ref otherPhysics, collision.Normal, friction, restitution);
+                    }
+                }
+                
+                Scene.Events.Invoke(collision);
+            }
         }
 
         private void CalculateForcesAndCollision() {
@@ -239,6 +491,10 @@ namespace FoldEngine.Physics {
             
             amount = new Complex(displacementInNormalDirection, displacementInTangentDirection) * normalComplex;
 
+            if(true) {
+                entity.Transform.Position += amount;
+                return true;
+            }
             
             float remainingDisplacement = amount.Length() - ((Complex)physics.ContactDisplacement / (Complex) amount.Normalized()).A;
             if(remainingDisplacement > 0) {
@@ -315,6 +571,24 @@ namespace FoldEngine.Physics {
                 physics.Torque = default;
 
                 physics.ContactDisplacement = default;
+            }
+        }
+        
+        private struct IntersectionData {
+            public long Other;
+            public Polygon.PolygonIntersectionVertex[][] Intersections;
+            public float Area;
+            public Vector2 ContactPoint;
+            public float SortKey;
+            public float SortKeyB;
+
+            public IntersectionData(long otherId) {
+                Other = otherId;
+                Intersections = null;
+                Area = 0;
+                ContactPoint = default;
+                SortKey = 0;
+                SortKeyB = 0;
             }
         }
     }

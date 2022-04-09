@@ -146,6 +146,25 @@ namespace EntryProject.Util {
             }
             return ComputePolygonIntersection(verticesA, verticesB);
         }
+
+        [Pure]
+        public static float ComputePolygonArea(PolygonIntersectionVertex[] polygon) {
+            float area = 0;
+
+            for(int i = 0; i < polygon.Length; i++) {
+                int iPrev = i == 0 ? polygon.Length - 1 : i - 1;
+                int iNext = i == polygon.Length - 1 ? 0 : i + 1;
+
+                Vector2 origin = polygon[i].Position;
+
+                Vector3 prev = new Vector3(polygon[iPrev].Position - origin, 0);
+                Vector3 next = new Vector3(polygon[iNext].Position - origin, 0);
+
+                area += Vector3.Cross(prev, next).Length() * 0.5f;
+            }
+
+            return area;
+        }
         
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
         private static readonly OrderedList<float, Intersection> Intersections = new OrderedList<float, Intersection>(v => v.OrderA);
