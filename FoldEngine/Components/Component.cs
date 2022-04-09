@@ -83,6 +83,7 @@ namespace FoldEngine.Components
         {
             if (_identifierToTypeMap == null)
             {
+                PopulateDictionaryWithAssembly(Assembly.GetAssembly(typeof(Component)));
                 PopulateDictionaryWithAssembly(Assembly.GetEntryAssembly());
             }
         }

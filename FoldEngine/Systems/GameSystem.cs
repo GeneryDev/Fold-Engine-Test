@@ -43,7 +43,7 @@ namespace FoldEngine.Systems {
             return Scene.Components.CreateIterator<T>(flags);
         }
 
-        internal virtual void Initialize() { }
+        public virtual void Initialize() { }
 
         public virtual void SubscribeToEvents() {}
 
@@ -112,6 +112,7 @@ namespace FoldEngine.Systems {
 
         public static void PopulateIdentifiers() {
             if(_identifierToTypeMap == null) {
+                PopulateDictionaryWithAssembly(Assembly.GetAssembly(typeof(GameSystem)));
                 PopulateDictionaryWithAssembly(Assembly.GetEntryAssembly());
             }
         }

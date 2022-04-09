@@ -9,7 +9,7 @@ namespace FoldEngine.Graphics.Atlas {
         
         private ComponentIterator<TextureAtlasComponent> _atlases;
 
-        internal override void Initialize() {
+        public override void Initialize() {
             _atlases = Scene.Components.CreateIterator<TextureAtlasComponent>(IterationFlags.None);
         }
 

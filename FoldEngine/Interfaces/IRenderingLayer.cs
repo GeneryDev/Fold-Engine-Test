@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using FoldEngine.Graphics;
@@ -130,6 +131,51 @@ namespace FoldEngine.Interfaces
 
         public void End() {
             Surface?.End();
+        }
+    }
+
+    public class DependencyRenderingLayer : IRenderingLayer {
+        public int DependencyIndex = 0;
+        public DependencyRenderingLayer(int index) {
+            DependencyIndex = index;
+        }
+
+        public IRenderingUnit RenderingUnit { get; }
+        public RenderGroup Group { get; set; }
+        public string Name { get; }
+        public Point LayerSize { get; }
+        public Vector2 LogicalSize { get; }
+        public Rectangle Destination { get; set; }
+        public SamplerState Sampling { get; }
+        public RenderSurface Surface { get; set; }
+        public Color? Color { get; set; }
+        public Vector2 CameraToLayer(Vector2 point) {
+            throw new NotImplementedException();
+        }
+
+        public Vector2 LayerToCamera(Vector2 point) {
+            throw new NotImplementedException();
+        }
+
+        public Vector2 LayerToLayer(Vector2 point, IRenderingLayer other) {
+            throw new NotImplementedException();
+        }
+
+        public Vector2 WindowToLayer(Vector2 point) {
+            throw new NotImplementedException();
+        }
+
+        public Vector2 LayerToWindow(Vector2 point) {
+            throw new NotImplementedException();
+        }
+
+        public void WindowSizeChanged(Point oldSize, Point newSize) {
+        }
+
+        public void Begin() {
+        }
+
+        public void End() {
         }
     }
 }

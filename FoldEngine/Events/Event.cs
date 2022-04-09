@@ -48,6 +48,7 @@ namespace FoldEngine.Events {
 
         public static void PopulateIdentifiers() {
             if(_identifierToTypeMap == null) {
+                PopulateDictionaryWithAssembly(Assembly.GetAssembly(typeof(Event)));
                 PopulateDictionaryWithAssembly(Assembly.GetEntryAssembly());
             }
         }

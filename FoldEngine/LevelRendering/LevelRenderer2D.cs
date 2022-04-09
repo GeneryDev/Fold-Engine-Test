@@ -11,7 +11,6 @@ using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Sandbox.Components;
 using Texture = FoldEngine.Graphics.Texture;
 
 namespace FoldEngine.Rendering {
@@ -20,7 +19,7 @@ namespace FoldEngine.Rendering {
         private ComponentIterator<Camera> _cameras;
         private ComponentIterator<MeshRenderable> _meshRenderables;
 
-        internal override void Initialize() {
+        public override void Initialize() {
             _cameras = CreateComponentIterator<Camera>(IterationFlags.None);
             _meshRenderables = CreateComponentIterator<MeshRenderable>(IterationFlags.Ordered);
         }

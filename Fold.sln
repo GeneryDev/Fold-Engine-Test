@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30320.27
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "FoldEngine", "FoldEngine\FoldEngine.shproj", "{AD06BF8F-7FFF-4C50-944C-05F3C8568CA8}"
-EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Sandbox", "Sandbox\Sandbox.shproj", "{9BB3BE52-030D-4380-96E9-2C05587F929F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntryProject", "EntryProject\EntryProject.csproj", "{67D866C2-47A9-4314-9C33-713A78F62336}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoldEngine", "FoldEngine\FoldEngine.csproj", "{793DCE0D-2AF1-4C70-8B2D-5C2AC2F23B94}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -25,6 +25,10 @@ Global
 		{67D866C2-47A9-4314-9C33-713A78F62336}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{67D866C2-47A9-4314-9C33-713A78F62336}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{67D866C2-47A9-4314-9C33-713A78F62336}.Release|Any CPU.Build.0 = Release|Any CPU
+		{793DCE0D-2AF1-4C70-8B2D-5C2AC2F23B94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{793DCE0D-2AF1-4C70-8B2D-5C2AC2F23B94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{793DCE0D-2AF1-4C70-8B2D-5C2AC2F23B94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{793DCE0D-2AF1-4C70-8B2D-5C2AC2F23B94}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

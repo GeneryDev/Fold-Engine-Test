@@ -14,8 +14,6 @@ using FoldEngine.Systems;
 using FoldEngine.Util.Transactions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using Sandbox.Components;
-using Woofer;
 
 namespace FoldEngine.Editor.Views {
     public class EditorHierarchyView : EditorView {

@@ -10,8 +10,6 @@ using FoldEngine.Serialization;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
-using Woofer;
-
 namespace FoldEngine.Scenes
 {
     public class Scene {

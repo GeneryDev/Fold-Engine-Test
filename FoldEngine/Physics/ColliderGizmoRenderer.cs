@@ -12,7 +12,7 @@ namespace FoldEngine.Physics {
     public class ColliderGizmoRenderer : GameSystem {
         private ComponentIterator<Collider> _colliders;
 
-        internal override void Initialize() {
+        public override void Initialize() {
             _colliders = Scene.Components.CreateIterator<Collider>(IterationFlags.None);
         }
 

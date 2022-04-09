@@ -29,7 +29,7 @@ namespace Sandbox.Systems {
     public class DebugSystem : GameSystem {
         private ComponentIterator<Living> _livingComponents;
 
-        internal override void Initialize() {
+        public override void Initialize() {
             _livingComponents = Scene.Components.CreateIterator<Living>(IterationFlags.None);
         }
 

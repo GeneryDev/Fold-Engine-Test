@@ -4,6 +4,7 @@ using FoldEngine.Commands;
 using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
 using FoldEngine.Editor.Views;
+using FoldEngine.Events;
 using FoldEngine.Graphics;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
@@ -13,7 +14,6 @@ using FoldEngine.Scenes;
 using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using Woofer;
 
 namespace FoldEngine.Editor {
 
@@ -30,7 +30,7 @@ namespace FoldEngine.Editor {
             });
         }
 
-        internal override void Initialize() {
+        public override void Initialize() {
             Environment = new EditorEnvironment(Scene);
 
             Environment.AddView<EditorToolbarView>(Environment.NorthPanel);

@@ -17,7 +17,7 @@ namespace FoldEngine.Rendering {
         public bool LineIntersection = false;
         public bool SnapToLine = true;
         
-        internal override void Initialize() {
+        public override void Initialize() {
             _cameras = CreateComponentIterator<Camera>(IterationFlags.None);
         }
         

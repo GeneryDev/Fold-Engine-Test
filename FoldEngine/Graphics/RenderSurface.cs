@@ -12,7 +12,7 @@ namespace FoldEngine.Graphics
         internal IRenderingUnit RenderingUnit;
         internal RenderTarget2D Target;
         internal TriangleBatch TriBatch;
-        internal GizmoBatch GizBatch;
+        public GizmoBatch GizBatch;
 
         public Point Size => new Point(Target.Width, Target.Height);
 

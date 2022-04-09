@@ -4,7 +4,6 @@ using FoldEngine.Audio;
 using FoldEngine.Resources;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
-using Woofer;
 using Sound = FoldEngine.Audio.Sound;
 
 namespace FoldEngine.Interfaces {

@@ -17,7 +17,7 @@ namespace Sandbox.Systems {
     public class HealthSystem : GameSystem {
         private ComponentIterator<Living> _livingComponents;
 
-        internal override void Initialize() {
+        public override void Initialize() {
             _livingComponents = CreateComponentIterator<Living>(IterationFlags.None);
         }
 

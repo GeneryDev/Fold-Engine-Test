@@ -15,7 +15,6 @@ using FoldEngine.Scenes;
 using FoldEngine.Serialization;
 using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
-using Woofer;
 
 namespace FoldEngine.Editor.Views {
     public class EditorToolbarView : EditorView {

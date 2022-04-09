@@ -5,7 +5,6 @@ using FoldEngine.Gui;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 using FoldEngine.Systems;
-using Woofer;
 
 namespace FoldEngine.Editor.Views {
     public class EditorSystemsView : EditorView {

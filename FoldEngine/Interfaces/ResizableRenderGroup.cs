@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using Woofer;
 
 namespace FoldEngine.Interfaces {
     public class ResizableRenderGroup : RenderGroup {

@@ -79,7 +79,7 @@ namespace Woofer
 
             
             Groups["editor"] = RootGroup = new RenderGroup(this) {
-                Size = mainSize,
+                Size = fullSize,
                 ["editor_gui"] = new RenderingLayer(this) {
                     Name = "editor_gui", LayerSize = mainSize, Destination = new Rectangle(Point.Zero, mainSize),
                     FitToWindow = true,
@@ -124,62 +124,6 @@ namespace Woofer
             Rectangle? bounds = RootGroup.GetBounds(renderGroup);
             if(bounds.HasValue) return bounds.Value;
             throw new ArgumentException($"RenderGroup {renderGroup} is not present in the current RenderGroup hierarchy.");
-        }
-    }
-
-    public class DependencyRenderingLayer : IRenderingLayer {
-        public int DependencyIndex = 0;
-        public DependencyRenderingLayer(int index) {
-            DependencyIndex = index;
-        }
-
-        public IRenderingUnit RenderingUnit { get; }
-        public RenderGroup Group { get; set; }
-        public string Name { get; }
-        public Point LayerSize { get; }
-        public Vector2 LogicalSize { get; }
-        public Rectangle Destination { get; set; }
-        public SamplerState Sampling { get; }
-        public RenderSurface Surface { get; set; }
-        public Color? Color { get; set; }
-        public Vector2 CameraToLayer(Vector2 point) {
-            throw new NotImplementedException();
-        }
-
-        public Vector2 LayerToCamera(Vector2 point) {
-            throw new NotImplementedException();
-        }
-
-        public Vector2 LayerToLayer(Vector2 point, IRenderingLayer other) {
-            throw new NotImplementedException();
-        }
-
-        public Vector2 WindowToLayer(Vector2 point) {
-            throw new NotImplementedException();
-        }
-
-        public Vector2 LayerToWindow(Vector2 point) {
-            throw new NotImplementedException();
-        }
-
-        public void WindowSizeChanged(Point oldSize, Point newSize) {
-        }
-
-        public void Begin() {
-        }
-
-        public void End() {
-        }
-    }
-
-    [Event("fold:window.size_changed", EventFlushMode.End)]
-    public struct WindowSizeChangedEvent {
-        public Point OldSize;
-        public Point NewSize;
-        
-        public WindowSizeChangedEvent(Point oldSize, Point newSize) {
-            this.OldSize = oldSize;
-            this.NewSize = newSize;
         }
     }
 }

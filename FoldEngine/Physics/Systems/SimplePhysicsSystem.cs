@@ -24,7 +24,7 @@ namespace FoldEngine.Physics {
         public Vector2 Gravity = new Vector2(0, -27);
         public float FaceNormalVelocityDotTolerance = 0f;
 
-        internal override void Initialize() {
+        public override void Initialize() {
             _physicsObjects = CreateComponentIterator<Physics>(IterationFlags.None);
             _colliders = CreateComponentIterator<Collider>(IterationFlags.None);
         }

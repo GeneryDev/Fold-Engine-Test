@@ -235,7 +235,11 @@ namespace FoldEngine.Resources {
             if(_attributes != null) return;
             _attributes = new Dictionary<Type, ResourceAttribute>();
             
-            var assembly = Assembly.GetEntryAssembly();
+            PopulateDictionaryWithAssembly(Assembly.GetAssembly(typeof(Component)));
+            PopulateDictionaryWithAssembly(Assembly.GetEntryAssembly());
+        }
+
+        private static void PopulateDictionaryWithAssembly(Assembly assembly) {
             foreach(Type type in assembly.GetTypes()) {
                 if(type.IsSubclassOf(typeof(Resource))) {
                     _attributes[type] = type.GetCustomAttribute<ResourceAttribute>() ?? new ResourceAttribute(type.Name.ToLowerInvariant());
