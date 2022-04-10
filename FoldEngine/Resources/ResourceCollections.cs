@@ -137,17 +137,34 @@ namespace FoldEngine.Resources {
         ///     Adds a pre-existing resource to a collection.
         /// </summary>
         /// <typeparam name="T">The type of the resource</typeparam>
-        /// <param name="resource">The resource to insert</param>
-        protected internal void Insert<T>(T resource) where T : Resource, new() {
-            CollectionFor<T>(true).Insert(resource);
+        /// <param name="resource">The resource to attach</param>
+        protected internal void Attach<T>(T resource) where T : Resource, new() {
+            CollectionFor<T>(true).Attach(resource);
         }
 
         /// <summary>
         ///     Adds a pre-existing resource to a collection.
         /// </summary>
-        /// <param name="resource">The resource to insert</param>
-        protected internal void Insert(Resource resource) {
-            CollectionFor(resource.GetType(), true).Insert(resource);
+        /// <param name="resource">The resource to attach</param>
+        protected internal void Attach(Resource resource) {
+            CollectionFor(resource.GetType(), true).Attach(resource);
+        }
+
+        /// <summary>
+        ///     Removes a pre-existing resource from a collection.
+        /// </summary>
+        /// <typeparam name="T">The type of the resource</typeparam>
+        /// <param name="resource">The resource to detach</param>
+        protected internal void Detach<T>(T resource) where T : Resource, new() {
+            CollectionFor<T>(false)?.Detach(resource);
+        }
+
+        /// <summary>
+        ///     Removes a pre-existing resource from a collection.
+        /// </summary>
+        /// <param name="resource">The resource to detach</param>
+        protected internal void Detach(Resource resource) {
+            CollectionFor(resource.GetType(), false)?.Detach(resource);
         }
 
 

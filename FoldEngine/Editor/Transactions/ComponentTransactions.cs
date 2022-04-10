@@ -58,7 +58,7 @@ namespace FoldEngine.Editor.Transactions {
                 saveOp.Options.Set(SerializeOnlyEntities.Instance, new List<long> {_entityId});
                 saveOp.Options.Set(SerializeOnlyComponents.Instance, new List<Type> {_type});
 
-                target.Scene.Save(saveOp);
+                target.Scene.Serialize(saveOp);
 
                 saveOp.Close();
                 _serializedData = stream.GetBuffer();
@@ -80,7 +80,7 @@ namespace FoldEngine.Editor.Transactions {
                && !target.Scene.Components.HasComponent(_type, _entityId)) {
                 var loadOp = new LoadOperation(new MemoryStream(_serializedData));
 
-                target.Scene.Load(loadOp);
+                target.Scene.Deserialize(loadOp);
 
                 loadOp.Close();
                 loadOp.Dispose();

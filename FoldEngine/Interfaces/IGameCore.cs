@@ -12,7 +12,7 @@ namespace FoldEngine.Interfaces {
         /// <summary>
         ///     The scene that is currently being played
         /// </summary>
-        Scene ActiveScene { get; }
+        Scene ActiveScene { get; set; }
 
         /// <summary>
         ///     This Core's rendering unit

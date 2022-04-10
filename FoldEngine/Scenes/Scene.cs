@@ -11,7 +11,8 @@ using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Scenes {
-    public class Scene {
+    [Resource(directoryName: "scene")]
+    public class Scene : Resource, ISelfSerializer {
         public const string Extension = "foldscene";
 
         public readonly ComponentMap Components;
@@ -34,12 +35,22 @@ namespace FoldEngine.Scenes {
 
         public bool Paused = false;
 
-        public Scene(IGameCore core) {
+        public Scene() {
+            Core = FoldGame.Game.Core;
+            Components = new ComponentMap(this);
+            Events = new EventMap(this);
+            Systems = new SystemMap(this);
+            Resources = new ResourceCollections(Core.Resources);
+        }
+
+        public Scene(IGameCore core, string identifier) {
             Core = core;
             Components = new ComponentMap(this);
             Events = new EventMap(this);
             Systems = new SystemMap(this);
-            Resources = new ResourceCollections(core.Resources);
+            Resources = new ResourceCollections(Core.Resources);
+            
+            Identifier = identifier;
         }
 
         public string Name { get; set; } = "Scene";
@@ -117,6 +128,8 @@ namespace FoldEngine.Scenes {
         }
 
         public virtual void Update() {
+            Access();
+            
             if(!_initialized) {
                 Initialize();
                 _initialized = true;
@@ -213,12 +226,12 @@ namespace FoldEngine.Scenes {
 
         public void Save(string path) {
             var saveOp = new SaveOperation(path);
-            Save(saveOp);
+            Serialize(saveOp);
             saveOp.Close();
             saveOp.Dispose();
         }
 
-        public void Save(SaveOperation writer) {
+        public void Serialize(SaveOperation writer) {
             writer.WriteCompound((ref SaveOperation.Compound c) => {
                 if(!writer.Options.Has(SerializeOnlyEntities.Instance)) {
                     c.WriteMember(nameof(Name), Name);
@@ -235,12 +248,12 @@ namespace FoldEngine.Scenes {
 
         public void Load(string path) {
             var loadOp = new LoadOperation(path);
-            Load(loadOp);
+            Deserialize(loadOp);
             loadOp.Close();
             loadOp.Dispose();
         }
 
-        public void Load(LoadOperation reader) {
+        public void Deserialize(LoadOperation reader) {
             reader.ReadCompound(c => {
                 if(reader.Options.Has(DeserializeClearScene.Instance)) {
                     if(c.HasMember(nameof(Name))) Name = c.GetMember<string>(nameof(Name));

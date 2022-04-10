@@ -24,7 +24,7 @@ namespace FoldEngine.Editor.Transactions {
                 var saveOp = new SaveOperation(stream);
                 saveOp.Options.Set(SerializeOnlyEntities.Instance, new List<long> {_entityId});
 
-                target.Scene.Save(saveOp);
+                target.Scene.Serialize(saveOp);
 
                 saveOp.Close();
                 _serializedData = stream.GetBuffer();
@@ -52,7 +52,7 @@ namespace FoldEngine.Editor.Transactions {
             if(target.Scene.Reclaim(_entityId)) {
                 var loadOp = new LoadOperation(new MemoryStream(_serializedData));
 
-                target.Scene.Load(loadOp);
+                target.Scene.Deserialize(loadOp);
 
                 loadOp.Close();
                 loadOp.Dispose();

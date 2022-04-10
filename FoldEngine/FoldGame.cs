@@ -14,7 +14,7 @@ namespace FoldEngine {
     public class FoldGame : Game {
         public static FoldGame Game;
 
-        private readonly IGameCore _core;
+        public readonly IGameCore Core;
 
         public readonly GraphicsDeviceManager Graphics;
 
@@ -24,7 +24,7 @@ namespace FoldEngine {
         private readonly FixedSizeFloatBuffer FrameTimes = new FixedSizeFloatBuffer(60);
 
         public FoldGame(IGameCore core) {
-            _core = core;
+            Core = core;
             Game = this;
 
             Graphics = new GraphicsDeviceManager(this);
@@ -45,20 +45,20 @@ namespace FoldEngine {
         ///     and initialize them as well.
         /// </summary>
         protected override void Initialize() {
-            _core.RenderingUnit.Effects = new EffectManager(Content);
-            _core.RenderingUnit.Fonts = new FontManager(_core);
+            Core.RenderingUnit.Effects = new EffectManager(Content);
+            Core.RenderingUnit.Fonts = new FontManager(Core);
 
-            _core.Initialize();
+            Core.Initialize();
 
-            (Graphics.PreferredBackBufferWidth, Graphics.PreferredBackBufferHeight) = _core.RenderingUnit.WindowSize;
-            _lastKnownWindowSize = _core.RenderingUnit.WindowSize;
+            (Graphics.PreferredBackBufferWidth, Graphics.PreferredBackBufferHeight) = Core.RenderingUnit.WindowSize;
+            _lastKnownWindowSize = Core.RenderingUnit.WindowSize;
 
             Window.AllowUserResizing = true;
             Window.ClientSizeChanged += (sender, args) => {
                 Point newSize = Window.ClientBounds.Size;
                 if(_lastKnownWindowSize != newSize) {
                     _lastKnownWindowSize = newSize;
-                    _core.RenderingUnit.WindowSize = newSize;
+                    Core.RenderingUnit.WindowSize = newSize;
                 }
             };
 
@@ -73,8 +73,8 @@ namespace FoldEngine {
         /// </summary>
         protected override void LoadContent() {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            _core.LoadContent();
-            _core.RenderingUnit.LoadContent();
+            Core.LoadContent();
+            Core.RenderingUnit.LoadContent();
             // Create a new SpriteBatch, which can be used to draw textures.
 
             // foreach(IRenderingLayer layer in _core.RenderingUnit.RootGroup.Layers.Values) {
@@ -114,14 +114,14 @@ namespace FoldEngine {
             Time.Update(gameTime);
             Time.Frame++;
 
-            _core.AudioUnit.Update();
+            Core.AudioUnit.Update();
 
-            _core.InputUnit.Update();
-            _core.Input();
+            Core.InputUnit.Update();
+            Core.Input();
 
-            _core.Resources.Update();
+            Core.Resources.Update();
 
-            _core.Update();
+            Core.Update();
 
 
             base.Update(gameTime);
@@ -141,11 +141,11 @@ namespace FoldEngine {
             GraphicsDevice.SetRenderTarget(null);
 
 
-            _core.RenderingUnit.RootGroup.Begin();
+            Core.RenderingUnit.RootGroup.Begin();
 
-            _core.Render();
+            Core.Render();
 
-            _core.RenderingUnit.RootGroup.End();
+            Core.RenderingUnit.RootGroup.End();
 
 
             //Draw each layer's buffer onto the screen
@@ -154,7 +154,7 @@ namespace FoldEngine {
 
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
-            _core?.RenderingUnit.RootGroup.Present(_spriteBatch);
+            Core?.RenderingUnit.RootGroup.Present(_spriteBatch);
 
             _spriteBatch.End();
 

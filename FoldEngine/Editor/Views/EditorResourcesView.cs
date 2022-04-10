@@ -1,4 +1,5 @@
 ﻿using System;
+using FoldEngine.Commands;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 
@@ -17,9 +18,16 @@ namespace FoldEngine.Editor.Views {
                 Scene.Resources.SaveAll();
                 Console.WriteLine("Save resources!");
             }
+            
+            if(ContentPanel.Button("Save Scene", 14).IsPressed()) {
+                // Scene.Core.CommandQueue.Enqueue(new SaveSceneCommand());
+                // Scene.SaveAll();
+                // Console.WriteLine("Save resources!");
+            }
 
             if(ContentPanel.Button("Invalidate Caches", 14).IsPressed()) Scene.Resources.InvalidateCaches();
             if(ContentPanel.Button("Invoke GC", 14).IsPressed()) GC.Collect(GC.MaxGeneration);
+            
         }
     }
 }

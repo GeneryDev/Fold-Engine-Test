@@ -121,7 +121,7 @@ namespace FoldEngine.Resources {
 
         //MAIN THREAD
         private void TaskCompleted(ResourceLoadTask task) {
-            _resources.Insert(task.CompletedResource);
+            _resources.Attach(task.CompletedResource);
 
             foreach(ResourceCollections.OnResourceLoaded callback in task.Callbacks) callback(task.CompletedResource);
 

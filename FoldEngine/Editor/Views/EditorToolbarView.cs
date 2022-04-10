@@ -65,7 +65,7 @@ namespace FoldEngine.Editor.Views {
 
             var saveOp = new SaveOperation(stream);
             saveOp.Options.Set(SerializeTempResources.Instance, true);
-            environment.Scene.Save(saveOp);
+            environment.Scene.Serialize(saveOp);
 
             saveOp.Close();
             _storedScene = stream.GetBuffer();
@@ -78,7 +78,7 @@ namespace FoldEngine.Editor.Views {
 
             loadOp.Options.Set(DeserializeClearScene.Instance, true);
 
-            environment.Scene.Load(loadOp);
+            environment.Scene.Deserialize(loadOp);
 
             loadOp.Close();
             loadOp.Dispose();

@@ -14,7 +14,8 @@ namespace FoldEngine.Resources {
         bool Exists(ResourceIdentifier identifier);
         void Save();
         void InvalidateCaches();
-        void Insert(Resource resource);
+        void Attach(Resource resource);
+        void Detach(Resource resource);
         void UnloadUnused();
     }
 
@@ -37,8 +38,12 @@ namespace FoldEngine.Resources {
             return identifier.IndexIntoCollection.Get(Generation) - 1 != -1;
         }
 
-        public void Insert(Resource resource) {
-            Insert((T) resource);
+        public void Attach(Resource resource) {
+            Attach((T) resource);
+        }
+
+        public void Detach(Resource resource) {
+            Detach((T) resource);
         }
 
         public void UnloadUnused() {
@@ -124,13 +129,22 @@ namespace FoldEngine.Resources {
             return newT;
         }
 
-        public void Insert(T resource) {
+        public void Attach(T resource) {
             string identifier = resource.Identifier;
             int existingIndex = IndexForIdentifier(identifier);
             if(existingIndex != -1) throw new ArgumentException("Resource '" + identifier + "' already exists!");
 
             Resources.Add(resource);
             InvalidateCaches();
+        }
+
+        public void Detach(T resource) {
+            string identifier = resource.Identifier;
+            int existingIndex = IndexForIdentifier(identifier);
+            if(existingIndex != -1) {
+                Resources.RemoveAt(existingIndex);
+                InvalidateCaches();
+            }
         }
     }
 

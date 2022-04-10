@@ -1,44 +1,51 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Runtime.Remoting.Messaging;
 using FoldEngine.Interfaces;
+using FoldEngine.Resources;
 using FoldEngine.Scenes;
 using FoldEngine.Serialization;
 
 namespace FoldEngine.Commands {
     public class SaveSceneCommand : ICommand {
-        public string TargetPath;
+        public string Identifier;
 
-        public SaveSceneCommand(string targetPath) {
-            TargetPath = targetPath;
+        public SaveSceneCommand(string identifier) {
+            Identifier = identifier;
         }
 
         public void Execute(IGameCore core) {
-            Directory.GetParent(TargetPath).Create();
-            var saveOp = new SaveOperation(TargetPath);
+            string oldIdentifier = core.ActiveScene.Identifier;
+            core.ActiveScene.Identifier = Identifier;
+            core.ActiveScene.Save();
+            core.ActiveScene.Identifier = oldIdentifier;
 
-            core.ActiveScene.Save(saveOp);
-
-            saveOp.Close();
-            saveOp.Dispose();
+            core.ResourceIndex.Update();
         }
     }
 
     public class LoadSceneCommand : ICommand {
-        public string SourcePath;
+        public ResourceIdentifier Identifier;
 
-        public LoadSceneCommand(string sourcePath) {
-            SourcePath = sourcePath;
+        public LoadSceneCommand(string identifier) {
+            Identifier = new ResourceIdentifier(identifier);
         }
 
         public void Execute(IGameCore core) {
-            var loadOp = new LoadOperation(SourcePath);
-
-            loadOp.Options.Set(DeserializeClearScene.Instance, true);
-            loadOp.Options.Set(DeserializeRemapIds.Instance, new EntityIdRemapper(core.ActiveScene));
-
-            core.ActiveScene.Load(loadOp);
-
-            loadOp.Close();
-            loadOp.Dispose();
+            core.Resources.Load<Scene>(ref Identifier, s => {
+                Console.WriteLine("Successfully loaded!");
+                core.ActiveScene = (Scene)s;
+                core.Resources.Detach(s);
+            });
+            // var loadOp = new LoadOperation(SourcePath);
+            //
+            // loadOp.Options.Set(DeserializeClearScene.Instance, true);
+            // loadOp.Options.Set(DeserializeRemapIds.Instance, new EntityIdRemapper(core.ActiveScene));
+            //
+            // core.ActiveScene.Deserialize(loadOp);
+            //
+            // loadOp.Close();
+            // loadOp.Dispose();
         }
     }
 }

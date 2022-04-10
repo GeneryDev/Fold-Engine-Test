@@ -65,13 +65,9 @@ namespace Sandbox.Systems {
 
 
             if(Scene.Core.InputUnit.Players[0].Get<ButtonAction>("quicksave").Consume())
-                Scene.Core.CommandQueue.Enqueue(
-                    new SaveSceneCommand(Path.ChangeExtension(Path.Combine(TargetDirectory, "scene"),
-                        Scene.Extension)));
+                Scene.Core.CommandQueue.Enqueue(new SaveSceneCommand("__saved_state"));
             else if(Scene.Core.InputUnit.Players[0].Get<ButtonAction>("quickload").Consume())
-                Scene.Core.CommandQueue.Enqueue(
-                    new LoadSceneCommand(Path.ChangeExtension(Path.Combine(TargetDirectory, "scene"),
-                        Scene.Extension)));
+                Scene.Core.CommandQueue.Enqueue(new LoadSceneCommand("__saved_state"));
 
             _livingComponents.Reset();
 

@@ -29,7 +29,7 @@ namespace Woofer {
 
         public IRenderingUnit RenderingUnit { get; }
 
-        public Scene ActiveScene { get; }
+        public Scene ActiveScene { get; set; }
 
         public InputUnit InputUnit { get; }
 

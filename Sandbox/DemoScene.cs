@@ -13,7 +13,7 @@ using Sandbox.Systems;
 
 namespace Sandbox {
     internal class DemoScene : Scene {
-        public DemoScene(IGameCore core) : base(core) { }
+        public DemoScene(IGameCore core) : base(core, "demo_scene") { }
 
         public override void Initialize() {
             BuildMeshes();
