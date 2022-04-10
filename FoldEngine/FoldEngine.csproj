@@ -104,6 +104,7 @@
         <Compile Include="Editor\Views\EditorHierarchyView.cs" />
         <Compile Include="Editor\Views\EditorInspectorView.cs" />
         <Compile Include="Editor\Views\EditorResourcesView.cs" />
+        <Compile Include="Editor\Views\EditorSceneControlView.cs" />
         <Compile Include="Editor\Views\EditorSystemsView.cs" />
         <Compile Include="Editor\Views\EditorTestView.cs" />
         <Compile Include="Editor\Views\EditorToolbarView.cs" />

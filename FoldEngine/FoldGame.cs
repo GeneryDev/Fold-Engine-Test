@@ -122,6 +122,9 @@ namespace FoldEngine {
             Core.Resources.Update();
 
             Core.Update();
+            if(Core.ActiveScene == null) {
+                Core.CommandQueue.ExecuteAll();
+            }
 
 
             base.Update(gameTime);

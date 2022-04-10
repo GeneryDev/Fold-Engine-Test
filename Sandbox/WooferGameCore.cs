@@ -56,11 +56,11 @@ namespace Woofer {
         }
 
         public void Input() {
-            ActiveScene.Input();
+            ActiveScene?.Input();
         }
 
         public void Update() {
-            ActiveScene.Update();
+            ActiveScene?.Update();
         }
 
         public void Render() {
