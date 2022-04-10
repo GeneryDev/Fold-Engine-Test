@@ -27,6 +27,7 @@ namespace FoldEngine.Scenes {
 
 
         private bool _initialized;
+        private bool _hasAnything;
 
         private long _nextEntityId;
         private List<bool> _reclaimableIds;
@@ -110,6 +111,7 @@ namespace FoldEngine.Scenes {
 
             ref Transform transform = ref Components.CreateComponent<Transform>(newEntityId);
             Components.CreateComponent<EntityName>(newEntityId).Name = name;
+            _hasAnything = true;
             // Console.WriteLine($"Created entity {newEntityId}");
             return newEntityId;
         }
@@ -248,7 +250,7 @@ namespace FoldEngine.Scenes {
 
         public void Deserialize(LoadOperation reader) {
             reader.ReadCompound(c => {
-                if(reader.Options.Has(DeserializeClearScene.Instance)) {
+                if(reader.Options.Has(DeserializeClearScene.Instance) || !_hasAnything) {
                     if(c.HasMember(nameof(Name))) Name = c.GetMember<string>(nameof(Name));
                     if(c.HasMember(nameof(_nextEntityId))) _nextEntityId = c.GetMember<long>(nameof(_nextEntityId));
                     if(c.HasMember(nameof(_deletedIds))) _deletedIds = c.GetListMember<long>(nameof(_deletedIds));
@@ -258,6 +260,7 @@ namespace FoldEngine.Scenes {
                 if(c.HasMember(nameof(Components))) c.DeserializeMember(nameof(Components), Components);
                 if(c.HasMember(nameof(Resources))) c.DeserializeMember(nameof(Resources), Resources);
             });
+            _hasAnything = true;
         }
 
         public bool Reclaim(long entityId) {
@@ -275,6 +278,7 @@ namespace FoldEngine.Scenes {
         }
 
         public bool ReclaimAndCreate(long entityId, string name) {
+            _hasAnything = true;
             if(Reclaim(entityId)) {
                 ref Transform transform = ref Components.CreateComponent<Transform>(entityId);
                 Components.CreateComponent<EntityName>(entityId).Name = name;
