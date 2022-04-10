@@ -7,11 +7,11 @@ namespace EntryProject.Util {
 
         private ObjectPool<TS> GetPool<TS>() where TS : T, new() {
             if(_pools == null) _pools = new Dictionary<Type, IObjectPool>();
-            
+
             Type type = typeof(TS);
-            
+
             if(!_pools.ContainsKey(type)) {
-                ObjectPool<TS> newPool = new ObjectPool<TS>();
+                var newPool = new ObjectPool<TS>();
                 _pools[type] = newPool;
                 return newPool;
             }
@@ -24,11 +24,9 @@ namespace EntryProject.Util {
         }
 
         public void FreeAll() {
-            if(_pools != null) {
-                foreach(IObjectPool pool in _pools.Values) {
+            if(_pools != null)
+                foreach(IObjectPool pool in _pools.Values)
                     pool.FreeAll();
-                }
-            }
         }
     }
 }

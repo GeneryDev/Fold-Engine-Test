@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using EntryProject.Editor.Gui.Hierarchy;
 using EntryProject.Util;
-using FoldEngine.Editor.Gui;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
@@ -13,46 +12,52 @@ using Mouse = Microsoft.Xna.Framework.Input.Mouse;
 
 namespace FoldEngine.Gui {
     public abstract class GuiEnvironment : IDisposable {
+        public readonly ObjectPoolCollection<IGuiAction> ActionPool = new ObjectPoolCollection<IGuiAction>();
 
-        public Scene Scene;
-        
-        // Input
-        public Point MousePos;
-        public ButtonAction MouseLeft = ButtonAction.Default;
-        public ButtonAction MouseMiddle = ButtonAction.Default;
-        public ButtonAction MouseRight = ButtonAction.Default;
-        private GuiPanel[] _pressedPanels = new GuiPanel[MouseEvent.MaxButtons];
-        public HoverTarget HoverTargetPrevious;
-        public HoverTarget HoverTarget;
-        public GuiElement FocusOwner { get; private set; }
-        public ControlScheme ControlScheme = new ControlScheme("Gui");
-        public List<GuiElement> DraggingElements = new List<GuiElement>();
-        
-        public abstract List<GuiPanel> VisiblePanels { get; }
-        
+        private long _dismissPopupsWhen;
+        private readonly GuiPanel[] _pressedPanels = new GuiPanel[MouseEvent.MaxButtons];
+
 
         public GuiPopupMenu ContextMenu;
-        
-        public readonly ObjectPoolCollection<IGuiAction> ActionPool = new ObjectPoolCollection<IGuiAction>();
-        
-        // Renderer
-        public IRenderingUnit Renderer { get; set; }
-        public IRenderingLayer BaseLayer { get; set; }
-        public IRenderingLayer OverlayLayer { get; set; }
-        
+        public ControlScheme ControlScheme = new ControlScheme("Gui");
+        public List<GuiElement> DraggingElements = new List<GuiElement>();
+        public HoverTarget HoverTarget;
+        public HoverTarget HoverTargetPrevious;
+        public ButtonAction MouseLeft = ButtonAction.Default;
+        public ButtonAction MouseMiddle = ButtonAction.Default;
+
+        // Input
+        public Point MousePos;
+        public ButtonAction MouseRight = ButtonAction.Default;
+
+        public Scene Scene;
+
 
         public GuiEnvironment(Scene scene) {
             Scene = scene;
             ContextMenu = new GuiPopupMenu(this);
             scene.Core.FoldGame.Window.TextInput += WindowOnTextInput;
-            
+
             ControlScheme.AddDevice(Scene.Core.InputUnit.Devices.Keyboard);
             ControlScheme.AddDevice(Scene.Core.InputUnit.Devices.Mouse);
         }
 
+        public GuiElement FocusOwner { get; private set; }
+
+        public abstract List<GuiPanel> VisiblePanels { get; }
+
+        // Renderer
+        public IRenderingUnit Renderer { get; set; }
+        public IRenderingLayer BaseLayer { get; set; }
+        public IRenderingLayer OverlayLayer { get; set; }
+
+        public void Dispose() {
+            Scene.Core.FoldGame.Window.TextInput -= WindowOnTextInput;
+        }
+
         private void WindowOnTextInput(object sender, TextInputEventArgs e) {
             if(FocusOwner != null) {
-                var evt = new KeyboardEvent() {
+                var evt = new KeyboardEvent {
                     Type = KeyboardEventType.Typed,
                     Character = e.Character,
                     Key = e.Key,
@@ -73,7 +78,7 @@ namespace FoldEngine.Gui {
 
             MousePos = Mouse.GetState().Position;
             if(BaseLayer != null) MousePos = BaseLayer.WindowToLayer(MousePos.ToVector2()).ToPoint();
-            
+
             HandleMouseEvents(MouseLeft, MouseEvent.LeftButton);
             HandleMouseEvents(MouseMiddle, MouseEvent.MiddleButton);
             HandleMouseEvents(MouseRight, MouseEvent.RightButton);
@@ -83,54 +88,44 @@ namespace FoldEngine.Gui {
 
         private void HandleMouseEvents(ButtonAction mouseButton, int buttonIndex) {
             if(mouseButton.Pressed) {
-                if(HoverTarget.PopupMenu != ContextMenu) {
-                    DismissPopups();
-                }
-                
+                if(HoverTarget.PopupMenu != ContextMenu) DismissPopups();
+
                 for(int i = VisiblePanels.Count - 1; i >= 0; i--) {
                     GuiPanel panel = VisiblePanels[i];
                     if(panel.Visible && panel.Bounds.Contains(MousePos)) {
                         _pressedPanels[buttonIndex] = panel;
 
-                        var evt = new MouseEvent() {
+                        var evt = new MouseEvent {
                             Type = MouseEventType.Pressed,
                             Position = MousePos,
                             Button = buttonIndex,
                             When = Time.Now
                         };
-                        
+
                         panel.OnMousePressed(ref evt);
                         break;
                     }
                 }
             } else if(mouseButton.Released) {
-                if(ContextMenu.Showing) {
-                    _dismissPopupsWhen = Time.Frame + 2;
-                }
+                if(ContextMenu.Showing) _dismissPopupsWhen = Time.Frame + 2;
 
-                var evt = new MouseEvent() {
+                var evt = new MouseEvent {
                     Type = MouseEventType.Released,
                     Position = MousePos,
                     Button = buttonIndex,
                     When = Time.Now
                 };
-                
+
                 _pressedPanels[buttonIndex]?.OnMouseReleased(ref evt);
                 _pressedPanels[buttonIndex] = null;
             }
         }
 
-        private long _dismissPopupsWhen;
-
         public void DismissPopups() {
-            if(ContextMenu.Showing) {
-                ContextMenu.Dismiss();
-            }
+            if(ContextMenu.Showing) ContextMenu.Dismiss();
         }
-        
-        public virtual void Update() {
-            
-        }
+
+        public virtual void Update() { }
 
         public virtual void Render(IRenderingUnit renderer, IRenderingLayer baseLayer, IRenderingLayer overlayLayer) {
             Renderer = renderer;
@@ -139,10 +134,8 @@ namespace FoldEngine.Gui {
 
             HoverTargetPrevious = HoverTarget;
             HoverTarget = default;
-            
-            if(_dismissPopupsWhen == Time.Frame) {
-                DismissPopups();
-            }
+
+            if(_dismissPopupsWhen == Time.Frame) DismissPopups();
         }
 
         public void SetFocusedElement(GuiElement element) {
@@ -150,13 +143,9 @@ namespace FoldEngine.Gui {
                 FocusOwner?.OnFocusLost();
 
                 FocusOwner = element;
-                
+
                 FocusOwner?.OnFocusGained();
             }
-        }
-
-        public void Dispose() {
-            Scene.Core.FoldGame.Window.TextInput -= WindowOnTextInput;
         }
     }
 
@@ -178,12 +167,13 @@ namespace FoldEngine.Gui {
         public const int LeftButton = 0;
         public const int MiddleButton = 1;
         public const int RightButton = 2;
-        
+
         public const int MaxButtons = 3;
     }
 
     public enum MouseEventType {
-        Pressed, Released
+        Pressed,
+        Released
     }
 
     public struct KeyboardEvent {
@@ -196,7 +186,9 @@ namespace FoldEngine.Gui {
     }
 
     public enum KeyboardEventType {
-        Pressed, Released, Typed
+        Pressed,
+        Released,
+        Typed
     }
 
     [Flags]
@@ -215,11 +207,19 @@ namespace FoldEngine.Gui {
 
         public static KeyModifiers GetKeyModifiers() {
             KeyboardState state = Keyboard.GetState();
-            return ((state[Keys.LeftControl] == KeyState.Down || state[Keys.RightControl] == KeyState.Down) ? KeyModifiers.Control : KeyModifiers.None)
-                   | ((state[Keys.LeftShift] == KeyState.Down || state[Keys.RightShift] == KeyState.Down) ? KeyModifiers.Shift : KeyModifiers.None)
-                   | ((state[Keys.LeftAlt] == KeyState.Down || state[Keys.RightAlt] == KeyState.Down) ? KeyModifiers.Alt : KeyModifiers.None)
-                   | ((state[Keys.LeftWindows] == KeyState.Down || state[Keys.RightWindows] == KeyState.Down) ? KeyModifiers.Meta : KeyModifiers.None)
-                ; 
+            return (state[Keys.LeftControl] == KeyState.Down || state[Keys.RightControl] == KeyState.Down
+                       ? KeyModifiers.Control
+                       : KeyModifiers.None)
+                   | (state[Keys.LeftShift] == KeyState.Down || state[Keys.RightShift] == KeyState.Down
+                       ? KeyModifiers.Shift
+                       : KeyModifiers.None)
+                   | (state[Keys.LeftAlt] == KeyState.Down || state[Keys.RightAlt] == KeyState.Down
+                       ? KeyModifiers.Alt
+                       : KeyModifiers.None)
+                   | (state[Keys.LeftWindows] == KeyState.Down || state[Keys.RightWindows] == KeyState.Down
+                       ? KeyModifiers.Meta
+                       : KeyModifiers.None)
+                ;
         }
     }
 }

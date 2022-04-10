@@ -1,29 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using FoldEngine.Commands;
+﻿using System.Collections.Generic;
 using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
 using FoldEngine.Editor.Views;
 using FoldEngine.Events;
-using FoldEngine.Graphics;
-using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Physics;
 using FoldEngine.Rendering;
 using FoldEngine.Scenes;
 using FoldEngine.Systems;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 
 namespace FoldEngine.Editor {
-
-    [GameSystem("fold:editor.base", ProcessingCycles.All, runWhenPaused: true)]
+    [GameSystem("fold:editor.base", ProcessingCycles.All, true)]
     public class EditorBase : GameSystem {
-        // public override bool ShouldSave => false;
-        
-        public EditorEnvironment Environment;
         public List<long> EditingEntity = new List<long>();
-        
+        // public override bool ShouldSave => false;
+
+        public EditorEnvironment Environment;
+
         public override void SubscribeToEvents() {
             Subscribe<WindowSizeChangedEvent>((ref WindowSizeChangedEvent evt) => {
                 Environment.LayoutValidated = false;
@@ -56,14 +49,13 @@ namespace FoldEngine.Editor {
         public override void OnRender(IRenderingUnit renderer) {
             Environment.Render(renderer, renderer.RootGroup["editor_gui"], renderer.RootGroup["editor_gui_overlay"]);
 
-            foreach(long entityId in EditingEntity) {
+            foreach(long entityId in EditingEntity)
                 if(Scene.Components.HasComponent<Transform>(entityId)) {
-                    Entity entity = new Entity(Scene, entityId);
-                
+                    var entity = new Entity(Scene, entityId);
+
                     LevelRenderer2D.DrawOutline(entity);
                     ColliderGizmoRenderer.DrawColliderGizmos(entity);
                 }
-            }
         }
     }
 }

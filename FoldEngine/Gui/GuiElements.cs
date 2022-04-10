@@ -1,6 +1,4 @@
-﻿using System;
-using EntryProject.Util;
-using FoldEngine.Editor.Views;
+﻿using EntryProject.Util;
 using FoldEngine.Graphics;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
@@ -9,47 +7,47 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Gui {
     public abstract class GuiElement {
+        public Rectangle Bounds;
+        public int Margin = 8;
         internal GuiPanel Parent;
 
         public virtual GuiEnvironment Environment => Parent.Environment;
 
-        public Rectangle Bounds;
-        public int Margin = 8;
+        public virtual bool ClickToFocus => true;
+        public virtual bool Focusable => false;
+        public bool Rollover => Parent.Environment.HoverTargetPrevious.Element == this;
+        public bool Focused => Parent?.Environment?.FocusOwner == this;
 
         public abstract void Reset(GuiPanel parent);
         public abstract void AdjustSpacing(GuiPanel parent);
 
-        
+
         public abstract void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default);
 
-        
+
         public virtual void OnMousePressed(ref MouseEvent e) {
             if(!e.Consumed && ClickToFocus) {
                 Focus();
                 if(Focusable) e.Consumed = true;
             }
         }
-        public virtual void OnMouseReleased(ref MouseEvent e) {}
-        
-        public virtual void OnKeyTyped(ref KeyboardEvent e) {}
-        public virtual void OnInput(ControlScheme controls) {}
+
+        public virtual void OnMouseReleased(ref MouseEvent e) { }
+
+        public virtual void OnKeyTyped(ref KeyboardEvent e) { }
+        public virtual void OnInput(ControlScheme controls) { }
 
         public virtual void OnFocusGained() { }
-        public virtual void OnFocusLost() {}
-        
-        public virtual bool ClickToFocus => true;
-        public virtual bool Focusable => false;
+        public virtual void OnFocusLost() { }
 
         public virtual void Focus() {
             Parent?.Environment?.SetFocusedElement(Focusable ? this : null);
         }
-        
+
 
         public bool Pressed(int buttonType = -1) {
             return Parent.IsPressed(this, buttonType);
         }
-        public bool Rollover => Parent.Environment.HoverTargetPrevious.Element == this;
-        public bool Focused => Parent?.Environment?.FocusOwner == this;
 
         public virtual void Displace(ref Point layoutPosition) {
             layoutPosition += new Point(0, Bounds.Height + Margin);
@@ -57,15 +55,15 @@ namespace FoldEngine.Gui {
     }
 
     public class GuiLabel : GuiElement {
-        protected string _text;
         protected int _fontSize = 14;
-        protected int _textAlignment = 0;
-        protected int _textMargin = 4;
-        protected ITexture _icon = null;
+        protected ITexture _icon;
         protected Color _iconColor = Color.White;
         protected Point _iconSize;
-        protected Color _textColor;
         protected bool _shouldCache = true;
+        protected string _text;
+        protected int _textAlignment;
+        protected Color _textColor;
+        protected int _textMargin = 4;
 
         public override void Reset(GuiPanel parent) {
             _fontSize = 2;
@@ -82,16 +80,14 @@ namespace FoldEngine.Gui {
         }
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
-            if(Bounds.Contains(Environment.MousePos)) {
-                Environment.HoverTarget.Element = this;
-            }
+            if(Bounds.Contains(Environment.MousePos)) Environment.HoverTarget.Element = this;
 
             RenderedText renderedText = _shouldCache ? Parent.RenderString(_text, _fontSize) : default;
             if(!renderedText.HasValue) TextRenderer.Instance.Start(renderer.Fonts["default"], _text, _fontSize);
 
             float textWidth = renderedText.HasValue ? renderedText.Width : TextRenderer.Instance.Width;
 
-            int totalWidth = (int) (textWidth);
+            int totalWidth = (int) textWidth;
             if(_icon != null) {
                 totalWidth += _iconSize.X;
                 totalWidth += 8;
@@ -103,26 +99,30 @@ namespace FoldEngine.Gui {
                     x = Bounds.X + _textMargin;
                     break;
                 case 0:
-                    x = (int) (Bounds.Center.X - totalWidth / 2);
+                    x = Bounds.Center.X - totalWidth / 2;
                     break;
                 case 1:
-                    x = (int) (Bounds.X + Bounds.Width - totalWidth - _textMargin);
-                    break;
-                default:
+                    x = Bounds.X + Bounds.Width - totalWidth - _textMargin;
                     break;
             }
 
             if(_icon != null) {
-                layer.Surface.Draw(new DrawRectInstruction() {
+                layer.Surface.Draw(new DrawRectInstruction {
                     Texture = _icon,
                     Color = _iconColor,
-                    DestinationRectangle = new Rectangle(_text.Length > 0 ? x : (Bounds.Center.X - _iconSize.X/2), Bounds.Center.Y - _iconSize.Y/2,  _iconSize.X, _iconSize.Y).Translate(offset)
+                    DestinationRectangle = new Rectangle(_text.Length > 0 ? x : Bounds.Center.X - _iconSize.X / 2,
+                        Bounds.Center.Y - _iconSize.Y / 2, _iconSize.X, _iconSize.Y).Translate(offset)
                 });
                 x += _iconSize.X;
                 x += 8;
             }
-            if(renderedText.HasValue) renderedText.DrawOnto(layer.Surface, new Point(x, Bounds.Center.Y + _fontSize / 2) + offset, _textColor);
-            else TextRenderer.Instance.DrawOnto(layer.Surface, new Point(x, Bounds.Center.Y + 3 * _fontSize / 7) + offset, _textColor);
+
+            if(renderedText.HasValue)
+                renderedText.DrawOnto(layer.Surface, new Point(x, Bounds.Center.Y + _fontSize / 2) + offset,
+                    _textColor);
+            else
+                TextRenderer.Instance.DrawOnto(layer.Surface,
+                    new Point(x, Bounds.Center.Y + 3 * _fontSize / 7) + offset, _textColor);
         }
 
         public GuiLabel Text(string text) {
@@ -156,6 +156,7 @@ namespace FoldEngine.Gui {
                 _iconColor = color;
                 _iconSize = new Point(icon.Width, icon.Height);
             }
+
             return this;
         }
 
@@ -170,10 +171,9 @@ namespace FoldEngine.Gui {
     }
 
     public class GuiButton : GuiLabel {
+        private MouseEvent _lastEvent;
 
         private PooledValue<IGuiAction> _leftAction;
-
-        private MouseEvent _lastEvent;
 
         protected virtual Color NormalColor => new Color(37, 37, 38);
         protected virtual Color RolloverColor => Color.CornflowerBlue;
@@ -190,11 +190,9 @@ namespace FoldEngine.Gui {
         }
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
-            if(Bounds.Contains(Environment.MousePos)) {
-                Environment.HoverTarget.Element = this;
-            }
+            if(Bounds.Contains(Environment.MousePos)) Environment.HoverTarget.Element = this;
 
-            layer.Surface.Draw(new DrawRectInstruction() {
+            layer.Surface.Draw(new DrawRectInstruction {
                 Texture = renderer.WhiteTexture,
                 Color = Pressed(MouseEvent.LeftButton) ? PressedColor : Rollover ? RolloverColor : NormalColor,
                 DestinationRectangle = Bounds.Translate(offset)
@@ -203,7 +201,7 @@ namespace FoldEngine.Gui {
         }
 
         public override void OnMouseReleased(ref MouseEvent e) {
-            if(Bounds.Contains(e.Position)) {
+            if(Bounds.Contains(e.Position))
                 switch(e.Button) {
                     case MouseEvent.LeftButton: {
                         _lastEvent = e;
@@ -215,10 +213,8 @@ namespace FoldEngine.Gui {
                         break;
                     }
                 }
-            }
         }
 
-        
 
         public new GuiButton Text(string text) {
             base.Text(text);
@@ -251,10 +247,14 @@ namespace FoldEngine.Gui {
         }
 
         public bool IsPressed() {
-            if(_lastEvent.Button == MouseEvent.LeftButton && _lastEvent.When != 0 && Time.Now >= _lastEvent.When && !_lastEvent.Consumed) {
+            if(_lastEvent.Button == MouseEvent.LeftButton
+               && _lastEvent.When != 0
+               && Time.Now >= _lastEvent.When
+               && !_lastEvent.Consumed) {
                 _lastEvent.Consumed = true;
                 return true;
             }
+
             return false;
         }
 
@@ -282,22 +282,21 @@ namespace FoldEngine.Gui {
         public override void Reset(GuiPanel parent) {
             Size = 2;
         }
-        
+
         public override void AdjustSpacing(GuiPanel parent) {
             Bounds.Width = Size;
             Bounds.Height = Size;
             Margin = 0;
         }
-        
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
-        }
+
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) { }
     }
 
     public class GuiSeparator : GuiElement {
-        protected string _label;
         protected int _fontSize = 7;
+        protected string _label;
         protected int _thickness = 2;
-        
+
 
         public override void Reset(GuiPanel parent) {
             _label = null;
@@ -310,32 +309,38 @@ namespace FoldEngine.Gui {
             Bounds.Height = _label != null ? 12 * _fontSize / 7 : _thickness;
             Margin = 4;
         }
-        
+
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
             var color = new Color(45, 45, 48);
             if(_label != null) {
                 RenderedText rendered = Parent.RenderString(_label, _fontSize);
 
-                int lineWidth = (int) ((Bounds.Width - rendered.Width * _fontSize) / 2) - 2 * _fontSize;
-                
-                layer.Surface.Draw(new DrawRectInstruction() {
+                int lineWidth = (Bounds.Width - rendered.Width * _fontSize) / 2 - 2 * _fontSize;
+
+                layer.Surface.Draw(new DrawRectInstruction {
                     Texture = renderer.WhiteTexture,
                     Color = color,
-                    DestinationRectangle = new Rectangle(Bounds.X, Bounds.Center.Y - _thickness/2, lineWidth, _thickness).Translate(offset)
+                    DestinationRectangle =
+                        new Rectangle(Bounds.X, Bounds.Center.Y - _thickness / 2, lineWidth, _thickness).Translate(
+                            offset)
                 });
-                layer.Surface.Draw(new DrawRectInstruction() {
+                layer.Surface.Draw(new DrawRectInstruction {
                     Texture = renderer.WhiteTexture,
                     Color = color,
-                    DestinationRectangle = new Rectangle(Bounds.Right - lineWidth, Bounds.Center.Y - _thickness/2, lineWidth, _thickness).Translate(offset)
+                    DestinationRectangle = new Rectangle(Bounds.Right - lineWidth, Bounds.Center.Y - _thickness / 2,
+                        lineWidth, _thickness).Translate(offset)
                 });
-                
-                rendered.DrawOnto(layer.Surface, new Point((int) (Bounds.Center.X - rendered.Width * _fontSize / 2), Bounds.Center.Y + 3 * _fontSize), Color.White);
+
+                rendered.DrawOnto(layer.Surface,
+                    new Point(Bounds.Center.X - rendered.Width * _fontSize / 2, Bounds.Center.Y + 3 * _fontSize),
+                    Color.White);
             } else {
                 int lineWidth = Bounds.Width;
-                layer.Surface.Draw(new DrawRectInstruction() {
+                layer.Surface.Draw(new DrawRectInstruction {
                     Texture = renderer.WhiteTexture,
                     Color = color,
-                    DestinationRectangle = new Rectangle(Bounds.Right - lineWidth, Bounds.Center.Y - _thickness/2, lineWidth, _thickness).Translate(offset)
+                    DestinationRectangle = new Rectangle(Bounds.Right - lineWidth, Bounds.Center.Y - _thickness / 2,
+                        lineWidth, _thickness).Translate(offset)
                 });
             }
         }

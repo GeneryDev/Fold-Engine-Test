@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
 using System.Reflection;
-using FoldEngine.Scenes;
 
 namespace FoldEngine.Events {
     public static class Event {
-        private static Dictionary<Type, string> _typeToIdentifierMap = null;
-        private static Dictionary<string, Type> _identifierToTypeMap = null;
+        public delegate void EventListener<T>(ref T evt);
+
+        private static Dictionary<Type, string> _typeToIdentifierMap;
+        private static Dictionary<string, Type> _identifierToTypeMap;
 
         public static string IdentifierOf(Type type) {
-            if(_typeToIdentifierMap == null) {
-                _typeToIdentifierMap = new Dictionary<Type, string>();
-            }
+            if(_typeToIdentifierMap == null) _typeToIdentifierMap = new Dictionary<Type, string>();
 
             if(!_typeToIdentifierMap.ContainsKey(type)) {
                 object[] matchingAttributes = type.GetCustomAttributes(typeof(EventAttribute), false);
@@ -35,7 +33,7 @@ namespace FoldEngine.Events {
 
         public static void PopulateDictionaryWithAssembly(Assembly assembly) {
             if(_identifierToTypeMap == null) _identifierToTypeMap = new Dictionary<string, Type>();
-            foreach(Type type in assembly.GetTypes()) {
+            foreach(Type type in assembly.GetTypes())
                 if(type.IsValueType) {
                     object[] attributes;
                     if((attributes = type.GetCustomAttributes(typeof(EventAttribute), false)).Length > 0) {
@@ -43,7 +41,6 @@ namespace FoldEngine.Events {
                         _identifierToTypeMap[thisIdentifier] = type;
                     }
                 }
-            }
         }
 
         public static void PopulateIdentifiers() {
@@ -52,8 +49,6 @@ namespace FoldEngine.Events {
                 PopulateDictionaryWithAssembly(Assembly.GetEntryAssembly());
             }
         }
-
-        public delegate void EventListener<T>(ref T evt);
     }
 
     public sealed class EventAttribute : Attribute {

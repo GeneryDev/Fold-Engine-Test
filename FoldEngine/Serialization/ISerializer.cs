@@ -9,9 +9,6 @@ namespace FoldEngine.Serialization {
     }
 
     public abstract class Serializer<T> : ISerializer {
-        public abstract void Serialize(T t, SaveOperation writer);
-        public abstract T Deserialize(LoadOperation reader);
-
         public void SerializeObject(object value, SaveOperation writer) {
             if(value is T t) Serialize(t, writer);
             else throw new ArgumentException(nameof(value));
@@ -20,7 +17,9 @@ namespace FoldEngine.Serialization {
         public object DeserializeObject(LoadOperation writer) {
             return Deserialize(writer);
         }
-        
+
         public abstract Type WorkingType { get; }
+        public abstract void Serialize(T t, SaveOperation writer);
+        public abstract T Deserialize(LoadOperation reader);
     }
 }

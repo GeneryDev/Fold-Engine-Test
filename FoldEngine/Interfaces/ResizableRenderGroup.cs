@@ -5,7 +5,7 @@ namespace FoldEngine.Interfaces {
         private Point _size;
 
         public ResizableRenderGroup(RenderGroup group) : base(group.RenderingUnit) {
-            this.Dependencies.Add(new Dependency() {
+            Dependencies.Add(new Dependency {
                 Group = group
             });
             this["child"] = new DependencyRenderingLayer(0);
@@ -16,9 +16,7 @@ namespace FoldEngine.Interfaces {
             get => _size;
             set {
                 _size = value;
-                foreach(Dependency dependency in Dependencies) {
-                    AdjustDependency(dependency);
-                }
+                foreach(Dependency dependency in Dependencies) AdjustDependency(dependency);
             }
         } //analogous to window size
 

@@ -2,12 +2,12 @@
 
 namespace FoldEngine.Editor.Gui.Fields.Transactions {
     public class InsertionEdit : DocumentTransactionBase {
-        private char[] _textToInsert;
-        
+        private readonly char[] _textToInsert;
+
         public InsertionEdit(char[] value, TextField field) : base(field) {
             _textToInsert = value;
         }
-        
+
         protected override void CalculateModifications() {
             foreach(Dot dot in PreviousProfile.Dots) {
                 Modification(dot.Min, dot.Length, _textToInsert);

@@ -2,26 +2,24 @@
 using System.Collections.Generic;
 using System.IO;
 using EntryProject.Util;
-using FoldEngine.Scenes;
 
 namespace FoldEngine.Serialization {
     public class LoadOperation {
+        public delegate void ArrayReader(Array c);
+
+        public delegate void CompoundReader(Compound c);
+
         private readonly string _path;
         private readonly BinaryReader _reader;
-        public readonly FieldCollection Options = new FieldCollection();
-        
+
         private readonly List<string> _stringPool = new List<string>();
-        
+        public readonly FieldCollection Options = new FieldCollection();
+
         public SerializerSuite SerializerSuite = SerializerSuite.Instance;
-        
-        public long Current {
-            get => _reader.BaseStream.Seek(0, SeekOrigin.Current);
-            set => _reader.BaseStream.Seek((int) value, SeekOrigin.Begin);
-        }
 
         public LoadOperation(Stream input) {
             _reader = new BinaryReader(input);
-            
+
             ReadHeader();
         }
 
@@ -33,14 +31,17 @@ namespace FoldEngine.Serialization {
             ReadHeader();
         }
 
+        public long Current {
+            get => _reader.BaseStream.Seek(0, SeekOrigin.Current);
+            set => _reader.BaseStream.Seek((int) value, SeekOrigin.Begin);
+        }
+
         private void ReadHeader() {
             long stringPoolOffset = _reader.ReadInt64();
             _reader.BaseStream.Seek(stringPoolOffset, SeekOrigin.Begin);
             int stringPoolSize = _reader.ReadInt32();
             _stringPool.Capacity = stringPoolSize;
-            for(int i = 0; i < stringPoolSize; i++) {
-                _stringPool.Add(_reader.ReadString());
-            }
+            for(int i = 0; i < stringPoolSize; i++) _stringPool.Add(_reader.ReadString());
 
             _reader.BaseStream.Seek(8, SeekOrigin.Begin);
         }
@@ -128,14 +129,14 @@ namespace FoldEngine.Serialization {
 
         public void ReadCompound(CompoundReader reader) {
             int memberCount = _reader.ReadInt32();
-            var compound = new Compound() {
+            var compound = new Compound {
                 LoadOperation = this,
                 MemberCount = memberCount,
                 MemberNames = new string[memberCount],
                 MemberDataOffsets = new long[memberCount],
                 MemberDataLengths = new int[memberCount]
             };
-            
+
             for(int i = 0; i < memberCount; i++) {
                 compound.MemberNames[i] = ReadString();
                 int byteLength = ReadInt32();
@@ -153,13 +154,13 @@ namespace FoldEngine.Serialization {
 
         public void ReadArray(ArrayReader reader) {
             int memberCount = _reader.ReadInt32();
-            var array = new Array() {
+            var array = new Array {
                 LoadOperation = this,
                 MemberCount = memberCount,
                 MemberDataOffsets = new long[memberCount],
                 MemberDataLengths = new int[memberCount]
             };
-            
+
             for(int i = 0; i < memberCount; i++) {
                 int byteLength = ReadInt32();
                 array.MemberDataOffsets[i] = Current;
@@ -174,9 +175,6 @@ namespace FoldEngine.Serialization {
             Current = end;
         }
 
-        public delegate void CompoundReader(Compound c);
-        public delegate void ArrayReader(Array c);
-
         public struct Compound {
             public LoadOperation LoadOperation;
             public int MemberCount;
@@ -185,22 +183,22 @@ namespace FoldEngine.Serialization {
             public int[] MemberDataLengths;
 
             public bool HasMember(string name) {
-                foreach(string memberName in MemberNames) {
-                    if(memberName == name) return true;
-                }
+                foreach(string memberName in MemberNames)
+                    if(memberName == name)
+                        return true;
                 return false;
             }
 
             private int IndexOfMember(string name) {
-                for(int i = 0; i < MemberCount; i++) {
-                    if(MemberNames[i] == name) return i;
-                }
+                for(int i = 0; i < MemberCount; i++)
+                    if(MemberNames[i] == name)
+                        return i;
                 return -1;
             }
 
             public void StartReadMember(string name) {
                 int memberIndex = IndexOfMember(name);
-                
+
                 if(memberIndex == -1) throw new ArgumentException($"No such member exists: {name}");
 
                 LoadOperation.Current = MemberDataOffsets[memberIndex];
@@ -208,7 +206,7 @@ namespace FoldEngine.Serialization {
 
             public T GetMember<T>(string name) {
                 int memberIndex = IndexOfMember(name);
-                
+
                 if(memberIndex == -1) throw new ArgumentException($"No such member exists: {name}");
 
                 LoadOperation.Current = MemberDataOffsets[memberIndex];
@@ -218,7 +216,7 @@ namespace FoldEngine.Serialization {
 
             public List<T> GetListMember<T>(string name) {
                 int memberIndex = IndexOfMember(name);
-                
+
                 if(memberIndex == -1) throw new ArgumentException($"No such member exists: {name}");
 
                 LoadOperation.Current = MemberDataOffsets[memberIndex];
@@ -228,7 +226,7 @@ namespace FoldEngine.Serialization {
 
             public void DeserializeMember(string name, ISelfSerializer selfSerializer) {
                 int memberIndex = IndexOfMember(name);
-                
+
                 if(memberIndex == -1) throw new ArgumentException($"No such member exists: {name}");
 
                 LoadOperation.Current = MemberDataOffsets[memberIndex];

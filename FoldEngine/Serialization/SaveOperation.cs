@@ -1,27 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using EntryProject.Util;
-using FoldEngine.Scenes;
 
 namespace FoldEngine.Serialization {
     public class SaveOperation {
+        public delegate void ArrayWriter(ref Array arr);
+
+        public delegate void CompoundWriter(ref Compound c);
+
+        public delegate void Writer();
+
         private readonly string _path;
+
+        private readonly List<string> _stringPool = new List<string>();
         private readonly BinaryWriter _writer;
         public readonly FieldCollection Options = new FieldCollection();
-        
-        private readonly List<string> _stringPool = new List<string>();
-        
-        public SerializerSuite SerializerSuite = SerializerSuite.Instance;
 
-        public long Current {
-            get => _writer.Seek(0, SeekOrigin.Current);
-            set => _writer.Seek((int) value, SeekOrigin.Begin);
-        }
+        public SerializerSuite SerializerSuite = SerializerSuite.Instance;
 
         public SaveOperation(Stream output) {
             _writer = new BinaryWriter(output);
-            
+
             _writer.Write(0L);
         }
 
@@ -29,59 +28,60 @@ namespace FoldEngine.Serialization {
             _path = path;
 
             _writer = new BinaryWriter(new FileStream(_path, FileMode.Create));
-            
+
             _writer.Write(0L);
         }
 
+        public long Current {
+            get => _writer.Seek(0, SeekOrigin.Current);
+            set => _writer.Seek((int) value, SeekOrigin.Begin);
+        }
+
         public SaveOperation WriteCompound(CompoundWriter writer) {
-            
             var c = new Compound(this);
 
             long lengthOffset = Current;
             _writer.Write(0);
-            
+
             writer(ref c);
             int length = c.MemberCount;
-            
+
             long endOffset = Current;
             Current = lengthOffset;
             _writer.Write(length);
             Current = endOffset;
-            
+
             return this;
         }
 
         public SaveOperation WriteArray(ArrayWriter writer) {
-
             var arr = new Array(this);
-            
+
             long lengthOffset = Current;
             _writer.Write(0);
-            
+
             writer(ref arr);
             int length = arr.MemberCount;
-            
+
             long endOffset = Current;
             Current = lengthOffset;
             _writer.Write(length);
             Current = endOffset;
-            
+
             return this;
         }
 
         public void Close() {
             long head = Current;
-            
+
             // Write string pool at the end of the file
             _writer.Write(_stringPool.Count);
-            foreach(string str in _stringPool) {
-                _writer.Write(str);
-            }
+            foreach(string str in _stringPool) _writer.Write(str);
 
             // Write address of the string pool at the beginning
             _writer.Seek(0, SeekOrigin.Begin);
             _writer.Write(head);
-            
+
             // End
             _writer.Close();
         }
@@ -169,6 +169,7 @@ namespace FoldEngine.Serialization {
                 index = _stringPool.Count;
                 _stringPool.Add(value);
             }
+
             _writer.Write(index);
             return this;
         }
@@ -180,18 +181,18 @@ namespace FoldEngine.Serialization {
         private SaveOperation WriteMember(string name, object value) {
             // Write member name;
             if(name != null) Write(name);
-            
+
             // Write an int for the length in bytes (will be overwritten later)
             long lengthPosition = Current;
             Write(0);
-            
+
             // Write the data
             SerializerSuite.Write(value, this);
-            
+
             // Calculate length in bytes
             long endPosition = Current;
             int length = (int) (endPosition - lengthPosition - 4);
-            
+
             // Write the length and return
             Current = lengthPosition;
             Write(length);
@@ -203,18 +204,18 @@ namespace FoldEngine.Serialization {
         private SaveOperation WriteMember<T>(string name, T value) {
             // Write member name;
             if(name != null) Write(name);
-            
+
             // Write an int for the length in bytes (will be overwritten later)
             long lengthPosition = Current;
             Write(0);
-            
+
             // Write the data
             SerializerSuite.Write(value, this);
-            
+
             // Calculate length in bytes
             long endPosition = Current;
             int length = (int) (endPosition - lengthPosition - 4);
-            
+
             // Write the length and return
             Current = lengthPosition;
             Write(length);
@@ -226,18 +227,18 @@ namespace FoldEngine.Serialization {
         private SaveOperation WriteMember<T>(string name, List<T> value) {
             // Write member name;
             if(name != null) Write(name);
-            
+
             // Write an int for the length in bytes (will be overwritten later)
             long lengthPosition = Current;
             Write(0);
-            
+
             // Write the data
             SerializerSuite.Write(value, this);
-            
+
             // Calculate length in bytes
             long endPosition = Current;
             int length = (int) (endPosition - lengthPosition - 4);
-            
+
             // Write the length and return
             Current = lengthPosition;
             Write(length);
@@ -249,18 +250,18 @@ namespace FoldEngine.Serialization {
         private SaveOperation WriteMember(string name, ISelfSerializer value) {
             // Write member name;
             if(name != null) Write(name);
-            
+
             // Write an int for the length in bytes (will be overwritten later)
             long lengthPosition = Current;
             Write(0);
-            
+
             // Write the data
             SerializerSuite.Write(value, this);
-            
+
             // Calculate length in bytes
             long endPosition = Current;
             int length = (int) (endPosition - lengthPosition - 4);
-            
+
             // Write the length and return
             Current = lengthPosition;
             Write(length);
@@ -272,18 +273,18 @@ namespace FoldEngine.Serialization {
         private SaveOperation WriteMember(string name, Writer writer) {
             // Write member name;
             if(name != null) Write(name);
-            
+
             // Write an int for the length in bytes (will be overwritten later)
             long lengthPosition = Current;
             Write(0);
-            
+
             // Write the data
             writer();
-            
+
             // Calculate length in bytes
             long endPosition = Current;
             int length = (int) (endPosition - lengthPosition - 4);
-            
+
             // Write the length and return
             Current = lengthPosition;
             Write(length);
@@ -291,11 +292,6 @@ namespace FoldEngine.Serialization {
 
             return this;
         }
-
-        public delegate void Writer();
-        
-        public delegate void CompoundWriter(ref Compound c);
-        public delegate void ArrayWriter(ref Array arr);
 
         public struct Compound {
             public SaveOperation SaveOperation;
@@ -325,7 +321,7 @@ namespace FoldEngine.Serialization {
             }
 
             public Compound WriteMember(string name, ISelfSerializer value) {
-                SaveOperation.WriteMember(name, (ISelfSerializer) value);
+                SaveOperation.WriteMember(name, value);
                 MemberCount++;
                 return this;
             }
@@ -336,6 +332,7 @@ namespace FoldEngine.Serialization {
                 return this;
             }
         }
+
         public struct Array {
             public SaveOperation SaveOperation;
             internal int MemberCount;
@@ -364,7 +361,7 @@ namespace FoldEngine.Serialization {
             }
 
             public Array WriteMember(ISelfSerializer value) {
-                SaveOperation.WriteMember(null, (ISelfSerializer) value);
+                SaveOperation.WriteMember(null, value);
                 MemberCount++;
                 return this;
             }

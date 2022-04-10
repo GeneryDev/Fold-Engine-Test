@@ -10,18 +10,16 @@ namespace FoldEngine.Input {
             set => _players[index] = value;
         }
 
-        public void Update() {
-            foreach(Player player in this) {
-                player.Update();
-            }
-        }
-
         public IEnumerator<Player> GetEnumerator() {
             return _players.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
             return GetEnumerator();
+        }
+
+        public void Update() {
+            foreach(Player player in this) player.Update();
         }
 
         public void Add(Player player) {

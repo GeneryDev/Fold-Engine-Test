@@ -7,34 +7,37 @@ using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Text;
 using Microsoft.Xna.Framework;
-using Mouse = Microsoft.Xna.Framework.Input.Mouse;
 
 namespace FoldEngine.Gui {
     public class GuiPanel : GuiElement {
         private const int ScrollAmount = 18;
-        
-        public GuiEnvironment Environment { get; private set; }
-        public Dictionary<string, RenderedText> RenderedStrings = new Dictionary<string,RenderedText>();
-        public bool Focused = true;
-        
-        private long _lastFrameRendered;
-        public bool Visible => _lastFrameRendered >= Time.Frame-1;
-        
-        public ButtonAction MouseLeft = ButtonAction.Default;
-        public ButtonAction MouseRight = ButtonAction.Default;
 
         private readonly List<GuiElement> _children = new List<GuiElement>();
+
+        private readonly GuiElement[] _pressedElements = new GuiElement[MouseEvent.MaxButtons];
         public readonly ObjectPoolCollection<GuiElement> ElementPool = new ObjectPoolCollection<GuiElement>();
 
-        public Point LayoutPosition = Point.Zero;
+        private long _lastFrameRendered;
+
+        private GuiElement _previousElement;
         public Point ContentSize = Point.Zero;
-        
-        public Point ScrollPosition = Point.Zero;
+        public bool Focused = true;
+
+        public Point LayoutPosition = Point.Zero;
         public bool MayScroll = false;
+
+        public ButtonAction MouseLeft = ButtonAction.Default;
+        public ButtonAction MouseRight = ButtonAction.Default;
+        public Dictionary<string, RenderedText> RenderedStrings = new Dictionary<string, RenderedText>();
+
+        public Point ScrollPosition = Point.Zero;
 
         public GuiPanel(GuiEnvironment environment) {
             Environment = environment;
         }
+
+        public GuiEnvironment Environment { get; }
+        public bool Visible => _lastFrameRendered >= Time.Frame - 1;
 
         public virtual void Reset() {
             _children.Clear();
@@ -66,14 +69,14 @@ namespace FoldEngine.Gui {
             _previousElement = element;
         }
 
-        private GuiElement _previousElement;
-
         protected void EndPreviousElement() {
             if(_previousElement != null) {
                 _previousElement.AdjustSpacing(this);
                 _previousElement.Displace(ref LayoutPosition);
-                ContentSize.X = Math.Max(ContentSize.X, _previousElement.Bounds.Right - Bounds.Location.X + ScrollPosition.X);
-                ContentSize.Y = Math.Max(ContentSize.Y, _previousElement.Bounds.Bottom - Bounds.Location.Y + ScrollPosition.Y);
+                ContentSize.X = Math.Max(ContentSize.X,
+                    _previousElement.Bounds.Right - Bounds.Location.X + ScrollPosition.X);
+                ContentSize.Y = Math.Max(ContentSize.Y,
+                    _previousElement.Bounds.Bottom - Bounds.Location.Y + ScrollPosition.Y);
                 _previousElement = null;
             }
         }
@@ -137,11 +140,12 @@ namespace FoldEngine.Gui {
 
             return RenderedStrings[str] = RenderedStrings[str].Update();
         }
+
         public RenderedText DrawString(string str, RenderSurface surface, Point start, Color color, float size) {
             Environment.Renderer.Fonts["default"].DrawString(str, surface, start, color, size);
             // if(!RenderedStrings.ContainsKey(str)) {
-                // if(useCache) RenderedStrings[str] = rendered;
-                // return rendered;
+            // if(useCache) RenderedStrings[str] = rendered;
+            // return rendered;
             // }
             return RenderedStrings[str];
         }
@@ -150,11 +154,9 @@ namespace FoldEngine.Gui {
             Environment?.SetFocusedElement(Focusable ? this : null);
         }
 
-        public override void Reset(GuiPanel parent) {
-        }
+        public override void Reset(GuiPanel parent) { }
 
-        public override void AdjustSpacing(GuiPanel parent) {
-        }
+        public override void AdjustSpacing(GuiPanel parent) { }
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
             EndPreviousElement();
@@ -163,13 +165,12 @@ namespace FoldEngine.Gui {
                 editorEnvironment.HoverTarget.Element = this;
                 if(MayScroll) editorEnvironment.HoverTarget.ScrollablePanel = this;
             }
-            _lastFrameRendered = Time.Frame;
-            foreach(GuiElement element in _children) {
-                if(element.Bounds.Intersects(Bounds)) element.Render(renderer, layer);
-            }
-        }
 
-        private readonly GuiElement[] _pressedElements = new GuiElement[MouseEvent.MaxButtons];
+            _lastFrameRendered = Time.Frame;
+            foreach(GuiElement element in _children)
+                if(element.Bounds.Intersects(Bounds))
+                    element.Render(renderer, layer);
+        }
 
         public override void OnMousePressed(ref MouseEvent e) {
             for(int i = _children.Count - 1; i >= 0; i--) {
@@ -180,7 +181,7 @@ namespace FoldEngine.Gui {
                     break;
                 }
             }
-            
+
             base.OnMousePressed(ref e);
         }
 
@@ -191,12 +192,13 @@ namespace FoldEngine.Gui {
 
         public bool IsPressed(GuiElement element, int buttonType = -1) {
             if(buttonType == -1) {
-                foreach(GuiElement pressedElement in _pressedElements) {
-                    if(pressedElement == element) return true;
-                }
+                foreach(GuiElement pressedElement in _pressedElements)
+                    if(pressedElement == element)
+                        return true;
 
                 return false;
             }
+
             return element == _pressedElements[buttonType];
         }
 
@@ -219,6 +221,4 @@ namespace FoldEngine.Gui {
             }
         }
     }
-
-    
 }

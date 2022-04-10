@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using FoldEngine.Graphics;
 using FoldEngine.Gui;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
@@ -8,19 +7,18 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Gui.Fields.Text {
     public class Caret {
-        private List<Dot> _dots = new List<Dot>();
-        private TextField _parent;
-
-        private Document Document => _parent.Document;
-        
-        private long _blinkerTime = 0;
-        public bool BlinkerOn => _parent.Pressed(MouseEvent.LeftButton) ||  ((Time.Now - _blinkerTime) / 500) % 2 == 0;
+        private long _blinkerTime;
+        private readonly List<Dot> _dots = new List<Dot>();
+        private readonly TextField _parent;
 
         public Caret(TextField parent) {
             _parent = parent;
-            
+
             _dots.Add(new Dot(Document));
         }
+
+        private Document Document => _parent.Document;
+        public bool BlinkerOn => _parent.Pressed(MouseEvent.LeftButton) || (Time.Now - _blinkerTime) / 500 % 2 == 0;
 
         public int Dot {
             get => _dots[0].Index;
@@ -51,24 +49,17 @@ namespace FoldEngine.Editor.Gui.Fields.Text {
 
         public void OnInput(ControlScheme controls) {
             KeyModifiers modifiers = KeyModifiersExt.GetKeyModifiers();
-            if(controls.Get<ButtonAction>("editor.field.caret.left").Consume()) {
+            if(controls.Get<ButtonAction>("editor.field.caret.left").Consume())
                 FireDotEvent(DotEventType.Left, modifiers);
-            }
-            if(controls.Get<ButtonAction>("editor.field.caret.right").Consume()) {
+            if(controls.Get<ButtonAction>("editor.field.caret.right").Consume())
                 FireDotEvent(DotEventType.Right, modifiers);
-            }
-            if(controls.Get<ButtonAction>("editor.field.caret.up").Consume()) {
-                FireDotEvent(DotEventType.Up, modifiers);
-            }
-            if(controls.Get<ButtonAction>("editor.field.caret.down").Consume()) {
+            if(controls.Get<ButtonAction>("editor.field.caret.up").Consume()) FireDotEvent(DotEventType.Up, modifiers);
+            if(controls.Get<ButtonAction>("editor.field.caret.down").Consume())
                 FireDotEvent(DotEventType.Down, modifiers);
-            }
-            if(controls.Get<ButtonAction>("editor.field.caret.home").Consume()) {
+            if(controls.Get<ButtonAction>("editor.field.caret.home").Consume())
                 FireDotEvent(DotEventType.Home, modifiers);
-            }
-            if(controls.Get<ButtonAction>("editor.field.caret.end").Consume()) {
+            if(controls.Get<ButtonAction>("editor.field.caret.end").Consume())
                 FireDotEvent(DotEventType.End, modifiers);
-            }
             if(controls.Get<ButtonAction>("editor.field.select_all").Consume()) {
                 _dots.Clear();
                 _dots.Add(new Dot(Document, 0, Document.Length));
@@ -94,6 +85,7 @@ namespace FoldEngine.Editor.Gui.Fields.Text {
                 dot.HandleEvent(type, modifiers);
                 _dots[i] = dot;
             }
+
             DotsUpdated();
             ResetBlinker();
         }
@@ -106,22 +98,18 @@ namespace FoldEngine.Editor.Gui.Fields.Text {
             if(_parent.Focused) {
                 int fieldWidth = _parent.Bounds.Width;
                 fieldWidth -= 2 * (offset.X - _parent.Bounds.X);
-                foreach(Dot dot in _dots) {
-                    dot.DrawSelection(renderer, layer, offset, fieldWidth);
-                }
+                foreach(Dot dot in _dots) dot.DrawSelection(renderer, layer, offset, fieldWidth);
             }
         }
 
         public void PostRender(IRenderingUnit renderer, IRenderingLayer layer, Point offset) {
-            if(_parent.Focused && BlinkerOn) {
-                foreach(Dot dot in _dots) {
+            if(_parent.Focused && BlinkerOn)
+                foreach(Dot dot in _dots)
                     dot.DrawIndex(renderer, layer, offset);
-                }
-            }
         }
 
         public CaretProfile CreateProfile() {
-            CaretProfile profile = new CaretProfile(_dots.ToArray());
+            var profile = new CaretProfile(_dots.ToArray());
             profile.Sort();
             return profile;
         }
@@ -129,13 +117,11 @@ namespace FoldEngine.Editor.Gui.Fields.Text {
         public void SetProfile(CaretProfile profile) {
             _dots.Clear();
 
-            foreach(Dot dot in profile.Dots) {
-                if(dot.Document == Document) {
+            foreach(Dot dot in profile.Dots)
+                if(dot.Document == Document)
                     _dots.Add(dot);
-                } else {
+                else
                     _dots.Add(new Dot(Document, dot.Index, dot.Mark));
-                }
-            }
         }
     }
 
@@ -144,9 +130,7 @@ namespace FoldEngine.Editor.Gui.Fields.Text {
 
         public CaretProfile(CaretProfile other) {
             Dots = new Dot[other.Dots.Length];
-            for(int i = 0; i < other.Dots.Length; i++) {
-                Dots[i] = other.Dots[i];
-            }
+            for(int i = 0; i < other.Dots.Length; i++) Dots[i] = other.Dots[i];
         }
 
         public CaretProfile(params Dot[] dots) {

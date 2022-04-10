@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using EntryProject.Util.JsonSerialization;
-using Microsoft.Xna.Framework.Input;
 
 namespace FoldEngine.Input {
     public class InputBuilder {
-        private InputDevices _devices;
-        private JsonDeserializerObject _root;
+        private readonly InputDevices _devices;
+        private readonly JsonDeserializerObject _root;
 
         public InputBuilder(InputDevices devices, JsonDeserializerObject root) {
             _devices = devices;
@@ -14,7 +13,7 @@ namespace FoldEngine.Input {
         }
 
         public List<Player> Build() {
-            List<Player> players = new List<Player>();
+            var players = new List<Player>();
             _root.GetArray("players")
                 .Iterate(new JsonBranches().Add<JsonDeserializerObject>(o => {
                     players.Add(BuildPlayer(o));
@@ -24,23 +23,24 @@ namespace FoldEngine.Input {
         }
 
         private Player BuildPlayer(JsonDeserializerObject rawPlayer) {
-            Player player = new Player();
+            var player = new Player();
 
             rawPlayer.GetArray("control_schemes")
                 .Iterate(new JsonBranches().Add<JsonDeserializerObject>(rawControlScheme =>
                     BuildControlScheme(rawControlScheme, player))
                 );
-                    
+
             return player;
         }
 
         private ControlScheme BuildControlScheme(JsonDeserializerObject rawControlScheme, Player player) {
             var controlScheme = new ControlScheme(rawControlScheme.Get<string>("name"));
-            
-            rawControlScheme.GetArray("devices").Iterate(new JsonBranches().Add<string>(s => {
-                controlScheme.AddDevice(_devices[s]);
-                return null;
-            }));
+
+            rawControlScheme.GetArray("devices")
+                .Iterate(new JsonBranches().Add<string>(s => {
+                    controlScheme.AddDevice(_devices[s]);
+                    return null;
+                }));
 
             rawControlScheme.GetArray("actions")
                 .Iterate(new JsonBranches().Add<JsonDeserializerObject>(rawAction =>
@@ -56,7 +56,7 @@ namespace FoldEngine.Input {
             string type = rawAction.Get<string>("type");
 
             IAction action = null;
-            
+
             switch(type) {
                 case "button": {
                     string buttonName = rawAction.Get<string>("button");
@@ -64,25 +64,28 @@ namespace FoldEngine.Input {
                     string whenRaw = rawAction.Get<string>("when", true, "down");
                     bool down = true;
                     switch(whenRaw.ToLowerInvariant()) {
-                        case "down": 
-                        case "pressed": down = true;
+                        case "down":
+                        case "pressed":
+                            down = true;
                             break;
-                        case "up": 
-                        case "released": down = false;
+                        case "up":
+                        case "released":
+                            down = false;
                             break;
-                        default: throw new ArgumentException($"Unknown 'when' {whenRaw}"); 
+                        default: throw new ArgumentException($"Unknown 'when' {whenRaw}");
                     }
 
                     var buttonAction = new ButtonAction(device.Get<ButtonInfo>(buttonName)) {
                         BufferTime = rawAction.Get<int>("buffer_time", true, 32),
                         WhenDown = down
                     };
-                    
+
                     JsonDeserializerObject repeatObj = rawAction.GetObject("repeat", true);
-                    
+
                     if(repeatObj != null) {
                         buttonAction.Repeat = true;
-                        buttonAction.RepeatStartDelay = repeatObj.Get<int>("start_delay", true, buttonAction.RepeatStartDelay);
+                        buttonAction.RepeatStartDelay =
+                            repeatObj.Get<int>("start_delay", true, buttonAction.RepeatStartDelay);
                         buttonAction.RepeatInterval = repeatObj.Get<int>("interval", true, buttonAction.RepeatInterval);
                     }
 
@@ -94,21 +97,19 @@ namespace FoldEngine.Input {
                         int axis = rawAction.Get<int>("axis", true, 0);
                         var analogInfo = device.Get<IAnalogInfo>(rawAction.Get<string>("analog"));
                         int factor = 1;
-                        if(rawAction.Get<bool>("invert", true)) {
-                            factor = -1;
-                        }
+                        if(rawAction.Get<bool>("invert", true)) factor = -1;
                         action = new AnalogAction(() => analogInfo[axis] * factor);
                         break;
-                    } else if(rawAction.ContainsKey("opposite_buttons")) {
+                    }
+
+                    if(rawAction.ContainsKey("opposite_buttons")) {
                         JsonDeserializerArray rawOppositeButtons = rawAction.GetArray("opposite_buttons");
 
-                        ButtonInfo negative = device.Get<ButtonInfo>(rawOppositeButtons.Get<string>(0));
-                        ButtonInfo positive = device.Get<ButtonInfo>(rawOppositeButtons.Get<string>(1));
+                        var negative = device.Get<ButtonInfo>(rawOppositeButtons.Get<string>(0));
+                        var positive = device.Get<ButtonInfo>(rawOppositeButtons.Get<string>(1));
 
                         int factor = 1;
-                        if(rawAction.Get<bool>("invert", true)) {
-                            factor = -1;
-                        }
+                        if(rawAction.Get<bool>("invert", true)) factor = -1;
                         action = new AnalogAction(() => factor * ((negative.Down ? -1 : 0) + (positive.Down ? 1 : 0)));
                         break;
                     }
@@ -119,18 +120,18 @@ namespace FoldEngine.Input {
                 case "change": {
                     int axis = rawAction.Get<int>("axis", true, 0);
                     var analog = device.Get<IAnalogInfo>(rawAction.Get<string>("analog"));
-                    
+
                     float? min = null;
-                    if(rawAction.ContainsKey("min")) min = (float)rawAction.Get<double>("min", false);
+                    if(rawAction.ContainsKey("min")) min = (float) rawAction.Get<double>("min", false);
                     float? max = null;
-                    if(rawAction.ContainsKey("max")) max = (float)rawAction.Get<double>("max", false);
-                    
+                    if(rawAction.ContainsKey("max")) max = (float) rawAction.Get<double>("max", false);
+
                     action = new ChangeAction(analog, min, max, axis);
                     break;
                 }
                 default: throw new ArgumentException($"Unknown action type {type}");
             }
-            
+
             controlScheme.PutAction(identifier, action);
             return action;
         }

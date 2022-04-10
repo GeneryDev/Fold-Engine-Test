@@ -8,14 +8,17 @@
                 _value = default;
                 Generation = generation;
             }
+
             return _value;
         }
-        
+
         public void Set(T value, int generation) {
             _value = value;
             Generation = generation;
         }
 
-        public bool IsValid(int generation) => Generation == generation;
+        public bool IsValid(int generation) {
+            return Generation == generation;
+        }
     }
 }

@@ -14,10 +14,15 @@ namespace FoldEngine.Input {
     }
 
     public class AnalogInfo1 : IAnalogInfo {
-        private float _value = 0;
-        private long _lastChangedTime = Time.Now;
-        private float _change;
-        private Func<float> _getter;
+        private readonly Func<float> _getter;
+
+        public AnalogInfo1(Func<float> getter) {
+            _getter = getter;
+        }
+
+        private float Value { get; set; }
+
+        public float Change { get; private set; }
 
         public float this[int axis] {
             get {
@@ -26,46 +31,43 @@ namespace FoldEngine.Input {
             }
         }
 
-        private float Value => _value;
-        public long LastChangedTime => _lastChangedTime;
-        public float Change => _change;
+        public long LastChangedTime { get; private set; } = Time.Now;
 
         public int Grade => 1;
-        
+
         public float MagnitudeSqr => Value;
         public float Magnitude => (float) Math.Sqrt(MagnitudeSqr);
 
-        public AnalogInfo1(Func<float> getter) {
-            this._getter = getter;
-        }
-
-        public static implicit operator float(AnalogInfo1 info) {
-            return info.Value;
-        }
-
         public void Update() {
-            float oldValue = _value;
-            _value = _getter();
-            if(_value != oldValue) {
-                _lastChangedTime = Time.Now;
-                _change = _value - oldValue;
+            float oldValue = Value;
+            Value = _getter();
+            if(Value != oldValue) {
+                LastChangedTime = Time.Now;
+                Change = Value - oldValue;
             }
         }
 
         public float GetChange(int axis) {
             return Change;
         }
+
+        public static implicit operator float(AnalogInfo1 info) {
+            return info.Value;
+        }
     }
 
     public class AnalogInfo2 : IAnalogInfo {
-        private Func<Vector2> _getter;
-        private Vector2 _value = Vector2.Zero;
-        private long _lastChangedTime = Time.Now;
-        private Vector2 _change;
+        private readonly Func<Vector2> _getter;
 
-        private Vector2 Value => _value;
-        public long LastChangedTime => _lastChangedTime;
-        public Vector2 Change => _change;
+        public AnalogInfo2(Func<Vector2> getter) {
+            _getter = getter;
+        }
+
+        private Vector2 Value { get; set; } = Vector2.Zero;
+
+        public Vector2 Change { get; private set; }
+
+        public long LastChangedTime { get; private set; } = Time.Now;
 
         public float this[int axis] {
             get {
@@ -84,16 +86,12 @@ namespace FoldEngine.Input {
         public float MagnitudeSqr => Value.LengthSquared();
         public float Magnitude => Value.Length();
 
-        public AnalogInfo2(Func<Vector2> getter) {
-            this._getter = getter;
-        }
-
         public void Update() {
-            Vector2 oldValue = _value;
-            _value = _getter();
-            if(_value != oldValue) {
-                _lastChangedTime = Time.Now;
-                _change = _value - oldValue;
+            Vector2 oldValue = Value;
+            Value = _getter();
+            if(Value != oldValue) {
+                LastChangedTime = Time.Now;
+                Change = Value - oldValue;
             }
         }
 

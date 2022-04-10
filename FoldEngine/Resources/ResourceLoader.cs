@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using FoldEngine.IO;
-using FoldEngine.Serialization;
 
 namespace FoldEngine.Resources {
     public class ResourceLoader {
-        private ResourceCollections _resources;
-        private List<ResourceLoadTask> _activeTasks = new List<ResourceLoadTask>();
-        private List<ResourceLoadTask> _inactiveTasks = new List<ResourceLoadTask>();
+        private readonly List<ResourceLoadTask> _activeTasks = new List<ResourceLoadTask>();
+        private readonly List<ResourceLoadTask> _inactiveTasks = new List<ResourceLoadTask>();
+        private readonly ResourceCollections _resources;
 
         public ResourceLoader(ResourceCollections resources) {
-            this._resources = resources;
+            _resources = resources;
         }
 
         //MAIN THREAD
@@ -21,24 +19,25 @@ namespace FoldEngine.Resources {
                 _inactiveTasks.RemoveAt(_inactiveTasks.Count - 1);
                 _activeTasks.Add(reused);
                 return reused;
-            } else {
-                var created = new ResourceLoadTask();
-                _activeTasks.Add(created);
-                return created;
             }
+
+            var created = new ResourceLoadTask();
+            _activeTasks.Add(created);
+            return created;
         }
 
         //MAIN THREAD
         public ResourceStatus GetStatusOfResource(Type type, string identifier) {
-            foreach(ResourceLoadTask task in _activeTasks) {
-                if(task.Type == type && task.Identifier == identifier) return task.Status;
-            }
+            foreach(ResourceLoadTask task in _activeTasks)
+                if(task.Type == type && task.Identifier == identifier)
+                    return task.Status;
             return ResourceStatus.Inactive;
         }
+
         public ResourceStatus GetStatusOfResource<T>(string identifier) {
-            foreach(ResourceLoadTask task in _activeTasks) {
-                if(task.Type == typeof(T) && task.Identifier == identifier) return task.Status;
-            }
+            foreach(ResourceLoadTask task in _activeTasks)
+                if(task.Type == typeof(T) && task.Identifier == identifier)
+                    return task.Status;
             return ResourceStatus.Inactive;
         }
 
@@ -59,14 +58,13 @@ namespace FoldEngine.Resources {
         private void StartLoading<T>(ResourceLoadTask task) where T : Resource, new() {
             ThreadPool.QueueUserWorkItem(_ => Load<T>(task));
         }
-        
+
         //MAIN THREAD
-        public void AddLoadCallback<T>(string identifier, ResourceCollections.OnResourceLoaded callback) where T : Resource, new() {
-            foreach(ResourceLoadTask task in _activeTasks) {
-                if(task.Type == typeof(T) && task.Identifier == identifier) {
+        public void AddLoadCallback<T>(string identifier, ResourceCollections.OnResourceLoaded callback)
+            where T : Resource, new() {
+            foreach(ResourceLoadTask task in _activeTasks)
+                if(task.Type == typeof(T) && task.Identifier == identifier)
                     task.Callbacks.Add(callback);
-                }
-            }
         }
 
         //WORK THREAD
@@ -125,10 +123,8 @@ namespace FoldEngine.Resources {
         private void TaskCompleted(ResourceLoadTask task) {
             _resources.Insert(task.CompletedResource);
 
-            foreach(ResourceCollections.OnResourceLoaded callback in task.Callbacks) {
-                callback(task.CompletedResource);
-            }
-            
+            foreach(ResourceCollections.OnResourceLoaded callback in task.Callbacks) callback(task.CompletedResource);
+
             task.Status = ResourceStatus.Inactive;
         }
 
@@ -136,16 +132,17 @@ namespace FoldEngine.Resources {
         private void TaskError(ResourceLoadTask task) {
             task.Status = ResourceStatus.Inactive;
         }
-
     }
 
     public class ResourceLoadTask {
-        public Type Type;
+        public readonly List<ResourceCollections.OnResourceLoaded> Callbacks =
+            new List<ResourceCollections.OnResourceLoaded>();
+
+        public Resource CompletedResource;
         public string Identifier;
         public string Path;
-        public Resource CompletedResource;
         public ResourceStatus Status;
-        public readonly List<ResourceCollections.OnResourceLoaded> Callbacks = new List<ResourceCollections.OnResourceLoaded>();
+        public Type Type;
     }
 
     public enum ResourceStatus {

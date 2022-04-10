@@ -13,6 +13,7 @@ namespace FoldEngine.Serialization {
             return reader.ReadString();
         }
     }
+
     public class ResourceIdentifierSerializer : Serializer<ResourceIdentifier> {
         public override Type WorkingType => typeof(ResourceIdentifier);
 

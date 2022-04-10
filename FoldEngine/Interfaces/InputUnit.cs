@@ -12,10 +12,10 @@ namespace FoldEngine.Interfaces {
         }
 
         public void Setup(InputDefinition def) {
-            foreach(Player player in new InputBuilder(Devices, new JsonDeserializerRoot(def.Identifier, def.Root).AsObject())
-                .Build()) {
+            foreach(Player player in new InputBuilder(Devices,
+                    new JsonDeserializerRoot(def.Identifier, def.Root).AsObject())
+                .Build())
                 Players.Add(player);
-            }
         }
     }
 }

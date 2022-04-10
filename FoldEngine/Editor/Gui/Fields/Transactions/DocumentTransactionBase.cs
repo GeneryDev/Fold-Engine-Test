@@ -6,18 +6,20 @@ using FoldEngine.Util.Transactions;
 
 namespace FoldEngine.Editor.Gui.Fields.Transactions {
     public abstract class DocumentTransactionBase : Transaction<TextField> {
-        private static readonly ObjectPool<List<DocumentModification>> TempModificationListPool = new ObjectPool<List<DocumentModification>>();
+        private static readonly ObjectPool<List<DocumentModification>> TempModificationListPool =
+            new ObjectPool<List<DocumentModification>>();
+
         private static readonly ObjectPool<List<Dot>> TempDotListPool = new ObjectPool<List<Dot>>();
 
-        protected TextField Field;
-        
-        protected CaretProfile PreviousProfile;
-        protected CaretProfile NextProfile;
-
         private DocumentModification[] _modifications;
+        private List<Dot> _tempDotList;
 
         private List<DocumentModification> _tempModificationList;
-        private List<Dot> _tempDotList;
+
+        protected TextField Field;
+        protected CaretProfile NextProfile;
+
+        protected CaretProfile PreviousProfile;
 
         public DocumentTransactionBase(TextField field) {
             Field = field;
@@ -27,15 +29,17 @@ namespace FoldEngine.Editor.Gui.Fields.Transactions {
         protected abstract void CalculateModifications();
 
         protected void Modification(int start, int length, char[] newValue) {
-            if(_tempModificationList == null) throw new InvalidOperationException("Cannot add a modification outside the CalculateModifications method");
-            
-            DocumentModification modification = new DocumentModification() {
+            if(_tempModificationList == null)
+                throw new InvalidOperationException(
+                    "Cannot add a modification outside the CalculateModifications method");
+
+            var modification = new DocumentModification {
                 Start = start,
                 Length = length,
                 OldValue = Field.Document.GetChars(start, length),
                 NewValue = newValue
             };
-            
+
             _tempModificationList.Add(modification);
 
             for(int i = 0; i < _tempDotList.Count; i++) {
@@ -55,8 +59,9 @@ namespace FoldEngine.Editor.Gui.Fields.Transactions {
         }
 
         protected void Dot(int index, int mark) {
-            if(_tempModificationList == null) throw new InvalidOperationException("Cannot add a dot outside the CalculateModifications method");
-            
+            if(_tempModificationList == null)
+                throw new InvalidOperationException("Cannot add a dot outside the CalculateModifications method");
+
             _tempDotList.Add(new Dot(Field.Document, index, mark));
         }
 
@@ -64,28 +69,27 @@ namespace FoldEngine.Editor.Gui.Fields.Transactions {
             if(_modifications == null) {
                 _tempModificationList = TempModificationListPool.Claim();
                 _tempDotList = TempDotListPool.Claim();
-                
+
                 CalculateModifications();
                 _tempModificationList.Sort((a, b) => b.Start - a.Start);
                 _modifications = _tempModificationList.ToArray();
                 NextProfile = new CaretProfile(_tempDotList.ToArray());
-                
+
                 _tempModificationList.Clear();
                 _tempDotList.Clear();
-                
+
                 TempModificationListPool.Free(_tempModificationList);
                 TempDotListPool.Free(_tempDotList);
-                
+
                 _tempModificationList = null;
                 _tempDotList = null;
             }
 
             bool actionPerformed = false;
 
-            for(int i = _modifications.Length - 1; i >= 0; i--) {
+            for(int i = _modifications.Length - 1; i >= 0; i--)
                 actionPerformed |= _modifications[i].Redo(target.Document);
-            }
-            
+
             target.Caret.SetProfile(NextProfile);
 
             return actionPerformed;
@@ -93,13 +97,11 @@ namespace FoldEngine.Editor.Gui.Fields.Transactions {
 
         public override bool Undo(TextField target) {
             bool actionPerformed = false;
-            
-            for(int i = 0; i < _modifications.Length; i++) {
-                actionPerformed |= _modifications[i].Undo(target.Document);
-            }
-            
+
+            for(int i = 0; i < _modifications.Length; i++) actionPerformed |= _modifications[i].Undo(target.Document);
+
             target.Caret.SetProfile(PreviousProfile);
-            
+
             return actionPerformed;
         }
     }

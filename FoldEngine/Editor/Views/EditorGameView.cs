@@ -1,7 +1,5 @@
-﻿using System;
-using FoldEngine.Components;
+﻿using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
-using FoldEngine.Editor.Tools;
 using FoldEngine.Gui;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
@@ -10,11 +8,11 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Views {
     public class EditorGameView : EditorView {
-        public override string Name => "Game";
-
         public EditorGameView() {
             Icon = new ResourceIdentifier("editor/play");
         }
+
+        public override string Name => "Game";
 
         public override bool UseMargin => false;
         public override Color? BackgroundColor => Color.Black;
@@ -27,33 +25,29 @@ namespace FoldEngine.Editor.Views {
         }
 
         public override void EnsurePanelExists(GuiEnvironment environment) {
-            if(ContentPanel == null) {
-                ContentPanel = new GameViewPanel(this, environment);
-            }
+            if(ContentPanel == null) ContentPanel = new GameViewPanel(this, environment);
         }
     }
 
     public class GameViewPanel : GuiPanel {
-        public override bool Focusable => true;
-
         public GameViewPanel(EditorGameView editorGameView, GuiEnvironment environment) : base(environment) {
             MayScroll = true;
         }
 
+        public override bool Focusable => true;
+
         public override void OnMousePressed(ref MouseEvent e) {
-            if(e.Button == MouseEvent.MiddleButton || e.Button == MouseEvent.RightButton) {
+            if(e.Button == MouseEvent.MiddleButton || e.Button == MouseEvent.RightButton)
                 ((EditorEnvironment) Environment).ForcedTool = ((EditorEnvironment) Environment).Tools[0];
-            }
-            
+
             ((EditorEnvironment) Environment).ActiveTool?.OnMousePressed(ref e);
             base.OnMousePressed(ref e);
         }
 
         public override void OnMouseReleased(ref MouseEvent e) {
-            if(e.Button == MouseEvent.MiddleButton || e.Button == MouseEvent.RightButton) {
+            if(e.Button == MouseEvent.MiddleButton || e.Button == MouseEvent.RightButton)
                 ((EditorEnvironment) Environment).ForcedTool = null;
-            }
-            
+
             base.OnMouseReleased(ref e);
             ((EditorEnvironment) Environment).ActiveTool?.OnMouseReleased(ref e);
         }
@@ -62,13 +56,13 @@ namespace FoldEngine.Editor.Views {
             if(Environment.Scene.EditorComponents != null) {
                 ref Transform cameraTransform = ref Environment.Scene.EditorComponents.EditorTransform;
 
-                var worldLayer = Environment.Scene.Core.RenderingUnit.WorldLayer;
+                IRenderingLayer worldLayer = Environment.Scene.Core.RenderingUnit.WorldLayer;
                 Vector2 cameraRelativePos =
                     worldLayer.LayerToCamera(worldLayer.WindowToLayer(Environment.MousePos.ToVector2()));
                 Vector2 pivot = cameraTransform.Apply(cameraRelativePos);
-                
+
                 cameraTransform.LocalScale -= cameraTransform.LocalScale * 0.1f * dir;
-                
+
                 cameraTransform.Position = pivot;
                 cameraTransform.Position = cameraTransform.Apply(-cameraRelativePos);
             }
@@ -79,15 +73,13 @@ namespace FoldEngine.Editor.Views {
                            + controls.Get<AnalogAction>("editor.movement.axis.y") * Vector2.UnitY;
             if(move != default) {
                 float speed = 250f;
-                if(controls.Get<ButtonAction>("editor.movement.faster").Down) {
-                    speed *= 4;
-                }
+                if(controls.Get<ButtonAction>("editor.movement.faster").Down) speed *= 4;
 
                 speed *= Environment.Scene.EditorComponents.EditorTransform.LocalScale.X;
-                
+
                 Environment.Scene.EditorComponents.EditorTransform.Position += move * speed * Time.DeltaTime;
             }
-            
+
             ((EditorEnvironment) Environment).ActiveTool?.OnInput(controls);
         }
     }

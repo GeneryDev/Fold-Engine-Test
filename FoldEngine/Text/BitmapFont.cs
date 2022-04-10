@@ -3,17 +3,14 @@ using FoldEngine.Graphics;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Text {
-
     public class BitmapFont : IFont {
+        public readonly GlyphBlock[] GlyphBlocks = new GlyphBlock[256];
         public readonly List<string> TextureNames = new List<string>();
         public readonly List<ITexture> TextureSources = new List<ITexture>();
-        public readonly GlyphBlock[] GlyphBlocks = new GlyphBlock[256];
+        public float DefaultSize = 9;
 
         public int LineHeight = 10;
-        public float DefaultSize = 9;
-        
-        public int Generation { get; private set; }
-        
+
         public GlyphInfo this[char c] {
             get => GlyphBlocks[c / 256]?.Glyphs[c % 256] ?? default;
             set {
@@ -21,6 +18,8 @@ namespace FoldEngine.Text {
                 GlyphBlocks[c / 256].Glyphs[c % 256] = value;
             }
         }
+
+        public int Generation { get; private set; }
 
         public void RenderString(string text, out RenderedText rendered, float size) {
             TextRenderer.Instance.Render(this, text, out rendered, size);
@@ -37,16 +36,16 @@ namespace FoldEngine.Text {
                 TextureSources.Add(texture);
                 TextureNames.Add(sourceName);
                 return TextureNames.Count - 1;
-            } else {
-                return TextureNames.IndexOf(sourceName);
             }
+
+            return TextureNames.IndexOf(sourceName);
         }
     }
 
     public class GlyphBlock {
         public readonly int BlockStart;
         public readonly GlyphInfo[] Glyphs;
-        
+
         public GlyphBlock(int blockStart) {
             BlockStart = blockStart;
             Glyphs = new GlyphInfo[256];
@@ -63,7 +62,8 @@ namespace FoldEngine.Text {
         public int Advancement;
 
         public override string ToString() {
-            return $"{nameof(NotNull)}: {NotNull}, {nameof(SourceIndex)}: {SourceIndex}, {nameof(Source)}: {Source}, {nameof(Height)}: {Height}, {nameof(Ascent)}: {Ascent}, {nameof(Width)}: {Width}, {nameof(Advancement)}: {Advancement}";
+            return
+                $"{nameof(NotNull)}: {NotNull}, {nameof(SourceIndex)}: {SourceIndex}, {nameof(Source)}: {Source}, {nameof(Height)}: {Height}, {nameof(Ascent)}: {Ascent}, {nameof(Width)}: {Width}, {nameof(Advancement)}: {Advancement}";
         }
     }
 }

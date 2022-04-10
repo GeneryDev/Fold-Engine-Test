@@ -1,27 +1,25 @@
-﻿using FoldEngine.Util;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using System.Reflection;
 using FoldEngine.Scenes;
 using FoldEngine.Serialization;
+using FoldEngine.Util;
 
 namespace FoldEngine.Components {
     public abstract class ComponentSet : ISelfSerializer {
+        public Type WorkingType => GetType();
+
+        public abstract Type ComponentType { get; }
+        public abstract void Serialize(SaveOperation writer);
+        public abstract void Deserialize(LoadOperation reader);
         internal abstract void Flush();
         public abstract bool Has(long entityId);
         public abstract void Remove(long entityId);
         public abstract void CreateFor(long entityId);
-        
+
         public abstract object GetFieldValue(long entityId, FieldInfo fieldInfo);
         public abstract void SetFieldValue(long entityId, FieldInfo fieldInfo, object value);
-
-        public Type WorkingType => this.GetType();
-        public abstract void Serialize(SaveOperation writer);
-        public abstract void Deserialize(LoadOperation reader);
-
-        public abstract Type ComponentType { get; }
 
         public abstract void Clear();
     }
@@ -30,59 +28,57 @@ namespace FoldEngine.Components {
     public class ComponentSet<T> : ComponentSet where T : struct {
         private const int StartingDenseSize = 16;
 
-        public override Type ComponentType => typeof(T);
+        private readonly List<int> _dsMarkedForRemoval = new List<int>();
 
         internal readonly Scene Scene;
 
+        internal BackupComponentSet BackupSet;
+        internal int CurrentTimestamp;
+
         internal ComponentSetEntry<T>[] Dense; //resized on flush
+        internal int MaxId; //sparse, exclusive
+
+        internal int MinId; //sparse, inclusive
         internal int N; //dense count
 
         internal int[]
             Sparse; //resized immediately, holds indices to the dense array. 0.. means present at that index, -1 means not present.
 
-        internal int MinId; //sparse, inclusive
-        internal int MaxId; //sparse, exclusive
-
-        internal BackupComponentSet BackupSet;
-        internal int CurrentTimestamp;
-
-        private readonly List<int> _dsMarkedForRemoval = new List<int>();
-
         public ComponentSet(Scene scene, int startingId) {
-            this.Scene = scene;
+            Scene = scene;
             MinId = MathUtil.MaximumSetBit(startingId);
             MaxId = MathUtil.NearestPowerOfTwo(startingId - MinId) + MinId;
 
             Dense = new ComponentSetEntry<T>[StartingDenseSize];
             Sparse = new int[MaxId - MinId];
-            for(int i = 0; i < Sparse.Length; i++) {
-                Sparse[i] = -1;
-            }
+            for(int i = 0; i < Sparse.Length; i++) Sparse[i] = -1;
 
             BackupSet = new BackupComponentSet();
 
             // Console.WriteLine("Creating component set for type " + typeof(T));
         }
 
+        public override Type ComponentType => typeof(T);
+
         public ref T Get(long entityId) {
-            if((int)entityId < MinId || (int)entityId >= MaxId || Sparse[(int)entityId - MinId] == -1)
+            if((int) entityId < MinId || (int) entityId >= MaxId || Sparse[(int) entityId - MinId] == -1)
                 return ref BackupSet.Get(entityId);
 
-            if(Dense[Sparse[entityId - MinId]].ModifiedTimestamp <= CurrentTimestamp && Dense[Sparse[entityId - MinId]].EntityId == entityId) {
+            if(Dense[Sparse[entityId - MinId]].ModifiedTimestamp <= CurrentTimestamp
+               && Dense[Sparse[entityId - MinId]].EntityId == entityId)
                 return ref Dense[Sparse[entityId - MinId]].Component;
-            } else {
-                throw new ComponentRegistryException($"Component {typeof(T)} not found for entity ID {entityId}");
-            }
+            throw new ComponentRegistryException($"Component {typeof(T)} not found for entity ID {entityId}");
         }
 
         public override bool Has(long entityId) {
             if(entityId < MinId || entityId >= MaxId || Sparse[entityId - MinId] == -1)
                 return BackupSet.Has(entityId);
 
-            return Dense[Sparse[entityId - MinId]].ModifiedTimestamp <= CurrentTimestamp && Dense[Sparse[entityId - MinId]].EntityId == entityId;
+            return Dense[Sparse[entityId - MinId]].ModifiedTimestamp <= CurrentTimestamp
+                   && Dense[Sparse[entityId - MinId]].EntityId == entityId;
         }
 
-        private new bool Has(int entityId) {
+        private bool Has(int entityId) {
             if(entityId < MinId || entityId >= MaxId || Sparse[entityId - MinId] == -1)
                 return BackupSet.Has(entityId);
 
@@ -102,45 +98,41 @@ namespace FoldEngine.Components {
         }
 
         public ref T Create(long entityId) {
-            if((int)entityId < MinId || (int)entityId >= MaxId) {
+            if((int) entityId < MinId || (int) entityId >= MaxId) {
                 // Console.WriteLine("Resizing ComponentSet to fit new entity ID");
                 //Resize sparse array to fit new entity ID
-                int newMinId = Math.Min(MinId, (int)entityId);
-                int newMaxId = Math.Max(MaxId, (int)entityId + 1);
+                int newMinId = Math.Min(MinId, (int) entityId);
+                int newMaxId = Math.Max(MaxId, (int) entityId + 1);
 
                 newMinId = MathUtil.MaximumSetBit(newMinId);
                 newMaxId = MathUtil.NearestPowerOfTwo(newMaxId - newMinId) + newMinId;
 
                 int oldSize = Sparse.Length;
-                int newSize = (int) (newMaxId - newMinId);
+                int newSize = newMaxId - newMinId;
 
                 Array.Resize(ref Sparse, newSize);
 
-                int shiftElementsBy = (int) (MinId - newMinId);
+                int shiftElementsBy = MinId - newMinId;
                 if(shiftElementsBy > 0) {
                     Console.WriteLine(
                         $"Decreasing minimum ID of ComponentSet from {MinId} to {newMinId}; Shifting sparse array elements by {shiftElementsBy}");
-                    for(int i = (int) (MaxId - MinId - 1); i >= 0; i--) {
+                    for(int i = MaxId - MinId - 1; i >= 0; i--) {
                         Sparse[i + shiftElementsBy] = Sparse[i];
                         Sparse[i] = -1;
                     }
-                    
+
                     // Pad the beginning with -1
-                    for(int i = 0; i < shiftElementsBy; i++) {
-                        Sparse[i] = -1;
-                    }
+                    for(int i = 0; i < shiftElementsBy; i++) Sparse[i] = -1;
                 }
-                
+
                 // Pad the end with -1
-                for(int i = oldSize + shiftElementsBy; i < newSize; i++) {
-                    Sparse[i] = -1;
-                }
+                for(int i = oldSize + shiftElementsBy; i < newSize; i++) Sparse[i] = -1;
 
                 MinId = newMinId;
                 MaxId = newMaxId;
             }
 
-            int sparseIndex = (int)entityId - MinId;
+            int sparseIndex = (int) entityId - MinId;
             if(Sparse[sparseIndex] >= 0) //Is in the dense array
             {
                 if(Dense[sparseIndex].ModifiedTimestamp > CurrentTimestamp) //Marked for removal, reclaim it
@@ -148,19 +140,17 @@ namespace FoldEngine.Components {
                     Dense[sparseIndex].ModifiedTimestamp -= 2; //Subtract 2 because:
                     //if ModifiedTimestamp == CurrentTimestamp + 1: it was added prior to this tick and thus should be enumerated
                     //if ModifiedTimestamp == CurrentTimestamp + 2: it was added THIS tick and thus should NOT be enumerated
-                    _dsMarkedForRemoval.Remove((int)entityId);
+                    _dsMarkedForRemoval.Remove((int) entityId);
                     Dense[sparseIndex].Component = default; //Reset component data
                     Component.InitializeComponent(ref Dense[sparseIndex].Component, Scene, entityId);
                     return ref Dense[sparseIndex].Component;
-                } else {
-                    if(Dense[sparseIndex].EntityId == entityId) {
-                        throw new ComponentRegistryException(
-                            $"Entity ID {entityId} already has a component of type {typeof(T)}");
-                    } else {
-                        throw new ComponentRegistryException(
-                            $"Cannot create component {typeof(T)} for Entity ID {entityId}: An entity of a different generation already has one: {Dense[sparseIndex].EntityId}");
-                    }
                 }
+
+                if(Dense[sparseIndex].EntityId == entityId)
+                    throw new ComponentRegistryException(
+                        $"Entity ID {entityId} already has a component of type {typeof(T)}");
+                throw new ComponentRegistryException(
+                    $"Cannot create component {typeof(T)} for Entity ID {entityId}: An entity of a different generation already has one: {Dense[sparseIndex].EntityId}");
             }
 
             if(N < Dense.Length) {
@@ -172,22 +162,21 @@ namespace FoldEngine.Components {
                 Dense[N - 1].Component = default;
                 Component.InitializeComponent(ref Dense[N - 1].Component, Scene, entityId);
                 return ref Dense[N - 1].Component;
-            } else {
-                //Have no space in dense. Use the backup set
-                return ref BackupSet.Create(entityId);
             }
+
+            //Have no space in dense. Use the backup set
+            return ref BackupSet.Create(entityId);
         }
 
         public override void Remove(long entityId) {
             if(entityId >= MinId && entityId < MaxId && Sparse[entityId - MinId] != -1) {
-                _dsMarkedForRemoval.Add((int)entityId);
+                _dsMarkedForRemoval.Add((int) entityId);
                 int timestampOffset = 1;
-                if(Dense[Sparse[entityId - MinId]].ModifiedTimestamp == CurrentTimestamp) {
-                    //This component was added THIS tick and is being removed the same tick.
+                if(Dense[Sparse[entityId - MinId]].ModifiedTimestamp == CurrentTimestamp
+                    ) //This component was added THIS tick and is being removed the same tick.
                     //In this case, set its "modified timestamp" to 2 ticks from now instead of 1.
                     //This has a special meaning when the component wants to be re-added.
                     timestampOffset = 2;
-                }
 
                 Dense[Sparse[entityId - MinId]].ModifiedTimestamp =
                     CurrentTimestamp + timestampOffset; //Mark as "removed" so Get<>() will skip it but iterators won't.
@@ -200,15 +189,16 @@ namespace FoldEngine.Components {
         }
 
         /// <summary>
-        /// Flushes the modifications (additions, removals) to the component set made since the previous flush.
-        /// This readjusts the components in memory as needed, and allows new iterators to have access to the new component list.
+        ///     Flushes the modifications (additions, removals) to the component set made since the previous flush.
+        ///     This readjusts the components in memory as needed, and allows new iterators to have access to the new component
+        ///     list.
         /// </summary>
         internal override void Flush() {
             foreach(int entityId in _dsMarkedForRemoval) {
                 int denseIndex = Sparse[entityId - MinId];
                 FoldUtil.Assert(denseIndex >= 0, "Sparse array entry is not cleared until flushing");
 
-                int lastEntityId = (int)Dense[N - 1].EntityId; //get entity ID of the last component in the dense array
+                int lastEntityId = (int) Dense[N - 1].EntityId; //get entity ID of the last component in the dense array
 
                 Dense[denseIndex] = Dense[N - 1]; //Move last dense entry to the index being removed
                 Sparse[lastEntityId - MinId] = denseIndex; //Make the last entity's sparse entry point to the new index
@@ -233,7 +223,7 @@ namespace FoldEngine.Components {
                 Dense[N].Component = queued.Component;
                 Dense[N].EntityId = queued.EntityId;
                 Dense[N].ModifiedTimestamp = CurrentTimestamp;
-                Sparse[(int)queued.EntityId - MinId] = N;
+                Sparse[(int) queued.EntityId - MinId] = N;
                 N++;
             }
 
@@ -247,17 +237,16 @@ namespace FoldEngine.Components {
         }
 
         public override void Serialize(SaveOperation writer) {
-            writer.WriteArray(((ref SaveOperation.Array arr) => {
+            writer.WriteArray((ref SaveOperation.Array arr) => {
                 for(int entityId = MinId; entityId < MaxId; entityId++) {
                     if(!Has(entityId)) continue;
                     if(writer.Options.Has(SerializeOnlyEntities.Instance)) {
                         bool shouldSerialize = false;
-                        foreach(long filteredEntityId in writer.Options.Get(SerializeOnlyEntities.Instance)) {
+                        foreach(long filteredEntityId in writer.Options.Get(SerializeOnlyEntities.Instance))
                             if((int) filteredEntityId == entityId) {
                                 shouldSerialize = true;
                                 break;
                             }
-                        }
 
                         if(!shouldSerialize) continue;
                     }
@@ -268,7 +257,7 @@ namespace FoldEngine.Components {
                         ComponentSerializer.Serialize(Get(entityId), writer);
                     });
                 }
-            }));
+            });
         }
 
         public override void Deserialize(LoadOperation reader) {
@@ -276,20 +265,17 @@ namespace FoldEngine.Components {
                 for(int i = 0; i < arr.MemberCount; i++) {
                     arr.StartReadMember(i);
                     long entityId = reader.ReadInt64();
-                    if(reader.Options.Has(DeserializeRemapIds.Instance)) {
+                    if(reader.Options.Has(DeserializeRemapIds.Instance))
                         entityId = reader.Options.Get(DeserializeRemapIds.Instance).TransformId(entityId);
-                    }
                     // Console.WriteLine($"{ComponentType} for entity id " + entityId);
-                    if(!Has((int)entityId)) CreateFor(entityId);
+                    if(!Has((int) entityId)) CreateFor(entityId);
                     ComponentSerializer.Deserialize<T>(this, entityId, reader);
                 }
             });
         }
 
         public override void Clear() {
-            for(int i = 0; i < Sparse.Length; i++) {
-                Sparse[i] = -1;
-            }
+            for(int i = 0; i < Sparse.Length; i++) Sparse[i] = -1;
             N = 0;
         }
 
@@ -307,21 +293,19 @@ namespace FoldEngine.Components {
 
             internal ref T Get(long entityId) {
                 if(QueuedComponents.Count > 0) {
-                    int foundIndex = FindIndexForEntityId((int)entityId, QueuedComponents, w => (int)w.EntityId);
-                    if(foundIndex < QueuedComponents.Count && QueuedComponents[foundIndex].EntityId == entityId) {
+                    int foundIndex = FindIndexForEntityId((int) entityId, QueuedComponents, w => (int) w.EntityId);
+                    if(foundIndex < QueuedComponents.Count && QueuedComponents[foundIndex].EntityId == entityId)
                         return ref QueuedComponents[foundIndex].Component;
-                    }
                 }
 
                 throw new ComponentRegistryException($"Component {typeof(T)} not found for entity ID {entityId}");
             }
 
             internal ref T Create(long entityId) {
-                int insertionIndex = FindIndexForEntityId((int)entityId, QueuedComponents, w => (int)w.EntityId);
-                if(insertionIndex < QueuedComponents.Count && QueuedComponents[insertionIndex].EntityId == entityId) {
+                int insertionIndex = FindIndexForEntityId((int) entityId, QueuedComponents, w => (int) w.EntityId);
+                if(insertionIndex < QueuedComponents.Count && QueuedComponents[insertionIndex].EntityId == entityId)
                     throw new ComponentRegistryException(
                         $"Entity ID {entityId} already has a component of type {typeof(T)}");
-                }
 
                 var newWrapper = new QueuedComponent<T> {
                     EntityId = entityId
@@ -331,10 +315,9 @@ namespace FoldEngine.Components {
             }
 
             internal void Remove(long entityId) {
-                int foundIndex = FindIndexForEntityId((int)entityId, QueuedComponents, w => (int)w.EntityId);
-                if(foundIndex < QueuedComponents.Count && QueuedComponents[foundIndex].EntityId == entityId) {
+                int foundIndex = FindIndexForEntityId((int) entityId, QueuedComponents, w => (int) w.EntityId);
+                if(foundIndex < QueuedComponents.Count && QueuedComponents[foundIndex].EntityId == entityId)
                     QueuedComponents.RemoveAt(foundIndex);
-                }
             }
 
             internal void Clear() {
@@ -342,13 +325,13 @@ namespace FoldEngine.Components {
             }
 
             public bool Has(long entityId) {
-                int foundIndex = FindIndexForEntityId((int)entityId, QueuedComponents, w => (int)w.EntityId);
+                int foundIndex = FindIndexForEntityId((int) entityId, QueuedComponents, w => (int) w.EntityId);
                 return foundIndex < QueuedComponents.Count && QueuedComponents[foundIndex].EntityId == entityId;
             }
 
             public bool Has(int entityId) {
-                int foundIndex = FindIndexForEntityId((int)entityId, QueuedComponents, w => (int)w.EntityId);
-                return foundIndex < QueuedComponents.Count && (int)QueuedComponents[foundIndex].EntityId == entityId;
+                int foundIndex = FindIndexForEntityId(entityId, QueuedComponents, w => (int) w.EntityId);
+                return foundIndex < QueuedComponents.Count && (int) QueuedComponents[foundIndex].EntityId == entityId;
             }
         }
 
@@ -356,18 +339,22 @@ namespace FoldEngine.Components {
         public delegate int EntityIdentifierFunction<TK>(TK t);
 
         /// <summary>
-        /// Searches a sorted list for the index at which the specified entity ID beints or exists,
-        /// for the purposes of adding components to sorted lists or searching components in sorted lists.
-        /// 
-        /// O(lg n) operation where n is the length of the given list.<br></br>
+        ///     Searches a sorted list for the index at which the specified entity ID beints or exists,
+        ///     for the purposes of adding components to sorted lists or searching components in sorted lists.
+        ///     O(lg n) operation where n is the length of the given list.<br></br>
         /// </summary>
         /// <param name="entityId">The entity ID to search a location for</param>
         /// <param name="list">The list of objects (components, IDs) to search in</param>
         /// <param name="identifierFunction">A function that turns the an object of type T into an entity ID</param>
-        /// <returns>An index between 0 and list.Count (both inclusive), reflecting one of two things:<br></br>
-        /// 1. The index within the list on which a component beinting to the given entity ID is located (if it exists)<br></br>
-        /// 2. The index within the list where a component beinting to the given entity ID should be located were it to be inserted into the list (if it doesn't already exist).<br></br>
-        /// It's important to check the EntityId of the element at the index returned to determine whether the entity already has a component there or if it doesn't</returns>
+        /// <returns>
+        ///     An index between 0 and list.Count (both inclusive), reflecting one of two things:<br></br>
+        ///     1. The index within the list on which a component beinting to the given entity ID is located (if it exists)
+        ///     <br></br>
+        ///     2. The index within the list where a component beinting to the given entity ID should be located were it to be
+        ///     inserted into the list (if it doesn't already exist).<br></br>
+        ///     It's important to check the EntityId of the element at the index returned to determine whether the entity already
+        ///     has a component there or if it doesn't
+        /// </returns>
         public static int FindIndexForEntityId<TK>(
             int entityId,
             List<TK> list,
@@ -377,25 +364,20 @@ namespace FoldEngine.Components {
             int minIndex = 0; // inclusive
             int maxIndex = list.Count; // exclusive
 
-            if(entityId < identifierFunction(list[minIndex])) {
-                return minIndex;
-            }
+            if(entityId < identifierFunction(list[minIndex])) return minIndex;
 
-            if(entityId > identifierFunction(list[maxIndex - 1])) {
-                return maxIndex;
-            }
+            if(entityId > identifierFunction(list[maxIndex - 1])) return maxIndex;
 
             while(minIndex < maxIndex) {
                 int pivotIndex = (minIndex + maxIndex) / 2;
 
                 int pivotId = identifierFunction(list[pivotIndex]);
-                if(pivotId == entityId) {
+                if(pivotId == entityId)
                     return pivotIndex;
-                } else if(entityId > pivotId) {
+                if(entityId > pivotId)
                     minIndex = pivotIndex + 1;
-                } else {
+                else
                     maxIndex = pivotIndex;
-                }
             }
 
             return minIndex;

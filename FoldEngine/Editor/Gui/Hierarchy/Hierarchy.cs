@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using FoldEngine.Graphics;
 using FoldEngine.Gui;
 using FoldEngine.Interfaces;
@@ -12,7 +11,7 @@ namespace EntryProject.Editor.Gui.Hierarchy {
         FirstInside,
         After
     }
-    
+
     public interface IHierarchy {
         GuiEnvironment Environment { get; set; }
         bool Pressed { get; set; }
@@ -20,26 +19,51 @@ namespace EntryProject.Editor.Gui.Hierarchy {
         Rectangle DragLine { get; set; }
         void DrawDragLine(IRenderingUnit renderer, IRenderingLayer environmentBaseLayer);
     }
+
     public class Hierarchy<T> : IHierarchy {
+        public int DragRelative = 0;
+        public T DragTargetId;
+
+        public List<T> Expanded = new List<T>();
+        public List<T> Selected = new List<T>();
+
+        public Hierarchy(GuiEnvironment environment) {
+            Environment = environment;
+            DragTargetId = DefaultId;
+        }
+
+        public Hierarchy(GuiPanel parent) {
+            Environment = parent.Environment;
+        }
+
+        public virtual T DefaultId { get; } = default;
         public GuiEnvironment Environment { get; set; }
         public bool Pressed { get; set; }
         public bool Dragging { get; set; }
         public Rectangle DragLine { get; set; }
 
-        public virtual T DefaultId { get; } = default;
-        public T DragTargetId = default;
-        public int DragRelative = 0;
+        public void DrawDragLine(IRenderingUnit renderer, IRenderingLayer layer) {
+            if(Dragging && Environment.HoverTarget.Hierarchy == this && DragRelative != 0) {
+                int thickness = 2;
+                int arrowSpan = 5;
+                int arrowLength = 8;
+                Rectangle dragLineThick = DragLine;
+                dragLineThick.Y -= thickness / 2;
+                dragLineThick.Height = thickness;
 
-        public Hierarchy(GuiEnvironment environment) {
-            this.Environment = environment;
-            this.DragTargetId = DefaultId;
-        }
-
-        public List<T> Expanded = new List<T>();
-        public List<T> Selected = new List<T>();
-
-        public Hierarchy(GuiPanel parent) {
-            Environment = parent.Environment;
+                layer.Surface.Draw(new DrawRectInstruction {
+                    Texture = renderer.WhiteTexture,
+                    Color = Color.Coral,
+                    DestinationRectangle = dragLineThick
+                });
+                layer.Surface.Draw(new DrawTriangleInstruction {
+                    Texture = renderer.WhiteTexture,
+                    Color = Color.Coral,
+                    A = new Vector3(DragLine.Left, DragLine.Y - arrowSpan, 0),
+                    B = new Vector3(DragLine.Left + arrowLength, DragLine.Y, 0),
+                    C = new Vector3(DragLine.Left, DragLine.Y + arrowSpan, 0)
+                });
+            }
         }
 
         public void ExpandCollapse(T id) {
@@ -54,30 +78,6 @@ namespace EntryProject.Editor.Gui.Hierarchy {
             return Expanded.Contains(id);
         }
 
-        public void DrawDragLine(IRenderingUnit renderer, IRenderingLayer layer) {
-            if(Dragging && Environment.HoverTarget.Hierarchy == this && DragRelative != 0) {
-                int thickness = 2;
-                int arrowSpan = 5;
-                int arrowLength = 8;
-                Rectangle dragLineThick = DragLine;
-                dragLineThick.Y -= thickness / 2;
-                dragLineThick.Height = thickness;
-                
-                layer.Surface.Draw(new DrawRectInstruction() {
-                    Texture = renderer.WhiteTexture,
-                    Color = Color.Coral,
-                    DestinationRectangle = dragLineThick
-                });
-                layer.Surface.Draw(new DrawTriangleInstruction() {
-                    Texture = renderer.WhiteTexture,
-                    Color = Color.Coral,
-                    A = new Vector3(DragLine.Left, DragLine.Y - arrowSpan, 0),
-                    B = new Vector3(DragLine.Left + arrowLength, DragLine.Y, 0),
-                    C = new Vector3(DragLine.Left, DragLine.Y + arrowSpan, 0)
-                });
-            }
-        }
-
-        public virtual void Drop() {}
+        public virtual void Drop() { }
     }
 }

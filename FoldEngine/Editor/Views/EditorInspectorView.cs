@@ -1,39 +1,33 @@
 ﻿using System;
-using System.Globalization;
-using System.Runtime.CompilerServices;
 using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
-using FoldEngine.Editor.Gui.Fields;
 using FoldEngine.Editor.Transactions;
 using FoldEngine.Graphics;
 using FoldEngine.Gui;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 using Microsoft.Xna.Framework;
-using Shard.Util;
 
 namespace FoldEngine.Editor.Views {
     public class EditorInspectorView : EditorView {
-        public override string Name => "Inspector";
+        private object _object;
 
         public EditorInspectorView() {
             Icon = new ResourceIdentifier("editor/info");
         }
-        
-        private object _object = null;
+
+        public override string Name => "Inspector";
 
         public override void Render(IRenderingUnit renderer) {
             ContentPanel.MayScroll = true;
             long id = -1;
             var editorBase = Scene.Systems.Get<EditorBase>();
             if(editorBase.EditingEntity.Count == 1) id = editorBase.EditingEntity[0];
-            
-            if(id != -1 && Scene.Components.HasComponent<Transform>(id)) {
+
+            if(id != -1 && Scene.Components.HasComponent<Transform>(id))
                 RenderEntityView(renderer, id);
-            } else if(_object != null) {
-                RenderObjectView(renderer);
-            }
+            else if(_object != null) RenderObjectView(renderer);
             // ContentPanel.Label(Scene.Name, 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
         }
 
@@ -44,8 +38,8 @@ namespace FoldEngine.Editor.Views {
             ContentPanel.Label($"ID: {id}", 7).TextAlignment(-1);
             ContentPanel.Spacing(12);
 
-            foreach(ComponentSet set in Scene.Components.Sets.Values) {
-                // if(set.ComponentType == typeof(EntityName)) continue;
+            foreach(ComponentSet set in Scene.Components.Sets.Values
+            ) // if(set.ComponentType == typeof(EntityName)) continue;
                 if(set.Has((int) id)) {
                     ComponentInfo componentInfo = ComponentInfo.Get(set.ComponentType);
                     if(componentInfo.HideInInspector) continue;
@@ -81,28 +75,26 @@ namespace FoldEngine.Editor.Views {
                         // ContentPanel.Spacing(5);
                     }
                 }
-            }
 
             if(ContentPanel.Button("Add Component", 14).IsPressed(out Point p)) {
                 GuiPopupMenu contextMenu = ContentPanel.Environment.ContextMenu;
                 contextMenu.Show(p, m => {
-                    foreach(Type type in Component.GetAllTypes()) {
-                        if(!Scene.Components.HasComponent(type, id) && m.Button(type.Name, 9).IsPressed()) {
-                            ((EditorEnvironment) ContentPanel.Environment).TransactionManager.InsertTransaction(new AddComponentTransaction(type, id));
-                        }
-                    }
+                    foreach(Type type in Component.GetAllTypes())
+                        if(!Scene.Components.HasComponent(type, id) && m.Button(type.Name, 9).IsPressed())
+                            ((EditorEnvironment) ContentPanel.Environment).TransactionManager.InsertTransaction(
+                                new AddComponentTransaction(type, id));
                 });
             }
         }
 
         private void RenderObjectView(IRenderingUnit renderer) {
             ComponentInfo info = ComponentInfo.Get(_object.GetType());
-            
+
             ContentPanel.Label(info.Name, 14)
                 .TextAlignment(-1)
                 .Icon(Scene.Resources.Get<Texture>(ref EditorIcons.Cog));
             ContentPanel.Spacing(12);
-            
+
 
             foreach(ComponentMember member in info.Members) {
                 object value = member.FieldInfo.GetValue(_object);
@@ -122,7 +114,7 @@ namespace FoldEngine.Editor.Views {
 
     public class ComponentMemberLabel : GuiLabel {
         public const int LabelWidth = 140;
-        
+
         private ComponentMember _member;
 
         public override void Reset(GuiPanel parent) {
@@ -145,14 +137,11 @@ namespace FoldEngine.Editor.Views {
     }
 
     public class ComponentMemberBreak : GuiElement {
-        public override void Reset(GuiPanel parent) {
-        }
+        public override void Reset(GuiPanel parent) { }
 
-        public override void AdjustSpacing(GuiPanel parent) {
-        }
+        public override void AdjustSpacing(GuiPanel parent) { }
 
-        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
-        }
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) { }
 
         public override void Displace(ref Point layoutPosition) {
             layoutPosition.X = Parent.Bounds.X;
@@ -161,8 +150,8 @@ namespace FoldEngine.Editor.Views {
     }
 
     public class ComponentHeader : GuiLabel {
-        private ComponentInfo _info;
         private long _id;
+        private ComponentInfo _info;
 
         public ComponentHeader Info(ComponentInfo info) {
             _info = info;
@@ -176,25 +165,25 @@ namespace FoldEngine.Editor.Views {
             _id = id;
             return this;
         }
-        
+
         public override void AdjustSpacing(GuiPanel parent) {
             base.AdjustSpacing(parent);
             Margin = 8;
         }
 
         public override void OnMouseReleased(ref MouseEvent e) {
-            if(e.Button == MouseEvent.RightButton) {
+            if(e.Button == MouseEvent.RightButton)
                 Environment.ContextMenu.Show(e.Position, m => {
-                    if(m.Button("Remove", 14).IsPressed()) {
-                        ((EditorEnvironment) Environment).TransactionManager.InsertTransaction(new RemoveComponentTransaction(_info.ComponentType, _id));
-                    };
+                    if(m.Button("Remove", 14).IsPressed())
+                        ((EditorEnvironment) Environment).TransactionManager.InsertTransaction(
+                            new RemoveComponentTransaction(_info.ComponentType, _id));
+                    ;
                 });
-            }
             base.OnMouseReleased(ref e);
         }
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
-            layer.Surface.Draw(new DrawRectInstruction() {
+            layer.Surface.Draw(new DrawRectInstruction {
                 Texture = renderer.WhiteTexture,
                 Color = new Color(63, 63, 70),
                 DestinationRectangle = Bounds.Translate(offset)

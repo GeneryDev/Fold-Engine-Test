@@ -1,5 +1,4 @@
-﻿using System;
-using EntryProject.Util;
+﻿using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
@@ -16,28 +15,29 @@ namespace FoldEngine.Rendering {
 
         public bool LineIntersection = false;
         public bool SnapToLine = true;
-        
+
         public override void Initialize() {
             _cameras = CreateComponentIterator<Camera>(IterationFlags.None);
         }
-        
+
         public override void OnRender(IRenderingUnit renderer) {
             _cameras.Reset();
 
             while(_cameras.Next()) {
-
                 ref Camera camera = ref _cameras.GetComponent();
                 ref Transform view = ref _cameras.GetCoComponent<Transform>();
-                
+
                 Vector2 cameraPos = view.Position;
                 Complex cameraRotNegativeComplex = Complex.FromRotation(-view.Rotation);
 
                 IRenderingLayer layer = renderer.MainGroup[camera.RenderToLayer];
-                
+
                 float thickness = 6;
 
-                Line lineA = new Line(new Vector2(-145, -50), new Vector2(55, 55));
-                Vector2 perpendicularA = (Vector2)(((Complex) (lineA.To - lineA.From)).Normalized * Complex.Imaginary) * thickness/2;
+                var lineA = new Line(new Vector2(-145, -50), new Vector2(55, 55));
+                Vector2 perpendicularA = (Vector2) (((Complex) (lineA.To - lineA.From)).Normalized * Complex.Imaginary)
+                                         * thickness
+                                         / 2;
 
                 layer.Surface.Draw(new DrawQuadInstruction(
                     renderer.WhiteTexture,
@@ -61,8 +61,10 @@ namespace FoldEngine.Rendering {
 
 
                 if(LineIntersection) {
-                    Line lineB = new Line(new Vector2(12, 120), renderer.WindowLayer.LayerToCamera(Mouse.GetState().Position.ToVector2()));
-                    Vector2 perpendicularB = (Vector2)(((Complex) (lineB.To - lineB.From)).Normalized * Complex.Imaginary) * thickness/2;
+                    var lineB = new Line(new Vector2(12, 120),
+                        renderer.WindowLayer.LayerToCamera(Mouse.GetState().Position.ToVector2()));
+                    Vector2 perpendicularB =
+                        (Vector2) (((Complex) (lineB.To - lineB.From)).Normalized * Complex.Imaginary) * thickness / 2;
 
                     layer.Surface.Draw(new DrawQuadInstruction(
                         renderer.WhiteTexture,
@@ -84,7 +86,7 @@ namespace FoldEngine.Rendering {
                         Vector2.Zero
                     ));
                     Vector2? intersection = lineA.Intersect(lineB, true, true);
-                    
+
                     Color pointColor = Color.Lime;
 
                     if(!intersection.HasValue) {
@@ -97,16 +99,16 @@ namespace FoldEngine.Rendering {
                     layer.Surface.Draw(new DrawQuadInstruction(
                         renderer.WhiteTexture,
                         layer.CameraToLayer(
-                            (Complex) (intersection + new Vector2(1,-1)*thickness - cameraPos)
+                            (Complex) (intersection + new Vector2(1, -1) * thickness - cameraPos)
                             * cameraRotNegativeComplex),
                         layer.CameraToLayer(
-                            (Complex) (intersection + new Vector2(-1,-1)*thickness - cameraPos)
+                            (Complex) (intersection + new Vector2(-1, -1) * thickness - cameraPos)
                             * cameraRotNegativeComplex),
                         layer.CameraToLayer(
-                            (Complex) (intersection + new Vector2(1,1)*thickness - cameraPos)
+                            (Complex) (intersection + new Vector2(1, 1) * thickness - cameraPos)
                             * cameraRotNegativeComplex),
                         layer.CameraToLayer(
-                            (Complex) (intersection + new Vector2(-1,1)*thickness - cameraPos)
+                            (Complex) (intersection + new Vector2(-1, 1) * thickness - cameraPos)
                             * cameraRotNegativeComplex),
                         Vector2.Zero,
                         Vector2.Zero,
@@ -114,7 +116,7 @@ namespace FoldEngine.Rendering {
                         Vector2.Zero,
                         pointColor
                     ));
-                    
+
                     _lastIntersection = intersection.Value;
                 }
 
@@ -122,20 +124,20 @@ namespace FoldEngine.Rendering {
                     Vector2 snapped =
                         lineA.SnapPointToLine(
                             renderer.WindowLayer.LayerToCamera(Mouse.GetState().Position.ToVector2()), true);
-                    
+
                     layer.Surface.Draw(new DrawQuadInstruction(
                         renderer.WhiteTexture,
                         layer.CameraToLayer(
-                            (Complex) (snapped + new Vector2(1,-1)*thickness - cameraPos)
+                            (Complex) (snapped + new Vector2(1, -1) * thickness - cameraPos)
                             * cameraRotNegativeComplex),
                         layer.CameraToLayer(
-                            (Complex) (snapped + new Vector2(-1,-1)*thickness - cameraPos)
+                            (Complex) (snapped + new Vector2(-1, -1) * thickness - cameraPos)
                             * cameraRotNegativeComplex),
                         layer.CameraToLayer(
-                            (Complex) (snapped + new Vector2(1,1)*thickness - cameraPos)
+                            (Complex) (snapped + new Vector2(1, 1) * thickness - cameraPos)
                             * cameraRotNegativeComplex),
                         layer.CameraToLayer(
-                            (Complex) (snapped + new Vector2(-1,1)*thickness - cameraPos)
+                            (Complex) (snapped + new Vector2(-1, 1) * thickness - cameraPos)
                             * cameraRotNegativeComplex),
                         Vector2.Zero,
                         Vector2.Zero,
@@ -144,8 +146,6 @@ namespace FoldEngine.Rendering {
                         Color.Aqua
                     ));
                 }
-
-                
             }
         }
     }

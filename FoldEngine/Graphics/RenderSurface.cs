@@ -1,20 +1,15 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-
-using FoldEngine.Interfaces;
+﻿using FoldEngine.Interfaces;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
-namespace FoldEngine.Graphics
-{
-    public class RenderSurface
-    {
+namespace FoldEngine.Graphics {
+    public class RenderSurface {
+        public GizmoBatch GizBatch;
         internal GraphicsDevice GraphicsDevice;
         internal IRenderingLayer Layer;
         internal IRenderingUnit RenderingUnit;
         internal RenderTarget2D Target;
         internal TriangleBatch TriBatch;
-        public GizmoBatch GizBatch;
-
-        public Point Size => new Point(Target.Width, Target.Height);
 
         public RenderSurface(IRenderingLayer layer, int width, int height) {
             Layer = layer;
@@ -25,8 +20,7 @@ namespace FoldEngine.Graphics
             Resize(width, height);
         }
 
-        public RenderSurface(GraphicsDevice graphicsDevice, IRenderingUnit renderingUnit, int width, int height)
-        {
+        public RenderSurface(GraphicsDevice graphicsDevice, IRenderingUnit renderingUnit, int width, int height) {
             GraphicsDevice = graphicsDevice;
             RenderingUnit = renderingUnit;
             TriBatch = new TriangleBatch(graphicsDevice);
@@ -34,8 +28,9 @@ namespace FoldEngine.Graphics
             Resize(width, height);
         }
 
-        public void Draw(DrawQuadInstruction instruction)
-        {
+        public Point Size => new Point(Target.Width, Target.Height);
+
+        public void Draw(DrawQuadInstruction instruction) {
             if(instruction.Texture == null) return;
             TriBatch.DrawQuad(
                 instruction.Texture.Source,
@@ -70,26 +65,25 @@ namespace FoldEngine.Graphics
             );
         }
 
-        internal void Begin()
-        {
+        internal void Begin() {
             GraphicsDevice.SetRenderTarget(Target);
             GraphicsDevice.Clear(Layer?.Color ?? Color.Transparent);
-            
+
             GizBatch.WhiteTexture = RenderingUnit.WhiteTexture;
             TriBatch.Begin(samplerState: SamplerState.PointClamp, depthStencilState: DepthStencilState.Default);
             GizBatch.Begin(samplerState: SamplerState.PointClamp);
         }
-        internal void End()
-        {
+
+        internal void End() {
             GraphicsDevice.SetRenderTarget(Target);
             TriBatch.End();
             GizBatch.End();
         }
 
-        public void Resize(int newWidth, int newHeight)
-        {
+        public void Resize(int newWidth, int newHeight) {
             Target?.Dispose();
-            Target = new RenderTarget2D(GraphicsDevice, newWidth, newHeight, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, usage: RenderTargetUsage.PlatformContents);
+            Target = new RenderTarget2D(GraphicsDevice, newWidth, newHeight, false, SurfaceFormat.Color,
+                DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.PlatformContents);
             //TODO MAKE THIS NOT PRESEVE CONTENTS
             //Tweak the TriBatcher to support batching with different parameters together
         }

@@ -4,14 +4,15 @@ using System.Collections.Generic;
 namespace EntryProject.Util {
     public interface IObjectPool {
         int ObjectCount { get; }
-        
+
         void FreeAll();
         object ClaimObject();
         void FreeObject(object o);
     }
+
     public class ObjectPool<T> : IObjectPool where T : new() {
         private readonly List<T> _objects = new List<T>();
-        private int _freeIndex = 0;
+        private int _freeIndex;
 
         public int ObjectCount => _objects.Count;
 
@@ -23,20 +24,22 @@ namespace EntryProject.Util {
             return Claim();
         }
 
+        public void FreeObject(object o) {
+            if(o is T t) Free(t);
+            else throw new ArgumentException("Given object is not of the pool's object type");
+        }
+
         public T Claim() {
             if(_freeIndex >= _objects.Count) {
                 var t = new T();
                 if(t is IPooledObject pooledT) {
                     pooledT.Pool = this;
                 }
+
                 _objects.Add(t);
             }
-            return _objects[_freeIndex++];
-        }
 
-        public void FreeObject(object o) {
-            if(o is T t) Free(t);
-            else throw new ArgumentException("Given object is not of the pool's object type");
+            return _objects[_freeIndex++];
         }
 
         public void Free(T t) {
@@ -49,6 +52,7 @@ namespace EntryProject.Util {
                 _freeIndex--;
                 return;
             }
+
             // Swap the last object returned with the object being freed, and decrement _freeIndex
             _objects[index] = _objects[_freeIndex - 1];
             _objects[_freeIndex - 1] = t;
@@ -72,7 +76,7 @@ namespace EntryProject.Util {
         }
 
         public void Free() {
-            Value = default(T);
+            Value = default;
         }
     }
 

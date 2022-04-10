@@ -7,8 +7,7 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Tools {
     public class HandTool : EditorTool {
-        
-        private bool _dragging = false;
+        private bool _dragging;
         private Vector2 _dragStartWorldPos;
 
         public HandTool(EditorEnvironment environment) : base(environment) {
@@ -17,7 +16,7 @@ namespace FoldEngine.Editor.Tools {
 
         public override void OnMousePressed(ref MouseEvent e) {
             if(Scene.EditorComponents == null) return;
-            
+
             IRenderingLayer worldLayer = Scene.Core.RenderingUnit.WorldLayer;
             Vector2 cameraPos = worldLayer.LayerToCamera(worldLayer.WindowToLayer(e.Position.ToVector2()));
             Vector2 worldPos = Scene.EditorComponents.EditorTransform.Apply(cameraPos);
@@ -32,10 +31,11 @@ namespace FoldEngine.Editor.Tools {
 
         public override void OnInput(ControlScheme controls) {
             if(Scene.EditorComponents == null) return;
-            
+
             if(_dragging) {
-                var worldLayer = Scene.Core.RenderingUnit.WorldLayer;
-                Vector2 cameraRelativePos = worldLayer.LayerToCamera(worldLayer.WindowToLayer(Environment.MousePos.ToVector2()));
+                IRenderingLayer worldLayer = Scene.Core.RenderingUnit.WorldLayer;
+                Vector2 cameraRelativePos =
+                    worldLayer.LayerToCamera(worldLayer.WindowToLayer(Environment.MousePos.ToVector2()));
 
                 ref Transform cameraTransform = ref Scene.EditorComponents.EditorTransform;
 

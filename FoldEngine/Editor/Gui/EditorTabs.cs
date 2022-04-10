@@ -1,5 +1,4 @@
-﻿using System;
-using EntryProject.Util;
+﻿using EntryProject.Util;
 using FoldEngine.Editor.Views;
 using FoldEngine.Graphics;
 using FoldEngine.Gui;
@@ -10,15 +9,15 @@ using Microsoft.Xna.Framework;
 namespace FoldEngine.Editor.Gui {
     public class ViewTab : GuiElement {
         private const float LabelSize = 7;
-        
-        private EditorView _view;
-        private ViewListPanel _viewList;
-        private RenderedText _renderedName;
-
-        private Point _dragStart;
-        private bool _dragging = false;
 
         public const int TabHeight = 14;
+        private bool _dragging;
+
+        private Point _dragStart;
+        private RenderedText _renderedName;
+
+        private EditorView _view;
+        private ViewListPanel _viewList;
 
         public override void Reset(GuiPanel parent) {
             _view = null;
@@ -28,7 +27,7 @@ namespace FoldEngine.Editor.Gui {
         public override void AdjustSpacing(GuiPanel parent) {
             _renderedName = Parent.RenderString(_view.Name, LabelSize);
             Margin = 2;
-            Bounds.Width = 16 + (int)_renderedName.Width + Margin*2;
+            Bounds.Width = 16 + _renderedName.Width + Margin * 2;
             Bounds.Height = TabHeight;
         }
 
@@ -37,23 +36,16 @@ namespace FoldEngine.Editor.Gui {
         }
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
-            if(Bounds.Contains(Environment.MousePos)) {
-                Environment.HoverTarget.Element = this;
-            }
-            
-            if(Pressed(MouseEvent.LeftButton) && Environment.HoverTargetPrevious.Element != this) {
-                _dragging = true;
-            }
+            if(Bounds.Contains(Environment.MousePos)) Environment.HoverTarget.Element = this;
 
-            if(_dragging) {
-                if(Parent.Environment is EditorEnvironment editorEnvironment) {
-                    if(!editorEnvironment.DraggingElements.Contains(this)) {
+            if(Pressed(MouseEvent.LeftButton) && Environment.HoverTargetPrevious.Element != this) _dragging = true;
+
+            if(_dragging)
+                if(Parent.Environment is EditorEnvironment editorEnvironment)
+                    if(!editorEnvironment.DraggingElements.Contains(this))
                         editorEnvironment.DraggingElements.Add(this);
-                    }
-                }
-            }
 
-            var renderingBounds = Bounds;
+            Rectangle renderingBounds = Bounds;
             if(_dragging) {
                 offset += Parent.Environment.MousePos - Bounds.Center;
                 renderingBounds = renderingBounds.Translate(offset);
@@ -61,20 +53,22 @@ namespace FoldEngine.Editor.Gui {
 
 
             Color defaultColor = _viewList.ActiveView == _view ? new Color(37, 37, 38) : Color.Transparent;
-            
-            layer.Surface.Draw(new DrawRectInstruction() {
+
+            layer.Surface.Draw(new DrawRectInstruction {
                 Texture = renderer.WhiteTexture,
-                Color = Pressed(MouseEvent.LeftButton) ? new Color(63, 63, 70) : Rollover ? Color.CornflowerBlue : defaultColor,
+                Color = Pressed(MouseEvent.LeftButton) ? new Color(63, 63, 70) :
+                    Rollover ? Color.CornflowerBlue : defaultColor,
                 DestinationRectangle = renderingBounds
             });
-            
+
             int x = renderingBounds.X + Margin;
-            
+
             var iconSize = new Point(8, 8);
 
-            layer.Surface.Draw(new DrawRectInstruction() {
+            layer.Surface.Draw(new DrawRectInstruction {
                 Texture = Environment.Scene.Core.Resources.Get<Texture>(ref _view.Icon),
-                DestinationRectangle = new Rectangle(x, renderingBounds.Center.Y - iconSize.Y/2,  iconSize.X, iconSize.Y)
+                DestinationRectangle =
+                    new Rectangle(x, renderingBounds.Center.Y - iconSize.Y / 2, iconSize.X, iconSize.Y)
             });
             x += iconSize.X;
             x += 4;
@@ -100,6 +94,7 @@ namespace FoldEngine.Editor.Gui {
                         }
                     }
                 }
+
                 _dragging = false;
             }
         }

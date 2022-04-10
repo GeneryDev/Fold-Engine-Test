@@ -2,7 +2,7 @@
 using FoldEngine.Serialization;
 
 namespace FoldEngine.Graphics.Atlas {
-    [Component(identifier: "fold:texture_atlas")]
+    [Component("fold:texture_atlas")]
     public struct TextureAtlasComponent {
         public string Group;
 

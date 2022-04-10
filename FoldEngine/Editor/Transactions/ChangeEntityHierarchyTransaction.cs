@@ -7,18 +7,23 @@ using FoldEngine.Util.Transactions;
 
 namespace FoldEngine.Editor.Transactions {
     public class ChangeEntityHierarchyTransaction : Transaction<EditorEnvironment> {
-        
-        private long _entityId = -1;
-        
-        private long _previousParent;
+        private readonly long _entityId = -1;
+
+        private readonly long _nextEntity;
+        private readonly HierarchyDropMode _nextRelationship;
         private long _previousNextSibling;
 
-        private long _nextEntity;
-        private HierarchyDropMode _nextRelationship;
+        private long _previousParent;
 
-        private Transform _snapshot;
+        private readonly Transform _snapshot;
 
-        public ChangeEntityHierarchyTransaction(long entityId, long previousParent, long previousNextSibling, long nextEntity, HierarchyDropMode nextRelationship, Transform snapshot) {
+        public ChangeEntityHierarchyTransaction(
+            long entityId,
+            long previousParent,
+            long previousNextSibling,
+            long nextEntity,
+            HierarchyDropMode nextRelationship,
+            Transform snapshot) {
             _entityId = entityId;
             _previousParent = previousParent;
             _previousNextSibling = previousNextSibling;
@@ -29,7 +34,7 @@ namespace FoldEngine.Editor.Transactions {
 
         public override bool Redo(EditorEnvironment target) {
             var entity = new Entity(target.Scene, _entityId);
-            
+
             UnlinkFromHierarchy(entity);
 
             switch(_nextRelationship) {
@@ -38,19 +43,19 @@ namespace FoldEngine.Editor.Transactions {
                     break;
                 }
             }
-            
+
             entity.Transform.RestoreSnapshot(_snapshot);
-            
+
             return true;
         }
 
         public override bool Undo(EditorEnvironment target) {
             var entity = new Entity(target.Scene, _entityId);
-            
+
             UnlinkFromHierarchy(entity);
 
             entity.Transform.RestoreSnapshot(_snapshot);
-            
+
             Console.WriteLine("undo");
             return true;
         }

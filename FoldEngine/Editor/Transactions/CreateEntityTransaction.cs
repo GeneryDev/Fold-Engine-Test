@@ -4,15 +4,14 @@ using FoldEngine.Util.Transactions;
 
 namespace FoldEngine.Editor.Transactions {
     public class CreateEntityTransaction : Transaction<EditorEnvironment> {
-        
-        private long _parentEntityId;
-
         private long _newEntityId = -1;
+
+        private readonly long _parentEntityId;
 
         public CreateEntityTransaction(long parentEntityId) {
             _parentEntityId = parentEntityId;
         }
-        
+
 
         public override bool Redo(EditorEnvironment target) {
             if(_newEntityId == -1) {
@@ -40,6 +39,7 @@ namespace FoldEngine.Editor.Transactions {
             } else {
                 SceneEditor.ReportEditorGameConflict();
             }
+
             return true;
         }
     }

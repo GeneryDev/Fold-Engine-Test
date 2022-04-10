@@ -1,35 +1,29 @@
-﻿using FoldEngine.Components;
-using FoldEngine.Scenes;
-using Microsoft.Xna.Framework;
-using Sandbox.Components;
-using Sandbox.Systems;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using EntryProject.Resources;
-using FoldEngine.Audio;
+﻿using System;
 using FoldEngine.Editor;
-using FoldEngine.Graphics;
 using FoldEngine.Graphics.Atlas;
 using FoldEngine.Interfaces;
 using FoldEngine.Physics;
 using FoldEngine.Rendering;
 using FoldEngine.Resources;
+using FoldEngine.Scenes;
 using FoldEngine.Util;
-using Woofer;
+using Microsoft.Xna.Framework;
+using Sandbox.Components;
+using Sandbox.Systems;
 
 namespace Sandbox {
     internal class DemoScene : Scene {
+        public DemoScene(IGameCore core) : base(core) { }
 
         public override void Initialize() {
             BuildMeshes();
-            
+
             Systems.Add<TextureAtlasSystem>();
             Systems.Add<SimplePhysicsSystem>();
             Systems.Add<LevelRenderer2D>();
             // Systems.Add<ColliderGizmoRenderer>();
             Systems.Add<DebugSystem>();
-            
+
             Entity e0 = CreateEntity("Entity 0");
             Entity e1 = CreateEntity("Entity 1");
             Entity e2 = CreateEntity("Entity 2");
@@ -53,7 +47,7 @@ namespace Sandbox {
             e1.AddComponent<Physics>();
             e1.AddComponent<Collider>().SetBox(1, 1);
             e1.AddComponent<Living>();
-            
+
             {
                 ref MeshRenderable mr = ref e3.AddComponent<MeshRenderable>();
                 mr.MeshIdentifier = new ResourceIdentifier("square");
@@ -63,8 +57,8 @@ namespace Sandbox {
             e3.Transform.Position += Vector2.UnitX * -0.7f;
             e3.AddComponent<Physics>().Static = true;
             e3.AddComponent<Collider>().SetBox(1, 1);
-            
-            
+
+
             {
                 ref MeshRenderable mr = ref e4.AddComponent<MeshRenderable>();
                 mr.MeshIdentifier = new ResourceIdentifier("square");
@@ -75,7 +69,7 @@ namespace Sandbox {
             e4.AddComponent<Physics>().Static = true;
             e4.AddComponent<Collider>().SetBox(1, 1);
             // e3.AddComponent<Living>();
-            
+
             // {
             //     ref MeshRenderable mr = ref e0.AddComponent<MeshRenderable>();
             //     mr.MeshIdentifier = "square";
@@ -86,8 +80,8 @@ namespace Sandbox {
             // e0.AddComponent<Physics>();
             // e0.AddComponent<Collider>().SetMesh("circle");
             // // e0.AddComponent<Living>();
-            
-            
+
+
             {
                 ref MeshRenderable mr = ref e2.AddComponent<MeshRenderable>();
                 mr.MeshIdentifier = new ResourceIdentifier("square");
@@ -98,9 +92,6 @@ namespace Sandbox {
             e2.Transform.LocalScale = new Vector2(9, 4);
             e2.AddComponent<Physics>().Static = true;
             e2.AddComponent<Collider>().ThickFaces = true;
-
-
-
 
 
             /*e0.Transform.Position = new Vector2(1, 2);
@@ -205,25 +196,28 @@ namespace Sandbox {
 
         private void BuildMeshes() {
             Console.WriteLine("BUILDING MESHES");
-            Resources.Create<Mesh>("square").Start(Mesh.MeshInputType.Vertices)
+            Resources.Create<Mesh>("square")
+                .Start(Mesh.MeshInputType.Vertices)
                 .Vertex(new Vector2(-0.5f, -0.5f), new Vector2(0, 1))
                 .Vertex(new Vector2(-0.5f, 0.5f), new Vector2(0, 0))
                 .Vertex(new Vector2(0.5f, 0.5f), new Vector2(1, 0))
                 .Vertex(new Vector2(0.5f, -0.5f), new Vector2(1, 1))
                 .End();
-            
+
             Mesh circle = Resources.Create<Mesh>("circle").Start(Mesh.MeshInputType.Vertices);
             const int segments = 12;
             Complex step = Complex.FromRotation(-(float) (Math.PI * 2 / segments));
-            Complex current = new Complex(0.5f, 0);
+            var current = new Complex(0.5f, 0);
             for(int i = 0; i < segments; i++) {
                 circle.Vertex(current, current + new Complex(0.5f, 0.5f));
                 current *= step;
             }
+
             circle.End();
-            
-            
-            Resources.Create<Mesh>("weird").Start(Mesh.MeshInputType.Vertices)
+
+
+            Resources.Create<Mesh>("weird")
+                .Start(Mesh.MeshInputType.Vertices)
                 .Vertex(new Vector2(-1, 0), Vector2.Zero)
                 .Vertex(new Vector2(-2, 1), Vector2.Zero)
                 .Vertex(new Vector2(0, 2), Vector2.Zero)
@@ -231,11 +225,9 @@ namespace Sandbox {
                 .Vertex(new Vector2(0, -2), Vector2.Zero)
                 .Vertex(new Vector2(-2, -1), Vector2.Zero)
                 .End();
-            
+
             // Resources.Create<TestResource>("red").color = new Color(255, 0, 0);
             // Resources.Create<TestResource>("blue").color = new Color(0, 0, 255);
         }
-
-        public DemoScene(IGameCore core) : base(core) { }
     }
 }

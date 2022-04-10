@@ -1,37 +1,37 @@
 ﻿using System;
+using FoldEngine.Components;
+using FoldEngine.Graphics;
+using FoldEngine.Interfaces;
+using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-using FoldEngine.Graphics;
-using FoldEngine.Interfaces;
-using FoldEngine.Util;
-
 namespace FoldEngine {
     /// <summary>
-    /// This is the main type for your game.
+    ///     This is the main type for your game.
     /// </summary>
     public class FoldGame : Game {
         public static FoldGame Game;
-        
-        public readonly GraphicsDeviceManager Graphics;
-        private SpriteBatch _spriteBatch;
 
         private readonly IGameCore _core;
 
-        private FixedSizeFloatBuffer FrameTimes = new FixedSizeFloatBuffer(60);
-        
+        public readonly GraphicsDeviceManager Graphics;
+
         private Point _lastKnownWindowSize = Point.Zero;
+        private SpriteBatch _spriteBatch;
+
+        private readonly FixedSizeFloatBuffer FrameTimes = new FixedSizeFloatBuffer(60);
 
         public FoldGame(IGameCore core) {
-            this._core = core;
+            _core = core;
             Game = this;
 
             Graphics = new GraphicsDeviceManager(this);
             Graphics.GraphicsProfile = GraphicsProfile.HiDef;
             Content.RootDirectory = "Content";
 
-            this.IsMouseVisible = true;
+            IsMouseVisible = true;
 
             IsFixedTimeStep = true;
             TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0 / 120);
@@ -39,20 +39,20 @@ namespace FoldEngine {
         }
 
         /// <summary>
-        /// Allows the game to perform any initialization it needs to before starting to run.
-        /// This is where it can query for any required services and load any non-graphic
-        /// related content.  Calling base.Initialize will enumerate through any components
-        /// and initialize them as well.
+        ///     Allows the game to perform any initialization it needs to before starting to run.
+        ///     This is where it can query for any required services and load any non-graphic
+        ///     related content.  Calling base.Initialize will enumerate through any components
+        ///     and initialize them as well.
         /// </summary>
         protected override void Initialize() {
             _core.RenderingUnit.Effects = new EffectManager(Content);
             _core.RenderingUnit.Fonts = new FontManager(_core);
 
             _core.Initialize();
-            
+
             (Graphics.PreferredBackBufferWidth, Graphics.PreferredBackBufferHeight) = _core.RenderingUnit.WindowSize;
             _lastKnownWindowSize = _core.RenderingUnit.WindowSize;
-            
+
             Window.AllowUserResizing = true;
             Window.ClientSizeChanged += (sender, args) => {
                 Point newSize = Window.ClientBounds.Size;
@@ -62,14 +62,14 @@ namespace FoldEngine {
                 }
             };
 
-            FoldEngine.Components.Component.PopulateIdentifiers();
+            Component.PopulateIdentifiers();
 
             base.Initialize();
         }
 
         /// <summary>
-        /// LoadContent will be called once per game and is the place to load
-        /// all of your content.
+        ///     LoadContent will be called once per game and is the place to load
+        ///     all of your content.
         /// </summary>
         protected override void LoadContent() {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
@@ -86,27 +86,26 @@ namespace FoldEngine {
         }
 
         /// <summary>
-        /// UnloadContent will be called once per game and is the place to unload
-        /// game-specific content.
+        ///     UnloadContent will be called once per game and is the place to unload
+        ///     game-specific content.
         /// </summary>
         protected override void UnloadContent() {
             // TODO: Unload any non ContentManager content here
         }
 
         /// <summary>
-        /// Allows the game to run logic such as updating the world,
-        /// checking for collisions, gathering input, and playing audio.
+        ///     Allows the game to run logic such as updating the world,
+        ///     checking for collisions, gathering input, and playing audio.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime) {
             if(GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
                || Keyboard.GetState().IsKeyDown(Keys.Escape)) {
                 Console.WriteLine("Exiting via input: ");
-                if(GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed) {
+                if(GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                     Console.WriteLine("Gamepad");
-                } else {
+                else
                     Console.WriteLine("Keyboard");
-                }
 
                 Exit();
             }
@@ -121,7 +120,7 @@ namespace FoldEngine {
             _core.Input();
 
             _core.Resources.Update();
-            
+
             _core.Update();
 
 
@@ -129,34 +128,34 @@ namespace FoldEngine {
         }
 
         /// <summary>
-        /// This is called when the game should draw itself.
+        ///     This is called when the game should draw itself.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime) {
             Time.Update(gameTime);
             FrameTimes.Put(Time.DeltaTime);
             // Console.WriteLine("FPS: ");
-            Time.FramesPerSecond = (1 / FrameTimes.Average());
+            Time.FramesPerSecond = 1 / FrameTimes.Average();
             // TODO: Add your drawing code here
 
             GraphicsDevice.SetRenderTarget(null);
 
-            
+
             _core.RenderingUnit.RootGroup.Begin();
-            
+
             _core.Render();
 
             _core.RenderingUnit.RootGroup.End();
 
-            
+
             //Draw each layer's buffer onto the screen
             GraphicsDevice.SetRenderTarget(null);
             GraphicsDevice.Clear(Color.Black);
-            
+
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
-            
+
             _core?.RenderingUnit.RootGroup.Present(_spriteBatch);
-            
+
             _spriteBatch.End();
 
             //spriteBatch.Draw(testTex, new Rectangle((int)(gameTime.TotalGameTime.TotalMilliseconds / 10), 16, 16, 16), Color.White);

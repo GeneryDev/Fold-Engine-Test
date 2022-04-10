@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace FoldEngine.Input {
     public class ControlScheme {
+        private readonly Dictionary<string, IAction> _actions = new Dictionary<string, IAction>();
+        private readonly List<IInputDevice> _devices = new List<IInputDevice>();
         public string Name;
-        private List<IInputDevice> _devices = new List<IInputDevice>();
-        private Dictionary<string, IAction> _actions = new Dictionary<string, IAction>();
 
         public ControlScheme(string name) {
             Name = name;
@@ -13,9 +12,9 @@ namespace FoldEngine.Input {
 
         public bool IsBeingUsed {
             get {
-                foreach(IInputDevice device in _devices) {
-                    if(device.IsBeingUsed) return true;
-                }
+                foreach(IInputDevice device in _devices)
+                    if(device.IsBeingUsed)
+                        return true;
 
                 return false;
             }

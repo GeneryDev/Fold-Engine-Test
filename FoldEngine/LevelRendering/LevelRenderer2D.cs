@@ -1,7 +1,6 @@
 ﻿using System;
 using EntryProject.Util;
 using FoldEngine.Components;
-using FoldEngine.Editor;
 using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
@@ -9,12 +8,9 @@ using FoldEngine.Scenes;
 using FoldEngine.Systems;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Texture = FoldEngine.Graphics.Texture;
 
 namespace FoldEngine.Rendering {
-    [GameSystem("fold:level_renderer.2d", ProcessingCycles.Render, runWhenPaused: true)]
+    [GameSystem("fold:level_renderer.2d", ProcessingCycles.Render, true)]
     public class LevelRenderer2D : GameSystem {
         private ComponentIterator<Camera> _cameras;
         private ComponentIterator<MeshRenderable> _meshRenderables;
@@ -31,63 +27,67 @@ namespace FoldEngine.Rendering {
 
             if(Scene.EditorComponents != null) {
                 anyCamera = true;
-                RenderCamera(Scene.EditorComponents.EditorCamera, Scene.EditorComponents.EditorTransform, renderer, false);
+                RenderCamera(Scene.EditorComponents.EditorCamera, Scene.EditorComponents.EditorTransform, renderer,
+                    false);
             } else {
                 while(_cameras.Next()) {
                     anyCamera = true;
 
                     ref Camera camera = ref _cameras.GetComponent();
                     ref Transform view = ref _cameras.GetCoComponent<Transform>();
-                
+
                     RenderCamera(camera, view, renderer, true);
                 }
             }
 
-            if(!anyCamera) {
-                Console.WriteLine("No cameras in scene");
-            }
+            if(!anyCamera) Console.WriteLine("No cameras in scene");
         }
 
-        private void RenderCamera(Camera camera, Transform view, IRenderingUnit renderer, bool setMainCameraId = false) {
+        private void RenderCamera(
+            Camera camera,
+            Transform view,
+            IRenderingUnit renderer,
+            bool setMainCameraId = false) {
             (float viewX, float viewY) = view.Position;
             if(camera.SnapPosition > 0) {
                 viewX = (float) (Math.Round(viewX / camera.SnapPosition) * camera.SnapPosition);
                 viewY = (float) (Math.Round(viewY / camera.SnapPosition) * camera.SnapPosition);
             }
+
             Complex cameraRotateScale = Complex.FromRotation(-view.Rotation);
 
             //Translate
             Matrix viewMatrix = new Matrix( //Translate
-                1, 0, 0, 0,
-                0, 1, 0, 0,
-                0, 0, 1, 0,
-                -viewX, -viewY, 0, 1
-            ) * new Matrix( //Rotate
-                cameraRotateScale.A, cameraRotateScale.B, 0, 0,
-                -cameraRotateScale.B, cameraRotateScale.A, 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1
-            ) * new Matrix( //Scale
-                1/view.LocalScale.X, 0, 0, 0,
-                0, 1/view.LocalScale.Y, 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1
-            );
-            
+                                    1, 0, 0, 0,
+                                    0, 1, 0, 0,
+                                    0, 0, 1, 0,
+                                    -viewX, -viewY, 0, 1
+                                )
+                                * new Matrix( //Rotate
+                                    cameraRotateScale.A, cameraRotateScale.B, 0, 0,
+                                    -cameraRotateScale.B, cameraRotateScale.A, 0, 0,
+                                    0, 0, 1, 0,
+                                    0, 0, 0, 1
+                                )
+                                * new Matrix( //Scale
+                                    1 / view.LocalScale.X, 0, 0, 0,
+                                    0, 1 / view.LocalScale.Y, 0, 0,
+                                    0, 0, 1, 0,
+                                    0, 0, 0, 1
+                                );
+
             Scene.GizmoTransformMatrix = viewMatrix;
-            if(setMainCameraId) {
-                Scene.MainCameraId = _cameras.GetEntityId();
-            }
-            
+            if(setMainCameraId) Scene.MainCameraId = _cameras.GetEntityId();
+
             IRenderingLayer layer = !string.IsNullOrEmpty(camera.RenderToLayer)
                 ? renderer.MainGroup[camera.RenderToLayer]
                 : renderer.WorldLayer;
             if(layer == null) return;
-            
+
             _meshRenderables.Reset();
-            
+
             while(_meshRenderables.Next()) {
-                Transform transform = _meshRenderables.GetCoComponent<Transform>();
+                var transform = _meshRenderables.GetCoComponent<Transform>();
                 ref MeshRenderable meshRenderable = ref _meshRenderables.GetComponent();
                 if(camera.SnapPosition > 0) {
                     Vector2 pos = transform.Position;
@@ -95,17 +95,20 @@ namespace FoldEngine.Rendering {
                     pos.Y = (float) (Math.Round(pos.Y / camera.SnapPosition) * camera.SnapPosition);
                     transform.Position = pos;
                 }
-                
-                if(meshRenderable.MeshIdentifier.Identifier == null || meshRenderable.TextureIdentifier.Identifier == null) continue;
-                
+
+                if(meshRenderable.MeshIdentifier.Identifier == null
+                   || meshRenderable.TextureIdentifier.Identifier == null) continue;
+
                 ITexture texture = Scene.Resources.Get<Texture>(ref meshRenderable.TextureIdentifier, Texture.Missing);
                 if(texture == null) continue;
-                
-                foreach(Mesh.Triangle triangle in Scene.Resources.Get<Mesh>(ref meshRenderable.MeshIdentifier, Mesh.Empty).GetTriangles()) {
+
+                foreach(Mesh.Triangle triangle in Scene.Resources
+                    .Get<Mesh>(ref meshRenderable.MeshIdentifier, Mesh.Empty)
+                    .GetTriangles()) {
                     Vector2 vertexA = triangle.A.Position.ToVector2().ApplyMatrixTransform(meshRenderable.Matrix);
                     Vector2 vertexB = triangle.B.Position.ToVector2().ApplyMatrixTransform(meshRenderable.Matrix);
                     Vector2 vertexC = triangle.C.Position.ToVector2().ApplyMatrixTransform(meshRenderable.Matrix);
-                
+
                     layer.Surface.Draw(new DrawTriangleInstruction(
                         texture,
                         layer.CameraToLayer(transform.Apply(vertexA).ApplyMatrixTransform(viewMatrix)),
@@ -123,29 +126,37 @@ namespace FoldEngine.Rendering {
         }
 
         public static void DrawOutline(Entity entity) {
-            if(entity.HasComponent<MeshRenderable>()) DrawOutline(entity.Scene, entity.Transform, entity.GetComponent<MeshRenderable>(), new Color(250, 110, 30));
+            if(entity.HasComponent<MeshRenderable>())
+                DrawOutline(entity.Scene, entity.Transform, entity.GetComponent<MeshRenderable>(),
+                    new Color(250, 110, 30));
         }
 
-        public static void DrawOutline(Scene scene, Transform transform, MeshRenderable meshRenderable, Color outlineColor) {
-            if(meshRenderable.MeshIdentifier.Identifier == null || meshRenderable.TextureIdentifier.Identifier == null) return;
+        public static void DrawOutline(
+            Scene scene,
+            Transform transform,
+            MeshRenderable meshRenderable,
+            Color outlineColor) {
+            if(meshRenderable.MeshIdentifier.Identifier == null
+               || meshRenderable.TextureIdentifier.Identifier == null) return;
 
             Vector2 firstVertex = default;
             Vector2 prevVertex = default;
             bool first = true;
-            foreach(var localVertex in scene.Resources.Get<Mesh>(ref meshRenderable.MeshIdentifier, Mesh.Empty).GetVertices()) {
+            foreach(Vector2 localVertex in scene.Resources.Get<Mesh>(ref meshRenderable.MeshIdentifier, Mesh.Empty)
+                .GetVertices()) {
                 Vector2 vertex = transform.Apply(localVertex);
-                if(first) {
+                if(first)
                     firstVertex = vertex;
-                } else {
+                else
                     scene.DrawGizmo(prevVertex, vertex, outlineColor);
-                }
 
                 first = false;
                 prevVertex = vertex;
             }
+
             scene.DrawGizmo(prevVertex, firstVertex, outlineColor);
         }
-        
+
         public long ListEntitiesIntersectingPosition(Vector2 worldPos) {
             _meshRenderables.Reset();
 
@@ -153,11 +164,10 @@ namespace FoldEngine.Rendering {
                 ref Transform transform = ref _meshRenderables.GetCoComponent<Transform>();
                 ref MeshRenderable meshRenderable = ref _meshRenderables.GetComponent();
 
-                if(meshRenderable.MeshIdentifier.Identifier == null || meshRenderable.TextureIdentifier.Identifier == null) continue;
+                if(meshRenderable.MeshIdentifier.Identifier == null
+                   || meshRenderable.TextureIdentifier.Identifier == null) continue;
 
-                if(meshRenderable.Contains(worldPos, ref transform)) {
-                    return _meshRenderables.GetEntityId();
-                }
+                if(meshRenderable.Contains(worldPos, ref transform)) return _meshRenderables.GetEntityId();
             }
 
             return -1;

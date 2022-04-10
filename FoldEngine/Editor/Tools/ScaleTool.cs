@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
@@ -13,16 +12,16 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Tools {
     public class ScaleTool : SelectTool {
+        private bool _dragging;
 
         private Transform _movePivot;
-        private bool _dragging = false;
-
-        private Vector2 _selectedGizmo = default;
+        private readonly List<Vector2> _pressEntityPivotPosition = new List<Vector2>();
+        private readonly List<Vector2> _pressEntityScale = new List<Vector2>();
 
         private Vector2 _pressMousePivotPosition;
-        private List<Vector2> _pressEntityPivotPosition = new List<Vector2>();
-        private List<Vector2> _pressEntityScale = new List<Vector2>();
-        private List<SetEntityTransformTransaction> _transactions = new List<SetEntityTransformTransaction>();
+
+        private Vector2 _selectedGizmo;
+        private readonly List<SetEntityTransformTransaction> _transactions = new List<SetEntityTransformTransaction>();
 
         public ScaleTool(EditorEnvironment environment) : base(environment) {
             Icon = EditorIcons.Scale;
@@ -34,25 +33,26 @@ namespace FoldEngine.Editor.Tools {
                     Scene.MainCameraTransform.Apply(Environment.Renderer.GizmoLayer.LayerToCamera(
                         Environment.Renderer.GizmoLayer.WindowToLayer(e.Position.ToVector2())));
                 _pressMousePivotPosition = _movePivot.Relativize(mouseWorldPos);
-                
+
                 _pressEntityPivotPosition.Clear();
                 _pressEntityScale.Clear();
                 _transactions.Clear();
-                EditorBase editorBase = Scene.Systems.Get<EditorBase>();
+                var editorBase = Scene.Systems.Get<EditorBase>();
                 foreach(long entityId in editorBase.EditingEntity) {
                     if(entityId == -1) continue;
 
-                    Entity entity = new Entity(Scene, entityId);
+                    var entity = new Entity(Scene, entityId);
 
                     Vector2 relativeEntityPos = _movePivot.Relativize(entity.Transform.Position);
-                    
+
                     _pressEntityPivotPosition.Add(relativeEntityPos);
                     _pressEntityScale.Add(entity.Transform.LocalScale);
-                    
+
                     var transaction = new SetEntityTransformTransaction(entity.Transform.CreateSnapshot());
                     Environment.TransactionManager.InsertTransaction(transaction);
                     _transactions.Add(transaction);
                 }
+
                 _dragging = true;
             } else {
                 base.OnMousePressed(ref e);
@@ -67,18 +67,16 @@ namespace FoldEngine.Editor.Tools {
         }
 
         private void EnsurePivotExists() {
-            if(!_movePivot.IsNotNull) {
-                _movePivot = Transform.InitializeComponent(Scene, 0);
-            }
+            if(!_movePivot.IsNotNull) _movePivot = Transform.InitializeComponent(Scene, 0);
         }
 
         public override void Render(IRenderingUnit renderer) {
             EnsurePivotExists();
             if(!_dragging) _selectedGizmo = default;
-            
+
             bool any = false;
-            
-            EditorBase editorBase = Scene.Systems.Get<EditorBase>();
+
+            var editorBase = Scene.Systems.Get<EditorBase>();
             if(_dragging) {
                 Vector2 mouseWorldPos =
                     Scene.MainCameraTransform.Apply(Environment.Renderer.GizmoLayer.LayerToCamera(
@@ -95,19 +93,19 @@ namespace FoldEngine.Editor.Tools {
                 foreach(long entityId in editorBase.EditingEntity) {
                     if(entityId == -1) continue;
                     any = true;
-                
-                    Entity entity = new Entity(Scene, entityId);
-                
+
+                    var entity = new Entity(Scene, entityId);
+
                     entity.Transform.Position = _movePivot.Position;
                     entity.Transform.Position = _movePivot.Apply(_pressEntityPivotPosition[i]);
-                    
+
                     entity.Transform.LocalScale = _pressEntityScale[i] * newScale;
-                    
+
                     _transactions[i].UpdateAfter(entity.Transform.CreateSnapshot());
-                
+
                     i++;
                 }
-                
+
                 _movePivot.LocalScale = Vector2.One;
             } else {
                 _movePivot.LocalPosition = default;
@@ -115,19 +113,19 @@ namespace FoldEngine.Editor.Tools {
                     if(entityId == -1) continue;
                     any = true;
 
-                    Entity entity = new Entity(Scene, entityId);
-                
+                    var entity = new Entity(Scene, entityId);
+
                     _movePivot.LocalPosition += entity.Transform.Position;
                     _movePivot.Rotation = entity.Transform.Rotation;
                 }
+
                 if(any) _movePivot.LocalPosition /= editorBase.EditingEntity.Count;
             }
 
             if(any) {
-                
                 Vector2 origin = _movePivot.LocalPosition;
                 Complex rotation = (_movePivot.Apply(Vector2.UnitX) - origin).Normalized();
-                
+
                 RenderArrow(renderer,
                     origin,
                     origin + (Vector2) ((Complex) Vector2.UnitX * rotation),
@@ -154,13 +152,19 @@ namespace FoldEngine.Editor.Tools {
             }
         }
 
-        private void RenderArrow(IRenderingUnit renderer, Vector2 start, Vector2 end, Color defaultColor, Color hoverColor, out bool hovered, bool? forceHoverState, float fixedLength = 0) {
+        private void RenderArrow(
+            IRenderingUnit renderer,
+            Vector2 start,
+            Vector2 end,
+            Color defaultColor,
+            Color hoverColor,
+            out bool hovered,
+            bool? forceHoverState,
+            float fixedLength = 0) {
             start = renderer.GizmoLayer.CameraToLayer(Scene.MainCameraTransform.Relativize(start));
             end = renderer.GizmoLayer.CameraToLayer(Scene.MainCameraTransform.Relativize(end));
 
-            if(fixedLength > 0) {
-                end = (end - start).Normalized() * fixedLength + start;
-            }
+            if(fixedLength > 0) end = (end - start).Normalized() * fixedLength + start;
 
             Vector2 dir = (end - start).Normalized();
             Complex dirComplex = dir;
@@ -169,46 +173,46 @@ namespace FoldEngine.Editor.Tools {
             float headLength = 16;
             float headWidth = 16;
             float hoverDistance = 16;
-            
+
             //Check hover
             if(!forceHoverState.HasValue) {
-                Line line = new Line(start, end);
+                var line = new Line(start, end);
                 Vector2 mousePosLayerSpace = renderer.GizmoLayer.WindowToLayer(Environment.MousePos.ToVector2());
                 hovered = line.DistanceFromPoint(mousePosLayerSpace, true) <= hoverDistance;
             } else {
                 hovered = forceHoverState.Value;
             }
-            
+
             //Render line
 
-            renderer.GizmoLayer.Surface.Draw(new DrawTriangleInstruction() {
-                A = new Vector3(start + (Vector2)(dirComplex * Complex.Imaginary) * thickness / 2, 0),
-                B = new Vector3(start - (Vector2)(dirComplex * Complex.Imaginary) * thickness / 2, 0),
-                C = new Vector3(end + (Vector2)(dirComplex * Complex.Imaginary) * thickness / 2 - dir * headLength, 0),
+            renderer.GizmoLayer.Surface.Draw(new DrawTriangleInstruction {
+                A = new Vector3(start + (Vector2) (dirComplex * Complex.Imaginary) * thickness / 2, 0),
+                B = new Vector3(start - (Vector2) (dirComplex * Complex.Imaginary) * thickness / 2, 0),
+                C = new Vector3(end + (Vector2) (dirComplex * Complex.Imaginary) * thickness / 2 - dir * headLength, 0),
                 Texture = renderer.WhiteTexture,
                 Color = hovered ? hoverColor : defaultColor
             });
-            renderer.GizmoLayer.Surface.Draw(new DrawTriangleInstruction() {
-                A = new Vector3(end + (Vector2)(dirComplex * Complex.Imaginary) * thickness / 2 - dir * headLength, 0),
-                B = new Vector3(start - (Vector2)(dirComplex * Complex.Imaginary) * thickness / 2, 0),
-                C = new Vector3(end - (Vector2)(dirComplex * Complex.Imaginary) * thickness / 2 - dir * headLength, 0),
+            renderer.GizmoLayer.Surface.Draw(new DrawTriangleInstruction {
+                A = new Vector3(end + (Vector2) (dirComplex * Complex.Imaginary) * thickness / 2 - dir * headLength, 0),
+                B = new Vector3(start - (Vector2) (dirComplex * Complex.Imaginary) * thickness / 2, 0),
+                C = new Vector3(end - (Vector2) (dirComplex * Complex.Imaginary) * thickness / 2 - dir * headLength, 0),
                 Texture = renderer.WhiteTexture,
                 Color = hovered ? hoverColor : defaultColor
             });
-            
+
             // Render head
-            
-            renderer.GizmoLayer.Surface.Draw(new DrawTriangleInstruction() {
-                A = new Vector3(end + (Vector2)(dirComplex * Complex.Imaginary) * headWidth / 2 - dir * headLength, 0),
-                B = new Vector3(end - (Vector2)(dirComplex * Complex.Imaginary) * headWidth / 2 - dir * headLength, 0),
-                C = new Vector3(end + (Vector2)(dirComplex * Complex.Imaginary) * headWidth / 2, 0),
+
+            renderer.GizmoLayer.Surface.Draw(new DrawTriangleInstruction {
+                A = new Vector3(end + (Vector2) (dirComplex * Complex.Imaginary) * headWidth / 2 - dir * headLength, 0),
+                B = new Vector3(end - (Vector2) (dirComplex * Complex.Imaginary) * headWidth / 2 - dir * headLength, 0),
+                C = new Vector3(end + (Vector2) (dirComplex * Complex.Imaginary) * headWidth / 2, 0),
                 Texture = renderer.WhiteTexture,
                 Color = hovered ? hoverColor : defaultColor
             });
-            renderer.GizmoLayer.Surface.Draw(new DrawTriangleInstruction() {
-                A = new Vector3(end + (Vector2)(dirComplex * Complex.Imaginary) * headWidth / 2, 0),
-                B = new Vector3(end - (Vector2)(dirComplex * Complex.Imaginary) * headWidth / 2 - dir * headLength, 0),
-                C = new Vector3(end - (Vector2)(dirComplex * Complex.Imaginary) * headWidth / 2, 0),
+            renderer.GizmoLayer.Surface.Draw(new DrawTriangleInstruction {
+                A = new Vector3(end + (Vector2) (dirComplex * Complex.Imaginary) * headWidth / 2, 0),
+                B = new Vector3(end - (Vector2) (dirComplex * Complex.Imaginary) * headWidth / 2 - dir * headLength, 0),
+                C = new Vector3(end - (Vector2) (dirComplex * Complex.Imaginary) * headWidth / 2, 0),
                 Texture = renderer.WhiteTexture,
                 Color = hovered ? hoverColor : defaultColor
             });

@@ -1,21 +1,21 @@
-﻿using FoldEngine.Components;
-using FoldEngine.Scenes;
-using FoldEngine.Systems;
-using Sandbox.Components;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using FoldEngine;
+﻿using System;
+using FoldEngine.Components;
 using FoldEngine.Interfaces;
 using FoldEngine.Physics;
-using FoldEngine.Rendering;
+using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Sandbox.Components;
 
 namespace Sandbox.Systems {
     [GameSystem("sandbox:health", ProcessingCycles.Update | ProcessingCycles.Render)]
     public class HealthSystem : GameSystem {
         private ComponentIterator<Living> _livingComponents;
+        private Vector2 _previousMousePos;
+
+        private Vector2 _rightPressedScreenPos;
+        private Vector2 _rightPressedWorldPos;
+        private bool _rightPreviouslyPressed;
 
         public override void Initialize() {
             _livingComponents = CreateComponentIterator<Living>(IterationFlags.None);
@@ -61,15 +61,10 @@ namespace Sandbox.Systems {
             //Console.WriteLine();
         }
 
-        private Vector2 _rightPressedScreenPos;
-        private Vector2 _rightPressedWorldPos;
-        private Vector2 _previousMousePos;
-        private bool _rightPreviouslyPressed = false;
-
         public override void OnRender(IRenderingUnit renderer) {
             _livingComponents.Reset();
 
-            Vector2 currentMouseScreenPos = Mouse.GetState().Position.ToVector2();
+            var currentMouseScreenPos = Mouse.GetState().Position.ToVector2();
             Vector2 currentMouseWorldPos = renderer.WindowLayer.LayerToCamera(currentMouseScreenPos);
 
             bool rightPressed = Mouse.GetState().RightButton == ButtonState.Pressed;
@@ -91,8 +86,9 @@ namespace Sandbox.Systems {
                         physics.AccelerationFromForce = default;
                         physics.Velocity = default;
                         physics.AngularVelocity = default;
-                        
-                        renderer.MainGroup["gizmos"].Surface.GizBatch.DrawLine(currentMouseScreenPos, _rightPressedScreenPos, Color.Lime);
+
+                        renderer.MainGroup["gizmos"]
+                            .Surface.GizBatch.DrawLine(currentMouseScreenPos, _rightPressedScreenPos, Color.Lime);
                     }
 
                     if(Mouse.GetState().LeftButton == ButtonState.Pressed) {
@@ -102,13 +98,14 @@ namespace Sandbox.Systems {
                     }
 
                     if(!rightPressed && _rightPreviouslyPressed) {
-                        physics.ApplyForce((currentMouseWorldPos - _rightPressedWorldPos) * 100, currentMouseWorldPos - transform.Position, ForceMode.Instant);
+                        physics.ApplyForce((currentMouseWorldPos - _rightPressedWorldPos) * 100,
+                            currentMouseWorldPos - transform.Position, ForceMode.Instant);
                         Console.WriteLine($"Torque: {physics.Torque}");
-                        Console.WriteLine($"Linear Acceleration: {physics.AccelerationFromForce}");                        
+                        Console.WriteLine($"Linear Acceleration: {physics.AccelerationFromForce}");
                     }
                 }
             }
-            
+
             _previousMousePos = currentMouseWorldPos;
             _rightPreviouslyPressed = rightPressed;
         }

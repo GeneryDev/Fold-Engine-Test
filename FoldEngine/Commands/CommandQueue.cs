@@ -3,8 +3,8 @@ using FoldEngine.Interfaces;
 
 namespace FoldEngine.Commands {
     public class CommandQueue {
+        private readonly List<ICommand> _commands = new List<ICommand>();
         public IGameCore Core;
-        private List<ICommand> _commands = new List<ICommand>();
 
         public CommandQueue(IGameCore core) {
             Core = core;
@@ -15,9 +15,7 @@ namespace FoldEngine.Commands {
         }
 
         public void ExecuteAll() {
-            foreach(ICommand command in _commands) {
-                command.Execute(Core);
-            }
+            foreach(ICommand command in _commands) command.Execute(Core);
             _commands.Clear();
         }
     }

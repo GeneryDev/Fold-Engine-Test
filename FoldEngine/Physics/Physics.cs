@@ -1,5 +1,4 @@
-﻿using System;
-using EntryProject.Editor.Inspector;
+﻿using EntryProject.Editor.Inspector;
 using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Editor.Inspector;
@@ -12,30 +11,35 @@ namespace FoldEngine.Physics {
     [ComponentInitializer(typeof(Physics), nameof(InitializeComponent))]
     public struct Physics {
         public static readonly bool DrawForceGizmos = false;
-        
+
         private Scene _scene;
         private long _entityId;
-        
+
         public bool Static;
-        
+
         public float Mass;
-        
+
         [ShowOnlyIf.Not(nameof(Static), true)]
         public float GravityMultiplier;
-        
+
         [ShowOnlyIf.Not(nameof(Static), true)]
         public Vector2 Velocity;
+
         [HideInInspector]
         public float AngularVelocity;
 
         [HideInInspector]
         public Vector2 PreviousPosition;
+
         [HideInInspector]
         public Vector2 PreviousVelocity;
+
         [HideInInspector]
         public Vector2 AccelerationFromForce;
+
         [HideInInspector]
         public Vector2 PreviousAcceleration;
+
         [HideInInspector]
         public float Torque;
 
@@ -48,7 +52,7 @@ namespace FoldEngine.Physics {
         public Vector2 LinearMomentum => Static ? Vector2.Zero : Mass * Velocity;
 
         public static Physics InitializeComponent(Scene scene, long entityId) {
-            return new Physics() {
+            return new Physics {
                 _scene = scene,
                 _entityId = entityId,
                 GravityMultiplier = 1,
@@ -61,17 +65,15 @@ namespace FoldEngine.Physics {
         public void ApplyForce(Vector2 force, Vector2 point, ForceMode mode, Color? gizmoColor = null) {
             if(force == default) return;
             if(Static) return;
-            
-            if(mode == ForceMode.Instant) {
-                force /= Time.FixedDeltaTime;
-            }
 
-            Complex diff = ((((Complex) force.Normalized()) / (Complex) point.Normalized())).Normalized;
+            if(mode == ForceMode.Instant) force /= Time.FixedDeltaTime;
+
+            Complex diff = ((Complex) force.Normalized() / (Complex) point.Normalized()).Normalized;
             if(point == Vector2.Zero) diff = force.Normalized();
-            
+
             Vector2 accel = force / Mass;
-            float torque = (point.Length()*force.Length() / 1000) * diff.B;
-            
+            float torque = point.Length() * force.Length() / 1000 * diff.B;
+
             AccelerationFromForce += accel;
             Torque += torque;
 
@@ -83,6 +85,7 @@ namespace FoldEngine.Physics {
     }
 
     public enum ForceMode {
-        Continuous, Instant
+        Continuous,
+        Instant
     }
 }

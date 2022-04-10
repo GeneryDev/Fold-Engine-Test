@@ -1,5 +1,4 @@
 ﻿using System;
-
 using FoldEngine.Components;
 
 namespace FoldEngine.Scenes {
@@ -44,9 +43,7 @@ namespace FoldEngine.Scenes {
             if(!ReferenceEquals(Scene, other.Scene)) return false;
             while(other.Transform.HasParent) {
                 other = new Entity(Scene, other.Transform.ParentId);
-                if(other.EntityId == EntityId) {
-                    return true;
-                }
+                if(other.EntityId == EntityId) return true;
             }
 
             return false;
@@ -62,13 +59,13 @@ namespace FoldEngine.Scenes {
         }
 
         public override int GetHashCode() {
-            return (int)EntityId;
+            return (int) EntityId;
         }
-        
+
         public static bool operator ==(Entity a, Entity b) {
             return a.Equals(b);
         }
-        
+
         public static bool operator !=(Entity a, Entity b) {
             return !a.Equals(b);
         }

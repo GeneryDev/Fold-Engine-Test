@@ -2,24 +2,41 @@
 using System.Reflection;
 using EntryProject.Util;
 using FoldEngine.Components;
-using FoldEngine.Editor.Gui.Fields;
-using FoldEngine.Editor.Gui.Fields.Text;
 using FoldEngine.Editor.Transactions;
 using FoldEngine.Gui;
 
 namespace FoldEngine.Editor.Gui {
-
     public interface IInspectorField {
         bool EditValueForType(Type type, ref object value, int index);
     }
 
     public abstract class SetFieldAction : IGuiAction {
         protected FieldInfo _fieldInfo;
-        protected int _index;
 
         protected object _forcedValue;
+        protected int _index;
         protected bool _useForcedValue;
-        
+
+        public void Perform(GuiElement element, MouseEvent e) {
+            object oldValue = GetOldValue();
+            object newValue = oldValue;
+
+            if(_useForcedValue) newValue = _forcedValue;
+
+            if(element is IInspectorField inspectorField)
+                if(!inspectorField.EditValueForType(_fieldInfo.FieldType, ref newValue, _index))
+                    return;
+
+            SetFieldTransaction transaction = CreateBaseTransaction();
+            transaction.FieldInfo = _fieldInfo;
+            transaction.OldValue = oldValue;
+            transaction.NewValue = newValue;
+
+            ((EditorEnvironment) element.Parent.Environment).TransactionManager.InsertTransaction(transaction);
+        }
+
+        public IObjectPool Pool { get; set; }
+
         public SetFieldAction FieldInfo(FieldInfo fieldInfo) {
             _fieldInfo = fieldInfo;
             _index = 0;
@@ -41,28 +58,8 @@ namespace FoldEngine.Editor.Gui {
 
         protected abstract object GetOldValue();
         protected abstract SetFieldTransaction CreateBaseTransaction();
-
-        public void Perform(GuiElement element, MouseEvent e) {
-            object oldValue = GetOldValue();
-            object newValue = oldValue;
-
-            if(_useForcedValue) newValue = _forcedValue;
-
-            if(element is IInspectorField inspectorField) {
-                if(!inspectorField.EditValueForType(_fieldInfo.FieldType, ref newValue, _index)) return;
-            }
-
-            SetFieldTransaction transaction = CreateBaseTransaction();
-            transaction.FieldInfo = _fieldInfo;
-            transaction.OldValue = oldValue;
-            transaction.NewValue = newValue;
-            
-            ((EditorEnvironment) element.Parent.Environment).TransactionManager.InsertTransaction(transaction);
-        }
-
-        public IObjectPool Pool { get; set; }
     }
-    
+
     public class SetComponentFieldAction : SetFieldAction {
         private long _id;
         private ComponentSet _set;
@@ -82,13 +79,13 @@ namespace FoldEngine.Editor.Gui {
         }
 
         protected override SetFieldTransaction CreateBaseTransaction() {
-            return new SetComponentFieldTransaction() {
+            return new SetComponentFieldTransaction {
                 ComponentType = _set.ComponentType,
                 EntityId = _id
             };
         }
     }
-    
+
     public class SetObjectFieldAction : SetFieldAction {
         private object _obj;
 
@@ -102,7 +99,7 @@ namespace FoldEngine.Editor.Gui {
         }
 
         protected override SetFieldTransaction CreateBaseTransaction() {
-            return new SetObjectFieldTransaction() {
+            return new SetObjectFieldTransaction {
                 Parent = _obj
             };
         }

@@ -5,11 +5,19 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Text {
     public class FontSet : IFont {
-        private List<FontSetEntry> _entries = new List<FontSetEntry>();
+        private readonly List<FontSetEntry> _entries = new List<FontSetEntry>();
         public int Generation { get; private set; }
 
+        public void RenderString(string text, out RenderedText rendered, float size) {
+            PickFontForSize(size).RenderString(text, out rendered, size);
+        }
+
+        public void DrawString(string text, RenderSurface surface, Point start, Color color, float size) {
+            PickFontForSize(size).DrawString(text, surface, start, color, size);
+        }
+
         public FontSet AddFont(IFont font, float defaultSize) {
-            _entries.Add(new FontSetEntry() {
+            _entries.Add(new FontSetEntry {
                 Font = font,
                 DefaultSize = defaultSize
             });
@@ -35,14 +43,6 @@ namespace FoldEngine.Text {
             return closestFont;
         }
 
-        public void RenderString(string text, out RenderedText rendered, float size) {
-            PickFontForSize(size).RenderString(text, out rendered, size);
-        }
-
-        public void DrawString(string text, RenderSurface surface, Point start, Color color, float size) {
-            PickFontForSize(size).DrawString(text, surface, start, color, size);
-        }
-        
 
         private struct FontSetEntry {
             public IFont Font;

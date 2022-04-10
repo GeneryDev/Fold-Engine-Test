@@ -5,9 +5,7 @@ namespace EntryProject.Util {
         private Dictionary<IField, object> _dict;
 
         public T Get<T>(Field<T> field) {
-            if(_dict?.ContainsKey(field) ?? false) {
-                return _dict[field] is T t ? t : default;
-            }
+            if(_dict?.ContainsKey(field) ?? false) return _dict[field] is T t ? t : default;
             return default;
         }
 
@@ -25,11 +23,7 @@ namespace EntryProject.Util {
         }
     }
 
-    public interface IField {
-        
-    }
+    public interface IField { }
 
-    public class Field<T> : IField {
-        
-    }
+    public class Field<T> : IField { }
 }

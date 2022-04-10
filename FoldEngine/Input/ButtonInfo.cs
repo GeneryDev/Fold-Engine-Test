@@ -7,16 +7,16 @@ namespace FoldEngine.Input {
 
     public class ButtonInfo : IInputInfo {
         public bool Down;
+        public Func<bool> Lookup;
         public long Since;
         public long SinceFrame;
-        public Func<bool> Lookup;
-
-        public long MillisecondsElapsed => Time.Now - Since;
 
         public ButtonInfo(Func<bool> lookup) {
             Lookup = lookup;
             Update();
         }
+
+        public long MillisecondsElapsed => Time.Now - Since;
 
         public void Update() {
             bool nowDown = Lookup();

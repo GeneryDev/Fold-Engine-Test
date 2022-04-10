@@ -6,14 +6,16 @@ namespace FoldEngine.Util {
     [DebuggerTypeProxy(typeof(OrderedList<,>.OrderedListDebugView))]
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class OrderedList<TK, TV> : List<TV>, ICollection<TV> where TV : struct where TK : IComparable<TK> {
+        public delegate TK SortingKeyFunction(TV t);
+
         private readonly SortingKeyFunction _sortingKeyFunction;
 
         public OrderedList(SortingKeyFunction sortingKeyFunction) {
-            this._sortingKeyFunction = sortingKeyFunction;
+            _sortingKeyFunction = sortingKeyFunction;
         }
 
         public new void Add(TV item) {
-            base.Insert(FindIndexForKey(_sortingKeyFunction(item)), item);
+            Insert(FindIndexForKey(_sortingKeyFunction(item)), item);
         }
 
         public TV? GetByKey(TK key) {
@@ -23,6 +25,7 @@ namespace FoldEngine.Util {
             if(_sortingKeyFunction(element).CompareTo(key) != 0) return null;
             return element;
         }
+
         public TV? GetClosestByKey(TK key) {
             int index = FindIndexForKey(key);
             if(index < 0 || index >= Count) return null;
@@ -30,7 +33,7 @@ namespace FoldEngine.Util {
         }
 
         public int FindIndexForKey(TK key) {
-            if(this.Count == 0) return 0;
+            if(Count == 0) return 0;
 
             int minIndex = 0; // inclusive
             int maxIndex = Count; // exclusive
@@ -49,7 +52,9 @@ namespace FoldEngine.Util {
                 TK pivotKey = _sortingKeyFunction(this[pivotIndex]);
                 if(pivotKey.CompareTo(key) == 0) {
                     return pivotIndex;
-                } else if(key.CompareTo(pivotKey) > 0) {
+                }
+
+                if(key.CompareTo(pivotKey) > 0) {
                     minIndex = pivotIndex + 1;
                 } else {
                     maxIndex = pivotIndex;
@@ -59,21 +64,18 @@ namespace FoldEngine.Util {
             return minIndex;
         }
 
-
-        public delegate TK SortingKeyFunction(TV t);
-
         private sealed class OrderedListDebugView {
             private readonly ICollection<TV> _collection;
-        
+
             public OrderedListDebugView(ICollection<TV> collection) {
-                this._collection = collection ?? throw new ArgumentNullException(nameof(collection));
+                _collection = collection ?? throw new ArgumentNullException(nameof(collection));
             }
-        
+
             [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
             public TV[] Items {
                 get {
-                    TV[] array = new TV[this._collection.Count];
-                    this._collection.CopyTo(array, 0);
+                    var array = new TV[_collection.Count];
+                    _collection.CopyTo(array, 0);
                     return array;
                 }
             }

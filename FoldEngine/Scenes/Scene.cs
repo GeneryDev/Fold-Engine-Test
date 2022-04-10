@@ -10,43 +10,29 @@ using FoldEngine.Serialization;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Scenes
-{
+namespace FoldEngine.Scenes {
     public class Scene {
         public const string Extension = "foldscene";
-        
-        public readonly IGameCore Core;
-        public string Name { get; set; } = "Scene";
 
         public readonly ComponentMap Components;
+
+        public readonly IGameCore Core;
         public readonly EventMap Events;
-        public readonly SystemMap Systems;
 
         public readonly ResourceCollections Resources;
+        public readonly SystemMap Systems;
 
-        private long _nextEntityId = 0;
+        private List<long> _deletedIds = new List<long>();
+
+
+        private bool _initialized;
+
+        private long _nextEntityId;
+        private List<bool> _reclaimableIds;
 
         public EditorComponents EditorComponents;
 
-        public Matrix GizmoTransformMatrix { get; set; }
-        public long MainCameraId { get; set; }
-        
-        public ref Transform MainCameraTransform {
-            get {
-                if(EditorComponents != null) {
-                    return ref EditorComponents.EditorTransform;
-                } else {
-                    return ref Components.GetComponent<Transform>(MainCameraId);
-                }
-            }
-        }
-
         public bool Paused = false;
-
-        /// <summary>
-        /// The speed at which the game is simulated
-        /// </summary>
-        public float TimeScale { get; set; }
 
         public Scene(IGameCore core) {
             Core = core;
@@ -56,20 +42,35 @@ namespace FoldEngine.Scenes
             Resources = new ResourceCollections(core.Resources);
         }
 
-        private List<long> _deletedIds = new List<long>();
-        private List<bool> _reclaimableIds;
+        public string Name { get; set; } = "Scene";
+
+        public Matrix GizmoTransformMatrix { get; set; }
+        public long MainCameraId { get; set; }
+
+        public ref Transform MainCameraTransform {
+            get {
+                if(EditorComponents != null)
+                    return ref EditorComponents.EditorTransform;
+                return ref Components.GetComponent<Transform>(MainCameraId);
+            }
+        }
+
+        /// <summary>
+        ///     The speed at which the game is simulated
+        /// </summary>
+        public float TimeScale { get; set; }
 
         public void DeleteEntity(long entityId, bool reclaimable = false) {
             Components.RemoveAllComponents(entityId);
             if(reclaimable) {
                 if(_reclaimableIds == null) {
                     _reclaimableIds = new List<bool>();
-                    for(int i = 0; i < _deletedIds.Count; i++) {
-                        _reclaimableIds.Add(false);
-                    }
+                    for(int i = 0; i < _deletedIds.Count; i++) _reclaimableIds.Add(false);
                 }
+
                 _reclaimableIds.Add(true);
             }
+
             _deletedIds.Add(entityId);
         }
 
@@ -85,14 +86,10 @@ namespace FoldEngine.Scenes
                         break;
                     }
 
-                    if(i == 0) {
-                        newEntityId = _nextEntityId++;
-                    }
+                    if(i == 0) newEntityId = _nextEntityId++;
                 }
 
-                if(newEntityId == -1) {
-                    throw new InvalidOperationException();
-                }
+                if(newEntityId == -1) throw new InvalidOperationException();
             } else if(_deletedIds.Count > 0) {
                 newEntityId = _deletedIds[_deletedIds.Count - 1] + (1L << 32);
                 _deletedIds.RemoveAt(_deletedIds.Count - 1);
@@ -109,9 +106,6 @@ namespace FoldEngine.Scenes
         public Entity CreateEntity(string name = "Unnamed Entity") {
             return new Entity(this, CreateEntityId(name));
         }
-
-
-        private bool _initialized = false;
 
         public virtual void Initialize() { }
 
@@ -132,7 +126,7 @@ namespace FoldEngine.Scenes
             Systems.InvokeUpdate();
 
             Core.CommandQueue.ExecuteAll();
-            
+
             Systems.Flush();
             Components.Flush();
         }
@@ -203,7 +197,8 @@ namespace FoldEngine.Scenes
                     Core.RenderingUnit.WorldLayer.CameraToLayer(center.ApplyMatrixTransform(GizmoTransformMatrix)),
                     Core.RenderingUnit.GizmoLayer);
                 Vector2 rightScreen = Core.RenderingUnit.WorldLayer.LayerToLayer(
-                    Core.RenderingUnit.WorldLayer.CameraToLayer((center + Vector2.UnitX * radius).ApplyMatrixTransform(GizmoTransformMatrix)),
+                    Core.RenderingUnit.WorldLayer.CameraToLayer(
+                        (center + Vector2.UnitX * radius).ApplyMatrixTransform(GizmoTransformMatrix)),
                     Core.RenderingUnit.GizmoLayer);
 
                 Complex current = rightScreen - centerScreen;
@@ -225,15 +220,13 @@ namespace FoldEngine.Scenes
 
         public void Save(SaveOperation writer) {
             writer.WriteCompound((ref SaveOperation.Compound c) => {
-
                 if(!writer.Options.Has(SerializeOnlyEntities.Instance)) {
                     c.WriteMember(nameof(Name), Name);
                     c.WriteMember(nameof(_nextEntityId), _nextEntityId);
                     c.WriteMember(nameof(_deletedIds), _deletedIds);
                     c.WriteMember(nameof(Systems), (ISelfSerializer) Systems);
-                    if(writer.Options.Get(SerializeTempResources.Instance)) {
+                    if(writer.Options.Get(SerializeTempResources.Instance))
                         c.WriteMember(nameof(Resources), (ISelfSerializer) Resources);
-                    }
                 }
 
                 c.WriteMember(nameof(Components), (ISelfSerializer) Components);
@@ -249,7 +242,6 @@ namespace FoldEngine.Scenes
 
         public void Load(LoadOperation reader) {
             reader.ReadCompound(c => {
-
                 if(reader.Options.Has(DeserializeClearScene.Instance)) {
                     if(c.HasMember(nameof(Name))) Name = c.GetMember<string>(nameof(Name));
                     if(c.HasMember(nameof(_nextEntityId))) _nextEntityId = c.GetMember<long>(nameof(_nextEntityId));
@@ -270,7 +262,8 @@ namespace FoldEngine.Scenes
                 return true;
             }
 
-            Console.WriteLine($"Cannot reclaim entity ID {entityId}; Something external to the editor has already modified it.");
+            Console.WriteLine(
+                $"Cannot reclaim entity ID {entityId}; Something external to the editor has already modified it.");
 
             return false;
         }
@@ -290,17 +283,20 @@ namespace FoldEngine.Scenes
     public class SerializeOnlyEntities : Field<List<long>> {
         public static readonly SerializeOnlyEntities Instance = new SerializeOnlyEntities();
     }
+
     public class SerializeOnlyComponents : Field<List<Type>> {
         public static readonly SerializeOnlyComponents Instance = new SerializeOnlyComponents();
     }
+
     public class SerializeTempResources : Field<bool> {
         public static readonly SerializeTempResources Instance = new SerializeTempResources();
     }
 
-    
+
     public class DeserializeClearScene : Field<bool> {
         public static readonly DeserializeClearScene Instance = new DeserializeClearScene();
     }
+
     public class DeserializeRemapIds : Field<EntityIdRemapper> {
         public static readonly DeserializeRemapIds Instance = new DeserializeRemapIds();
     }

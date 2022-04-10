@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using EntryProject.Util;
-using FoldEngine.Commands;
 using FoldEngine.Editor.Tools;
-using FoldEngine.Editor.Transactions;
 using FoldEngine.Editor.Views;
 using FoldEngine.Graphics;
 using FoldEngine.Gui;
@@ -18,18 +16,189 @@ using Mouse = FoldEngine.Input.Mouse;
 
 namespace FoldEngine.Editor.Gui {
     public class EditorEnvironment : GuiEnvironment {
-
         public const int FrameBorder = 4;
         public const int FrameMargin = 8;
 
-        public sealed override List<GuiPanel> VisiblePanels { get; } = new List<GuiPanel>();
+        public readonly List<EditorTool> Tools = new List<EditorTool>();
+
+        public readonly TransactionManager<EditorEnvironment> TransactionManager;
         public List<EditorView> AllViews = new List<EditorView>();
+        public EditorTool ForcedTool;
+        public EditorTool SelectedTool;
+
+        public EditorEnvironment(Scene scene) : base(scene) {
+            TransactionManager = new TransactionManager<EditorEnvironment>(this);
+
+            NorthPanel = new BorderPanel(this, -Vector2.UnitY);
+            SouthPanel = new BorderPanel(this, Vector2.UnitY);
+            WestPanel = new BorderPanel(this, -Vector2.UnitX);
+            EastPanel = new BorderPanel(this, Vector2.UnitX);
+            CenterPanel = new BorderPanel(this, Vector2.Zero);
+
+            VisiblePanels.Add(NorthPanel);
+            VisiblePanels.Add(SouthPanel);
+            VisiblePanels.Add(WestPanel);
+            VisiblePanels.Add(EastPanel);
+            VisiblePanels.Add(CenterPanel);
+
+            SetupControlScheme();
+            SetupTools();
+        }
+
+        public sealed override List<GuiPanel> VisiblePanels { get; } = new List<GuiPanel>();
 
         public ViewListPanel HoverViewListPanel { get; set; }
 
-        #region Dock Size Properties
+        public EditorTool ActiveTool => ForcedTool ?? SelectedTool;
 
-        
+        private void SetupControlScheme() {
+            Keyboard keyboard = Scene.Core.InputUnit.Devices.Keyboard;
+            Mouse mouse = Scene.Core.InputUnit.Devices.Mouse;
+
+            ControlScheme.PutAction("editor.undo",
+                new ButtonAction(keyboard[Keys.Z]) {Repeat = true}.Modifiers(keyboard[Keys.LeftControl]));
+            ControlScheme.PutAction("editor.redo",
+                new ButtonAction(keyboard[Keys.Y]) {Repeat = true}.Modifiers(keyboard[Keys.LeftControl]));
+
+            ControlScheme.PutAction("editor.field.select_all",
+                new ButtonAction(keyboard[Keys.A]) {Repeat = true}.Modifiers(keyboard[Keys.LeftControl]));
+            ControlScheme.PutAction("editor.field.caret.left", new ButtonAction(keyboard[Keys.Left]) {Repeat = true});
+            ControlScheme.PutAction("editor.field.caret.right", new ButtonAction(keyboard[Keys.Right]) {Repeat = true});
+            ControlScheme.PutAction("editor.field.caret.up", new ButtonAction(keyboard[Keys.Up]) {Repeat = true});
+            ControlScheme.PutAction("editor.field.caret.down", new ButtonAction(keyboard[Keys.Down]) {Repeat = true});
+            ControlScheme.PutAction("editor.field.caret.home", new ButtonAction(keyboard[Keys.Home]) {Repeat = true});
+            ControlScheme.PutAction("editor.field.caret.end", new ButtonAction(keyboard[Keys.End]) {Repeat = true});
+
+            ControlScheme.PutAction("editor.field.caret.debug", new ButtonAction(keyboard[Keys.F1]) {Repeat = true});
+
+            ControlScheme.PutAction("editor.zoom.in", new ChangeAction(mouse.ScrollWheel, 0.5f, null));
+            ControlScheme.PutAction("editor.zoom.out", new ChangeAction(mouse.ScrollWheel, null, -1.5f));
+
+            ControlScheme.PutAction("editor.movement.axis.x",
+                new AnalogAction(() => (keyboard[Keys.Left].Down ? -1 : 0) + (keyboard[Keys.Right].Down ? 1 : 0)));
+            ControlScheme.PutAction("editor.movement.axis.y",
+                new AnalogAction(() => (keyboard[Keys.Down].Down ? -1 : 0) + (keyboard[Keys.Up].Down ? 1 : 0)));
+
+            ControlScheme.PutAction("editor.movement.faster", new ButtonAction(keyboard[Keys.LeftShift]));
+        }
+
+        private void SetupTools() {
+            Tools.Add(new HandTool(this));
+            Tools.Add(new MoveTool(this));
+            Tools.Add(new ScaleTool(this));
+            Tools.Add(new RotateTool(this));
+            Tools.Add(SelectedTool = new SelectTool(this));
+        }
+
+        public override void Input(InputUnit inputUnit) {
+            base.Input(inputUnit);
+
+            if(ControlScheme.Get<ButtonAction>("editor.undo").Consume()) TransactionManager.Undo();
+            if(ControlScheme.Get<ButtonAction>("editor.redo").Consume()) TransactionManager.Redo();
+
+            if(HoverTarget.ScrollablePanel != null)
+                if(HoverTarget.ScrollablePanel.IsAncestorOf(HoverTarget.Element)) {
+                    if(ControlScheme.Get<ChangeAction>("editor.zoom.in"))
+                        HoverTarget.ScrollablePanel.Scroll(1);
+                    else if(ControlScheme.Get<ChangeAction>("editor.zoom.out")) HoverTarget.ScrollablePanel.Scroll(-1);
+                }
+        }
+
+        public override void Render(IRenderingUnit renderer, IRenderingLayer baseLayer, IRenderingLayer overlayLayer) {
+            base.Render(renderer, baseLayer, overlayLayer);
+
+            HoverViewListPanel = default;
+
+            renderer.Groups["editor"].Dependencies[0].Group.Size = default;
+
+            if(!LayoutValidated) {
+                CenterPanel.Bounds = new Rectangle(SizeWest, SizeNorth, renderer.WindowSize.X - SizeWest - SizeEast,
+                    renderer.WindowSize.Y - SizeNorth - SizeSouth);
+                LayoutValidated = true;
+            }
+
+            CenterPanel.Render(renderer, baseLayer);
+
+            {
+                var bounds = new Rectangle(0, 0, baseLayer.LayerSize.X, SizeNorth);
+                if(!_cornerBiasNorthWest) {
+                    bounds.X += SizeWest;
+                    bounds.Width -= SizeWest;
+                }
+
+                if(!_cornerBiasNorthEast) bounds.Width -= SizeEast;
+                NorthPanel.Bounds = bounds;
+                NorthPanel.Render(renderer, baseLayer);
+            }
+            {
+                var bounds = new Rectangle(0, baseLayer.LayerSize.Y - SizeSouth, baseLayer.LayerSize.X, SizeSouth);
+                if(!_cornerBiasSouthWest) {
+                    bounds.X += SizeWest;
+                    bounds.Width -= SizeWest;
+                }
+
+                if(!_cornerBiasSouthEast) bounds.Width -= SizeEast;
+                SouthPanel.Bounds = bounds;
+                SouthPanel.Render(renderer, baseLayer);
+            }
+
+            {
+                var bounds = new Rectangle(0, 0, SizeWest, baseLayer.LayerSize.Y);
+                if(_cornerBiasNorthWest) {
+                    bounds.Y += SizeNorth;
+                    bounds.Height -= SizeNorth;
+                }
+
+                if(_cornerBiasSouthWest) bounds.Height -= SizeSouth;
+                WestPanel.Bounds = bounds;
+                WestPanel.Render(renderer, baseLayer);
+            }
+            {
+                var bounds = new Rectangle(baseLayer.LayerSize.X - SizeEast, 0, SizeEast, baseLayer.LayerSize.Y);
+                if(_cornerBiasNorthEast) {
+                    bounds.Y += SizeNorth;
+                    bounds.Height -= SizeNorth;
+                }
+
+                if(_cornerBiasSouthEast) bounds.Height -= SizeSouth;
+                EastPanel.Bounds = bounds;
+                EastPanel.Render(renderer, baseLayer);
+            }
+
+            foreach(GuiElement panel in DraggingElements) panel?.Render(renderer, overlayLayer);
+
+            if(ContextMenu.Showing) ContextMenu.Render(renderer, overlayLayer);
+        }
+
+        public void AddView<T>(BorderPanel preferredPanel = null) where T : EditorView, new() {
+            var view = new T {Scene = Scene};
+            view.Initialize();
+
+            AllViews.Add(view);
+
+            preferredPanel?.ViewLists[0].AddView(view);
+        }
+
+        public T GetView<T>() where T : EditorView {
+            foreach(EditorView view in AllViews)
+                if(view is T viewT)
+                    return viewT;
+            return null;
+        }
+
+        public bool SwitchToView(EditorView view) {
+            foreach(BorderPanel borderPanel in VisiblePanels) {
+                foreach(ViewListPanel viewListPanel in borderPanel.ViewLists)
+                    if(viewListPanel.ContainsView(view)) {
+                        viewListPanel.SwitchToView(view);
+                        return true;
+                    }
+            }
+
+            return false;
+        }
+
+        #region Dock Size Properties
 
         public int SizeNorth {
             get => _sizeNorth;
@@ -94,229 +263,49 @@ namespace FoldEngine.Editor.Gui {
                 _cornerBiasSouthEast = value;
             }
         }
+
         #endregion
 
         #region Dock Backing Fields
 
-        public bool LayoutValidated = false;
+        public bool LayoutValidated;
         private int _sizeNorth = 96;
         private int _sizeSouth = 128;
         private int _sizeWest = 256;
         private int _sizeEast = 360;
-        
+
         private bool _cornerBiasNorthWest = true;
         private bool _cornerBiasNorthEast = true;
         private bool _cornerBiasSouthWest = true;
-        private bool _cornerBiasSouthEast = false;
-        
+        private bool _cornerBiasSouthEast;
+
         public BorderPanel NorthPanel;
         public BorderPanel SouthPanel;
         public BorderPanel WestPanel;
         public BorderPanel EastPanel;
-        
+
         public BorderPanel CenterPanel;
 
         #endregion
-
-        public readonly List<EditorTool> Tools = new List<EditorTool>();
-        public EditorTool SelectedTool;
-        public EditorTool ForcedTool;
-
-        public EditorTool ActiveTool => ForcedTool ?? SelectedTool;
-        
-        public readonly TransactionManager<EditorEnvironment> TransactionManager;
-
-        public EditorEnvironment(Scene scene) : base(scene) {
-            TransactionManager = new TransactionManager<EditorEnvironment>(this);
-
-            NorthPanel = new BorderPanel(this, -Vector2.UnitY);
-            SouthPanel = new BorderPanel(this, Vector2.UnitY);
-            WestPanel = new BorderPanel(this, -Vector2.UnitX);
-            EastPanel = new BorderPanel(this, Vector2.UnitX);
-            CenterPanel = new BorderPanel(this, Vector2.Zero);
-            
-            VisiblePanels.Add(NorthPanel);
-            VisiblePanels.Add(SouthPanel);
-            VisiblePanels.Add(WestPanel);
-            VisiblePanels.Add(EastPanel);
-            VisiblePanels.Add(CenterPanel);
-            
-            SetupControlScheme();
-            SetupTools();
-        }
-
-        private void SetupControlScheme() {
-            Keyboard keyboard = Scene.Core.InputUnit.Devices.Keyboard;
-            Mouse mouse = Scene.Core.InputUnit.Devices.Mouse;
-            
-            ControlScheme.PutAction("editor.undo", new ButtonAction(keyboard[Keys.Z]) {Repeat = true}.Modifiers(keyboard[Keys.LeftControl]));
-            ControlScheme.PutAction("editor.redo", new ButtonAction(keyboard[Keys.Y]) {Repeat = true}.Modifiers(keyboard[Keys.LeftControl]));
-            
-            ControlScheme.PutAction("editor.field.select_all", new ButtonAction(keyboard[Keys.A]) {Repeat = true}.Modifiers(keyboard[Keys.LeftControl]));
-            ControlScheme.PutAction("editor.field.caret.left", new ButtonAction(keyboard[Keys.Left]) {Repeat = true});
-            ControlScheme.PutAction("editor.field.caret.right", new ButtonAction(keyboard[Keys.Right]) {Repeat = true});
-            ControlScheme.PutAction("editor.field.caret.up", new ButtonAction(keyboard[Keys.Up]) {Repeat = true});
-            ControlScheme.PutAction("editor.field.caret.down", new ButtonAction(keyboard[Keys.Down]) {Repeat = true});
-            ControlScheme.PutAction("editor.field.caret.home", new ButtonAction(keyboard[Keys.Home]) {Repeat = true});
-            ControlScheme.PutAction("editor.field.caret.end", new ButtonAction(keyboard[Keys.End]) {Repeat = true});
-            
-            ControlScheme.PutAction("editor.field.caret.debug", new ButtonAction(keyboard[Keys.F1]) {Repeat = true});
-            
-            ControlScheme.PutAction("editor.zoom.in", new ChangeAction(mouse.ScrollWheel, 0.5f, null));
-            ControlScheme.PutAction("editor.zoom.out", new ChangeAction(mouse.ScrollWheel, null, -1.5f));
-            
-            ControlScheme.PutAction("editor.movement.axis.x", new AnalogAction(() => (keyboard[Keys.Left].Down ? -1 : 0) + (keyboard[Keys.Right].Down ? 1 : 0)));
-            ControlScheme.PutAction("editor.movement.axis.y", new AnalogAction(() => (keyboard[Keys.Down].Down ? -1 : 0) + (keyboard[Keys.Up].Down ? 1 : 0)));
-            
-            ControlScheme.PutAction("editor.movement.faster", new ButtonAction(keyboard[Keys.LeftShift]));
-        }
-
-        private void SetupTools() {
-            Tools.Add(new HandTool(this));
-            Tools.Add(new MoveTool(this));
-            Tools.Add(new ScaleTool(this));
-            Tools.Add(new RotateTool(this));
-            Tools.Add(SelectedTool = new SelectTool(this));
-        }
-
-        public override void Input(InputUnit inputUnit) {
-            base.Input(inputUnit);
-            
-            if(ControlScheme.Get<ButtonAction>("editor.undo").Consume()) TransactionManager.Undo();
-            if(ControlScheme.Get<ButtonAction>("editor.redo").Consume()) TransactionManager.Redo();
-            
-            if(HoverTarget.ScrollablePanel != null) {
-                if(HoverTarget.ScrollablePanel.IsAncestorOf(HoverTarget.Element)) {
-                    if(ControlScheme.Get<ChangeAction>("editor.zoom.in")) {
-                        HoverTarget.ScrollablePanel.Scroll(1);
-                    } else if(ControlScheme.Get<ChangeAction>("editor.zoom.out")) {
-                        HoverTarget.ScrollablePanel.Scroll(-1);
-                    }
-                }
-            }
-        }
-
-        public override void Render(IRenderingUnit renderer, IRenderingLayer baseLayer, IRenderingLayer overlayLayer) {
-            base.Render(renderer, baseLayer, overlayLayer);
-
-            HoverViewListPanel = default;
-
-            renderer.Groups["editor"].Dependencies[0].Group.Size = default;
-            
-            if(!LayoutValidated) {
-                CenterPanel.Bounds = new Rectangle(SizeWest, SizeNorth, renderer.WindowSize.X - SizeWest - SizeEast,
-                    renderer.WindowSize.Y - SizeNorth - SizeSouth);
-                LayoutValidated = true;
-            }
-            CenterPanel.Render(renderer, baseLayer);
-            
-            {
-                var bounds = new Rectangle(0, 0, baseLayer.LayerSize.X, SizeNorth);
-                if(!_cornerBiasNorthWest) {
-                    bounds.X += SizeWest;
-                    bounds.Width -= SizeWest;
-                }
-                if(!_cornerBiasNorthEast) {
-                    bounds.Width -= SizeEast;
-                }
-                NorthPanel.Bounds = bounds;
-                NorthPanel.Render(renderer, baseLayer);
-            }
-            {
-                var bounds = new Rectangle(0, baseLayer.LayerSize.Y - SizeSouth, baseLayer.LayerSize.X, SizeSouth);
-                if(!_cornerBiasSouthWest) {
-                    bounds.X += SizeWest;
-                    bounds.Width -= SizeWest;
-                }
-                if(!_cornerBiasSouthEast) {
-                    bounds.Width -= SizeEast;
-                }
-                SouthPanel.Bounds = bounds;
-                SouthPanel.Render(renderer, baseLayer);
-            }
-
-            {
-                var bounds = new Rectangle(0, 0, SizeWest, baseLayer.LayerSize.Y);
-                if(_cornerBiasNorthWest) {
-                    bounds.Y += SizeNorth;
-                    bounds.Height -= SizeNorth;
-                }
-                if(_cornerBiasSouthWest) {
-                    bounds.Height -= SizeSouth;
-                }
-                WestPanel.Bounds = bounds;
-                WestPanel.Render(renderer, baseLayer);
-            }
-            {
-                var bounds = new Rectangle(baseLayer.LayerSize.X - SizeEast, 0, SizeEast, baseLayer.LayerSize.Y);
-                if(_cornerBiasNorthEast) {
-                    bounds.Y += SizeNorth;
-                    bounds.Height -= SizeNorth;
-                }
-                if(_cornerBiasSouthEast) {
-                    bounds.Height -= SizeSouth;
-                }
-                EastPanel.Bounds = bounds;
-                EastPanel.Render(renderer, baseLayer);
-            }
-
-            foreach(GuiElement panel in DraggingElements) {
-                panel?.Render(renderer, overlayLayer);
-            }
-
-            if(ContextMenu.Showing) {
-                ContextMenu.Render(renderer, overlayLayer);
-            }
-        }
-
-        public void AddView<T>(BorderPanel preferredPanel = null) where T : EditorView, new() {
-            T view = new T {Scene = Scene};
-            view.Initialize();
-
-            AllViews.Add(view);
-
-            preferredPanel?.ViewLists[0].AddView(view);
-        }
-
-        public T GetView<T>() where T : EditorView {
-            foreach(EditorView view in AllViews) {
-                if(view is T viewT) return viewT;
-            }
-            return null;
-        }
-
-        public bool SwitchToView(EditorView view) {
-            foreach(BorderPanel borderPanel in VisiblePanels) {
-                foreach(ViewListPanel viewListPanel in borderPanel.ViewLists) {
-                    if(viewListPanel.ContainsView(view)) {
-                        viewListPanel.SwitchToView(view);
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
     }
 
     public class BorderPanel : GuiPanel {
-
         public Vector2 Side;
 
         public List<ViewListPanel> ViewLists = new List<ViewListPanel>();
-        
+
         public BorderPanel(EditorEnvironment editorEnvironment, Vector2 side) : base(editorEnvironment) {
-            this.Side = side;
+            Side = side;
             ViewLists.Add(new ViewListPanel(editorEnvironment));
         }
-        
+
         private void RenderBackground(IRenderingUnit renderer, IRenderingLayer layer, Point offset) {
-            layer.Surface.Draw(new DrawRectInstruction() {
+            layer.Surface.Draw(new DrawRectInstruction {
                 Texture = renderer.WhiteTexture,
                 DestinationRectangle = Bounds,
                 Color = new Color(45, 45, 48)
             });
-            layer.Surface.Draw(new DrawRectInstruction() {
+            layer.Surface.Draw(new DrawRectInstruction {
                 Texture = renderer.WhiteTexture,
                 DestinationRectangle = Bounds.Grow(-EditorEnvironment.FrameBorder),
                 Color = new Color(37, 37, 38)
@@ -326,7 +315,7 @@ namespace FoldEngine.Editor.Gui {
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
             Reset();
             RenderBackground(renderer, layer, offset);
-            
+
             for(int i = 0; i < ViewLists.Count; i++) {
                 ViewListPanel viewList = ViewLists[i];
                 ResetLayoutPosition();
@@ -336,66 +325,63 @@ namespace FoldEngine.Editor.Gui {
                 viewList.Bounds.Width = Bounds.Width / ViewLists.Count;
                 viewList.Bounds = viewList.Bounds.Grow(-EditorEnvironment.FrameBorder);
             }
-            
+
             ResetLayoutPosition();
-            
+
             if(Side != default) Element<GuiResizer>().Side(-Side);
-            
+
             base.Render(renderer, layer, offset);
         }
     }
 
     public class ViewListPanel : GuiPanel {
-        
+        public EditorView ActiveView;
+
         public List<EditorView> Views = new List<EditorView>();
-        public EditorView ActiveView = null;
-        
+
         public ViewListPanel(GuiEnvironment environment) : base(environment) { }
 
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
-            if(Environment is EditorEnvironment editorEnvironment && Bounds.Contains(Environment.MousePos)) {
+            if(Environment is EditorEnvironment editorEnvironment && Bounds.Contains(Environment.MousePos))
                 editorEnvironment.HoverViewListPanel = this;
-            }
 
             Color? bgColor = ActiveView?.BackgroundColor;
-            if(bgColor.HasValue) {
-                layer.Surface.Draw(new DrawRectInstruction() {
+            if(bgColor.HasValue)
+                layer.Surface.Draw(new DrawRectInstruction {
                     Texture = renderer.WhiteTexture,
                     Color = bgColor.Value,
                     DestinationRectangle = Bounds.Translate(offset)
                 });
-            }
-            
-            layer.Surface.Draw(new DrawRectInstruction() {
+
+            layer.Surface.Draw(new DrawRectInstruction {
                 Texture = renderer.WhiteTexture,
                 Color = new Color(45, 45, 48),
-                DestinationRectangle = new Rectangle(Bounds.X, Bounds.Y, Bounds.Width, ViewTab.TabHeight).Translate(offset)
+                DestinationRectangle =
+                    new Rectangle(Bounds.X, Bounds.Y, Bounds.Width, ViewTab.TabHeight).Translate(offset)
             });
-            
+
             Reset();
-            foreach(EditorView view in Views) {
-                Element<ViewTab>().View(view, this);
-            }
+            foreach(EditorView view in Views) Element<ViewTab>().View(view, this);
             ResetLayoutPosition();
 
-            if(ActiveView == null && Views.Count > 0) {
-                ActiveView = Views[0];
-            }
+            if(ActiveView == null && Views.Count > 0) ActiveView = Views[0];
 
             if(ActiveView != null) {
                 ActiveView.EnsurePanelExists(Environment);
-                
+
                 Element(ActiveView.ContentPanel);
 
                 ActiveView.ContentPanel.Bounds = Bounds;
                 ActiveView.ContentPanel.Bounds.Y += ViewTab.TabHeight;
                 ActiveView.ContentPanel.Bounds.Height -= ViewTab.TabHeight;
-                if(ActiveView.UseMargin) ActiveView.ContentPanel.Bounds = ActiveView.ContentPanel.Bounds.Grow(-EditorEnvironment.FrameMargin);
+                if(ActiveView.UseMargin)
+                    ActiveView.ContentPanel.Bounds =
+                        ActiveView.ContentPanel.Bounds.Grow(-EditorEnvironment.FrameMargin);
 
                 ActiveView.ContentPanel.Reset();
                 ActiveView.Render(renderer);
             }
-            
+
             base.Render(renderer, layer, offset);
         }
 
@@ -407,11 +393,10 @@ namespace FoldEngine.Editor.Gui {
         public void RemoveView(EditorView view) {
             Views.Remove(view);
             if(ActiveView == view) {
-                if(Views.Count > 0) {
+                if(Views.Count > 0)
                     ActiveView = Views[Views.Count - 1];
-                } else {
+                else
                     ActiveView = null;
-                }
             }
         }
 
@@ -427,8 +412,7 @@ namespace FoldEngine.Editor.Gui {
     public class GuiResizer : GuiElement {
         private Vector2 _side;
 
-        public override void Reset(GuiPanel parent) {
-        }
+        public override void Reset(GuiPanel parent) { }
 
         public override void AdjustSpacing(GuiPanel parent) {
             Bounds.Width = parent.Bounds.Width;
@@ -445,14 +429,11 @@ namespace FoldEngine.Editor.Gui {
             }
         }
 
-        public override void Displace(ref Point layoutPosition) {
-        }
-        
+        public override void Displace(ref Point layoutPosition) { }
+
         public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
-            if(Bounds.Contains(Environment.MousePos)) {
-                Environment.HoverTarget.Element = this;
-            }
-            
+            if(Bounds.Contains(Environment.MousePos)) Environment.HoverTarget.Element = this;
+
             var color = new Color(140, 140, 145);
             bool pressed = Pressed();
             if(pressed || Rollover) {
@@ -461,31 +442,31 @@ namespace FoldEngine.Editor.Gui {
                     drawBounds.Width = 2;
                     if(_side.X > 0) drawBounds.X += Bounds.Width - 2;
                 }
+
                 if(_side.Y != 0) {
                     drawBounds.Height = 2;
                     if(_side.Y > 0) drawBounds.Y += Bounds.Height - 2;
                 }
-                layer.Surface.Draw(new DrawRectInstruction() {
+
+                layer.Surface.Draw(new DrawRectInstruction {
                     Texture = renderer.WhiteTexture,
                     Color = pressed ? Color.White : color,
                     DestinationRectangle = drawBounds
                 });
             }
-            if(pressed) {
+
+            if(pressed)
                 if(Parent.Environment is EditorEnvironment environment) {
-                    if(_side == Vector2.UnitX) {
-                        environment.SizeWest = Math.Max(1,environment.MousePos.X+1);
-                    } else if(_side == -Vector2.UnitX) {
-                        environment.SizeEast = Math.Max(1,environment.BaseLayer.LayerSize.X - environment.MousePos.X);
-                    }
-                    
-                    if(_side == Vector2.UnitY) {
-                        environment.SizeNorth = Math.Max(1,environment.MousePos.Y+1);
-                    } else if(_side == -Vector2.UnitY) {
-                        environment.SizeSouth = Math.Max(1,environment.BaseLayer.LayerSize.Y - environment.MousePos.Y);
-                    }
+                    if(_side == Vector2.UnitX)
+                        environment.SizeWest = Math.Max(1, environment.MousePos.X + 1);
+                    else if(_side == -Vector2.UnitX)
+                        environment.SizeEast = Math.Max(1, environment.BaseLayer.LayerSize.X - environment.MousePos.X);
+
+                    if(_side == Vector2.UnitY)
+                        environment.SizeNorth = Math.Max(1, environment.MousePos.Y + 1);
+                    else if(_side == -Vector2.UnitY)
+                        environment.SizeSouth = Math.Max(1, environment.BaseLayer.LayerSize.Y - environment.MousePos.Y);
                 }
-            }
         }
 
         public GuiResizer Side(Vector2 side) {

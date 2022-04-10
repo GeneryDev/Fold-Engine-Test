@@ -7,19 +7,19 @@ using Microsoft.Xna.Framework;
 namespace FoldEngine.Editor.Gui.Fields.Text {
     public struct Dot {
         private const bool SMART_KEYS_HOME = false;
-        
+
         public Document Document;
-        
+
         public int Index;
         public int Mark;
         public int X;
-        
+
         public int Min => Math.Min(Index, Mark);
         public int Max => Math.Max(Index, Mark);
-        
+
         public bool IsPoint => Index == Mark;
 
-        public bool InIndentation => this.Index >= GetRowStart() && this.Index <= GetRowContentStart();
+        public bool InIndentation => Index >= GetRowStart() && Index <= GetRowContentStart();
         public int Length => Math.Abs(Index - Mark);
 
 
@@ -45,7 +45,6 @@ namespace FoldEngine.Editor.Gui.Fields.Text {
         }
 
         public bool HandleEvent(DotEventType type, KeyModifiers modifiers) {
-            
             bool actionPerformed = false;
             int nextPos = 0;
             bool doUpdateX = false;
@@ -55,7 +54,10 @@ namespace FoldEngine.Editor.Gui.Fields.Text {
                     if(!IsPoint && !modifiers.Has(KeyModifiers.Shift)) {
                         nextPos = Math.Min(Index, Mark);
                         if(modifiers.Has(KeyModifiers.Control)) nextPos = GetPositionBeforeWord();
-                    } else nextPos = (modifiers.Has(KeyModifiers.Control)) ? GetPositionBeforeWord() : GetPositionBefore();
+                    } else {
+                        nextPos = modifiers.Has(KeyModifiers.Control) ? GetPositionBeforeWord() : GetPositionBefore();
+                    }
+
                     doUpdateX = true;
                     actionPerformed = true;
                     break;
@@ -64,39 +66,38 @@ namespace FoldEngine.Editor.Gui.Fields.Text {
                     if(!IsPoint && !modifiers.Has(KeyModifiers.Shift)) {
                         nextPos = Math.Max(Index, Mark);
                         if(modifiers.Has(KeyModifiers.Control)) nextPos = GetPositionAfterWord();
-                    } else nextPos = (modifiers.Has(KeyModifiers.Control)) ? GetPositionAfterWord() : GetPositionAfter();
+                    } else {
+                        nextPos = modifiers.Has(KeyModifiers.Control) ? GetPositionAfterWord() : GetPositionAfter();
+                    }
+
                     doUpdateX = true;
                     actionPerformed = true;
                     break;
                 }
                 case DotEventType.Up: {
-                    if(modifiers.Has(KeyModifiers.Control)) {
-                        return false;
-                    }
+                    if(modifiers.Has(KeyModifiers.Control)) return false;
                     nextPos = GetPositionAbove();
                     if(nextPos < 0) {
                         nextPos = 0;
                         doUpdateX = true;
                     }
+
                     actionPerformed = true;
                     break;
                 }
                 case DotEventType.Down: {
-                    if(modifiers.Has(KeyModifiers.Control)) {
-                        return false;
-                    }
+                    if(modifiers.Has(KeyModifiers.Control)) return false;
                     nextPos = GetPositionBelow();
                     if(nextPos < 0) {
                         nextPos = Document.Length;
                         doUpdateX = true;
                     }
+
                     actionPerformed = true;
                     break;
                 }
                 case DotEventType.Home: {
-                    if (!modifiers.Has(KeyModifiers.Control)) {
-                        nextPos = GetRowHome();
-                    }
+                    if(!modifiers.Has(KeyModifiers.Control)) nextPos = GetRowHome();
                     doUpdateX = true;
                     actionPerformed = true;
                     break;
@@ -109,11 +110,13 @@ namespace FoldEngine.Editor.Gui.Fields.Text {
                     break;
                 }
             }
+
             if(actionPerformed) {
                 Index = nextPos;
                 if(!modifiers.Has(KeyModifiers.Shift)) Mark = nextPos;
                 if(doUpdateX) UpdateX();
             }
+
             return actionPerformed;
         }
 
@@ -138,13 +141,13 @@ namespace FoldEngine.Editor.Gui.Fields.Text {
         }
 
         public int GetPositionBeforeWord() {
-            return Math.Max(0, Math.Max(Document.GetPreviousWord(Index), GetRowStart()-1));
+            return Math.Max(0, Math.Max(Document.GetPreviousWord(Index), GetRowStart() - 1));
         }
 
         public int GetPositionAfterWord() {
             int pos = Document.GetNextWord(Index);
             int rowEnd = GetRowEnd();
-            return (Index == rowEnd) ? pos : Math.Min(pos, rowEnd);
+            return Index == rowEnd ? pos : Math.Min(pos, rowEnd);
         }
 
         public int GetRowHome() {
@@ -157,13 +160,13 @@ namespace FoldEngine.Editor.Gui.Fields.Text {
         }
 
         public int GetWordStart() {
-            return Math.Max(0, Math.Min(Document.GetWordStart(Index), GetRowStart()-1));
+            return Math.Max(0, Math.Min(Document.GetWordStart(Index), GetRowStart() - 1));
         }
 
         public int GetWordEnd() {
             int pos = Document.GetWordEnd(Index);
             int rowEnd = GetRowEnd();
-            return (Index == rowEnd) ? pos : Math.Min(pos, rowEnd);
+            return Index == rowEnd ? pos : Math.Min(pos, rowEnd);
         }
 
         public int GetRowStart() {
@@ -179,12 +182,10 @@ namespace FoldEngine.Editor.Gui.Fields.Text {
         }
 
         public bool Intersects(Dot other) {
-            if(other.Min < this.Min) {
-                return other.Intersects(this);
-            }
+            if(other.Min < Min) return other.Intersects(this);
 
-            if(this.Mark == other.Mark && this.IsPoint != other.IsPoint) return false;
-            return other.Min < this.Max;
+            if(Mark == other.Mark && IsPoint != other.IsPoint) return false;
+            return other.Min < Max;
         }
 
         public bool Contains(int index) {
@@ -192,15 +193,15 @@ namespace FoldEngine.Editor.Gui.Fields.Text {
         }
 
         public void Absorb(Dot other) {
-            int newMin = Math.Min(this.Min, other.Min);
-            int newMax = Math.Max(this.Max, other.Max);
+            int newMin = Math.Min(Min, other.Min);
+            int newMax = Math.Max(Max, other.Max);
 
-            if(other.Mark <= newMin || this.Mark <= newMin) {
-                this.Mark = newMin;
-                this.Index = newMax;
+            if(other.Mark <= newMin || Mark <= newMin) {
+                Mark = newMin;
+                Index = newMax;
             } else {
-                this.Mark = newMax;
-                this.Index = newMin;
+                Mark = newMax;
+                Index = newMin;
             }
         }
 
@@ -214,8 +215,8 @@ namespace FoldEngine.Editor.Gui.Fields.Text {
             rect.Offset(offset);
             rect.Width = 2;
             rect.X -= rect.Width / 2;
-            
-            layer.Surface.Draw(new DrawRectInstruction() {
+
+            layer.Surface.Draw(new DrawRectInstruction {
                 Texture = renderer.WhiteTexture,
                 Color = Color.White,
                 DestinationRectangle = rect
@@ -231,25 +232,27 @@ namespace FoldEngine.Editor.Gui.Fields.Text {
             Rectangle endRect = Document.ModelToView(Max);
             if(startLine == endLine) {
                 //Single rectangle
-                
-                layer.Surface.Draw(new DrawRectInstruction() {
+
+                layer.Surface.Draw(new DrawRectInstruction {
                     Texture = renderer.WhiteTexture,
                     Color = Color.CornflowerBlue,
-                    DestinationRectangle = new Rectangle(startRect.X + offset.X, startRect.Y + offset.Y, endRect.X - startRect.X, endRect.Height)
+                    DestinationRectangle = new Rectangle(startRect.X + offset.X, startRect.Y + offset.Y,
+                        endRect.X - startRect.X, endRect.Height)
                 });
             } else {
-                
-                layer.Surface.Draw(new DrawRectInstruction() {
+                layer.Surface.Draw(new DrawRectInstruction {
                     Texture = renderer.WhiteTexture,
                     Color = Color.CornflowerBlue,
-                    DestinationRectangle = new Rectangle(startRect.X + offset.X, startRect.Y + offset.Y, maxWidth - startRect.X, startRect.Height)
+                    DestinationRectangle = new Rectangle(startRect.X + offset.X, startRect.Y + offset.Y,
+                        maxWidth - startRect.X, startRect.Height)
                 });
-                layer.Surface.Draw(new DrawRectInstruction() {
+                layer.Surface.Draw(new DrawRectInstruction {
                     Texture = renderer.WhiteTexture,
                     Color = Color.CornflowerBlue,
-                    DestinationRectangle = new Rectangle(offset.X, startRect.Y + startRect.Height + offset.Y, maxWidth, endRect.Y - startRect.Y - startRect.Height)
+                    DestinationRectangle = new Rectangle(offset.X, startRect.Y + startRect.Height + offset.Y, maxWidth,
+                        endRect.Y - startRect.Y - startRect.Height)
                 });
-                layer.Surface.Draw(new DrawRectInstruction() {
+                layer.Surface.Draw(new DrawRectInstruction {
                     Texture = renderer.WhiteTexture,
                     Color = Color.CornflowerBlue,
                     DestinationRectangle = new Rectangle(offset.X, endRect.Y + offset.Y, endRect.X, endRect.Height)
@@ -259,6 +262,11 @@ namespace FoldEngine.Editor.Gui.Fields.Text {
     }
 
     public enum DotEventType {
-        Left, Right, Up, Down, Home, End
+        Left,
+        Right,
+        Up,
+        Down,
+        Home,
+        End
     }
 }

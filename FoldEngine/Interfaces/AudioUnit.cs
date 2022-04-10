@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
 using ChaiFoxes.FMODAudio;
 using FoldEngine.Audio;
-using FoldEngine.Resources;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
 using Sound = FoldEngine.Audio.Sound;
 
 namespace FoldEngine.Interfaces {
@@ -17,7 +14,7 @@ namespace FoldEngine.Interfaces {
         public SoundInstance CreateInstance(Sound sound) {
             var instance = new SoundInstance(this, sound);
             _instances.Add(instance);
-            
+
             return instance;
         }
 
@@ -33,9 +30,7 @@ namespace FoldEngine.Interfaces {
         }
 
         public void StopAll() {
-            foreach(SoundInstance instance in _instances) {
-                instance.Stop();
-            }
+            foreach(SoundInstance instance in _instances) instance.Stop();
             _instances.Clear();
         }
     }

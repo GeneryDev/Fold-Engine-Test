@@ -1,35 +1,35 @@
-﻿using FoldEngine.Components;
-using FoldEngine.Scenes;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
-using System.Linq;
 using System.Reflection;
-using System.Text;
+using FoldEngine.Components;
 using FoldEngine.Events;
 using FoldEngine.Interfaces;
-using Microsoft.Xna.Framework;
+using FoldEngine.Scenes;
 
 namespace FoldEngine.Systems {
     public abstract class GameSystem {
-        public Scene Scene { get; internal set; }
+        private static Dictionary<Type, string> _typeToIdentifierMap;
+        private static Dictionary<string, Type> _identifierToTypeMap;
+        private static Dictionary<string, ConstructorInfo> _identifierToConstructorMap;
 
         private readonly GameSystemAttribute _attribute;
-        public string SystemName => _attribute.SystemName;
-        public ProcessingCycles ProcessingCycles => _attribute.ProcessingCycles;
-        public bool RunWhenPaused => _attribute.RunWhenPaused;
         private readonly List<EventUnsubscriber> _eventUnsubscribers = new List<EventUnsubscriber>();
 
         protected GameSystem() {
-            _attribute = (GameSystemAttribute) this.GetType().GetCustomAttribute(typeof(GameSystemAttribute));
+            _attribute = (GameSystemAttribute) GetType().GetCustomAttribute(typeof(GameSystemAttribute));
         }
+
+        public Scene Scene { get; internal set; }
+        public string SystemName => _attribute.SystemName;
+        public ProcessingCycles ProcessingCycles => _attribute.ProcessingCycles;
+        public bool RunWhenPaused => _attribute.RunWhenPaused;
 
         public virtual void OnInput() { }
         public virtual void OnUpdate() { }
         public virtual void OnFixedUpdate() { }
         public virtual void OnRender(IRenderingUnit renderer) { }
-        
-        public virtual void PollResources() {}
+
+        public virtual void PollResources() { }
 
         protected MultiComponentIterator CreateComponentIterator(params Type[] watchingTypes) {
             return Scene.Components.CreateMultiIterator(watchingTypes);
@@ -45,35 +45,25 @@ namespace FoldEngine.Systems {
 
         public virtual void Initialize() { }
 
-        public virtual void SubscribeToEvents() {}
+        public virtual void SubscribeToEvents() { }
 
 
         internal void UnsubscribeFromEvents() {
-            foreach(EventUnsubscriber obj in _eventUnsubscribers) {
-                obj.Unsubscribe();
-            }
+            foreach(EventUnsubscriber obj in _eventUnsubscribers) obj.Unsubscribe();
             _eventUnsubscribers.Clear();
         }
-        
+
         protected void Subscribe<T>(Event.EventListener<T> action) where T : struct {
             _eventUnsubscribers.Add(Scene.Events.Subscribe(action));
         }
-        
-        
-        
-        
-        private static Dictionary<Type, string> _typeToIdentifierMap = null;
-        private static Dictionary<string, Type> _identifierToTypeMap = null;
-        private static Dictionary<string, ConstructorInfo> _identifierToConstructorMap = null;
 
         public static string IdentifierOf(Type type) {
-            if(_typeToIdentifierMap == null) {
-                _typeToIdentifierMap = new Dictionary<Type, string>();
-            }
+            if(_typeToIdentifierMap == null) _typeToIdentifierMap = new Dictionary<Type, string>();
 
             if(!_typeToIdentifierMap.ContainsKey(type)) {
                 object[] matchingAttributes = type.GetCustomAttributes(typeof(GameSystemAttribute), false);
-                if(matchingAttributes.Length == 0) throw new ArgumentException($"Type '{type}' is not a game system type");
+                if(matchingAttributes.Length == 0)
+                    throw new ArgumentException($"Type '{type}' is not a game system type");
                 _typeToIdentifierMap[type] =
                     (matchingAttributes[0] as GameSystemAttribute).SystemName;
             }
@@ -97,8 +87,9 @@ namespace FoldEngine.Systems {
 
         public static void PopulateDictionaryWithAssembly(Assembly assembly) {
             if(_identifierToTypeMap == null) _identifierToTypeMap = new Dictionary<string, Type>();
-            if(_identifierToConstructorMap == null) _identifierToConstructorMap = new Dictionary<string, ConstructorInfo>();
-            foreach(Type type in assembly.GetTypes()) {
+            if(_identifierToConstructorMap == null)
+                _identifierToConstructorMap = new Dictionary<string, ConstructorInfo>();
+            foreach(Type type in assembly.GetTypes())
                 if(type.IsSubclassOf(typeof(GameSystem))) {
                     object[] attributes;
                     if((attributes = type.GetCustomAttributes(typeof(GameSystemAttribute), false)).Length > 0) {
@@ -107,7 +98,6 @@ namespace FoldEngine.Systems {
                         _identifierToConstructorMap[thisIdentifier] = type.GetConstructor(new Type[0]);
                     }
                 }
-            }
         }
 
         public static void PopulateIdentifiers() {
@@ -136,9 +126,9 @@ namespace FoldEngine.Systems {
     }
 
     public sealed class GameSystemAttribute : Attribute {
-        public readonly string SystemName;
         public readonly ProcessingCycles ProcessingCycles;
-        public readonly bool RunWhenPaused = false;
+        public readonly bool RunWhenPaused;
+        public readonly string SystemName;
 
         public GameSystemAttribute(string identifier, ProcessingCycles processingCycles, bool runWhenPaused = false) {
             SystemName = identifier;

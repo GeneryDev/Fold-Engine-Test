@@ -9,9 +9,9 @@ using FoldEngine.Util.Transactions;
 
 namespace FoldEngine.Editor.Transactions {
     public class AddComponentTransaction : Transaction<EditorEnvironment> {
+        private readonly long _entityId;
 
-        private Type _type;
-        private long _entityId;
+        private readonly Type _type;
 
         public AddComponentTransaction(Type type, long entityId) {
             _type = type;
@@ -19,31 +19,31 @@ namespace FoldEngine.Editor.Transactions {
         }
 
         public override bool Redo(EditorEnvironment target) {
-            if(target.Scene.Components.HasComponent<Transform>(_entityId) && !target.Scene.Components.HasComponent(_type, _entityId)) {
+            if(target.Scene.Components.HasComponent<Transform>(_entityId)
+               && !target.Scene.Components.HasComponent(_type, _entityId))
                 target.Scene.Components.CreateComponent(_type, _entityId);
-            } else {
+            else
                 SceneEditor.ReportEditorGameConflict();
-            }
 
             return true;
         }
 
         public override bool Undo(EditorEnvironment target) {
-            if(target.Scene.Components.HasComponent(_type, _entityId)) {
+            if(target.Scene.Components.HasComponent(_type, _entityId))
                 target.Scene.Components.RemoveComponent(_type, _entityId);
-            } else {
+            else
                 SceneEditor.ReportEditorGameConflict();
-            }
 
             return true;
         }
     }
-    public class RemoveComponentTransaction : Transaction<EditorEnvironment> {
 
-        private Type _type;
-        private long _entityId;
-        
+    public class RemoveComponentTransaction : Transaction<EditorEnvironment> {
+        private readonly long _entityId;
+
         private byte[] _serializedData;
+
+        private readonly Type _type;
 
         public RemoveComponentTransaction(Type type, long entityId) {
             _type = type;
@@ -53,41 +53,41 @@ namespace FoldEngine.Editor.Transactions {
         public override bool Redo(EditorEnvironment target) {
             if(_serializedData == null) {
                 var stream = new MemoryStream();
-                
+
                 var saveOp = new SaveOperation(stream);
-                saveOp.Options.Set(SerializeOnlyEntities.Instance, new List<long>() {_entityId});
-                saveOp.Options.Set(SerializeOnlyComponents.Instance, new List<Type>() {_type});
-            
+                saveOp.Options.Set(SerializeOnlyEntities.Instance, new List<long> {_entityId});
+                saveOp.Options.Set(SerializeOnlyComponents.Instance, new List<Type> {_type});
+
                 target.Scene.Save(saveOp);
-            
+
                 saveOp.Close();
                 _serializedData = stream.GetBuffer();
                 saveOp.Dispose();
             }
-            
-            if(target.Scene.Components.HasComponent(_type, _entityId)) {
+
+            if(target.Scene.Components.HasComponent(_type, _entityId))
                 target.Scene.Components.RemoveComponent(_type, _entityId);
-            } else {
+            else
                 SceneEditor.ReportEditorGameConflict();
-            }
 
             return true;
         }
 
         public override bool Undo(EditorEnvironment target) {
             if(_serializedData == null) throw new InvalidOperationException("Cannot call Undo before Redo");
-            
-            if(target.Scene.Components.HasComponent<Transform>(_entityId) && !target.Scene.Components.HasComponent(_type, _entityId)) {
+
+            if(target.Scene.Components.HasComponent<Transform>(_entityId)
+               && !target.Scene.Components.HasComponent(_type, _entityId)) {
                 var loadOp = new LoadOperation(new MemoryStream(_serializedData));
-            
+
                 target.Scene.Load(loadOp);
-            
+
                 loadOp.Close();
                 loadOp.Dispose();
             } else {
                 SceneEditor.ReportEditorGameConflict();
             }
-            
+
             return true;
         }
     }

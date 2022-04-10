@@ -3,14 +3,28 @@ using FoldEngine;
 using FoldEngine.Commands;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
-using FoldEngine.IO;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
-
 using Sandbox;
 
 namespace Woofer {
     public class WooferGameCore : IGameCore {
+        public WooferGameCore() {
+            Console.WriteLine("Constructing Core");
+            FoldGame = new FoldGame(this);
+
+            RenderingUnit = new WooferRenderingUnit(this);
+            InputUnit = new InputUnit();
+            AudioUnit = new AudioUnit();
+            CommandQueue = new CommandQueue(this);
+            Resources = new ResourceCollections(this);
+            ResourceIndex = new ResourceIndex();
+            ResourceIndex.Update();
+
+            ActiveScene = new DemoScene(this);
+        }
+
+        public float TimeScale => 1;
         public FoldGame FoldGame { get; }
 
         public IRenderingUnit RenderingUnit { get; }
@@ -27,23 +41,6 @@ namespace Woofer {
 
         public ResourceIndex ResourceIndex { get; }
 
-        public float TimeScale => 1;
-
-        public WooferGameCore() {
-            Console.WriteLine("Constructing Core");
-            FoldGame = new FoldGame(this);
-            
-            RenderingUnit = new WooferRenderingUnit(this);
-            InputUnit = new InputUnit();
-            AudioUnit = new AudioUnit();
-            CommandQueue = new CommandQueue(this);
-            Resources = new ResourceCollections(this);
-            ResourceIndex = new ResourceIndex();
-            ResourceIndex.Update();
-            
-            ActiveScene = new DemoScene(this);
-        }
-
         public void Initialize() {
             Console.WriteLine("Initializing Core");
             RenderingUnit.Initialize();
@@ -51,12 +48,10 @@ namespace Woofer {
 
         public void LoadContent() {
             Console.WriteLine("Loading Core Content");
-            
+
             foreach(string inputName in ResourceIndex.GetIdentifiersInGroup<InputDefinition>("#default")) {
                 var identifier = new ResourceIdentifier(inputName);
-                Resources.Load<InputDefinition>(ref identifier, d => {
-                    InputUnit.Setup((InputDefinition) d);
-                });
+                Resources.Load<InputDefinition>(ref identifier, d => { InputUnit.Setup((InputDefinition) d); });
             }
         }
 
@@ -76,9 +71,8 @@ namespace Woofer {
             Console.WriteLine("Started");
 #if DEBUG
             Console.WriteLine("Command Line Arguments: " + Environment.GetCommandLineArgs().Length);
-            for(int i = 0; i < Environment.GetCommandLineArgs().Length; i++) {
+            for(int i = 0; i < Environment.GetCommandLineArgs().Length; i++)
                 Console.WriteLine($"[{i}]: " + Environment.GetCommandLineArgs()[i]);
-            }
 #endif
             FoldGameEntry.StartGame(new WooferGameCore());
         }

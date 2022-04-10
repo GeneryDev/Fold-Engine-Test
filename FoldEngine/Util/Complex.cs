@@ -1,9 +1,7 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 
-using System;
-
-namespace FoldEngine.Util
-{
+namespace FoldEngine.Util {
     public struct Complex {
         public float A; //Real component
         public float B; //Imaginary component
@@ -12,7 +10,7 @@ namespace FoldEngine.Util
         public float Magnitude => (float) Math.Sqrt(SqrMagnitude);
         public Complex Inverse => new Complex(A / SqrMagnitude, -B / SqrMagnitude);
 
-        public Complex Normalized => new Complex(this.A / Magnitude, this.B / Magnitude);
+        public Complex Normalized => new Complex(A / Magnitude, B / Magnitude);
         public float Angle => (float) Math.Atan2(B, A);
 
         public static readonly Complex Real = new Complex(1, 0);

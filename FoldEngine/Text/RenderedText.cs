@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using FoldEngine.Graphics;
+﻿using FoldEngine.Graphics;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Text {
@@ -15,15 +14,11 @@ namespace FoldEngine.Text {
         public bool HasValue => Glyphs != null;
 
         public void DrawOnto(RenderSurface surface, Point start, Color color, float scale = 1) {
-            foreach(RenderedTextGlyph glyph in Glyphs) {
-                glyph.DrawOnto(surface, start, color, scale, BitmapFont);
-            }
+            foreach(RenderedTextGlyph glyph in Glyphs) glyph.DrawOnto(surface, start, color, scale, BitmapFont);
         }
 
         public RenderedText Update() {
-            if(Generation != BitmapFont.Generation) {
-                TextRenderer.Instance.Render(BitmapFont, Text, out this, Size);
-            }
+            if(Generation != BitmapFont.Generation) TextRenderer.Instance.Render(BitmapFont, Text, out this, Size);
             return this;
         }
     }
@@ -40,14 +35,14 @@ namespace FoldEngine.Text {
 
         public void DrawOnto(RenderSurface surface, Point start, Color color, float scale, BitmapFont bitmapFont) {
             ITexture texture = bitmapFont.TextureSources[SourceIndex];
-            Vector2 textureSize = new Vector2(texture.Width, texture.Height);
+            var textureSize = new Vector2(texture.Width, texture.Height);
             (int x, int y) = start;
             surface.Draw(new DrawQuadInstruction(
                 texture,
-                new Vector2(scale*Destination.Left + x, scale*Destination.Bottom + y),
-                new Vector2(scale*Destination.Left + x, scale*Destination.Top + y),
-                new Vector2(scale*Destination.Right + x, scale*Destination.Bottom + y),
-                new Vector2(scale*Destination.Right + x, scale*Destination.Top + y),
+                new Vector2(scale * Destination.Left + x, scale * Destination.Bottom + y),
+                new Vector2(scale * Destination.Left + x, scale * Destination.Top + y),
+                new Vector2(scale * Destination.Right + x, scale * Destination.Bottom + y),
+                new Vector2(scale * Destination.Right + x, scale * Destination.Top + y),
                 new Vector2(Source.Left, Source.Bottom) / textureSize,
                 new Vector2(Source.Left, Source.Top) / textureSize,
                 new Vector2(Source.Right, Source.Bottom) / textureSize,

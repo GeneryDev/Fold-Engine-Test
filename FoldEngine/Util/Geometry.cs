@@ -5,7 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using FoldEngine;
 using FoldEngine.Components;
-using FoldEngine.Graphics;
 using FoldEngine.Resources;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
@@ -31,7 +30,8 @@ namespace EntryProject.Util {
         }
 
         public bool Contains(Vector2 point, float precision = 0.000001f) {
-            return Math.Abs(Vector2.DistanceSquared(From, point) + Vector2.DistanceSquared(point, To) - MagnitudeSqr) < precision;
+            return Math.Abs(Vector2.DistanceSquared(From, point) + Vector2.DistanceSquared(point, To) - MagnitudeSqr)
+                   < precision;
         }
 
         public float DistanceFromPoint(Vector2 point, bool capped) {
@@ -40,47 +40,47 @@ namespace EntryProject.Util {
                 if(point.X <= 0) return point.Length();
                 if(point.X >= flat.X) return Vector2.Distance(point, flat);
             }
+
             return Math.Abs(point.Y);
         }
 
         public Vector2 SnapPointToLine(Vector2 point, bool capped) {
             Vector2 flat = LayFlat(this, ref point, out Complex undo);
             if(capped) {
-                if(point.X <= 0) return this.From;
-                if(point.X >= flat.X) return this.To;
+                if(point.X <= 0) return From;
+                if(point.X >= flat.X) return To;
             }
-            return new Complex(point.X, 0) * undo + (Complex) this.From;
+
+            return new Complex(point.X, 0) * undo + (Complex) From;
         }
 
         private const float EdgeTolerance = 0.00000004f;
 
         public Vector2? Intersect(Line other, bool thisCapped, bool otherCapped) {
-            if(this.MagnitudeSqr == 0) {
-                if(other.MagnitudeSqr == 0) {
-                    return this.From == other.From ? this.From : (Vector2?) null;
-                }
+            if(MagnitudeSqr == 0) {
+                if(other.MagnitudeSqr == 0) return From == other.From ? From : (Vector2?) null;
 
-                return other.Contains(this.From) ? this.From : (Vector2?) null;
-            } else if(other.MagnitudeSqr == 0) {
-                return this.Contains(other.From) ? other.From : (Vector2?) null;
+                return other.Contains(From) ? From : (Vector2?) null;
             }
+
+            if(other.MagnitudeSqr == 0) return Contains(other.From) ? other.From : (Vector2?) null;
             Vector2 flat = LayFlat(this, ref other, out Complex undo);
 
-            if(otherCapped) {
+            if(otherCapped)
                 if(Math.Sign(other.From.Y) == Math.Sign(other.To.Y)
                    && Math.Sign(other.From.Y - EdgeTolerance) == Math.Sign(other.To.Y - EdgeTolerance)
-                   && Math.Sign(other.From.Y + EdgeTolerance) == Math.Sign(other.To.Y + EdgeTolerance)) {
+                   && Math.Sign(other.From.Y + EdgeTolerance) == Math.Sign(other.To.Y + EdgeTolerance))
                     return null;
-                }
-            }
-            double xIntersect = (double) other.From.X
-                                + (-(double) other.From.Y / ((double) other.To.Y - other.From.Y))
+            double xIntersect = other.From.X
+                                + -(double) other.From.Y
+                                / ((double) other.To.Y - other.From.Y)
                                 * ((double) other.To.X - other.From.X);
             if(thisCapped) {
                 if(xIntersect < -EdgeTolerance) return null;
                 if(xIntersect > flat.X + EdgeTolerance) return null;
             }
-            return new Complex((float) xIntersect, 0) * undo + (Complex) this.From;
+
+            return new Complex((float) xIntersect, 0) * undo + (Complex) From;
         }
 
         public static Vector2 LayFlat(Line line, ref Vector2 point, out Complex undo) {
@@ -90,8 +90,8 @@ namespace EntryProject.Util {
 
             undo = ((Complex) line.To).Normalized;
 
-            point = (Vector2)((Complex) point / undo);
-            line.To = (Vector2)((Complex) line.To / undo);
+            point = (Complex) point / undo;
+            line.To = (Complex) line.To / undo;
 
             return line.To;
         }
@@ -103,13 +103,11 @@ namespace EntryProject.Util {
 
             undo = ((Complex) line.To).Normalized;
 
-            other.From = (Vector2)((Complex) other.From / undo);
-            other.To = (Vector2)((Complex) other.To / undo);
-            line.To = (Vector2)((Complex) line.To / undo);
+            other.From = (Complex) other.From / undo;
+            other.To = (Complex) other.To / undo;
+            line.To = (Complex) line.To / undo;
 
-            if(other.From.X.Equals(float.NaN)) {
-                Console.WriteLine("uh oh");
-            }
+            if(other.From.X.Equals(float.NaN)) Console.WriteLine("uh oh");
 
             return line.To;
         }
@@ -120,30 +118,47 @@ namespace EntryProject.Util {
 
         public static Line operator -(Line line, Vector2 offset) {
             return new Line(line.From - offset, line.To - offset);
-        } 
+        }
     }
 
     [SuppressMessage("ReSharper", "ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator")]
     public static class Polygon {
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+        private static readonly OrderedList<float, Intersection> Intersections =
+            new OrderedList<float, Intersection>(v => v.OrderA);
+
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+        private static readonly OrderedList<float, Intersection> BackupIntersections =
+            new OrderedList<float, Intersection>(v => v.OrderA);
+        //This backup list is only here for debugging purposes. This one shouldn't have its element removed while forming the intersection polygon, only when resetting to compute a new one.
+
+        private static readonly List<PolygonIntersectionVertex>
+            ComputingPolygon = new List<PolygonIntersectionVertex>();
+
+        private static readonly List<PolygonIntersectionVertex[]> ComputingPolygons =
+            new List<PolygonIntersectionVertex[]>();
+
         [Pure]
         public static PolygonIntersectionVertex[][] ComputePolygonIntersection(
             Mesh meshA,
             Transform transformA,
             Mesh meshB,
             Transform transformB) {
-            Vector2[] verticesA = new Vector2[meshA.GetVertexCount()];
-            Vector2[] verticesB = new Vector2[meshB.GetVertexCount()];
+            var verticesA = new Vector2[meshA.GetVertexCount()];
+            var verticesB = new Vector2[meshB.GetVertexCount()];
 
             int i = 0;
             foreach(Vector2 vertex in meshA.GetVertices()) {
                 verticesA[i] = transformA.Apply(vertex);
                 i++;
             }
+
             i = 0;
             foreach(Vector2 vertex in meshB.GetVertices()) {
                 verticesB[i] = transformB.Apply(vertex);
                 i++;
             }
+
             return ComputePolygonIntersection(verticesA, verticesB);
         }
 
@@ -157,24 +172,15 @@ namespace EntryProject.Util {
 
                 Vector2 origin = polygon[i].Position;
 
-                Vector3 prev = new Vector3(polygon[iPrev].Position - origin, 0);
-                Vector3 next = new Vector3(polygon[iNext].Position - origin, 0);
+                var prev = new Vector3(polygon[iPrev].Position - origin, 0);
+                var next = new Vector3(polygon[iNext].Position - origin, 0);
 
                 area += Vector3.Cross(prev, next).Length() * 0.5f;
             }
 
             return area;
         }
-        
-        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        private static readonly OrderedList<float, Intersection> Intersections = new OrderedList<float, Intersection>(v => v.OrderA);
-        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        private static readonly OrderedList<float, Intersection> BackupIntersections = new OrderedList<float, Intersection>(v => v.OrderA);
-        //This backup list is only here for debugging purposes. This one shouldn't have its element removed while forming the intersection polygon, only when resetting to compute a new one.
-        
-        private static readonly List<PolygonIntersectionVertex> ComputingPolygon = new List<PolygonIntersectionVertex>();
-        private static readonly List<PolygonIntersectionVertex[]> ComputingPolygons = new List<PolygonIntersectionVertex[]>();
-        
+
         [Pure]
         public static PolygonIntersectionVertex[][] ComputePolygonIntersection(
             Vector2[] verticesA,
@@ -185,16 +191,16 @@ namespace EntryProject.Util {
 
             Intersections.Clear();
             BackupIntersections.Clear();
-            
+
             int ins = 0;
             int outs = 0;
             Vector2? minIntersection = null;
             Vector2? maxIntersection = null;
 
             for(int i = 0; i < verticesA.Length; i++) {
-                Line lineA = new Line(verticesA[i], verticesA[(i+1) % verticesA.Length]);
+                var lineA = new Line(verticesA[i], verticesA[(i + 1) % verticesA.Length]);
                 for(int j = 0; j < verticesB.Length; j++) {
-                    Line lineB = new Line(verticesB[j], verticesB[(j+1) % verticesB.Length]);
+                    var lineB = new Line(verticesB[j], verticesB[(j + 1) % verticesB.Length]);
 
                     Vector2? intersectionPoint = lineA.Intersect(lineB, true, true);
 
@@ -204,17 +210,18 @@ namespace EntryProject.Util {
                         };
                         Line lineACopy = lineA;
                         Line.LayFlat(lineB, ref lineACopy, out _);
-                        int signDelta = (Math.Sign(lineACopy.To.Y) - Math.Sign(lineACopy.From.Y));
+                        int signDelta = Math.Sign(lineACopy.To.Y) - Math.Sign(lineACopy.From.Y);
                         if(signDelta == 0) {
                             Console.WriteLine("signDelta is zero, continuing");
                             continue;
                         }
+
                         intersection.Type = signDelta > 0 ? IntersectionType.In : IntersectionType.Out;
-                        
+
                         Vector2 intersectionPointFlat = intersection.Position;
                         float lengthA = Line.LayFlat(lineA, ref intersectionPointFlat, out _).X;
                         intersection.OrderA = i + intersectionPointFlat.X / lengthA;
-                        
+
                         intersectionPointFlat = intersection.Position;
                         float lengthB = Line.LayFlat(lineB, ref intersectionPointFlat, out _).X;
                         intersection.OrderB = j + intersectionPointFlat.X / lengthB;
@@ -232,24 +239,25 @@ namespace EntryProject.Util {
                         //     intersection.OrderB = intersection.VertexIndexB;
                         // if(intersection.OrderB > intersection.VertexIndexB + 1)
                         //     intersection.OrderB = intersection.VertexIndexB + 1;
-                        
+
                         //Update min/max intersection points
-                        minIntersection = Vector2.Min(minIntersection ?? intersectionPoint.Value, intersectionPoint.Value);
-                        maxIntersection = Vector2.Max(maxIntersection ?? intersectionPoint.Value, intersectionPoint.Value);
-                        
+                        minIntersection = Vector2.Min(minIntersection ?? intersectionPoint.Value,
+                            intersectionPoint.Value);
+                        maxIntersection = Vector2.Max(maxIntersection ?? intersectionPoint.Value,
+                            intersectionPoint.Value);
+
                         if(intersection.Type == IntersectionType.In) ins++;
                         else outs++;
-                        
+
                         Intersections.Add(intersection);
                         BackupIntersections.Add(intersection);
                     }
                 }
             }
 
-            if(minIntersection.HasValue && (maxIntersection.Value - minIntersection.Value).Length() <= 0) {
-                // Console.WriteLine("Single point, exiting");
+            if(minIntersection.HasValue && (maxIntersection.Value - minIntersection.Value).Length() <= 0
+            ) // Console.WriteLine("Single point, exiting");
                 return null;
-            }
 
             if(ins != outs) {
                 for(int i = 0; i < Intersections.Count; i++) {
@@ -257,8 +265,8 @@ namespace EntryProject.Util {
 
                     bool remove = (int) intersection.OrderA != intersection.VertexIndexA
                                   || (int) intersection.OrderB != intersection.VertexIndexB
-                                  // || intersection.OrderA == intersection.VertexIndexA
-                                  // || intersection.OrderB == intersection.VertexIndexB
+                        // || intersection.OrderA == intersection.VertexIndexA
+                        // || intersection.OrderB == intersection.VertexIndexB
                         ;
 
                     if(remove) {
@@ -271,23 +279,22 @@ namespace EntryProject.Util {
 
                 if(ins != outs) {
                     Console.WriteLine("Mismatching in-intersection and out-intersection count, exiting");
-                    return null;                    
+                    return null;
                 }
             }
 
             if(Intersections.Count < 2) return null;
-            
+
             ComputingPolygons.Clear();
 
             while(Intersections.Count >= 2) {
                 ComputingPolygon.Clear();
-                
+
                 Intersection firstIntersection = Intersections[0];
 
                 Intersection current = firstIntersection;
                 bool polygonComplete = false;
-                while(!polygonComplete) {
-
+                while(!polygonComplete)
                     if(current.Type == IntersectionType.Out) {
                         //traverse polygon A
 
@@ -296,23 +303,21 @@ namespace EntryProject.Util {
                         bool doneFullLoop = false;
                         do {
                             Intersection? nextIntersection = default;
-                            foreach(Intersection intersection in Intersections) {
+                            foreach(Intersection intersection in Intersections)
                                 if(intersection.VertexIndexA == i
                                    && intersection.Type != current.Type
-                                   && (intersection != current
-                                       && (intersection.VertexIndexA != current.VertexIndexA
-                                           || intersection.OrderA >= current.OrderA
-                                           || Intersections.Count == 1))) {
+                                   && intersection != current
+                                   && (intersection.VertexIndexA != current.VertexIndexA
+                                       || intersection.OrderA >= current.OrderA
+                                       || Intersections.Count == 1)) {
                                     if(!nextIntersection.HasValue) {
                                         nextIntersection = intersection;
                                     } else {
                                         if(intersection.VertexIndexA < nextIntersection.Value.VertexIndexA
-                                           || intersection.OrderA < nextIntersection.Value.OrderA) {
+                                           || intersection.OrderA < nextIntersection.Value.OrderA)
                                             nextIntersection = intersection;
-                                        }
                                     }
                                 }
-                            }
 
                             if(nextIntersection == firstIntersection) {
                                 //Completed the polygon
@@ -323,7 +328,9 @@ namespace EntryProject.Util {
                                 polygonComplete = true;
 
                                 break;
-                            } else if(nextIntersection.HasValue) {
+                            }
+
+                            if(nextIntersection.HasValue) {
                                 FoldUtil.Assert(nextIntersection.Value.Type != current.Type,
                                     "Found two out-type intersections in a row!!!");
                                 ComputingPolygon.Add(new PolygonIntersectionVertex(nextIntersection.Value));
@@ -333,84 +340,81 @@ namespace EntryProject.Util {
 
                                 current = nextIntersection.Value;
                                 break;
-                            } else {
-                                //No intersection found ahead, instead add the next vertex and repeat (until an intersection is found)
-                                i = (i + 1) % verticesA.Length;
-                                ComputingPolygon.Add(new PolygonIntersectionVertex(verticesA[i], i, -1));
-                                if(i == startIndex) doneFullLoop = true;
                             }
 
+                            //No intersection found ahead, instead add the next vertex and repeat (until an intersection is found)
+                            i = (i + 1) % verticesA.Length;
+                            ComputingPolygon.Add(new PolygonIntersectionVertex(verticesA[i], i, -1));
+                            if(i == startIndex) doneFullLoop = true;
                         } while(!doneFullLoop
-                                // || i != ((startIndex + 1) % verticesA.Length)
-                                );
-                        
+                            // || i != ((startIndex + 1) % verticesA.Length)
+                        );
+
                         // FoldUtil.Assert(!doneFullLoop, "Did a full loop and found no matching intersections (A)");
                         if(doneFullLoop) return null;
                     } else {
                         //traverse polygon B
-                        
+
                         int startIndex = current.VertexIndexB;
                         int i = startIndex;
                         bool doneFullLoop = false;
                         do {
                             Intersection? nextIntersection = default;
-                            foreach(Intersection intersection in Intersections) {
+                            foreach(Intersection intersection in Intersections)
                                 if(intersection.VertexIndexB == i
                                    && intersection.Type != current.Type
-                                   && (intersection != current
-                                       && (intersection.VertexIndexB != current.VertexIndexB
-                                           || intersection.OrderB >= current.OrderB
-                                           || Intersections.Count == 1))) {
+                                   && intersection != current
+                                   && (intersection.VertexIndexB != current.VertexIndexB
+                                       || intersection.OrderB >= current.OrderB
+                                       || Intersections.Count == 1)) {
                                     if(!nextIntersection.HasValue) {
                                         nextIntersection = intersection;
                                     } else {
                                         if(intersection.VertexIndexB < nextIntersection.Value.VertexIndexB
-                                           || intersection.OrderB < nextIntersection.Value.OrderB) {
+                                           || intersection.OrderB < nextIntersection.Value.OrderB)
                                             nextIntersection = intersection;
-                                        }
                                     }
                                 }
-                            }
 
                             if(nextIntersection == firstIntersection) {
                                 //Completed the polygon
                                 ComputingPolygon.Add(new PolygonIntersectionVertex(nextIntersection.Value));
-                                
+
                                 Intersections.Remove(nextIntersection.Value);
 
                                 polygonComplete = true;
 
                                 break;
-                            } else if(nextIntersection.HasValue) {
+                            }
+
+                            if(nextIntersection.HasValue) {
                                 FoldUtil.Assert(nextIntersection.Value.Type != current.Type,
                                     "Found two out-type intersections in a row!!!");
                                 ComputingPolygon.Add(new PolygonIntersectionVertex(nextIntersection.Value));
                                 //Wrap up and get ready to switch to traversing polygon A
 
                                 Intersections.Remove(nextIntersection.Value);
-                                
+
                                 current = nextIntersection.Value;
                                 break;
-                            } else {
-                                //No intersection found ahead, instead add the next vertex and repeat (until an intersection is found)
-                                i = (i + 1) % verticesB.Length;
-                                ComputingPolygon.Add(new PolygonIntersectionVertex(verticesB[i], -1, i));
-                                if(i == startIndex) doneFullLoop = true;
                             }
 
+                            //No intersection found ahead, instead add the next vertex and repeat (until an intersection is found)
+                            i = (i + 1) % verticesB.Length;
+                            ComputingPolygon.Add(new PolygonIntersectionVertex(verticesB[i], -1, i));
+                            if(i == startIndex) doneFullLoop = true;
                         } while(!doneFullLoop
-                                // || i != ((startIndex + 1) % verticesB.Length)
-                                );
+                            // || i != ((startIndex + 1) % verticesB.Length)
+                        );
 
                         // FoldUtil.Assert(!doneFullLoop, "Did a full loop and found no matching intersections (B)");
                         if(doneFullLoop) return null;
                     }
-                }
 
                 // if(ComputingPolygon[0].Position == ComputingPolygon[1].Position
-                   // || ComputingPolygon[1].Position == ComputingPolygon[2].Position
-                   // || ComputingPolygon[2].Position == ComputingPolygon[0].Position) continue; //TODO temporary code to stop duplicate vertices
-                
+                // || ComputingPolygon[1].Position == ComputingPolygon[2].Position
+                // || ComputingPolygon[2].Position == ComputingPolygon[0].Position) continue; //TODO temporary code to stop duplicate vertices
+
                 ComputingPolygons.Add(ComputingPolygon.ToArray());
             }
 
@@ -422,28 +426,25 @@ namespace EntryProject.Util {
             Complex axisNormalComplex = axisNormal;
 
             float largestCrossSection = 0;
-            
-            Vector2[] vertices = new Vector2[polygon.Length];
-            for(int i = 0; i < vertices.Length; i++) {
-                vertices[i] = (Complex) polygon[i].Position / axisNormalComplex;
-            }
+
+            var vertices = new Vector2[polygon.Length];
+            for(int i = 0; i < vertices.Length; i++) vertices[i] = (Complex) polygon[i].Position / axisNormalComplex;
 
             for(int i = 0; i < vertices.Length; i++) {
                 Vector2 vertex = vertices[i];
                 Vector2 prevVertex = vertices[i - 1 >= 0 ? i - 1 : vertices.Length - 1];
-                Vector2 nextVertex = vertices[(i+1) % vertices.Length];
-                
-                Vector2 vertexNormal = ((new Line(prevVertex, vertex).Normal + new Line(vertex, nextVertex).Normal) / 2).Normalized();
-                
+                Vector2 nextVertex = vertices[(i + 1) % vertices.Length];
+
+                Vector2 vertexNormal = ((new Line(prevVertex, vertex).Normal + new Line(vertex, nextVertex).Normal) / 2)
+                    .Normalized();
+
                 float minX = vertex.X;
                 float maxX = minX;
                 for(int j = 0; j < vertices.Length; j++) {
-                    if(j == i - 1 || (i == 0 && j == vertices.Length - 1) || j == i) {
-                        //Don't check adjacent faces
+                    if(j == i - 1 || i == 0 && j == vertices.Length - 1 || j == i) //Don't check adjacent faces
                         continue;
-                    }
-                    
-                    Line line = new Line(vertices[j], vertices[(j+1) % vertices.Length]);
+
+                    var line = new Line(vertices[j], vertices[(j + 1) % vertices.Length]);
                     if(Vector2.Dot(line.Normal, vertexNormal) <= 0) {
                         Vector2? intersection = line.Intersect(new Line(vertex, vertex + Vector2.UnitX), true, false);
                         //TODO verify that the line this is checking against is facing away from this vertex (for concave shapes)
@@ -464,16 +465,14 @@ namespace EntryProject.Util {
         [Pure]
         public static Vector2 ComputeHighestPoint(PolygonIntersectionVertex[] polygon, Vector2 axisNormal) {
             Complex axisNormalComplex = axisNormal;
-            
-            Vector2[] vertices = new Vector2[polygon.Length];
-            for(int i = 0; i < vertices.Length; i++) {
-                vertices[i] = (Complex) polygon[i].Position / axisNormalComplex;
-            }
+
+            var vertices = new Vector2[polygon.Length];
+            for(int i = 0; i < vertices.Length; i++) vertices[i] = (Complex) polygon[i].Position / axisNormalComplex;
 
             float maxX = 0;
             float minY = 0;
             float maxY = 0;
-            
+
             for(int i = 0; i < vertices.Length; i++) {
                 (float x, float y) = vertices[i];
 
@@ -491,12 +490,13 @@ namespace EntryProject.Util {
                             minY = y;
                             maxY = minY;
                         }
+
                         maxX = x;
                     }
                 }
             }
-            
-            return ((Complex)new Vector2(maxX, (minY + maxY) / 2)) * axisNormalComplex;
+
+            return (Complex) new Vector2(maxX, (minY + maxY) / 2) * axisNormalComplex;
         }
 
         [DebuggerTypeProxy(typeof(IntersectionDebugView))]
@@ -532,7 +532,7 @@ namespace EntryProject.Util {
 
             public static bool operator ==(Intersection a, Intersection b) {
                 return a.Equals(b);
-            } 
+            }
 
             public static bool operator !=(Intersection a, Intersection b) {
                 return !a.Equals(b);
@@ -540,9 +540,9 @@ namespace EntryProject.Util {
 
             private sealed class IntersectionDebugView {
                 public Vector2 Position;
+                public string Type;
                 public string WhereInA;
                 public string WhereInB;
-                public string Type;
 
                 public IntersectionDebugView(Intersection source) {
                     Position = source.Position;
@@ -554,9 +554,10 @@ namespace EntryProject.Util {
         }
 
         internal enum IntersectionType {
-            In, Out
+            In,
+            Out
         }
-        
+
         public struct PolygonIntersectionVertex {
             public Vector2 Position;
             public int VertexIndexA;
@@ -567,9 +568,9 @@ namespace EntryProject.Util {
             public bool IsFromB => VertexIndexB != -1;
 
             internal PolygonIntersectionVertex(Intersection intersection) {
-                this.Position = intersection.Position;
-                this.VertexIndexA = intersection.VertexIndexA;
-                this.VertexIndexB = intersection.VertexIndexB;
+                Position = intersection.Position;
+                VertexIndexA = intersection.VertexIndexA;
+                VertexIndexB = intersection.VertexIndexB;
             }
 
             public PolygonIntersectionVertex(Vector2 position, int vertexIndexA = -1, int vertexIndexB = -1) {

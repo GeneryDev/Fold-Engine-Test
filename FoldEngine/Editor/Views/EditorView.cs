@@ -6,11 +6,10 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Views {
     public abstract class EditorView {
-        public Scene Scene;
-
         public GuiPanel ContentPanel;
 
         public ResourceIdentifier Icon;
+        public Scene Scene;
         public abstract string Name { get; }
 
         public virtual bool UseMargin => true;
@@ -20,9 +19,7 @@ namespace FoldEngine.Editor.Views {
         public abstract void Render(IRenderingUnit renderer);
 
         public virtual void EnsurePanelExists(GuiEnvironment environment) {
-            if(ContentPanel == null) {
-                ContentPanel = new GuiPanel(environment);
-            }
+            if(ContentPanel == null) ContentPanel = new GuiPanel(environment);
         }
     }
 }

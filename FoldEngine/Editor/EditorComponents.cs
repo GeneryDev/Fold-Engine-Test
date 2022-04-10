@@ -4,13 +4,13 @@ using FoldEngine.Scenes;
 
 namespace FoldEngine.Editor {
     public class EditorComponents {
-        public Scene Scene;
-        public Transform EditorTransform;
         public Camera EditorCamera;
+        public Transform EditorTransform;
+        public Scene Scene;
 
         public EditorComponents(Scene scene) {
             Scene = scene;
-            
+
             EditorTransform = Transform.InitializeComponent(scene, -1);
             EditorCamera = new Camera();
         }

@@ -1,13 +1,11 @@
-﻿using System;
-using FoldEngine.Gui;
+﻿using FoldEngine.Gui;
 using FoldEngine.Text;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Gui {
     public class ToolbarButton : GuiButton {
+        private bool _down;
         private RenderedText _renderedName;
-
-        private bool _down = false;
 
         protected override Color NormalColor => _down ? base.PressedColor : base.NormalColor;
 
@@ -21,7 +19,7 @@ namespace FoldEngine.Editor.Gui {
             _down = down;
             return this;
         }
-        
+
         public override void AdjustSpacing(GuiPanel parent) {
             _renderedName = Parent.RenderString(_text, _fontSize);
             Bounds.Width = 12 * _fontSize / 7;

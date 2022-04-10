@@ -1,13 +1,9 @@
 ﻿using FoldEngine.Scenes;
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace FoldEngine.Components {
     public class ComponentReference<T> where T : struct {
-        Scene _scene;
-        long _entityId;
+        private readonly long _entityId;
+        private readonly Scene _scene;
 
         public ComponentReference(Scene scene, long entityId) {
             _scene = scene;

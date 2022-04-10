@@ -2,8 +2,8 @@
 
 namespace FoldEngine.Scenes {
     public class EntityIdRemapper {
-        private Dictionary<long, long> _map = new Dictionary<long,long>();
-        private Scene _scene;
+        private readonly Dictionary<long, long> _map = new Dictionary<long, long>();
+        private readonly Scene _scene;
         public bool CreateNewIfNotPresent = true;
 
         public EntityIdRemapper(Scene scene = null) {
@@ -12,11 +12,9 @@ namespace FoldEngine.Scenes {
 
         public long TransformId(long oldId) {
             if(!_map.ContainsKey(oldId)) {
-                if(CreateNewIfNotPresent) {
+                if(CreateNewIfNotPresent)
                     return _map[oldId] = _scene.CreateEntityId("a");
-                } else {
-                    return oldId;
-                }
+                return oldId;
             }
 
             return _map[oldId];

@@ -3,10 +3,9 @@ using Microsoft.Xna.Framework.Input;
 
 namespace FoldEngine.Input {
     public class GamePad : IInputDevice {
-
         public GamePadButtons Buttons;
-        public GamePadThumbsticks Thumbsticks;
         public GamePadDPad DPad;
+        public GamePadThumbsticks Thumbsticks;
         public GamePadTriggers Triggers;
 
         public GamePad(int playerIndex) {
@@ -25,10 +24,10 @@ namespace FoldEngine.Input {
             Thumbsticks.Update();
             Triggers.Update();
         }
-        
-        
+
+
         public T Get<T>(string name) where T : IInputInfo {
-            if(typeof(T) == typeof(ButtonInfo)) {
+            if(typeof(T) == typeof(ButtonInfo))
                 switch(name.ToLowerInvariant()) {
                     case "a": return (T) (IInputInfo) Buttons.A;
                     case "b": return (T) (IInputInfo) Buttons.B;
@@ -43,18 +42,18 @@ namespace FoldEngine.Input {
                     case "righttrigger": return (T) (IInputInfo) Buttons.RightTrigger;
                     case "leftstick": return (T) (IInputInfo) Buttons.LeftStick;
                     case "rightstick": return (T) (IInputInfo) Buttons.RightStick;
-                    
+
                     case "dpad.up": return (T) (IInputInfo) DPad.Up;
                     case "dpad.down": return (T) (IInputInfo) DPad.Down;
                     case "dpad.left": return (T) (IInputInfo) DPad.Left;
                     case "dpad.right": return (T) (IInputInfo) DPad.Right;
                 }
-            } else if(typeof(T) == typeof(IAnalogInfo) || typeof(T).IsSubclassOf(typeof(IAnalogInfo))) {
+            else if(typeof(T) == typeof(IAnalogInfo) || typeof(T).IsSubclassOf(typeof(IAnalogInfo)))
                 switch(name.ToLowerInvariant()) {
-                    case "thumbstick.left": return (T)(IInputInfo)Thumbsticks.Left;
-                    case "thumbstick.right": return (T)(IInputInfo)Thumbsticks.Right;
+                    case "thumbstick.left": return (T) (IInputInfo) Thumbsticks.Left;
+                    case "thumbstick.right": return (T) (IInputInfo) Thumbsticks.Right;
                 }
-            }
+
             throw new ArgumentException(name);
         }
 
@@ -64,33 +63,48 @@ namespace FoldEngine.Input {
 
             public ButtonInfo A;
             public ButtonInfo B;
-            public ButtonInfo X;
-            public ButtonInfo Y;
-            public ButtonInfo Start;
             public ButtonInfo Back;
             public ButtonInfo Home;
             public ButtonInfo LeftBumper;
-            public ButtonInfo RightBumper;
             public ButtonInfo LeftStick;
-            public ButtonInfo RightStick;
-            
+
             public ButtonInfo LeftTrigger;
+            public ButtonInfo RightBumper;
+            public ButtonInfo RightStick;
             public ButtonInfo RightTrigger;
+            public ButtonInfo Start;
+            public ButtonInfo X;
+            public ButtonInfo Y;
 
             public GamePadButtons(int playerId) {
-                A = new ButtonInfo(() => Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Buttons.A == ButtonState.Pressed);
-                B = new ButtonInfo(() => Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Buttons.B == ButtonState.Pressed);
-                X = new ButtonInfo(() => Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Buttons.X == ButtonState.Pressed);
-                Y = new ButtonInfo(() => Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Buttons.Y == ButtonState.Pressed);
-                Start = new ButtonInfo(() => Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Buttons.Start == ButtonState.Pressed);
-                Back = new ButtonInfo(() => Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Buttons.Back == ButtonState.Pressed);
-                Home = new ButtonInfo(() => Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Buttons.BigButton == ButtonState.Pressed);
-                LeftBumper = new ButtonInfo(() => Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Buttons.LeftShoulder == ButtonState.Pressed);
-                RightBumper = new ButtonInfo(() => Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Buttons.RightShoulder == ButtonState.Pressed);
-                LeftStick = new ButtonInfo(() => Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Buttons.LeftStick == ButtonState.Pressed);
-                RightStick = new ButtonInfo(() => Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Buttons.RightStick == ButtonState.Pressed);
-                LeftTrigger = new ButtonInfo(() => Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Triggers.Left >= TriggerThreshold);
-                RightTrigger = new ButtonInfo(() => Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Triggers.Right >= TriggerThreshold);
+                A = new ButtonInfo(() =>
+                    Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Buttons.A == ButtonState.Pressed);
+                B = new ButtonInfo(() =>
+                    Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Buttons.B == ButtonState.Pressed);
+                X = new ButtonInfo(() =>
+                    Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Buttons.X == ButtonState.Pressed);
+                Y = new ButtonInfo(() =>
+                    Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Buttons.Y == ButtonState.Pressed);
+                Start = new ButtonInfo(() =>
+                    Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Buttons.Start == ButtonState.Pressed);
+                Back = new ButtonInfo(() =>
+                    Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Buttons.Back == ButtonState.Pressed);
+                Home = new ButtonInfo(() =>
+                    Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Buttons.BigButton == ButtonState.Pressed);
+                LeftBumper = new ButtonInfo(() =>
+                    Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Buttons.LeftShoulder
+                    == ButtonState.Pressed);
+                RightBumper = new ButtonInfo(() =>
+                    Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Buttons.RightShoulder
+                    == ButtonState.Pressed);
+                LeftStick = new ButtonInfo(() =>
+                    Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Buttons.LeftStick == ButtonState.Pressed);
+                RightStick = new ButtonInfo(() =>
+                    Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Buttons.RightStick == ButtonState.Pressed);
+                LeftTrigger = new ButtonInfo(() =>
+                    Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Triggers.Left >= TriggerThreshold);
+                RightTrigger = new ButtonInfo(() =>
+                    Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).Triggers.Right >= TriggerThreshold);
             }
 
             public bool IsBeingUsed => A.Down
@@ -142,16 +156,20 @@ namespace FoldEngine.Input {
         }
 
         public class GamePadDPad {
-            public ButtonInfo Up;
             public ButtonInfo Down;
             public ButtonInfo Left;
             public ButtonInfo Right;
+            public ButtonInfo Up;
 
             public GamePadDPad(int playerId) {
-                Up = new ButtonInfo(() => Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).DPad.Up == ButtonState.Pressed);
-                Down = new ButtonInfo(() => Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).DPad.Down == ButtonState.Pressed);
-                Left = new ButtonInfo(() => Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).DPad.Left == ButtonState.Pressed);
-                Right = new ButtonInfo(() => Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).DPad.Right == ButtonState.Pressed);
+                Up = new ButtonInfo(() =>
+                    Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).DPad.Up == ButtonState.Pressed);
+                Down = new ButtonInfo(() =>
+                    Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).DPad.Down == ButtonState.Pressed);
+                Left = new ButtonInfo(() =>
+                    Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).DPad.Left == ButtonState.Pressed);
+                Right = new ButtonInfo(() =>
+                    Microsoft.Xna.Framework.Input.GamePad.GetState(playerId).DPad.Right == ButtonState.Pressed);
             }
 
             public bool IsBeingUsed => Up.Down || Down.Down || Left.Down || Right.Down;

@@ -1,12 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Xna.Framework.Graphics;
 
-namespace FoldEngine.Graphics
-{
-    public struct DrawRectInstruction
-    {
+namespace FoldEngine.Graphics {
+    public struct DrawRectInstruction {
         public ITexture Texture;
         public Rectangle DestinationRectangle;
         public Rectangle? SourceRectangle;
@@ -21,15 +16,18 @@ namespace FoldEngine.Graphics
             Color = null;
         }
 
-        public DrawRectInstruction(ITexture texture, Rectangle destinationRectangle, Rectangle? sourceRectangle = null) {
+        public DrawRectInstruction(
+            ITexture texture,
+            Rectangle destinationRectangle,
+            Rectangle? sourceRectangle = null) {
             Texture = texture;
             DestinationRectangle = destinationRectangle;
             SourceRectangle = sourceRectangle;
             Color = null;
         }
-        
+
         public static implicit operator DrawQuadInstruction(DrawRectInstruction instruction) {
-            return new DrawQuadInstruction() {
+            return new DrawQuadInstruction {
                 Texture = instruction.Texture,
                 A = new Vector3(instruction.DestinationRectangle.Left, instruction.DestinationRectangle.Bottom, 50),
                 B = new Vector3(instruction.DestinationRectangle.Left, instruction.DestinationRectangle.Top, 50),
@@ -42,8 +40,6 @@ namespace FoldEngine.Graphics
                 Color = instruction.Color
             };
         }
-        
-        
     }
 
     public struct DrawQuadInstruction {
@@ -135,7 +131,7 @@ namespace FoldEngine.Graphics
         public Color? ColorA;
         public Color? ColorB;
         public Color? ColorC;
-        
+
         public Color Color {
             set => ColorA = ColorB = ColorC = value;
         }
@@ -186,5 +182,4 @@ namespace FoldEngine.Graphics
             ColorC = colorC;
         }
     }
-
 }

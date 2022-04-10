@@ -1,14 +1,11 @@
-﻿using Microsoft.Xna.Framework;
-
-using System.Collections.Generic;
-
+﻿using System.Collections.Generic;
 using FoldEngine.Graphics;
+using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Interfaces
-{
+namespace FoldEngine.Interfaces {
     public interface IRenderingUnit {
         IGameCore Core { get; }
-        
+
         EffectManager Effects { get; set; }
         FontManager Fonts { get; set; }
 
@@ -16,14 +13,14 @@ namespace FoldEngine.Interfaces
         RenderGroup RootGroup { get; set; }
         RenderGroup MainGroup { get; set; }
         Dictionary<string, RenderGroup> Groups { get; }
-        
+
         ITexture WhiteTexture { get; }
 
-        void LoadContent();
-        
         IRenderingLayer WorldLayer { get; }
         IRenderingLayer WindowLayer { get; }
         IRenderingLayer GizmoLayer { get; }
+
+        void LoadContent();
 
         Rectangle GetGroupBounds(RenderGroup renderGroup);
         void Initialize();

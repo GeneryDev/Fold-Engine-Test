@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using FoldEngine.Events;
 using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
-using FoldEngine.Resources;
-using FoldEngine.Text;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Texture = FoldEngine.Graphics.Texture;
 
-namespace Woofer
-{
+namespace Woofer {
     public class WooferRenderingUnit : IRenderingUnit {
-        public IGameCore Core { get; private set; }
         private Point _windowSize = new Point(1280, 720);
+
+        public WooferRenderingUnit(WooferGameCore core) {
+            Core = core;
+        }
+
+        public IGameCore Core { get; }
 
         public EffectManager Effects { get; set; }
         public FontManager Fonts { get; set; }
@@ -24,20 +23,17 @@ namespace Woofer
             set {
                 Point oldSize = _windowSize;
                 _windowSize = value;
-                if(Core.FoldGame != null) {
+                if(Core.FoldGame != null)
                     if(value != oldSize) {
-                        foreach(RenderGroup group in Groups.Values) {
-                            group.WindowSizeChanged(oldSize, value);
-                        }
+                        foreach(RenderGroup group in Groups.Values) @group.WindowSizeChanged(oldSize, value);
                         Core.ActiveScene?.Events.Invoke(new WindowSizeChangedEvent(oldSize, value));
                     }
-                }
             }
         }
 
         public ITexture WhiteTexture { get; private set; }
-        
-        public Dictionary<string, RenderGroup> Groups { get; private set; } = new Dictionary<string, RenderGroup>();
+
+        public Dictionary<string, RenderGroup> Groups { get; } = new Dictionary<string, RenderGroup>();
 
         public RenderGroup RootGroup { get; set; }
         public RenderGroup MainGroup { get; set; }
@@ -46,14 +42,10 @@ namespace Woofer
         public IRenderingLayer WorldLayer => MainGroup["world"];
         public IRenderingLayer GizmoLayer => MainGroup["gizmos"];
 
-        public WooferRenderingUnit(WooferGameCore core) {
-            Core = core;
-        }
-
         public void Initialize() {
             Console.WriteLine("Initializing Rendering Unit");
-            var mainSize = new Point(1280, 720); 
-            
+            var mainSize = new Point(1280, 720);
+
             Groups["main"] = RootGroup = MainGroup = new RenderGroup(this) {
                 Size = mainSize,
                 ["world"] = new RenderingLayer(this) {
@@ -77,7 +69,7 @@ namespace Woofer
 
             var fullSize = new Point(1920, 1040);
 
-            
+
             Groups["editor"] = RootGroup = new RenderGroup(this) {
                 Size = fullSize,
                 ["editor_gui"] = new RenderingLayer(this) {
@@ -87,34 +79,29 @@ namespace Woofer
                 },
                 ["editor_gui_game"] = new DependencyRenderingLayer(0),
                 ["editor_gui_overlay"] = new RenderingLayer(this) {
-                    Name = "editor_gui_overlay", LayerSize = mainSize, Destination = new Rectangle(Point.Zero, mainSize),
+                    Name = "editor_gui_overlay", LayerSize = mainSize,
+                    Destination = new Rectangle(Point.Zero, mainSize),
                     FitToWindow = true,
                     LogicalSize = mainSize.ToVector2()
-                    
                 }
             };
-            Groups["editor"].AddDependency(new RenderGroup.Dependency() {
-                Group = new ResizableRenderGroup(MainGroup) {
-                    Size = mainSize
-                },
-                Destination = new Rectangle(Point.Zero, mainSize)
-            });
-            
+            Groups["editor"]
+                .AddDependency(new RenderGroup.Dependency {
+                    Group = new ResizableRenderGroup(MainGroup) {
+                        Size = mainSize
+                    },
+                    Destination = new Rectangle(Point.Zero, mainSize)
+                });
+
 
             WindowSize = RootGroup.Size;
             UpdateWindowSize();
         }
 
-        public void UpdateWindowSize() {
-            (Core.FoldGame.Graphics.PreferredBackBufferWidth, Core.FoldGame.Graphics.PreferredBackBufferHeight) =
-                WindowSize;
-            Core.FoldGame.Graphics.ApplyChanges();
-        }
-
         public void LoadContent() {
             Texture.CreateConstants();
             WhiteTexture = Texture.White;
-            
+
             Console.WriteLine("Loading Fonts");
             Fonts.LoadAll();
             Console.WriteLine("Fonts loaded");
@@ -123,7 +110,14 @@ namespace Woofer
         public Rectangle GetGroupBounds(RenderGroup renderGroup) {
             Rectangle? bounds = RootGroup.GetBounds(renderGroup);
             if(bounds.HasValue) return bounds.Value;
-            throw new ArgumentException($"RenderGroup {renderGroup} is not present in the current RenderGroup hierarchy.");
+            throw new ArgumentException(
+                $"RenderGroup {renderGroup} is not present in the current RenderGroup hierarchy.");
+        }
+
+        public void UpdateWindowSize() {
+            (Core.FoldGame.Graphics.PreferredBackBufferWidth, Core.FoldGame.Graphics.PreferredBackBufferHeight) =
+                WindowSize;
+            Core.FoldGame.Graphics.ApplyChanges();
         }
     }
 }

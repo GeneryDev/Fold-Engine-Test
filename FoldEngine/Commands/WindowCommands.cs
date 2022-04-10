@@ -14,6 +14,7 @@ namespace FoldEngine.Commands {
             core.FoldGame.Window.Title = _title;
         }
     }
+
     public class SetWindowSizeCommand : ICommand {
         private readonly Point _size;
 

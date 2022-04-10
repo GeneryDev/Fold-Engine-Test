@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace FoldEngine.Input {
     public class Player {
-        private List<ControlScheme> _controlSchemes = new List<ControlScheme>();
+        private readonly List<ControlScheme> _controlSchemes = new List<ControlScheme>();
         public ControlScheme ActiveScheme { get; private set; }
-        
+
         public T Get<T>(string identifier) where T : class, IAction {
             return ActiveScheme.Get<T>(identifier);
         }

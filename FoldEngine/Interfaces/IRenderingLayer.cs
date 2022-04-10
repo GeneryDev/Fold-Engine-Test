@@ -1,15 +1,13 @@
 ﻿using System;
+using FoldEngine.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-using FoldEngine.Graphics;
-
-namespace FoldEngine.Interfaces
-{
+namespace FoldEngine.Interfaces {
     public interface IRenderingLayer {
         IRenderingUnit RenderingUnit { get; }
         RenderGroup Group { get; set; }
-        
+
         string Name { get; }
         Point LayerSize { get; }
         Vector2 LogicalSize { get; }
@@ -32,28 +30,28 @@ namespace FoldEngine.Interfaces
     }
 
     public class RenderingLayer : IRenderingLayer {
-        public IRenderingUnit RenderingUnit { get; }
-        public RenderGroup Group { get; set; }
         private Point _layerSize;
 
         public RenderingLayer(IRenderingUnit renderer) {
-            this.RenderingUnit = renderer;
+            RenderingUnit = renderer;
         }
+
+        public bool FitToWindow { get; set; } = false;
+        public IRenderingUnit RenderingUnit { get; }
+        public RenderGroup Group { get; set; }
 
         public string Name { get; set; }
 
         public Point LayerSize {
             get => _layerSize;
             set {
-                if(Surface != null) {
+                if(Surface != null)
                     Surface.Resize(value.X, value.Y);
-                } else {
+                else
                     Surface = new RenderSurface(this, value.X, value.Y);
-                }
                 _layerSize = value;
             }
         }
-        public bool FitToWindow { get; set; } = false;
 
         public Vector2 LogicalSize { get; set; }
         public Rectangle Destination { get; set; }
@@ -73,7 +71,7 @@ namespace FoldEngine.Interfaces
             // point.Y = (int) Math.Round(y - point.Y * scaleY) + LayerSize.Y / 2;
 
             point.Y *= -1;
-            
+
             point *= LayerSize.ToVector2() / LogicalSize;
 
             point += LayerSize.ToVector2() / 2f;
@@ -83,9 +81,9 @@ namespace FoldEngine.Interfaces
 
 
         public Vector2 LayerToLayer(Vector2 point, IRenderingLayer to) {
-            Vector2 relativeScale = to.LayerSize.ToVector2() / this.LayerSize.ToVector2();
+            Vector2 relativeScale = to.LayerSize.ToVector2() / LayerSize.ToVector2();
 
-            return ((point - new Vector2(this.LayerSize.X / 2f, this.LayerSize.Y / 2f)) * relativeScale)
+            return (point - new Vector2(LayerSize.X / 2f, LayerSize.Y / 2f)) * relativeScale
                    + new Vector2(to.LayerSize.X / 2f, to.LayerSize.Y / 2f);
         }
 
@@ -95,7 +93,7 @@ namespace FoldEngine.Interfaces
 
         public Vector2 WindowToLayer(Vector2 point) {
             Rectangle groupBounds = Group.Bounds;
-            
+
             point -= groupBounds.Location.ToVector2();
             point /= groupBounds.Size.ToVector2();
             point *= Group.Size.ToVector2();
@@ -107,7 +105,7 @@ namespace FoldEngine.Interfaces
 
         public Vector2 LayerToWindow(Vector2 point) {
             Rectangle groupBounds = Group.Bounds;
-            
+
             point /= LayerSize.ToVector2();
             point *= Destination.Size.ToVector2();
             point += Destination.Location.ToVector2();
@@ -135,7 +133,8 @@ namespace FoldEngine.Interfaces
     }
 
     public class DependencyRenderingLayer : IRenderingLayer {
-        public int DependencyIndex = 0;
+        public int DependencyIndex;
+
         public DependencyRenderingLayer(int index) {
             DependencyIndex = index;
         }
@@ -149,6 +148,7 @@ namespace FoldEngine.Interfaces
         public SamplerState Sampling { get; }
         public RenderSurface Surface { get; set; }
         public Color? Color { get; set; }
+
         public Vector2 CameraToLayer(Vector2 point) {
             throw new NotImplementedException();
         }
@@ -169,13 +169,10 @@ namespace FoldEngine.Interfaces
             throw new NotImplementedException();
         }
 
-        public void WindowSizeChanged(Point oldSize, Point newSize) {
-        }
+        public void WindowSizeChanged(Point oldSize, Point newSize) { }
 
-        public void Begin() {
-        }
+        public void Begin() { }
 
-        public void End() {
-        }
+        public void End() { }
     }
 }

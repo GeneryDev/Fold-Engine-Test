@@ -1,14 +1,13 @@
 ﻿using System;
-using FoldEngine.Editor.Gui.Fields.Text;
 using FoldEngine.Gui;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Gui.Fields {
     public class ValueDropdown : GuiButton {
-
-        private int _parentWidthOccupied = 0;
         private int _fieldsInRow = 1;
-        
+
+        private int _parentWidthOccupied;
+
         public ValueDropdown FieldSpacing(int parentWidthOccupied, int fieldsInRow = 1) {
             _parentWidthOccupied = parentWidthOccupied;
             _fieldsInRow = fieldsInRow;
@@ -16,7 +15,7 @@ namespace FoldEngine.Editor.Gui.Fields {
         }
 
         public override void AdjustSpacing(GuiPanel parent) {
-            Bounds.Width = (int)Math.Ceiling((float)(parent.Bounds.Width - _parentWidthOccupied) / _fieldsInRow);
+            Bounds.Width = (int) Math.Ceiling((float) (parent.Bounds.Width - _parentWidthOccupied) / _fieldsInRow);
             Bounds.Height = 18;
             Margin = 4;
         }

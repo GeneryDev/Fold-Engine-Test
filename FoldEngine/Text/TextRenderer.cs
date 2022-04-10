@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using EntryProject.Util;
 using FoldEngine.Graphics;
 using Microsoft.Xna.Framework;
@@ -7,30 +6,27 @@ using Microsoft.Xna.Framework;
 namespace FoldEngine.Text {
     //Coordinate system where +Y is down and -Y is up
     public class TextRenderer {
-        public static TextRenderer Instance { get; } = new TextRenderer();
-        
+        private readonly List<RenderedTextGlyph> _glyphs = new List<RenderedTextGlyph>();
+
         private BitmapFont _bitmapFont;
-        private string _text;
-        private float _size;
-        private int _index;
         private Point _cursor;
-        private Point _minPoint;
+        private int _index;
+        private int _lineStartIndex;
         private Point _maxPoint;
+        private Point _minPoint;
+
+        private float _scale;
+        private float _size;
+        private string _text;
+        public static TextRenderer Instance { get; } = new TextRenderer();
 
         public Point Cursor => _cursor;
-        
-        private readonly List<RenderedTextGlyph> _glyphs = new List<RenderedTextGlyph>();
-        private int _lineStartIndex = 0;
 
         public int Width => _maxPoint.X - _minPoint.X;
         public int Height => _maxPoint.Y - _minPoint.Y;
 
-        private float _scale;
-
         public void Start(IFont font, string text, float size) {
-            if(font is FontSet fontSet) {
-                font = fontSet.PickFontForSize(size);
-            }
+            if(font is FontSet fontSet) font = fontSet.PickFontForSize(size);
             _bitmapFont = (BitmapFont) font;
             _text = text;
             _size = size;
@@ -46,6 +42,7 @@ namespace FoldEngine.Text {
                 if(!Append(c)) break;
                 _index++;
             }
+
             if(_index > _lineStartIndex) FlushLine();
         }
 
@@ -65,9 +62,7 @@ namespace FoldEngine.Text {
         }
 
         public void DumpChars(IEnumerable<char> chars) {
-            foreach(char c in chars) {
-                Append(c);
-            }
+            foreach(char c in chars) Append(c);
         }
 
         public void Render(BitmapFont bitmapFont, string text, out RenderedText output, float size) {
@@ -90,28 +85,27 @@ namespace FoldEngine.Text {
         private void FlushLine() {
             _cursor.X = 0;
             _cursor.Y += _bitmapFont.LineHeight;
-            
+
             _lineStartIndex = _index;
         }
-        
+
         private RenderedTextGlyph NextGlyph(char c) {
             GlyphInfo glyphInfo = _bitmapFont[c];
             if(glyphInfo.NotNull) {
-                
                 var glyph = new RenderedTextGlyph {
                     HasValue = true,
                     SourceIndex = glyphInfo.SourceIndex,
                     Source = glyphInfo.Source,
                     Destination = new Rectangle(
-                        (int) (_cursor.X * _scale), 
+                        (int) (_cursor.X * _scale),
                         (int) ((_cursor.Y - glyphInfo.Ascent) * _scale),
-                        (int) (glyphInfo.Width*_scale),
-                        (int) (glyphInfo.Height*_scale)
+                        (int) (glyphInfo.Width * _scale),
+                        (int) (glyphInfo.Height * _scale)
                     )
                 };
 
                 _cursor.X += glyphInfo.Advancement;
-                
+
                 return glyph;
             }
 
@@ -119,9 +113,7 @@ namespace FoldEngine.Text {
         }
 
         public void DrawOnto(RenderSurface surface, Point start, Color color, float scale = 1) {
-            foreach(RenderedTextGlyph glyph in _glyphs) {
-                glyph.DrawOnto(surface, start, color, scale, _bitmapFont);
-            }
+            foreach(RenderedTextGlyph glyph in _glyphs) glyph.DrawOnto(surface, start, color, scale, _bitmapFont);
         }
     }
 }
