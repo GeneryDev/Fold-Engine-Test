@@ -51,18 +51,22 @@ namespace Woofer {
                 ["world"] = new RenderingLayer(this) {
                     Name = "world", LayerSize = new Point(320, 180), Destination = new Rectangle(Point.Zero, mainSize),
                     LogicalSize = mainSize.ToVector2(),
+                    FitToWindow = true,
                     Color = new Color(56, 56, 56)
                 },
                 ["gizmos"] = new RenderingLayer(this) {
                     Name = "gizmos", LayerSize = mainSize, Destination = new Rectangle(Point.Zero, mainSize),
+                    FitToWindow = true,
                     LogicalSize = mainSize.ToVector2()
                 },
                 ["screen"] = new RenderingLayer(this) {
                     Name = "screen", LayerSize = mainSize, Destination = new Rectangle(Point.Zero, mainSize),
+                    FitToWindow = true,
                     LogicalSize = mainSize.ToVector2()
                 },
                 ["hud"] = new RenderingLayer(this) {
                     Name = "hud", LayerSize = new Point(640, 360), Destination = new Rectangle(Point.Zero, mainSize),
+                    FitToWindow = true,
                     LogicalSize = mainSize.ToVector2()
                 }
             };
@@ -71,7 +75,7 @@ namespace Woofer {
 
 
             Groups["editor"] = RootGroup = new RenderGroup(this) {
-                Size = fullSize,
+                Size = mainSize,
                 ["editor_gui"] = new RenderingLayer(this) {
                     Name = "editor_gui", LayerSize = mainSize, Destination = new Rectangle(Point.Zero, mainSize),
                     FitToWindow = true,

@@ -187,7 +187,7 @@ namespace Sandbox {
             //     .Vertex(new Vector2(0.5f, -0.5f), new Vector2(1, 1))
             //     .End();
 
-            SceneEditor.AttachEditor(this);
+            // SceneEditor.AttachEditor(this);
 
             // SoundInstance music = Core.AudioUnit.CreateInstance("Audio/music");
             // music.Looping = true;
