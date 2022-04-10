@@ -31,6 +31,8 @@ namespace FoldEngine.Physics {
         [ShowOnlyIf(nameof(ThickFaces), false)]
         public float ThinFaceTolerance;
 
+        public bool IsTrigger;
+
         public static Collider InitializeComponent(Scene scene, long entityId) {
             return new Collider {
                 Type = ColliderType.Box,

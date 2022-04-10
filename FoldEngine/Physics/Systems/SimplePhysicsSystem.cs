@@ -155,6 +155,7 @@ namespace FoldEngine.Physics {
         private void CollisionResponse(IntersectionData data, Entity entity) {
             ref Transform transform = ref entity.Transform;
             ref Physics physics = ref entity.GetComponent<Physics>();
+            ref Collider collider = ref entity.GetComponent<Collider>();
 
             var other = new Entity(entity.Scene, data.Other);
             ref Physics otherPhysics = ref other.GetComponent<Physics>();
@@ -244,7 +245,7 @@ namespace FoldEngine.Physics {
                     Separation = relativeVelocity.Length() - largestMoveDepth
                 };
 
-                if(!physics.Static) {
+                if(!physics.Static && !(collider.IsTrigger || otherCollider.IsTrigger)) {
                     float friction = otherPhysics.Friction;
                     float restitution = Math.Max(physics.Restitution, otherPhysics.Restitution);
                     if(AttemptDisplacement(entity, -collision.Direction.Normalized() * collision.DirectionDepth,
