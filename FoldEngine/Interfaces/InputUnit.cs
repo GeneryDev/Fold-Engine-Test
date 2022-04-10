@@ -11,8 +11,8 @@ namespace FoldEngine.Interfaces {
             Players.Update();
         }
 
-        public void Setup(string configPath) {
-            foreach(Player player in new InputBuilder(Devices, JsonDeserializerRoot.NewFromFile(configPath).AsObject())
+        public void Setup(InputDefinition def) {
+            foreach(Player player in new InputBuilder(Devices, new JsonDeserializerRoot(def.Identifier, def.Root).AsObject())
                 .Build()) {
                 Players.Add(player);
             }

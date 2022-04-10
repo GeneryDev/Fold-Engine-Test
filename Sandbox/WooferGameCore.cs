@@ -40,8 +40,6 @@ namespace Woofer {
             Resources = new ResourceCollections(this);
             ResourceIndex = new ResourceIndex();
             ResourceIndex.Update();
-
-            InputUnit.Setup("Content/Config/input.json");
             
             ActiveScene = new DemoScene(this);
         }
@@ -53,8 +51,13 @@ namespace Woofer {
 
         public void LoadContent() {
             Console.WriteLine("Loading Core Content");
-            // AudioUnit.Load("Audio/failure");
-            // AudioUnit.Load("Audio/music");
+            
+            foreach(string inputName in ResourceIndex.GetIdentifiersInGroup<InputDefinition>("#default")) {
+                var identifier = new ResourceIdentifier(inputName);
+                Resources.Load<InputDefinition>(ref identifier, d => {
+                    InputUnit.Setup((InputDefinition) d);
+                });
+            }
         }
 
         public void Input() {

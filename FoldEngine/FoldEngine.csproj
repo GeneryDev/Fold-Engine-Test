@@ -137,6 +137,7 @@
         <Compile Include="Input\IAction.cs" />
         <Compile Include="Input\IInputDevice.cs" />
         <Compile Include="Input\InputBuilder.cs" />
+        <Compile Include="Input\InputDefinition.cs" />
         <Compile Include="Input\InputDevices.cs" />
         <Compile Include="Input\Keyboard.cs" />
         <Compile Include="Input\Mouse.cs" />

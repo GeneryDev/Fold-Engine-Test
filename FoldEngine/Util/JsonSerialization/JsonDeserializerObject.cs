@@ -246,7 +246,7 @@ namespace EntryProject.Util.JsonSerialization {
     public class JsonDeserializerRoot : JsonDeserializerNode {
         private JToken _root;
 
-        private JsonDeserializerRoot(string key, JToken root) {
+        public JsonDeserializerRoot(string key, JToken root) {
             this.Key = key;
             _root = root;
         }
