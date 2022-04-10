@@ -16,6 +16,7 @@ namespace FoldEngine.Interfaces {
 
         RenderSurface Surface { get; set; }
         Color? Color { get; set; }
+        bool IsRoot { get; set; }
 
         Vector2 CameraToLayer(Vector2 point);
         Vector2 LayerToCamera(Vector2 point);
@@ -37,6 +38,18 @@ namespace FoldEngine.Interfaces {
         }
 
         public bool FitToWindow { get; set; } = false;
+        private bool _isRoot;
+
+        public bool IsRoot {
+            get => _isRoot;
+            set {
+                bool changed = _isRoot != value;
+                _isRoot = value;
+                if(changed) {
+                    WindowSizeChanged(RenderingUnit.WindowSize, RenderingUnit.WindowSize);
+                }
+            }
+        }
         public IRenderingUnit RenderingUnit { get; }
         public RenderGroup Group { get; set; }
 
@@ -116,7 +129,7 @@ namespace FoldEngine.Interfaces {
         }
 
         public void WindowSizeChanged(Point oldSize, Point newSize) {
-            if(FitToWindow) {
+            if(FitToWindow && IsRoot) {
                 LayerSize = newSize;
                 Destination = new Rectangle(Point.Zero, LayerSize);
                 LogicalSize = newSize.ToVector2();
@@ -148,6 +161,7 @@ namespace FoldEngine.Interfaces {
         public SamplerState Sampling { get; }
         public RenderSurface Surface { get; set; }
         public Color? Color { get; set; }
+        public bool IsRoot { get; set; }
 
         public Vector2 CameraToLayer(Vector2 point) {
             throw new NotImplementedException();

@@ -53,6 +53,7 @@
         <Compile Include="Audio\Sound.cs" />
         <Compile Include="Commands\CommandQueue.cs" />
         <Compile Include="Commands\ICommand.cs" />
+        <Compile Include="Commands\RendererCommands.cs" />
         <Compile Include="Commands\SceneCommands.cs" />
         <Compile Include="Commands\WindowCommands.cs" />
         <Compile Include="Components\Component.cs" />

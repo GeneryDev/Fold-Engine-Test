@@ -25,7 +25,7 @@ namespace Woofer {
                 _windowSize = value;
                 if(Core.FoldGame != null)
                     if(value != oldSize) {
-                        foreach(RenderGroup group in Groups.Values) @group.WindowSizeChanged(oldSize, value);
+                        foreach(RenderGroup group in Groups.Values) group.WindowSizeChanged(oldSize, value);
                         Core.ActiveScene?.Events.Invoke(new WindowSizeChangedEvent(oldSize, value));
                     }
             }
@@ -74,7 +74,7 @@ namespace Woofer {
             var fullSize = new Point(1920, 1040);
 
 
-            Groups["editor"] = RootGroup = new RenderGroup(this) {
+            Groups["editor"] = new RenderGroup(this) {
                 Size = mainSize,
                 ["editor_gui"] = new RenderingLayer(this) {
                     Name = "editor_gui", LayerSize = mainSize, Destination = new Rectangle(Point.Zero, mainSize),
@@ -96,7 +96,6 @@ namespace Woofer {
                     },
                     Destination = new Rectangle(Point.Zero, mainSize)
                 });
-
 
             WindowSize = RootGroup.Size;
             UpdateWindowSize();

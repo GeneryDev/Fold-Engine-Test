@@ -15,6 +15,7 @@ namespace FoldEngine.Interfaces {
 
         public virtual Point Size { get; set; } //analogous to window size
         public Rectangle Bounds => RenderingUnit.GetGroupBounds(this);
+        public bool IsRoot { get; set; }
 
         public IRenderingLayer this[string layerName] {
             get => _layers.ContainsKey(layerName) ? _layers[layerName] : null;
@@ -26,8 +27,14 @@ namespace FoldEngine.Interfaces {
 
 
         public void Begin() {
-            foreach(IRenderingLayer layer in _layers.Values) layer.Begin();
-            foreach(Dependency dependency in Dependencies) dependency.Group.Begin();
+            foreach(IRenderingLayer layer in _layers.Values) {
+                layer.IsRoot = IsRoot;
+                layer.Begin();
+            }
+            foreach(Dependency dependency in Dependencies) {
+                dependency.Group.IsRoot = false;
+                dependency.Group.Begin();
+            }
         }
 
         public void End() {

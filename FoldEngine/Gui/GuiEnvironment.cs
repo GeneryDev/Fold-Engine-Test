@@ -77,7 +77,12 @@ namespace FoldEngine.Gui {
             }
 
             MousePos = Mouse.GetState().Position;
-            if(BaseLayer != null) MousePos = BaseLayer.WindowToLayer(MousePos.ToVector2()).ToPoint();
+            if(BaseLayer != null)
+                try {
+                    MousePos = BaseLayer.WindowToLayer(MousePos.ToVector2()).ToPoint();
+                } catch(Exception ignore) {
+                    Console.WriteLine(ignore.Message);
+                }
 
             HandleMouseEvents(MouseLeft, MouseEvent.LeftButton);
             HandleMouseEvents(MouseMiddle, MouseEvent.MiddleButton);

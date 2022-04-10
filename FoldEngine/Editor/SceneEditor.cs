@@ -31,8 +31,7 @@ namespace FoldEngine.Editor {
         }
 
         public static void ResetViewport(IRenderingUnit renderer) {
-            renderer.Groups["editor"].Dependencies[0].Group.Size = renderer.WindowSize;
-            renderer.Groups["editor"].Dependencies[0].Destination = new Rectangle(Point.Zero, renderer.WindowSize);
+            renderer.Core.CommandQueue.Enqueue(new SetRootRendererGroupCommand(renderer.MainGroup));
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

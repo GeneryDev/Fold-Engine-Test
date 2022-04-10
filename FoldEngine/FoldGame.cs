@@ -143,7 +143,7 @@ namespace FoldEngine {
 
             GraphicsDevice.SetRenderTarget(null);
 
-
+            Core.RenderingUnit.RootGroup.IsRoot = true;
             Core.RenderingUnit.RootGroup.Begin();
 
             Core.Render();

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using FoldEngine.Commands;
 using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
 using FoldEngine.Editor.Views;
@@ -49,6 +50,11 @@ namespace FoldEngine.Editor {
         }
 
         public override void OnRender(IRenderingUnit renderer) {
+            if(!renderer.Groups.ContainsKey("editor")) return;
+            if(renderer.RootGroup != renderer.Groups["editor"]) {
+                Scene.Core.CommandQueue.Enqueue(new SetRootRendererGroupCommand(renderer.Groups["editor"]));
+                return;
+            }
             Environment.Render(renderer, renderer.RootGroup["editor_gui"], renderer.RootGroup["editor_gui_overlay"]);
 
             foreach(long entityId in EditingEntity)
