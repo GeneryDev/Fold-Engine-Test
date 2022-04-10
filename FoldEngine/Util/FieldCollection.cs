@@ -21,6 +21,8 @@ namespace EntryProject.Util {
             if(_dict == null) _dict = new Dictionary<IField, object>();
             _dict[field] = value;
         }
+
+        public delegate void Configurator(FieldCollection options);
     }
 
     public interface IField { }

@@ -58,6 +58,10 @@ namespace FoldEngine.Editor.Views {
             // ContentPanel.Element<ToolbarButton>().Text("Quit").FontSize(14);
         }
 
+        internal static void NewSceneLoaded() {
+            _storedScene = null;
+        }
+
         private void Play(EditorEnvironment environment) {
             environment.Scene.EditorComponents = null;
 

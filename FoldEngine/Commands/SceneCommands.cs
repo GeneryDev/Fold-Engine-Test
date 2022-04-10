@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Remoting.Messaging;
+using FoldEngine.Editor;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
@@ -17,7 +19,9 @@ namespace FoldEngine.Commands {
         public void Execute(IGameCore core) {
             string oldIdentifier = core.ActiveScene.Identifier;
             core.ActiveScene.Identifier = Identifier;
-            core.ActiveScene.Save();
+            core.ActiveScene.Save(options => {
+                options.Set(SerializeExcludeSystems.Instance, new List<Type> {typeof(EditorBase)});
+            });
             core.ActiveScene.Identifier = oldIdentifier;
 
             core.ResourceIndex.Update();
@@ -26,9 +30,11 @@ namespace FoldEngine.Commands {
 
     public class LoadSceneCommand : ICommand {
         public ResourceIdentifier Identifier;
+        public bool AttachEditor;
 
-        public LoadSceneCommand(string identifier) {
+        public LoadSceneCommand(string identifier, bool attachEditor = false) {
             Identifier = new ResourceIdentifier(identifier);
+            AttachEditor = attachEditor;
         }
 
         public void Execute(IGameCore core) {
@@ -36,6 +42,11 @@ namespace FoldEngine.Commands {
                 Console.WriteLine("Successfully loaded!");
                 core.ActiveScene = (Scene)s;
                 core.Resources.Detach(s);
+                if(AttachEditor) {
+                    SceneEditor.AttachEditor((Scene)s);
+                } else {
+                    SceneEditor.ResetViewport(core.RenderingUnit);
+                }
             });
             // var loadOp = new LoadOperation(SourcePath);
             //

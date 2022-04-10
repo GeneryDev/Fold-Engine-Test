@@ -29,8 +29,21 @@ namespace FoldEngine.Scenes {
         public void Serialize(SaveOperation writer) {
             writer.WriteCompound((ref SaveOperation.Compound c) => {
                 c.WriteMember(nameof(_all), () => {
-                    writer.Write(_all.Count);
-                    foreach(GameSystem sys in _all) writer.Write(sys.SystemName);
+                    int count = _all.Count;
+                    if(writer.Options.Has(SerializeExcludeSystems.Instance)) {
+                        count = 0;
+                        foreach(GameSystem sys in _all) {
+                            if(writer.Options.Get(SerializeExcludeSystems.Instance).Contains(sys.GetType())) continue;
+                            count++;
+                        }
+                    }
+                    writer.Write(count);
+                    
+                    foreach(GameSystem sys in _all) {
+                        if(count != _all.Count
+                           && writer.Options.Get(SerializeExcludeSystems.Instance).Contains(sys.GetType())) continue;
+                        writer.Write(sys.SystemName);
+                    }
                 });
             });
         }
@@ -60,6 +73,10 @@ namespace FoldEngine.Scenes {
 
         public void Remove(GameSystem sys) {
             _queuedToRemove.Enqueue(sys);
+        }
+
+        public void Remove<T>() where T : GameSystem, new() {
+            Remove(Get<T>());
         }
 
         private void UpdateProcessingGroups() {

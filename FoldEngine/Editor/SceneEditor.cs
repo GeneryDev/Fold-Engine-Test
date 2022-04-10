@@ -3,7 +3,10 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using FoldEngine.Commands;
+using FoldEngine.Editor.Views;
+using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
+using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor {
     public static class SceneEditor {
@@ -14,6 +17,22 @@ namespace FoldEngine.Editor {
             scene.Paused = true;
 
             scene.Systems.Add<EditorBase>();
+            EditorToolbarView.NewSceneLoaded();
+        }
+        public static void DetachEditor(Scene scene) {
+            scene.EditorComponents = null;
+
+            scene.Core.CommandQueue.Enqueue(new SetWindowTitleCommand(scene.Name));
+            scene.Paused = false;
+
+            scene.Systems.Remove<EditorBase>();
+
+            ResetViewport(scene.Core.RenderingUnit);
+        }
+
+        public static void ResetViewport(IRenderingUnit renderer) {
+            renderer.Groups["editor"].Dependencies[0].Group.Size = renderer.WindowSize;
+            renderer.Groups["editor"].Dependencies[0].Destination = new Rectangle(Point.Zero, renderer.WindowSize);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

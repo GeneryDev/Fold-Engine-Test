@@ -216,16 +216,17 @@ namespace FoldEngine.Resources {
             }
         }
 
-        public void Save() {
+        public void Save(FieldCollection.Configurator configurator = null) {
             ResourceAttribute resourceAttribute = AttributeOf(GetType());
             string resourceFolder = Path.Combine("resources", resourceAttribute.DirectoryName);
             string path = Path.Combine(resourceFolder, Identifier);
             path = Path.ChangeExtension(path, resourceAttribute.Extensions[0]);
-            Save(path);
+            Save(path, configurator);
         }
 
-        public void Save(string path) {
+        public void Save(string path, FieldCollection.Configurator configurator = null) {
             var writer = new SaveOperation(Data.Out.Stream(path));
+            configurator?.Invoke(writer.Options);
             try {
                 SerializeResource(writer);
             } finally {
@@ -243,14 +244,23 @@ namespace FoldEngine.Resources {
 
         private static void PopulateDictionaryWithAssembly(Assembly assembly) {
             foreach(Type type in assembly.GetTypes())
-                if(type.IsSubclassOf(typeof(Resource)))
-                    _attributes[type] = type.GetCustomAttribute<ResourceAttribute>()
-                                        ?? new ResourceAttribute(type.Name.ToLowerInvariant());
+                if(type.IsSubclassOf(typeof(Resource))) {
+                    var attribute = type.GetCustomAttribute<ResourceAttribute>(false);
+                    if(attribute != null) _attributes[type] = attribute;
+                }
         }
 
         public static ResourceAttribute AttributeOf(Type type) {
             Populate();
-            return _attributes[type];
+            if(_attributes.ContainsKey(type)) {
+                return _attributes[type];
+            } else {
+                foreach(Type key in _attributes.Keys) {
+                    if(type.IsSubclassOf(key)) return _attributes[key];
+                }
+
+                return null;
+            }
         }
 
         public static ResourceAttribute AttributeOf<T>() where T : Resource {

@@ -224,13 +224,6 @@ namespace FoldEngine.Scenes {
             }
         }
 
-        public void Save(string path) {
-            var saveOp = new SaveOperation(path);
-            Serialize(saveOp);
-            saveOp.Close();
-            saveOp.Dispose();
-        }
-
         public void Serialize(SaveOperation writer) {
             writer.WriteCompound((ref SaveOperation.Compound c) => {
                 if(!writer.Options.Has(SerializeOnlyEntities.Instance)) {
@@ -291,6 +284,10 @@ namespace FoldEngine.Scenes {
 
             return false;
         }
+
+        public bool IsEditorAttached() {
+            return Systems.Get<EditorBase>() != null;
+        }
     }
 
     public class SerializeOnlyEntities : Field<List<long>> {
@@ -303,6 +300,10 @@ namespace FoldEngine.Scenes {
 
     public class SerializeTempResources : Field<bool> {
         public static readonly SerializeTempResources Instance = new SerializeTempResources();
+    }
+
+    public class SerializeExcludeSystems : Field<List<Type>> {
+        public static readonly SerializeExcludeSystems Instance = new SerializeExcludeSystems();
     }
 
 

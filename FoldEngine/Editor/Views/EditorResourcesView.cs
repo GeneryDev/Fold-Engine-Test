@@ -22,6 +22,11 @@ namespace FoldEngine.Editor.Views {
             if(ContentPanel.Button("Invalidate Caches", 14).IsPressed()) Scene.Resources.InvalidateCaches();
             if(ContentPanel.Button("Invoke GC", 14).IsPressed()) GC.Collect(GC.MaxGeneration);
             
+            
+            if(ContentPanel.Button("Detach Editor (no undo!)", 14).IsPressed()) {
+                SceneEditor.DetachEditor(Scene);
+                Console.WriteLine("Editor detached!");
+            }
         }
     }
 }

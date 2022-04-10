@@ -67,7 +67,7 @@ namespace Sandbox.Systems {
             if(Scene.Core.InputUnit.Players[0].Get<ButtonAction>("quicksave").Consume())
                 Scene.Core.CommandQueue.Enqueue(new SaveSceneCommand("__saved_state"));
             else if(Scene.Core.InputUnit.Players[0].Get<ButtonAction>("quickload").Consume())
-                Scene.Core.CommandQueue.Enqueue(new LoadSceneCommand("__saved_state"));
+                Scene.Core.CommandQueue.Enqueue(new LoadSceneCommand("__saved_state", Scene.IsEditorAttached()));
 
             _livingComponents.Reset();
 
