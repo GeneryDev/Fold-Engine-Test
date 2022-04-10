@@ -176,5 +176,13 @@ namespace FoldEngine.Scenes {
 
             return null;
         }
+
+        public GameSystem Get(Type type) {
+            foreach(GameSystem sys in _all)
+                if(type.IsInstanceOfType(sys))
+                    return sys;
+
+            return null;
+        }
     }
 }

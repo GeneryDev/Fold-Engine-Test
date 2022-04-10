@@ -96,6 +96,7 @@ namespace FoldEngine.Components {
         }
 
         public static IEnumerable<Type> GetAllTypes() {
+            PopulateIdentifiers();
             return _identifierToTypeMap.Values;
         }
     }

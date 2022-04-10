@@ -85,6 +85,11 @@ namespace FoldEngine.Systems {
             return (GameSystem) _identifierToConstructorMap[identifier].Invoke(new object[0]);
         }
 
+        public static IEnumerable<Type> GetAllTypes() {
+            PopulateIdentifiers();
+            return _identifierToTypeMap.Values;
+        }
+
         public static void PopulateDictionaryWithAssembly(Assembly assembly) {
             if(_identifierToTypeMap == null) _identifierToTypeMap = new Dictionary<string, Type>();
             if(_identifierToConstructorMap == null)

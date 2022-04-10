@@ -246,8 +246,8 @@ namespace FoldEngine.Gui {
             return this;
         }
 
-        public bool IsPressed() {
-            if(_lastEvent.Button == MouseEvent.LeftButton
+        public bool IsPressed(int button = MouseEvent.LeftButton) {
+            if(_lastEvent.Button == button
                && _lastEvent.When != 0
                && Time.Now >= _lastEvent.When
                && !_lastEvent.Consumed) {
@@ -258,8 +258,8 @@ namespace FoldEngine.Gui {
             return false;
         }
 
-        public bool IsPressed(out Point position) {
-            bool pressed = IsPressed();
+        public bool IsPressed(out Point position, int button = MouseEvent.LeftButton) {
+            bool pressed = IsPressed(button);
             position = pressed ? _lastEvent.Position : default;
             return pressed;
         }

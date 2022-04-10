@@ -24,7 +24,7 @@ namespace FoldEngine.Editor.Tools {
                 worldLayer.LayerToCamera(worldLayer.WindowToLayer(Environment.MousePos.ToVector2()));
             Vector2 worldPos = cameraTransform.Apply(cameraRelativePos);
 
-            long intersectingEntities = Scene.Systems.Get<LevelRenderer2D>().ListEntitiesIntersectingPosition(worldPos);
+            long intersectingEntities = Scene.Systems.Get<LevelRenderer2D>()?.ListEntitiesIntersectingPosition(worldPos) ?? -1;
 
             var editorBase = Scene.Systems.Get<EditorBase>();
             if(!Scene.Core.InputUnit.Devices.Keyboard[Keys.LeftControl].Down

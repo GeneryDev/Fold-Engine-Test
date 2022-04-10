@@ -93,6 +93,7 @@
         <Compile Include="Editor\Tools\RotateTool.cs" />
         <Compile Include="Editor\Tools\ScaleTool.cs" />
         <Compile Include="Editor\Tools\SelectTool.cs" />
+        <Compile Include="Editor\Transactions\AddSystemTransaction.cs" />
         <Compile Include="Editor\Transactions\ChangeEntityHierarchyTransaction.cs" />
         <Compile Include="Editor\Transactions\ComponentTransactions.cs" />
         <Compile Include="Editor\Transactions\CreateEntityTransaction.cs" />
