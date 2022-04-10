@@ -32,6 +32,12 @@ namespace FoldEngine.Gui {
             EndPreviousElement();
             // Bounds = new Rectangle(pos, new Point(150, 300));
             Bounds.Size = ContentSize;
+            if(Bounds.Bottom > renderer.WindowSize.Y) {
+                Bounds.Y -= Bounds.Size.Y;
+            }
+            if(Bounds.Right > renderer.WindowSize.X) {
+                Bounds.X -= Bounds.Size.X;
+            }
             layer.Surface.Draw(new DrawRectInstruction {
                 Texture = renderer.WhiteTexture,
                 DestinationRectangle = Bounds.Grow(2).Translate(offset),
