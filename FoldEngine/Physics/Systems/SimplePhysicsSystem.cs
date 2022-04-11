@@ -233,7 +233,7 @@ namespace FoldEngine.Physics {
             if(!largestMoveDepth.Equals(float.NaN) && maxSurfaceNormalFaceLength > 0) {
                 Complex surfaceNormalComplex = surfaceNormal;
                 if(largestNormalDepth <= 0) return;
-                if(Math.Abs(Vector2.Dot(moveDirection, surfaceNormal)) <= 0.01f) return;
+                // if(Math.Abs(Vector2.Dot(moveDirection, surfaceNormal)) <= 0.01f) return;
 
                 var collision = new CollisionEvent {
                     First = entity,
