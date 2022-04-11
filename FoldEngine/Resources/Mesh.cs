@@ -118,7 +118,7 @@ namespace FoldEngine.Resources {
             return this;
         }
 
-        public void End() {
+        public Mesh End() {
             switch(_inputType) {
                 case MeshInputType.Triangles:
                     if(_vertexCount % 3 != 0)
@@ -218,6 +218,8 @@ namespace FoldEngine.Resources {
 
                     break;
             }
+
+            return this;
         }
 
         private static bool IsPointInsidePolygon(Vector3 point, IReadOnlyList<EarClippingNode> nodes) {

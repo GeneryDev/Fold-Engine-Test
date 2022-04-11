@@ -22,6 +22,10 @@ namespace FoldEngine.Editor.Views {
                 SceneEditor.DetachEditor(Scene);
                 Console.WriteLine("Editor detached!");
             }
+
+            if(ContentPanel.Button("Breakpoint", 14).IsPressed()) {
+                Console.WriteLine("Breakpoint!");
+            }
         }
     }
 }

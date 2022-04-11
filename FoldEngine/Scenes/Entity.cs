@@ -39,6 +39,10 @@ namespace FoldEngine.Scenes {
             Scene.Components.RemoveComponent<T>(EntityId);
         }
 
+        public void Delete() {
+            Scene.DeleteEntity(EntityId);
+        }
+
         public bool IsAncestorOf(Entity other) {
             if(!ReferenceEquals(Scene, other.Scene)) return false;
             while(other.Transform.HasParent) {

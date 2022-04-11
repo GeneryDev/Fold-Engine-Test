@@ -64,18 +64,18 @@ namespace FoldEngine.Components {
             if((int) entityId < MinId || (int) entityId >= MaxId || Sparse[(int) entityId - MinId] == -1)
                 return ref BackupSet.Get(entityId);
 
-            if(Dense[Sparse[entityId - MinId]].ModifiedTimestamp <= CurrentTimestamp
-               && Dense[Sparse[entityId - MinId]].EntityId == entityId)
-                return ref Dense[Sparse[entityId - MinId]].Component;
+            if(Dense[Sparse[(int)entityId - MinId]].ModifiedTimestamp <= CurrentTimestamp
+               && Dense[Sparse[(int)entityId - MinId]].EntityId == entityId)
+                return ref Dense[Sparse[(int)entityId - MinId]].Component;
             throw new ComponentRegistryException($"Component {typeof(T)} not found for entity ID {entityId}");
         }
 
         public override bool Has(long entityId) {
-            if(entityId < MinId || entityId >= MaxId || Sparse[entityId - MinId] == -1)
+            if((int)entityId < MinId || (int)entityId >= MaxId || Sparse[(int)entityId - MinId] == -1)
                 return BackupSet.Has(entityId);
 
-            return Dense[Sparse[entityId - MinId]].ModifiedTimestamp <= CurrentTimestamp
-                   && Dense[Sparse[entityId - MinId]].EntityId == entityId;
+            return Dense[Sparse[(int)entityId - MinId]].ModifiedTimestamp <= CurrentTimestamp
+                   && Dense[Sparse[(int)entityId - MinId]].EntityId == entityId;
         }
 
         private bool Has(int entityId) {
@@ -165,20 +165,22 @@ namespace FoldEngine.Components {
             }
 
             //Have no space in dense. Use the backup set
-            return ref BackupSet.Create(entityId);
+            ref T component = ref BackupSet.Create(entityId);
+            Component.InitializeComponent<T>(ref component, Scene, entityId);
+            return ref component;
         }
 
         public override void Remove(long entityId) {
-            if(entityId >= MinId && entityId < MaxId && Sparse[entityId - MinId] != -1) {
+            if((int)entityId >= MinId && (int)entityId < MaxId && Sparse[(int)entityId - MinId] != -1) {
                 _dsMarkedForRemoval.Add((int) entityId);
                 int timestampOffset = 1;
-                if(Dense[Sparse[entityId - MinId]].ModifiedTimestamp == CurrentTimestamp
+                if(Dense[Sparse[(int)entityId - MinId]].ModifiedTimestamp == CurrentTimestamp
                     ) //This component was added THIS tick and is being removed the same tick.
                     //In this case, set its "modified timestamp" to 2 ticks from now instead of 1.
                     //This has a special meaning when the component wants to be re-added.
                     timestampOffset = 2;
 
-                Dense[Sparse[entityId - MinId]].ModifiedTimestamp =
+                Dense[Sparse[(int)entityId - MinId]].ModifiedTimestamp =
                     CurrentTimestamp + timestampOffset; //Mark as "removed" so Get<>() will skip it but iterators won't.
 
                 //Sparse will remain pointing to a location in dense for purposes of iteration

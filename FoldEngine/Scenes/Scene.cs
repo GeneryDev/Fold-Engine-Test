@@ -73,6 +73,11 @@ namespace FoldEngine.Scenes {
         public float TimeScale { get; set; }
 
         public void DeleteEntity(long entityId, bool reclaimable = false) {
+            ref Transform transform = ref Components.GetComponent<Transform>(entityId);
+            if(transform.HasParent) {
+                transform.MutableParent.RemoveChild(entityId);
+            }
+            
             Components.RemoveAllComponents(entityId);
             if(reclaimable) {
                 if(_reclaimableIds == null) {
@@ -81,6 +86,10 @@ namespace FoldEngine.Scenes {
                 }
 
                 _reclaimableIds.Add(true);
+            }
+
+            if(_deletedIds.Contains(entityId)) {
+                throw new InvalidOperationException("Entity id was already deleted!!!!");
             }
 
             _deletedIds.Add(entityId);

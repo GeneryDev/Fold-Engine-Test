@@ -35,12 +35,16 @@ namespace FoldEngine.Editor.Views {
             ContentPanel.Label(Scene.Components.GetComponent<EntityName>(id).Name, 14)
                 .TextAlignment(-1)
                 .Icon(Scene.Resources.Get<Texture>(ref EditorIcons.Cube));
-            ContentPanel.Label($"ID: {id}", 7).TextAlignment(-1);
+            if(id >= int.MaxValue) {
+                ContentPanel.Label($"ID: {id} ({(int)id})", 7).TextAlignment(-1);
+            } else {
+                ContentPanel.Label($"ID: {id}", 7).TextAlignment(-1);
+            }
             ContentPanel.Spacing(12);
 
-            foreach(ComponentSet set in Scene.Components.Sets.Values
-            ) // if(set.ComponentType == typeof(EntityName)) continue;
-                if(set.Has((int) id)) {
+            foreach(ComponentSet set in Scene.Components.Sets.Values)
+                // if(set.ComponentType == typeof(EntityName)) continue;
+                if(set.Has(id)) {
                     ComponentInfo componentInfo = ComponentInfo.Get(set.ComponentType);
                     if(componentInfo.HideInInspector) continue;
 
@@ -54,7 +58,7 @@ namespace FoldEngine.Editor.Views {
 
                     foreach(ComponentMember member in componentInfo.Members) {
                         if(!member.ShouldShowInInspector(Scene, id)) continue;
-                        object value = set.GetFieldValue((int) id, member.FieldInfo);
+                        object value = set.GetFieldValue(id, member.FieldInfo);
                         // ContentPanel
                         //     .Label(
                         //         StringBuilder

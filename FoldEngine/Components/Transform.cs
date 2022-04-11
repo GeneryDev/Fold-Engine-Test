@@ -401,6 +401,8 @@ namespace FoldEngine.Components {
 
                         if(Scene.Components.HasComponent<Transform>(NextSiblingId))
                             Scene.Components.GetComponent<Transform>(NextSiblingId).PreviousSiblingId = EntityId;
+                    } else {
+                        nextSibling.RemoveSibling(siblingEntityId);
                     }
                 } else {
                     NextSiblingId = -1;
