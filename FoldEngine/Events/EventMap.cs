@@ -57,11 +57,19 @@ namespace FoldEngine.Events {
         }
 
         public void FlushAfterSystem() {
-            foreach(IEventQueue queue in _afterSystemQueues) queue.Flush();
+            // ReSharper disable once ForCanBeConvertedToForeach
+            for(int i = 0; i < _afterSystemQueues.Count; i++) {
+                IEventQueue queue = _afterSystemQueues[i];
+                queue.Flush();
+            }
         }
 
         public void FlushEnd() {
-            foreach(IEventQueue queue in _endQueues) queue.Flush();
+            // ReSharper disable once ForCanBeConvertedToForeach
+            for(int i = 0; i < _endQueues.Count; i++) {
+                IEventQueue queue = _endQueues[i];
+                queue.Flush();
+            }
         }
     }
 }
