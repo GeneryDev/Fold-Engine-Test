@@ -257,7 +257,7 @@ namespace FoldEngine.Components {
                     arr.WriteMember(() => {
                         // ReSharper disable twice AccessToModifiedClosure
                         writer.Write(Dense[Sparse[entityId - MinId]].EntityId);
-                        ComponentSerializer.Serialize(Get(entityId), writer);
+                        ComponentSerializer.Serialize(Get(Dense[Sparse[entityId - MinId]].EntityId), writer);
                     });
                 }
             });

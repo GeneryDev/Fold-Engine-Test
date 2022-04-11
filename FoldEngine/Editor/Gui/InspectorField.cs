@@ -75,7 +75,7 @@ namespace FoldEngine.Editor.Gui {
         }
 
         protected override object GetOldValue() {
-            return _set.GetFieldValue((int) _id, _fieldInfo);
+            return _set.GetFieldValue(_id, _fieldInfo);
         }
 
         protected override SetFieldTransaction CreateBaseTransaction() {

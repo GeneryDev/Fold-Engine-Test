@@ -13,7 +13,7 @@ namespace FoldEngine.Serialization {
         public override List<T> Deserialize(LoadOperation reader) {
             int length = reader.ReadInt32();
             var list = new List<T>(length);
-            for(int i = 0; i < length; i++) list[i] = reader.Read<T>();
+            for(int i = 0; i < length; i++) list.Add(reader.Read<T>());
 
             return list;
         }

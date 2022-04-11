@@ -199,6 +199,7 @@
         <Compile Include="Util\FixedSizeBuffer.cs" />
         <Compile Include="Util\Geometry.cs" />
         <Compile Include="Util\JsonSerialization\JsonDeserializerObject.cs" />
+        <Compile Include="Util\Mathf.cs" />
         <Compile Include="Util\MathUtil.cs" />
         <Compile Include="Util\ObjectPool.cs" />
         <Compile Include="Util\ObjectPoolCollection.cs" />
