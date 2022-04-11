@@ -194,9 +194,9 @@ namespace Sandbox.Systems {
 
         public override void SubscribeToEvents() {
             Subscribe((ref CollisionEvent collision) => {
-                if(Scene.Components.HasComponent<Living>(collision.First)
+                if(collision.First.HasComponent<Living>()
                    && Vector2.Dot(collision.Normal, Vector2.UnitY) > 0.5f) {
-                    Scene.Components.GetComponent<Living>(collision.First).Grounded = true;
+                    collision.First.GetComponent<Living>().Grounded = true;
                     _lastNormal = collision.Normal;
                 }
             });

@@ -236,8 +236,8 @@ namespace FoldEngine.Physics {
                 if(Math.Abs(Vector2.Dot(moveDirection, surfaceNormal)) <= 0.01f) return;
 
                 var collision = new CollisionEvent {
-                    First = entity.EntityId,
-                    Second = other.EntityId,
+                    First = entity,
+                    Second = other,
                     Normal = surfaceNormalComplex,
                     Direction = moveDirection,
                     NormalDepth = largestNormalDepth,
@@ -381,15 +381,15 @@ namespace FoldEngine.Physics {
 
     [Event("collision")]
     public struct CollisionEvent {
-        public long First;
-        public long Second;
+        public Entity First;
+        public Entity Second;
         public Vector2 Normal;
         public Vector2 Direction;
         public float NormalDepth;
         public float DirectionDepth;
         public float Separation;
 
-        public CollisionEvent(long first, long second, Vector2 normal, float depth = 0, float separation = 0) {
+        public CollisionEvent(Entity first, Entity second, Vector2 normal, float depth = 0, float separation = 0) {
             First = first;
             Second = second;
             Normal = normal;

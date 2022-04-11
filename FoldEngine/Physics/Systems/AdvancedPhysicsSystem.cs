@@ -1,6 +1,7 @@
 ﻿using System;
 using EntryProject.Util;
 using FoldEngine.Components;
+using FoldEngine.Scenes;
 using FoldEngine.Systems;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
@@ -150,10 +151,10 @@ namespace FoldEngine.Physics {
 
                                 if(totalNormals != 0 && normalSum.Length() > 0) {
                                     Vector2 surfaceNormal = (normalSum / totalNormals).Normalized();
-                                    Scene.Events.Invoke(new CollisionEvent(_physicsObjects.GetEntityId(),
-                                        _colliders.GetEntityId(), surfaceNormal));
-                                    Scene.Events.Invoke(new CollisionEvent(_colliders.GetEntityId(),
-                                        _physicsObjects.GetEntityId(), -surfaceNormal));
+                                    Scene.Events.Invoke(new CollisionEvent(new Entity(Scene, _physicsObjects.GetEntityId()),
+                                        new Entity(Scene, _colliders.GetEntityId()), surfaceNormal));
+                                    Scene.Events.Invoke(new CollisionEvent(new Entity(Scene, _colliders.GetEntityId()),
+                                        new Entity(Scene, _physicsObjects.GetEntityId()), -surfaceNormal));
                                     // Console.WriteLine($"surfaceNormal = {surfaceNormal}");
                                     // Console.WriteLine($"physics.Velocity (before) = {physics.Velocity}");
                                     Vector2 expectedVelocity =
