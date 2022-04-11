@@ -119,6 +119,11 @@ namespace FoldEngine.Scenes {
             }
 
             ref Transform transform = ref Components.CreateComponent<Transform>(newEntityId);
+            try {
+                Components.GetComponent<Transform>(newEntityId);
+            } catch(Exception x) {
+                FoldUtil.Breakpoint();
+            }
             Components.CreateComponent<EntityName>(newEntityId).Name = name;
             _hasAnything = true;
             // Console.WriteLine($"Created entity {newEntityId}");

@@ -83,7 +83,12 @@ namespace FoldEngine.Resources {
         }
 
         public void Save() {
-            foreach(T resource in Resources) resource.Save();
+            foreach(T resource in Resources) {
+                if(resource.CanSerialize) {
+                    Console.WriteLine($"Serializing resource: {resource.Identifier} of type {typeof(T)}");
+                    resource.Save();
+                }
+            }
         }
 
         private int IndexForIdentifier(string identifier) {
@@ -220,7 +225,7 @@ namespace FoldEngine.Resources {
             ResourceAttribute resourceAttribute = AttributeOf(GetType());
             string resourceFolder = Path.Combine("resources", resourceAttribute.DirectoryName);
             string path = Path.Combine(resourceFolder, Identifier);
-            path = Path.ChangeExtension(path, resourceAttribute.Extensions[0]);
+            path += "." + resourceAttribute.Extensions[0];
             Save(path, configurator);
         }
 

@@ -135,22 +135,23 @@ namespace FoldEngine.Components {
             int sparseIndex = (int) entityId - MinId;
             if(Sparse[sparseIndex] >= 0) //Is in the dense array
             {
-                if(Dense[sparseIndex].ModifiedTimestamp > CurrentTimestamp) //Marked for removal, reclaim it
+                if(Dense[Sparse[sparseIndex]].ModifiedTimestamp > CurrentTimestamp) //Marked for removal, reclaim it
                 {
-                    Dense[sparseIndex].ModifiedTimestamp -= 2; //Subtract 2 because:
+                    Dense[Sparse[sparseIndex]].ModifiedTimestamp -= 2; //Subtract 2 because:
                     //if ModifiedTimestamp == CurrentTimestamp + 1: it was added prior to this tick and thus should be enumerated
                     //if ModifiedTimestamp == CurrentTimestamp + 2: it was added THIS tick and thus should NOT be enumerated
                     _dsMarkedForRemoval.Remove((int) entityId);
-                    Dense[sparseIndex].Component = default; //Reset component data
-                    Component.InitializeComponent(ref Dense[sparseIndex].Component, Scene, entityId);
-                    return ref Dense[sparseIndex].Component;
+                    Dense[Sparse[sparseIndex]].Component = default; //Reset component data
+                    Dense[Sparse[sparseIndex]].EntityId = entityId;
+                    Component.InitializeComponent(ref Dense[Sparse[sparseIndex]].Component, Scene, entityId);
+                    return ref Dense[Sparse[sparseIndex]].Component;
                 }
 
-                if(Dense[sparseIndex].EntityId == entityId)
+                if(Dense[Sparse[sparseIndex]].EntityId == entityId)
                     throw new ComponentRegistryException(
                         $"Entity ID {entityId} already has a component of type {typeof(T)}");
                 throw new ComponentRegistryException(
-                    $"Cannot create component {typeof(T)} for Entity ID {entityId}: An entity of a different generation already has one: {Dense[sparseIndex].EntityId}");
+                    $"Cannot create component {typeof(T)} for Entity ID {entityId}: An entity of a different generation already has one: {Dense[Sparse[sparseIndex]].EntityId}");
             }
 
             if(N < Dense.Length) {
