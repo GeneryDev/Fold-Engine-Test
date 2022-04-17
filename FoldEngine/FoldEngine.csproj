@@ -62,6 +62,7 @@
         <Compile Include="Components\ComponentReference.cs" />
         <Compile Include="Components\ComponentSerializer.cs" />
         <Compile Include="Components\ComponentSet.cs" />
+        <Compile Include="Components\InactiveComponent.cs" />
         <Compile Include="Components\MultiComponentIterator.cs" />
         <Compile Include="Components\NameComponent.cs" />
         <Compile Include="Components\Transform.cs" />

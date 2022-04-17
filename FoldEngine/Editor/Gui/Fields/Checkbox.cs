@@ -9,6 +9,8 @@ namespace FoldEngine.Editor.Gui.Fields {
     public class Checkbox : GuiElement, IInspectorField {
         private bool _checked;
         private PooledValue<IGuiAction> _editedAction;
+        private bool _editedValue;
+        private long _editedTime;
 
         public bool EditValueForType(Type type, ref object value, int index) {
             value = !(bool) value;
@@ -50,6 +52,8 @@ namespace FoldEngine.Editor.Gui.Fields {
                 switch(e.Button) {
                     case MouseEvent.LeftButton: {
                         _editedAction.Value?.Perform(this, e);
+                        _editedTime = e.When;
+                        _editedValue = !_checked;
                         break;
                     }
                 }
@@ -59,6 +63,10 @@ namespace FoldEngine.Editor.Gui.Fields {
             _checked = value;
 
             return this;
+        }
+
+        public bool IsChecked() {
+            return Time.Now <= _editedTime+1 ? _editedValue : _checked;
         }
 
         public Checkbox EditedAction(IGuiAction action) {

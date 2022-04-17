@@ -28,7 +28,7 @@ namespace FoldEngine.Editor.Views {
         public override string Name => "Hierarchy";
 
         public override void Initialize() {
-            _transforms = Scene.Components.CreateIterator<Transform>(IterationFlags.None);
+            _transforms = Scene.Components.CreateIterator<Transform>(IterationFlags.IncludeInactive);
         }
 
         public override void Render(IRenderingUnit renderer) {
@@ -73,8 +73,9 @@ namespace FoldEngine.Editor.Views {
 
             button
                 .Icon(Scene.Resources.Get<Texture>(ref EditorIcons.Cube),
-                    selected ? Color.White : new Color(128, 128, 128))
+                    entity.Active ? (selected ? Color.White : new Color(128, 128, 128)) : (selected ? new Color(200, 200, 200) : new Color(80, 80, 80)))
                 .Selected(selected)
+                .TextColor(entity.Active ? Color.White : (selected ? new Color(200, 200, 200) : new Color(128, 128, 128)))
                 ;
 
             switch(button.GetEvent(out Point p)) {

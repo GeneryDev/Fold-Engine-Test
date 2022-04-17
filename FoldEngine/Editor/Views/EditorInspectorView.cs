@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Reflection;
 using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
+using FoldEngine.Editor.Gui.Fields;
+using FoldEngine.Editor.Inspector;
 using FoldEngine.Editor.Transactions;
 using FoldEngine.Graphics;
 using FoldEngine.Gui;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
+using FoldEngine.Scenes;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Views {
@@ -40,7 +44,21 @@ namespace FoldEngine.Editor.Views {
             } else {
                 ContentPanel.Label($"ID: {id}", 7).TextAlignment(-1);
             }
-            ContentPanel.Spacing(12);
+
+            Entity entity = new Entity(Scene, id);
+
+            if(entity.Active != ContentPanel.Element<Checkbox>().Value(entity.Active).IsChecked()) {
+                if(entity.Active) {
+                    ((EditorEnvironment) ContentPanel.Environment).TransactionManager.InsertTransaction(
+                        new AddComponentTransaction(typeof(InactiveComponent), id));
+                } else {
+                    ((EditorEnvironment) ContentPanel.Environment).TransactionManager.InsertTransaction(
+                        new RemoveComponentTransaction(typeof(InactiveComponent), id));
+                }
+            }
+            ContentPanel.Label("Active", 9).TextAlignment(-1);
+            ContentPanel.Element<ComponentMemberBreak>();
+            // ContentPanel.Spacing(12);
 
             foreach(ComponentSet set in Scene.Components.Sets.Values)
                 // if(set.ComponentType == typeof(EntityName)) continue;
@@ -83,10 +101,11 @@ namespace FoldEngine.Editor.Views {
             if(ContentPanel.Button("Add Component", 14).IsPressed(out Point p)) {
                 GuiPopupMenu contextMenu = ContentPanel.Environment.ContextMenu;
                 contextMenu.Show(p, m => {
-                    foreach(Type type in Component.GetAllTypes())
-                        if(!Scene.Components.HasComponent(type, id) && m.Button(type.Name, 9).IsPressed())
+                    foreach(Type type in Component.GetAllTypes()) {
+                        if(type.GetCustomAttribute<HideInInspector>() == null && !Scene.Components.HasComponent(type, id) && m.Button(type.Name, 9).IsPressed())
                             ((EditorEnvironment) ContentPanel.Environment).TransactionManager.InsertTransaction(
                                 new AddComponentTransaction(type, id));
+                    }
                 });
             }
         }

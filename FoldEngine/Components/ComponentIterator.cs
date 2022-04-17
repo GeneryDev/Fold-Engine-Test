@@ -140,7 +140,9 @@ namespace FoldEngine.Components {
                     _sparseIndex++;
                 } while(_sparseIndex < _set.Sparse.Length
                         && (_set.Sparse[_sparseIndex] == -1
-                            || _set.Dense[_set.Sparse[_sparseIndex]].ModifiedTimestamp == _iterationTimestamp));
+                            || _set.Dense[_set.Sparse[_sparseIndex]].ModifiedTimestamp == _iterationTimestamp
+                            || (!_flags.Has(IterationFlags.IncludeInactive) && _scene.Components.HasComponent<InactiveComponent>(_set.Dense[_set.Sparse[_sparseIndex]].EntityId))
+                            ));
                 // ModifiedTimestamp < IterationTimestamp: Component was added before this "tick" (or it was removed and recovered this same tick)
                 // ModifiedTimestamp == IterationTimestamp: Component was added this very tick (so skip it)
                 // ModifiedTimestamp > IterationTimestamp: Component was marked for removal this very tick (but it should still be iterated through)
@@ -153,7 +155,11 @@ namespace FoldEngine.Components {
                     _finished = true;
                 }
             } else {
-                _denseIndex++;
+                do {
+                    _denseIndex++;
+                } while(_denseIndex < _set.N
+                        && (!_flags.Has(IterationFlags.IncludeInactive) && _scene.Components.HasComponent<InactiveComponent>(_set.Dense[_denseIndex].EntityId))
+                        );
                 _finished = _denseIndex >= _set.N;
             }
 
@@ -201,7 +207,8 @@ namespace FoldEngine.Components {
     [Flags]
     public enum IterationFlags {
         None = 0,
-        Ordered = 1
+        Ordered = 1,
+        IncludeInactive = 2
     }
 
     public static class IterationFlagsExt {

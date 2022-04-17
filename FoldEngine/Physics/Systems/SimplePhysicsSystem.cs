@@ -12,7 +12,7 @@ namespace FoldEngine.Physics {
     [GameSystem("fold:physics.simple", ProcessingCycles.FixedUpdate)]
     public class SimplePhysicsSystem : GameSystem {
         private const bool UseVerletIntegration = false;
-        public static readonly bool DrawCollisionGizmos = true;
+        public static readonly bool DrawCollisionGizmos = false;
 
         private static readonly Comparison<IntersectionData> SortByKey = (a, b) => {
             int byKey = Math.Sign(b.SortKey - a.SortKey);
@@ -334,6 +334,7 @@ namespace FoldEngine.Physics {
 
             physicsA.ApplyForce(normalForce, default, ForceMode.Instant);
             physicsA.ApplyForce(frictionForce, default, ForceMode.Instant);
+            // physicsA.Velocity += (normalForce + frictionForce) / physicsA.Mass;
 
             physicsA.ApplyForce(normalForce * restitution, default, ForceMode.Instant); //TODO
         }
