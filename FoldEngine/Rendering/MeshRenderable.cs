@@ -10,10 +10,12 @@ namespace FoldEngine.Rendering {
     public struct MeshRenderable {
         public ResourceIdentifier TextureIdentifier;
         public ResourceIdentifier MeshIdentifier;
+        public ResourceIdentifier EffectIdentifier;
         public Matrix Matrix;
         public Vector2 UVOffset;
         public Vector2 UVScale;
         public Color Color;
+        public float ZIndex;
 
         /// <summary>
         ///     Returns an initialized mesh renderable component with all its correct default values.

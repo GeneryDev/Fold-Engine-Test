@@ -61,7 +61,6 @@ namespace FoldEngine.Editor.Views {
             // ContentPanel.Spacing(12);
 
             foreach(ComponentSet set in Scene.Components.Sets.Values)
-                // if(set.ComponentType == typeof(EntityName)) continue;
                 if(set.Has(id)) {
                     ComponentInfo componentInfo = ComponentInfo.Get(set.ComponentType);
                     if(componentInfo.HideInInspector) continue;

@@ -9,6 +9,8 @@ namespace FoldEngine.Graphics {
         private readonly EffectParameter _matrixTransform;
         private readonly EffectPass _spritePass;
         private bool _beginCalled;
+        private BatcherParams _activeParams;
+        
         private BlendState _blendState;
         private DepthStencilState _depthStencilState;
         private Effect _effect;
@@ -61,30 +63,34 @@ namespace FoldEngine.Graphics {
             _spritePass.Apply();
         }
 
-        public void Begin(
-            SpriteSortMode sortMode = SpriteSortMode.Deferred,
+        public void QuickBegin(
             BlendState blendState = null,
             SamplerState samplerState = null,
             DepthStencilState depthStencilState = null,
             RasterizerState rasterizerState = null,
-            Effect effect = null,
-            Matrix? transformMatrix = null) {
+            Effect effect = null) {
+            BatcherParams param = new BatcherParams(blendState, samplerState, depthStencilState, rasterizerState, effect);
+            if(_beginCalled && param == _activeParams) return;
+            End();
+            _activeParams = param;
             if(_beginCalled)
                 throw new InvalidOperationException(
                     "Begin cannot be called again until End has been successfully called.");
+            
             // this._sortMode = sortMode;
             _blendState = blendState ?? BlendState.AlphaBlend;
             _samplerState = samplerState ?? SamplerState.LinearClamp;
             _depthStencilState = depthStencilState ?? DepthStencilState.None;
             _rasterizerState = rasterizerState ?? RasterizerState.CullCounterClockwise;
             _effect = effect;
-            _matrix = transformMatrix;
-            if(sortMode == SpriteSortMode.Immediate)
-                Setup();
+            // _matrix = transformMatrix;
+            // if(sortMode == SpriteSortMode.Immediate)
+                // Setup();
             _beginCalled = true;
         }
 
         public void End() {
+            if(!_beginCalled) return;
             _beginCalled = _beginCalled
                 ? false
                 : throw new InvalidOperationException("Begin must be called before calling End.");
@@ -364,5 +370,52 @@ namespace FoldEngine.Graphics {
         protected CustomSpriteEffect(SpriteEffect cloneSource) : base(cloneSource) { }
 
         protected override void OnApply() { }
+    }
+
+    internal struct BatcherParams {
+        public BlendState BlendState;
+        public SamplerState SamplerState;
+        public DepthStencilState DepthStencilState;
+        public RasterizerState RasterizerState;
+        public Effect Effect;
+
+        public BatcherParams(BlendState blendState, SamplerState samplerState, DepthStencilState depthStencilState, RasterizerState rasterizerState, Effect effect) {
+            BlendState = blendState;
+            SamplerState = samplerState;
+            DepthStencilState = depthStencilState;
+            RasterizerState = rasterizerState;
+            Effect = effect;
+        }
+
+        public bool Equals(BatcherParams other) {
+            return Equals(BlendState, other.BlendState)
+                   && Equals(SamplerState, other.SamplerState)
+                   && Equals(DepthStencilState, other.DepthStencilState)
+                   && Equals(RasterizerState, other.RasterizerState)
+                   && Equals(Effect, other.Effect);
+        }
+
+        public override bool Equals(object obj) {
+            return obj is BatcherParams other && Equals(other);
+        }
+
+        public override int GetHashCode() {
+            unchecked {
+                int hashCode = (BlendState != null ? BlendState.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (SamplerState != null ? SamplerState.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (DepthStencilState != null ? DepthStencilState.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (RasterizerState != null ? RasterizerState.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Effect != null ? Effect.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
+
+        public static bool operator ==(BatcherParams a, BatcherParams b) {
+            return a.Equals(b);
+        }
+
+        public static bool operator !=(BatcherParams a, BatcherParams b) {
+            return !(a == b);
+        }
     }
 }

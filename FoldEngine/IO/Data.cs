@@ -7,10 +7,24 @@ namespace FoldEngine.IO {
     public static class Data {
         public static readonly Encoding DefaultEncoding = Encoding.UTF8;
 
+#if DEBUG
+        private static string DataPathPrefix;
+        static Data() {
+            DataPathPrefix = "../../../../../";
+            string prefixMarker = "#DATA_PATH_PREFIX:";
+            foreach(string arg in Environment.GetCommandLineArgs()) {
+                if(arg.StartsWith(prefixMarker)) {
+                    DataPathPrefix = arg.Substring(prefixMarker.Length);
+                    break;
+                }
+            }
+        }
+#endif
+
         private static string InData(string path) {
 #if DEBUG
             return Path.Combine(
-                Environment.GetCommandLineArgs().Length > 1 ? Environment.GetCommandLineArgs()[1] : "../../../../../",
+                DataPathPrefix,
                 "data", path);
 #else
             return Path.Combine("data", path);
@@ -46,6 +60,10 @@ namespace FoldEngine.IO {
             public static IEnumerable<string> ListEntries(string path) {
                 path = InData(path);
                 return Directory.EnumerateFileSystemEntries(path);
+            }
+
+            public static string Path(string path) {
+                return InData(path);
             }
         }
 

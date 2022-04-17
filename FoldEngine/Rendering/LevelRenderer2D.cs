@@ -111,15 +111,16 @@ namespace FoldEngine.Rendering {
 
                     layer.Surface.Draw(new DrawTriangleInstruction(
                         texture,
-                        layer.CameraToLayer(transform.Apply(vertexA).ApplyMatrixTransform(viewMatrix)),
-                        layer.CameraToLayer(transform.Apply(vertexB).ApplyMatrixTransform(viewMatrix)),
-                        layer.CameraToLayer(transform.Apply(vertexC).ApplyMatrixTransform(viewMatrix)),
+                        new Vector3(layer.CameraToLayer(transform.Apply(vertexA).ApplyMatrixTransform(viewMatrix)), meshRenderable.ZIndex),
+                        new Vector3(layer.CameraToLayer(transform.Apply(vertexB).ApplyMatrixTransform(viewMatrix)), meshRenderable.ZIndex),
+                        new Vector3(layer.CameraToLayer(transform.Apply(vertexC).ApplyMatrixTransform(viewMatrix)), meshRenderable.ZIndex),
                         triangle.A.TextureCoordinate * meshRenderable.UVScale + meshRenderable.UVOffset,
                         triangle.B.TextureCoordinate * meshRenderable.UVScale + meshRenderable.UVOffset,
                         triangle.C.TextureCoordinate * meshRenderable.UVScale + meshRenderable.UVOffset,
                         Extensions.MultiplyColor(triangle.A.Color, meshRenderable.Color),
                         Extensions.MultiplyColor(triangle.B.Color, meshRenderable.Color),
-                        Extensions.MultiplyColor(triangle.C.Color, meshRenderable.Color)
+                        Extensions.MultiplyColor(triangle.C.Color, meshRenderable.Color),
+                        Scene.Resources.Get<EffectR>(ref meshRenderable.EffectIdentifier, null)
                     ));
                 }
             }

@@ -56,6 +56,7 @@ namespace FoldEngine.Graphics {
         public Color? ColorB;
         public Color? ColorC;
         public Color? ColorD;
+        public EffectR Effect;
 
         public Color? Color {
             set => ColorA = ColorB = ColorC = ColorD = value;
@@ -74,7 +75,8 @@ namespace FoldEngine.Graphics {
             Color? colorA = null,
             Color? colorB = null,
             Color? colorC = null,
-            Color? colorD = null) {
+            Color? colorD = null,
+            EffectR effect = null) {
             Texture = texture;
             A = new Vector3(a, 0);
             B = new Vector3(b, 0);
@@ -88,6 +90,7 @@ namespace FoldEngine.Graphics {
             ColorB = colorB;
             ColorC = colorC;
             ColorD = colorD;
+            Effect = effect;
         }
 
         public DrawQuadInstruction(
@@ -103,7 +106,8 @@ namespace FoldEngine.Graphics {
             Color? colorA = null,
             Color? colorB = null,
             Color? colorC = null,
-            Color? colorD = null) {
+            Color? colorD = null,
+            EffectR effect = null) {
             Texture = texture;
             A = a;
             B = b;
@@ -117,6 +121,7 @@ namespace FoldEngine.Graphics {
             ColorB = colorB;
             ColorC = colorC;
             ColorD = colorD;
+            Effect = effect;
         }
     }
 
@@ -131,6 +136,7 @@ namespace FoldEngine.Graphics {
         public Color? ColorA;
         public Color? ColorB;
         public Color? ColorC;
+        public EffectR Effect;
 
         public Color Color {
             set => ColorA = ColorB = ColorC = value;
@@ -146,7 +152,8 @@ namespace FoldEngine.Graphics {
             Vector2 texC,
             Color? colorA = null,
             Color? colorB = null,
-            Color? colorC = null) {
+            Color? colorC = null,
+            EffectR effect = null) {
             Texture = texture;
             A = new Vector3(a, 0);
             B = new Vector3(b, 0);
@@ -157,6 +164,7 @@ namespace FoldEngine.Graphics {
             ColorA = colorA;
             ColorB = colorB;
             ColorC = colorC;
+            Effect = effect;
         }
 
         public DrawTriangleInstruction(
@@ -169,7 +177,8 @@ namespace FoldEngine.Graphics {
             Vector2 texC,
             Color? colorA = null,
             Color? colorB = null,
-            Color? colorC = null) {
+            Color? colorC = null,
+            EffectR effect = null) {
             Texture = texture;
             A = a;
             B = b;
@@ -180,6 +189,7 @@ namespace FoldEngine.Graphics {
             ColorA = colorA;
             ColorB = colorB;
             ColorC = colorC;
+            Effect = effect;
         }
     }
 }
