@@ -6,27 +6,19 @@ namespace FoldEngine.Graphics {
     public class GizmoBatch {
         private readonly GizmoBatcher _batcher;
         private readonly GraphicsDevice _device;
-        private readonly EffectParameter _matrixTransform;
-        private readonly EffectPass _spritePass;
         private bool _beginCalled;
         private BlendState _blendState;
         private DepthStencilState _depthStencilState;
         private Effect _effect;
-        private Viewport _lastViewport;
-        private Matrix? _matrix;
-        private Matrix _projection;
         private RasterizerState _rasterizerState;
         private SamplerState _samplerState;
-        private readonly Effect _spriteEffect;
-        private Rectangle _tempRect = new Rectangle(0, 0, 0, 0);
+        private readonly CustomSpriteEffect _spriteEffect;
 
         public GizmoBatch(GraphicsDevice graphicsDevice) {
             _device = graphicsDevice
                       ?? throw new ArgumentNullException(nameof(graphicsDevice),
                           "The GraphicsDevice must not be null when creating new resources.");
             _spriteEffect = new CustomSpriteEffect(graphicsDevice);
-            _matrixTransform = _spriteEffect.Parameters["MatrixTransform"];
-            _spritePass = _spriteEffect.CurrentTechnique.Passes[0];
             _batcher = new GizmoBatcher(graphicsDevice);
             _beginCalled = false;
         }
@@ -38,15 +30,6 @@ namespace FoldEngine.Graphics {
             set => _batcher.WhiteTexture = value;
         }
 
-        private void SetupMatrix(Viewport viewport) {
-            Matrix.CreateOrthographicOffCenter(0.0f, viewport.Width, viewport.Height, 0.0f, 0.0f, -100f,
-                out _projection);
-            if(NeedsHalfPixelOffset) {
-                _projection.M41 += -0.5f * _projection.M11;
-                _projection.M42 += -0.5f * _projection.M22;
-            }
-        }
-
         private void Setup() {
             GraphicsDevice graphicsDevice = _device;
             graphicsDevice.BlendState = _blendState;
@@ -54,17 +37,7 @@ namespace FoldEngine.Graphics {
             graphicsDevice.RasterizerState = _rasterizerState;
             graphicsDevice.SamplerStates[0] = _samplerState;
 
-            Viewport viewport = graphicsDevice.Viewport;
-            if(viewport.Width != _lastViewport.Width || viewport.Height != _lastViewport.Height) {
-                SetupMatrix(viewport);
-                _lastViewport = viewport;
-            }
-
-            if(_matrix.HasValue)
-                _matrixTransform.SetValue(_matrix.GetValueOrDefault() * _projection);
-            else
-                _matrixTransform.SetValue(_projection);
-            _spritePass.Apply();
+            _spriteEffect.SetupMatrix();
         }
 
         public void Begin(
@@ -84,7 +57,6 @@ namespace FoldEngine.Graphics {
             _depthStencilState = depthStencilState ?? DepthStencilState.None;
             _rasterizerState = rasterizerState ?? RasterizerState.CullCounterClockwise;
             _effect = effect;
-            _matrix = transformMatrix;
             if(sortMode == SpriteSortMode.Immediate)
                 Setup();
             _beginCalled = true;
@@ -96,7 +68,7 @@ namespace FoldEngine.Graphics {
                 : throw new InvalidOperationException("Begin must be called before calling End.");
             // if (this._sortMode != SpriteSortMode.Immediate)
             Setup();
-            _batcher.DrawBatch(_effect);
+            _batcher.DrawBatch(_effect ?? _spriteEffect);
         }
 
         private void CheckValid(Texture2D texture) {
@@ -221,16 +193,13 @@ namespace FoldEngine.Graphics {
 
             if(numVertices <= 0)
                 return;
-            _device.Textures[0] = WhiteTexture.Source;
-            if(effect != null)
-                foreach(EffectPass pass in effect.CurrentTechnique.Passes) {
-                    pass.Apply();
-                    _device.DrawUserIndexedPrimitives(primitiveType, _vertexArray, 0, numVertices, _index, 0,
-                        primitiveCount, VertexPositionColorTexture.VertexDeclaration);
-                }
-            else
+            
+            foreach(EffectPass pass in effect.CurrentTechnique.Passes) {
+                pass.Apply();
+                _device.Textures[0] = WhiteTexture.Source;
                 _device.DrawUserIndexedPrimitives(primitiveType, _vertexArray, 0, numVertices, _index, 0,
                     primitiveCount, VertexPositionColorTexture.VertexDeclaration);
+            }
         }
     }
 

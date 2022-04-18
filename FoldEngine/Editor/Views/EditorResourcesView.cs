@@ -19,7 +19,7 @@ namespace FoldEngine.Editor.Views {
                 Console.WriteLine("Save resources!");
             }
 
-            if(ContentPanel.Button("Invalidate Caches", 14).IsPressed()) Scene.Resources.InvalidateCaches();
+            if(ContentPanel.Button("Reload Resources", 14).IsPressed()) Scene.Core.ResourceIndex.Update();
             if(ContentPanel.Button("Invoke GC", 14).IsPressed()) GC.Collect(GC.MaxGeneration);
         }
     }

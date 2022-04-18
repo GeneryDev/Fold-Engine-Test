@@ -1,11 +1,12 @@
 ﻿using System;
+using FoldEngine.IO;
 using FoldEngine.Resources;
-// using Microsoft.Xna.Framework.Content.Pipeline;
-// using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
-// using Microsoft.Xna.Framework.Content.Pipeline.Processors;
-// using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
+using Microsoft.Xna.Framework.Content.Pipeline;
+using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
+using Microsoft.Xna.Framework.Content.Pipeline.Processors;
+using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
 using Microsoft.Xna.Framework.Graphics;
-// using MonoGame.Framework.Content.Pipeline.Builder;
+using MonoGame.Framework.Content.Pipeline.Builder;
 
 namespace FoldEngine.Graphics {
     [Resource(directoryName: "effects", extensions: "fx")]
@@ -15,17 +16,19 @@ namespace FoldEngine.Graphics {
         public override bool CanSerialize => false;
 
         public override void DeserializeResource(string path) {
-            // EffectImporter importer = new EffectImporter();
-            // EffectContent content = importer.Import(Data.In.Path(path), null);
-            // EffectProcessor processor = new EffectProcessor();
-            // PipelineManager pm = new PipelineManager(string.Empty, string.Empty, string.Empty);
-            // PipelineProcessorContext ppc = new PipelineProcessorContext(pm, new PipelineBuildEvent());
-            // CompiledEffectContent cecontent = processor.Process(content, ppc);
-            // ContentCompiler compiler = new ContentCompiler();
-            //
-            // Effect = new Effect(FoldGame.Game.GraphicsDevice, cecontent.GetEffectCode());
+            EffectImporter importer = new EffectImporter();
+            EffectContent content = importer.Import(Data.In.Path(path), null);
+            EffectProcessor processor = new EffectProcessor();
+            PipelineManager pm = new PipelineManager(string.Empty, string.Empty, string.Empty);
+            pm.Profile = FoldGame.Game.Graphics.GraphicsProfile;
+            pm.Platform = TargetPlatform.DesktopGL; //TODO how do I get this
+            PipelineProcessorContext ppc = new PipelineProcessorContext(pm, new PipelineBuildEvent());
+            CompiledEffectContent cecontent = processor.Process(content, ppc);
+            ContentCompiler compiler = new ContentCompiler();
+            
+            Effect = new Effect(FoldGame.Game.GraphicsDevice, cecontent.GetEffectCode());
             Console.WriteLine("effect loaded");
-            Effect = new SpriteEffect(FoldGame.Game.GraphicsDevice);
+            // Effect = new SpriteEffect(FoldGame.Game.GraphicsDevice);
         }
     }
 }

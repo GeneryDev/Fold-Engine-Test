@@ -44,7 +44,14 @@
           <Private>True</Private>
         </Reference>
         <Reference Include="MonoGame.Framework, Version=3.7.1.189, Culture=neutral, PublicKeyToken=null">
-          <HintPath>..\..\..\..\..\..\..\Program Files (x86)\MonoGame\v3.0\Assemblies\DesktopGL\MonoGame.Framework.dll</HintPath>
+          <HintPath>..\packages\MonoGame.Framework.Portable.3.7.1.189\lib\portable-net45+win8+wpa81\MonoGame.Framework.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+        <Reference Include="MonoGame.Framework.Content.Pipeline, Version=3.7.1.189, Culture=neutral, PublicKeyToken=null">
+          <HintPath>..\..\..\..\..\..\..\Program Files (x86)\MSBuild\MonoGame\v3.0\Tools\MonoGame.Framework.Content.Pipeline.dll</HintPath>
+        </Reference>
+        <Reference Include="MonoGame.Framework.Content.Pipeline, Version=3.8.0.1641, Culture=neutral, PublicKeyToken=null">
+          <HintPath>..\EntryProject\bin\DesktopGL\AnyCPU\Debug\MonoGame.Framework.Content.Pipeline.dll</HintPath>
         </Reference>
         <Reference Include="mscorlib" />
         <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
@@ -52,6 +59,9 @@
         </Reference>
         <Reference Include="Shard, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
           <HintPath>..\..\..\..\..\RiderProjects\Shard\Shard\bin\Release\Shard.dll</HintPath>
+        </Reference>
+        <Reference Include="SharpDX, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1">
+          <HintPath>..\..\..\..\..\..\..\Program Files (x86)\MSBuild\MonoGame\v3.0\Tools\SharpDX.dll</HintPath>
         </Reference>
         <Reference Include="System" />
         <Reference Include="System.Core" />
@@ -229,6 +239,15 @@
     </ItemGroup>
     <ItemGroup>
       <Content Include="Content\Content.mgcb" />
+      <Content Include="CppNet.dll">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="libmojoshader_64.dll">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="SharpDX.D3DCompiler.dll">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
       <Content Include="x64\fmod.dll">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>

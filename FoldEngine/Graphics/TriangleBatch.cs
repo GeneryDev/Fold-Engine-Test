@@ -4,63 +4,33 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace FoldEngine.Graphics {
     public class TriangleBatch {
+        public const bool UseHalfPixelOffset = true;
+        
         private readonly TriangleBatcher _batcher;
         private readonly GraphicsDevice _device;
-        private readonly EffectParameter _matrixTransform;
-        private readonly EffectPass _spritePass;
         private bool _beginCalled;
         private BatcherParams _activeParams;
-        
-        private BlendState _blendState;
-        private DepthStencilState _depthStencilState;
-        private Effect _effect;
-        private Viewport _lastViewport;
-        private Matrix? _matrix;
+
         private Matrix _projection;
-        private RasterizerState _rasterizerState;
-        private SamplerState _samplerState;
-        private readonly Effect _spriteEffect;
+        private readonly CustomSpriteEffect _spriteEffect;
 
         public TriangleBatch(GraphicsDevice graphicsDevice) {
             _device = graphicsDevice
                       ?? throw new ArgumentNullException(nameof(graphicsDevice),
                           "The GraphicsDevice must not be null when creating new resources.");
             _spriteEffect = new CustomSpriteEffect(graphicsDevice);
-            _matrixTransform = _spriteEffect.Parameters["MatrixTransform"];
-            _spritePass = _spriteEffect.CurrentTechnique.Passes[0];
             _batcher = new TriangleBatcher(graphicsDevice);
             _beginCalled = false;
         }
 
-        public bool NeedsHalfPixelOffset { get; set; } = true;
-
-        private void SetupMatrix(Viewport viewport) {
-            Matrix.CreateOrthographicOffCenter(0.0f, viewport.Width, viewport.Height, 0.0f, 0.0f, -100f,
-                out _projection);
-            if(NeedsHalfPixelOffset) {
-                _projection.M41 += -0.5f * _projection.M11;
-                _projection.M42 += -0.5f * _projection.M22;
-            }
-        }
-
         private void Setup() {
             GraphicsDevice graphicsDevice = _device;
-            graphicsDevice.BlendState = _blendState;
-            graphicsDevice.DepthStencilState = _depthStencilState;
-            graphicsDevice.RasterizerState = _rasterizerState;
-            graphicsDevice.SamplerStates[0] = _samplerState;
+            graphicsDevice.BlendState = _activeParams.BlendState;
+            graphicsDevice.DepthStencilState = _activeParams.DepthStencilState;
+            graphicsDevice.RasterizerState = _activeParams.RasterizerState;
+            graphicsDevice.SamplerStates[0] = _activeParams.SamplerState;
 
-            Viewport viewport = graphicsDevice.Viewport;
-            if(viewport.Width != _lastViewport.Width || viewport.Height != _lastViewport.Height) {
-                SetupMatrix(viewport);
-                _lastViewport = viewport;
-            }
-
-            if(_matrix.HasValue)
-                _matrixTransform.SetValue(_matrix.GetValueOrDefault() * _projection);
-            else
-                _matrixTransform.SetValue(_projection);
-            _spritePass.Apply();
+            _projection = _spriteEffect.SetupMatrix();
         }
 
         public void QuickBegin(
@@ -69,23 +39,22 @@ namespace FoldEngine.Graphics {
             DepthStencilState depthStencilState = null,
             RasterizerState rasterizerState = null,
             Effect effect = null) {
-            BatcherParams param = new BatcherParams(blendState, samplerState, depthStencilState, rasterizerState, effect);
-            if(_beginCalled && param == _activeParams) return;
+            
+            blendState = blendState ?? BlendState.AlphaBlend;
+            samplerState = samplerState ?? SamplerState.LinearClamp;
+            depthStencilState = depthStencilState ?? DepthStencilState.None;
+            rasterizerState = rasterizerState ?? RasterizerState.CullCounterClockwise;
+            
+            var requestedParams = new BatcherParams(blendState, samplerState, depthStencilState, rasterizerState, effect);
+            if(_beginCalled && requestedParams == _activeParams) return;
             End();
-            _activeParams = param;
             if(_beginCalled)
                 throw new InvalidOperationException(
                     "Begin cannot be called again until End has been successfully called.");
             
-            // this._sortMode = sortMode;
-            _blendState = blendState ?? BlendState.AlphaBlend;
-            _samplerState = samplerState ?? SamplerState.LinearClamp;
-            _depthStencilState = depthStencilState ?? DepthStencilState.None;
-            _rasterizerState = rasterizerState ?? RasterizerState.CullCounterClockwise;
-            _effect = effect;
-            // _matrix = transformMatrix;
-            // if(sortMode == SpriteSortMode.Immediate)
-                // Setup();
+            _activeParams = requestedParams;
+            
+            effect?.Parameters["MatrixTransform"]?.SetValue(_projection);
             _beginCalled = true;
         }
 
@@ -94,9 +63,8 @@ namespace FoldEngine.Graphics {
             _beginCalled = _beginCalled
                 ? false
                 : throw new InvalidOperationException("Begin must be called before calling End.");
-            // if (this._sortMode != SpriteSortMode.Immediate)
             Setup();
-            _batcher.DrawBatch(_effect);
+            _batcher.DrawBatch(_activeParams.Effect ?? _spriteEffect);
         }
 
         private void CheckValid(Texture2D texture) {
@@ -341,16 +309,13 @@ namespace FoldEngine.Graphics {
 
             if(numVertices <= 0)
                 return;
-            _device.Textures[0] = texture;
-            if(effect != null)
-                foreach(EffectPass pass in effect.CurrentTechnique.Passes) {
-                    pass.Apply();
-                    _device.DrawUserIndexedPrimitives(primitiveType, _vertexArray, 0, numVertices, _index, 0,
-                        primitiveCount, VertexPositionColorTexture.VertexDeclaration);
-                }
-            else
+            
+            foreach(EffectPass pass in effect.CurrentTechnique.Passes) {
+                pass.Apply();
+                _device.Textures[0] = texture;
                 _device.DrawUserIndexedPrimitives(primitiveType, _vertexArray, 0, numVertices, _index, 0,
                     primitiveCount, VertexPositionColorTexture.VertexDeclaration);
+            }
         }
 
         public void Clear() {
@@ -366,10 +331,55 @@ namespace FoldEngine.Graphics {
     }
 
     public class CustomSpriteEffect : SpriteEffect {
-        public CustomSpriteEffect(GraphicsDevice device) : base(device) { }
-        protected CustomSpriteEffect(SpriteEffect cloneSource) : base(cloneSource) { }
+        private EffectParameter _matrixParam;
+        private Viewport _lastViewport;
+        private Matrix _projection;
+        private float _zFarPlane;
 
-        protected override void OnApply() { }
+        public CustomSpriteEffect(GraphicsDevice device, float farPlane = -100)
+            : base(device)
+        {
+            _matrixParam = Parameters["MatrixTransform"];
+            _zFarPlane = farPlane;
+        }
+
+        /// <summary>
+        /// An optional matrix used to transform the sprite geometry. Uses <see cref="Matrix.Identity"/> if null.
+        /// </summary>
+        public Matrix? TransformMatrix { get; set; }
+
+        public override Effect Clone()
+        {
+            return new CustomSpriteEffect(GraphicsDevice, _zFarPlane);
+        }
+
+        public Matrix SetupMatrix() {
+            var vp = GraphicsDevice.Viewport;
+            if ((vp.Width != _lastViewport.Width) || (vp.Height != _lastViewport.Height))
+            {
+                Matrix.CreateOrthographicOffCenter(0, vp.Width, vp.Height, 0, 0, _zFarPlane, out _projection);
+
+                if (TriangleBatch.UseHalfPixelOffset)
+                {
+                    _projection.M41 += -0.5f * _projection.M11;
+                    _projection.M42 += -0.5f * _projection.M22;
+                }
+
+                _lastViewport = vp;
+            }
+
+            if (TransformMatrix.HasValue)
+                _matrixParam.SetValue(TransformMatrix.GetValueOrDefault() * _projection);
+            else
+                _matrixParam.SetValue(_projection);
+
+            return _projection;
+        }
+
+        protected override void OnApply()
+        {
+            
+        }
     }
 
     internal struct BatcherParams {
