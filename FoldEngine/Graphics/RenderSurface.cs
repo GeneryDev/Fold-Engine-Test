@@ -32,7 +32,7 @@ namespace FoldEngine.Graphics {
 
         public void Draw(DrawQuadInstruction instruction) {
             if(instruction.Texture == null) return;
-            TriBatch.QuickBegin(samplerState: SamplerState.PointClamp, depthStencilState: DepthStencilState.Default, effect: instruction.Effect?.Effect);
+            TriBatch.QuickBegin(Target, samplerState: SamplerState.PointClamp, depthStencilState: DepthStencilState.Default, effect: instruction.Effect?.Effect);
             TriBatch.DrawQuad(
                 instruction.Texture.Source,
                 instruction.A,
@@ -52,7 +52,7 @@ namespace FoldEngine.Graphics {
 
         public void Draw(DrawTriangleInstruction instruction) {
             if(instruction.Texture == null) return;
-            TriBatch.QuickBegin(samplerState: SamplerState.PointClamp, depthStencilState: DepthStencilState.Default, effect: instruction.Effect?.Effect);
+            TriBatch.QuickBegin(Target, samplerState: SamplerState.PointClamp, depthStencilState: DepthStencilState.Default, effect: instruction.Effect?.Effect);
             TriBatch.DrawTriangle(
                 instruction.Texture.Source,
                 instruction.A,
@@ -72,14 +72,14 @@ namespace FoldEngine.Graphics {
             GraphicsDevice.Clear(Layer?.Color ?? Color.Transparent);
 
             GizBatch.WhiteTexture = RenderingUnit.WhiteTexture;
-            TriBatch.QuickBegin(samplerState: SamplerState.PointClamp, depthStencilState: DepthStencilState.Default);
-            TriBatch.QuickBegin(samplerState: SamplerState.PointClamp, depthStencilState: DepthStencilState.Default);
+            // TriBatch.QuickBegin(samplerState: SamplerState.PointClamp, depthStencilState: DepthStencilState.Default);
+            // TriBatch.QuickBegin(samplerState: SamplerState.PointClamp, depthStencilState: DepthStencilState.Default);
             GizBatch.Begin(samplerState: SamplerState.PointClamp);
         }
 
         internal void End() {
             GraphicsDevice.SetRenderTarget(Target);
-            TriBatch.End();
+            TriBatch.End(Target);
             GizBatch.End();
         }
 

@@ -34,6 +34,7 @@ namespace FoldEngine.Graphics {
         }
 
         public void QuickBegin(
+            RenderTarget2D renderTarget,
             BlendState blendState = null,
             SamplerState samplerState = null,
             DepthStencilState depthStencilState = null,
@@ -47,7 +48,7 @@ namespace FoldEngine.Graphics {
             
             var requestedParams = new BatcherParams(blendState, samplerState, depthStencilState, rasterizerState, effect);
             if(_beginCalled && requestedParams == _activeParams) return;
-            End();
+            End(renderTarget);
             if(_beginCalled)
                 throw new InvalidOperationException(
                     "Begin cannot be called again until End has been successfully called.");
@@ -58,11 +59,12 @@ namespace FoldEngine.Graphics {
             _beginCalled = true;
         }
 
-        public void End() {
+        public void End(RenderTarget2D renderTarget) {
             if(!_beginCalled) return;
             _beginCalled = _beginCalled
                 ? false
                 : throw new InvalidOperationException("Begin must be called before calling End.");
+            _device.SetRenderTarget(renderTarget);
             Setup();
             _batcher.DrawBatch(_activeParams.Effect ?? _spriteEffect);
         }
