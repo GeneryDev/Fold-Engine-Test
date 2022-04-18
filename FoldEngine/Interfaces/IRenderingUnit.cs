@@ -6,7 +6,6 @@ namespace FoldEngine.Interfaces {
     public interface IRenderingUnit {
         IGameCore Core { get; }
 
-        EffectManager Effects { get; set; }
         FontManager Fonts { get; set; }
 
         Point WindowSize { get; set; }

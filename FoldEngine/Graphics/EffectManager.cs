@@ -1,26 +1,29 @@
 ﻿using System.Collections.Generic;
+using FoldEngine.IO;
 using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Content.Pipeline;
+using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
+using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Content.Pipeline.Builder;
 
 namespace FoldEngine.Graphics {
-    public class EffectManager {
-        //TODO make this a resource.
-        //See: https://community.monogame.net/t/solved-is-it-possible-to-directly-load-a-effect-from-a-class-files-string/10486
-        private readonly Dictionary<string, Effect> _effects = new Dictionary<string, Effect>();
+    public static class EffectManager {
+        
+        private static readonly EffectImporter Importer = new EffectImporter();
+        private static readonly EffectProcessor Processor = new EffectProcessor();
+        private static readonly PipelineManager Pm = new PipelineManager(string.Empty, string.Empty, string.Empty);
+        private static readonly PipelineProcessorContext Ppc = new PipelineProcessorContext(Pm, new PipelineBuildEvent());
 
-        private readonly ContentManager _content;
-
-        public EffectManager(ContentManager content) {
-            _content = content;
+        static EffectManager() {
+            Pm.Profile = FoldGame.Game.Graphics.GraphicsProfile;
+            Pm.Platform = FoldGame.Game.Core.TargetPlatform;
         }
-
-        public Effect this[string name] {
-            get => _effects.ContainsKey(name) ? _effects[name] : null;
-            set => _effects[name] = value;
-        }
-
-        public Effect LoadEffect(string name) {
-            return _effects[name] = _content.Load<Effect>("Effects/" + name);
+        
+        public static Effect Compile(string path) {
+            EffectContent content = Importer.Import(path, null);
+            CompiledEffectContent cecontent = Processor.Process(content, Ppc);
+            return new Effect(FoldGame.Game.GraphicsDevice, cecontent.GetEffectCode());
         }
     }
 }

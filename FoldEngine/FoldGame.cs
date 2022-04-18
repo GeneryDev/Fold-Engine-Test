@@ -45,7 +45,6 @@ namespace FoldEngine {
         ///     and initialize them as well.
         /// </summary>
         protected override void Initialize() {
-            Core.RenderingUnit.Effects = new EffectManager(Content);
             Core.RenderingUnit.Fonts = new FontManager(Core);
 
             Core.Initialize();

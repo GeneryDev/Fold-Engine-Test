@@ -23,8 +23,6 @@ namespace FoldEngine.Graphics {
             _beginCalled = false;
         }
 
-        public bool NeedsHalfPixelOffset { get; set; } = true;
-
         public ITexture WhiteTexture {
             get => _batcher.WhiteTexture;
             set => _batcher.WhiteTexture = value;

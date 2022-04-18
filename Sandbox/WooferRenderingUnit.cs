@@ -15,7 +15,6 @@ namespace Woofer {
 
         public IGameCore Core { get; }
 
-        public EffectManager Effects { get; set; }
         public FontManager Fonts { get; set; }
 
         public Point WindowSize {

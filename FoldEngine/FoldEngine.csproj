@@ -32,16 +32,8 @@
         <WarningLevel>4</WarningLevel>
     </PropertyGroup>
     <ItemGroup>
-        <Reference Include="AssimpNet, Version=4.1.0.0, Culture=neutral, PublicKeyToken=0d51b391f59f42a6">
-          <HintPath>..\packages\AssimpNet.4.1.0\lib\net40\AssimpNet.dll</HintPath>
-          <Private>True</Private>
-        </Reference>
         <Reference Include="ChaiFoxes.FMODAudio.Desktop, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null">
           <HintPath>..\packages\ChaiFoxes.FMODAudio.Desktop.2.0.0\lib\net452\ChaiFoxes.FMODAudio.Desktop.dll</HintPath>
-        </Reference>
-        <Reference Include="Microsoft.Win32.Registry, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-          <HintPath>..\packages\Microsoft.Win32.Registry.4.5.0\lib\net461\Microsoft.Win32.Registry.dll</HintPath>
-          <Private>True</Private>
         </Reference>
         <Reference Include="MonoGame.Framework, Version=3.7.1.189, Culture=neutral, PublicKeyToken=null">
           <HintPath>..\packages\MonoGame.Framework.Portable.3.7.1.189\lib\portable-net45+win8+wpa81\MonoGame.Framework.dll</HintPath>
@@ -59,9 +51,6 @@
         </Reference>
         <Reference Include="Shard, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
           <HintPath>..\..\..\..\..\RiderProjects\Shard\Shard\bin\Release\Shard.dll</HintPath>
-        </Reference>
-        <Reference Include="SharpDX, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1">
-          <HintPath>..\..\..\..\..\..\..\Program Files (x86)\MSBuild\MonoGame\v3.0\Tools\SharpDX.dll</HintPath>
         </Reference>
         <Reference Include="System" />
         <Reference Include="System.Core" />
@@ -298,6 +287,7 @@
       </Content>
     </ItemGroup>
     <ItemGroup>
+      <Folder Include="data\resources" />
       <Folder Include="Input\Builder" />
       <Folder Include="Rendering\2d" />
     </ItemGroup>

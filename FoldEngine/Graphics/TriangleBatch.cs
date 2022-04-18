@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace FoldEngine.Graphics {
     public class TriangleBatch {
-        public const bool UseHalfPixelOffset = true;
+        public static bool UseHalfPixelOffset = false;
         
         private readonly TriangleBatcher _batcher;
         private readonly GraphicsDevice _device;

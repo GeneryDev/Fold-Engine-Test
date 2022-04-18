@@ -5,6 +5,7 @@ using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
+using Microsoft.Xna.Framework.Content.Pipeline;
 using Sandbox;
 
 namespace Woofer {
@@ -26,6 +27,7 @@ namespace Woofer {
 
         public float TimeScale => 1;
         public FoldGame FoldGame { get; }
+        public TargetPlatform TargetPlatform => TargetPlatform.DesktopGL;
 
         public IRenderingUnit RenderingUnit { get; }
 

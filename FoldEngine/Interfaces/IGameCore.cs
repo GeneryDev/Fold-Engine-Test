@@ -1,6 +1,7 @@
 ﻿using FoldEngine.Commands;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
+using Microsoft.Xna.Framework.Content.Pipeline;
 
 namespace FoldEngine.Interfaces {
     /// <summary>
@@ -8,6 +9,8 @@ namespace FoldEngine.Interfaces {
     /// </summary>
     public interface IGameCore {
         FoldGame FoldGame { get; }
+        
+        TargetPlatform TargetPlatform { get; }
 
         /// <summary>
         ///     The scene that is currently being played

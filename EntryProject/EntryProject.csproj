@@ -52,6 +52,9 @@
     <Reference Include="MonoGame.Framework">
       <HintPath>$(MonoGameInstallDirectory)\MonoGame\v3.0\Assemblies\DesktopGL\MonoGame.Framework.dll</HintPath>
     </Reference>
+    <Reference Include="MonoGame.Framework.Content.Pipeline, Version=3.7.1.189, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\MSBuild\MonoGame\v3.0\Tools\MonoGame.Framework.Content.Pipeline.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
       <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -173,6 +176,21 @@
     </Content>
     <Content Update="..\data\resources\texture\groups\editor.json">
       <Link>data\resources\texture\groups\editor.json</Link>
+    </Content>
+    <Content Update="..\data\Macros.fxh">
+      <Link>data\Macros.fxh</Link>
+    </Content>
+    <Content Update="..\data\resources\effects\_Macros.fxh">
+      <Link>data\resources\effects\Macros.fxh</Link>
+    </Content>
+    <Content Update="..\data\resources\effects\testfx.fx">
+      <Link>data\resources\effects\testfx.fx</Link>
+    </Content>
+    <Content Update="..\data\resources\effects\macros.fxh">
+      <Link>data\resources\effects\macros.fxh</Link>
+    </Content>
+    <Content Update="..\data\resources\effects\alpha_test.fx">
+      <Link>data\resources\effects\alpha_test.fx</Link>
     </Content>
   </ItemGroup>
   <ItemGroup>
