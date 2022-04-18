@@ -56,6 +56,7 @@ namespace FoldEngine.Resources {
                     for(int i = 0; i < a.MemberCount; i++) {
                         a.StartReadMember(i);
                         Vertices[i] = GenericSerializer.Deserialize(new MeshVertex(), reader);
+                        ProcessVertex(Vertices[i]);
                     }
                 });
                 c.StartReadMember("Indices");
@@ -68,6 +69,14 @@ namespace FoldEngine.Resources {
                     }
                 });
             });
+        }
+
+        private void ProcessVertex(MeshVertex vertex) {
+            float distanceSquared = vertex.Position.LengthSquared();
+            if(_radiusSquared < distanceSquared) {
+                _radiusSquared = distanceSquared;
+                _farthestVertexFromOrigin = vertex.Position.ToVector2();
+            }
         }
 
         public Mesh Start(MeshInputType inputType) {
@@ -107,11 +116,7 @@ namespace FoldEngine.Resources {
             Vertices[_nextVertexIndex] = vertex;
 
             _vertexCount++;
-            float distanceSquared = vertex.Position.LengthSquared();
-            if(_radiusSquared < distanceSquared) {
-                _radiusSquared = distanceSquared;
-                _farthestVertexFromOrigin = vertex.Position.ToVector2();
-            }
+            ProcessVertex(vertex);
 
             _nextVertexIndex++;
 
