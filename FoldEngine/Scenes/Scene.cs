@@ -11,7 +11,7 @@ using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Scenes {
-    [Resource(directoryName: "scene")]
+    [Resource("scene")]
     public class Scene : Resource, ISelfSerializer {
         public const string Extension = "foldscene";
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
 
 namespace FoldEngine.Resources {
@@ -53,9 +54,22 @@ namespace FoldEngine.Resources {
                 StartLoading<T>(task);
             }
         }
+        public void NeedsLoaded(Type type, string identifier, string path) {
+            if(GetStatusOfResource(type, identifier) == ResourceStatus.Inactive) {
+                MethodInfo methodToCall = typeof(ResourceLoader).GetMethod(nameof(StartLoading), new Type[] {typeof(ResourceLoadTask)}).MakeGenericMethod(type);
+                
+                ResourceLoadTask task = PrepareTask();
+                task.Type = type;
+                task.Identifier = identifier;
+                task.Path = path;
+                task.Status = ResourceStatus.Loading;
+                
+                methodToCall.Invoke(this, new object[]{ task });
+            }
+        }
 
         //MAIN THREAD
-        private void StartLoading<T>(ResourceLoadTask task) where T : Resource, new() {
+        public void StartLoading<T>(ResourceLoadTask task) where T : Resource, new() {
             ThreadPool.QueueUserWorkItem(_ => Load<T>(task));
         }
 

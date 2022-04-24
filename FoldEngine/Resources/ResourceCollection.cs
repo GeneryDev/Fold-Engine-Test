@@ -12,6 +12,7 @@ namespace FoldEngine.Resources {
         bool IsEmpty { get; }
         Type ResourceType { get; }
         bool Exists(ResourceIdentifier identifier);
+        Resource Get(ref ResourceIdentifier identifier, Resource def = null);
         void Save();
         void InvalidateCaches();
         void Attach(Resource resource);
@@ -124,6 +125,10 @@ namespace FoldEngine.Resources {
             return def;
         }
 
+        public Resource Get(ref ResourceIdentifier identifier, Resource def = null) {
+            return Get(ref identifier, (T)def);
+        }
+
         public T Create(string identifier, LoadOperation reader = null) {
             int existingIndex = IndexForIdentifier(identifier);
             if(existingIndex != -1) throw new ArgumentException("Resource '" + identifier + "' already exists!");
@@ -171,6 +176,7 @@ namespace FoldEngine.Resources {
             Constructors = new Dictionary<Type, ConstructorInfo>();
 
         private static Dictionary<Type, ResourceAttribute> _attributes;
+        private static Dictionary<string, ResourceAttribute> _attributesById;
         protected internal long LastAccessTime = Time.Now;
         public string Identifier { get; protected internal set; }
 
@@ -242,6 +248,7 @@ namespace FoldEngine.Resources {
         private static void Populate() {
             if(_attributes != null) return;
             _attributes = new Dictionary<Type, ResourceAttribute>();
+            _attributesById = new Dictionary<string, ResourceAttribute>();
 
             PopulateDictionaryWithAssembly(Assembly.GetAssembly(typeof(Component)));
             PopulateDictionaryWithAssembly(Assembly.GetEntryAssembly());
@@ -251,7 +258,11 @@ namespace FoldEngine.Resources {
             foreach(Type type in assembly.GetTypes())
                 if(type.IsSubclassOf(typeof(Resource))) {
                     var attribute = type.GetCustomAttribute<ResourceAttribute>(false);
-                    if(attribute != null) _attributes[type] = attribute;
+                    if(attribute != null) {
+                        attribute.ResourceType = type;
+                        _attributes[type] = attribute;
+                        _attributesById[attribute.Identifier] = attribute;
+                    }
                 }
         }
 
@@ -268,6 +279,11 @@ namespace FoldEngine.Resources {
             }
         }
 
+        public static ResourceAttribute AttributeOf(string identifier) {
+            Populate();
+            return _attributesById.ContainsKey(identifier) ? _attributesById[identifier] : null;
+        }
+
         public static ResourceAttribute AttributeOf<T>() where T : Resource {
             return AttributeOf(typeof(T));
         }
@@ -279,12 +295,15 @@ namespace FoldEngine.Resources {
     }
 
     public sealed class ResourceAttribute : Attribute {
+        public readonly string Identifier;
         public readonly string DirectoryName;
         public readonly string[] Extensions;
         public readonly int UnloadTime; //ms
+        public Type ResourceType;
 
-        public ResourceAttribute(string directoryName, int unloadTime = 5000, params string[] extensions) {
-            DirectoryName = directoryName;
+        public ResourceAttribute(string identifier, string directoryName = null, int unloadTime = 5000, params string[] extensions) {
+            Identifier = identifier;
+            DirectoryName = directoryName ?? identifier;
             UnloadTime = unloadTime;
             if(extensions == null || extensions.Length == 0)
                 Extensions = new[] {"foldresource"};

@@ -3,7 +3,7 @@ using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 
 namespace FoldEngine.Audio {
-    [Resource("sound", 5000, "wav", "ogg", "mp3")]
+    [Resource("sound", directoryName: "sound", unloadTime: 5000, "wav", "ogg", "mp3")]
     public class Sound : Resource {
         internal ChaiFoxes.FMODAudio.Sound Effect;
 

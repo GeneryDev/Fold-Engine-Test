@@ -70,6 +70,16 @@ namespace FoldEngine.Resources {
         }
 
         /// <summary>
+        ///     Checks whether the resource of the given type and identifier exists and is currently loaded.
+        /// </summary>
+        /// <param name="type">The type of the resource</param>
+        /// <param name="identifier">The identifier of the resource</param>
+        /// <returns>True if the resource exists and is loaded, false otherwise.</returns>
+        public bool Exists(Type type, ref ResourceIdentifier identifier) {
+            return FindOwner(type, ref identifier) != null;
+        }
+
+        /// <summary>
         ///     Retrieves the resource of the given type and identifier, if it is exists and is loaded.
         ///     If it is not loaded, it returns the provided default value,
         ///     and schedules the resource to be loaded from disk asynchronously.
@@ -85,6 +95,26 @@ namespace FoldEngine.Resources {
             if(collection != null)
                 return ((ResourceCollection<T>) collection).Get(ref identifier, def);
             Root.StartLoad<T>(identifier.Identifier);
+
+            return def;
+        }
+
+        /// <summary>
+        ///     Retrieves the resource of the given type and identifier, if it is exists and is loaded.
+        ///     If it is not loaded, it returns the provided default value,
+        ///     and schedules the resource to be loaded from disk asynchronously.
+        /// </summary>
+        /// <param name="type">The type of the resource</param>
+        /// <param name="identifier">The identifier of the resource</param>
+        /// <param name="def">The default value to return in case the resource is not loaded.</param>
+        /// <returns>The requested resource, if it exists; the def parameter otherwise.</returns>
+        public Resource Get(Type type, ref ResourceIdentifier identifier, Resource def = default) {
+            if(identifier.Identifier == null) return def;
+
+            IResourceCollection collection = FindOwner(type, ref identifier);
+            if(collection != null)
+                return collection.Get(ref identifier, def);
+            Root.StartLoad(type, identifier.Identifier);
 
             return def;
         }
@@ -120,6 +150,19 @@ namespace FoldEngine.Resources {
         public void KeepLoaded<T>(ref ResourceIdentifier identifier, bool preload = false) where T : Resource, new() {
             if(!preload && !Exists<T>(ref identifier)) return;
             Get<T>(ref identifier);
+        }
+
+        /// <summary>
+        ///     Marks a resource as "in use" and prevents it from being unloaded.
+        ///     This method should only be called from a <code>GameSystem</code>'s <code>PollResources</code> method.
+        ///     See: <see cref="GameSystem" />
+        /// </summary>
+        /// <param name="type">The type of the resource</param>
+        /// <param name="identifier">The identifier of the resource</param>
+        /// <param name="preload">Whether to start loading the resource if not already in memory</param>
+        public void KeepLoaded(Type type, ref ResourceIdentifier identifier, bool preload = false) {
+            if(!preload && !Exists(type, ref identifier)) return;
+            Get(type, ref identifier);
         }
 
         /// <summary>
@@ -186,10 +229,13 @@ namespace FoldEngine.Resources {
         }
 
         private IResourceCollection FindOwner<T>(ref ResourceIdentifier identifier) where T : Resource, new() {
-            Type type = typeof(T);
+            return FindOwner(typeof(T), ref identifier);
+        }
+
+        private IResourceCollection FindOwner(Type type, ref ResourceIdentifier identifier) {
             return _collections.ContainsKey(type) && _collections[type].Exists(identifier)
                 ? _collections[type]
-                : Parent?.FindOwner<T>(ref identifier);
+                : Parent?.FindOwner(type, ref identifier);
         }
 
         private void Clear() {
@@ -205,6 +251,18 @@ namespace FoldEngine.Resources {
             if(_core.ResourceIndex.Exists(typeof(T), identifier)) {
                 string path = _core.ResourceIndex.GetPathForIdentifier(typeof(T), identifier);
                 _loader.NeedsLoaded<T>(identifier, path);
+            }
+        }
+
+        private void StartLoad(Type type, string identifier) {
+            if(Parent != null) {
+                Parent.StartLoad(type, identifier);
+                return;
+            }
+
+            if(_core.ResourceIndex.Exists(type, identifier)) {
+                string path = _core.ResourceIndex.GetPathForIdentifier(type, identifier);
+                _loader.NeedsLoaded(type, identifier, path);
             }
         }
 

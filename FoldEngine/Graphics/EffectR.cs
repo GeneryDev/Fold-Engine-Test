@@ -4,7 +4,7 @@ using FoldEngine.Resources;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace FoldEngine.Graphics {
-    [Resource(directoryName: "effects", extensions: "fx")]
+    [Resource("effect", extensions: "fx")]
     public class EffectR : Resource {
         public Effect Effect { get; private set; }
         public int Order;
