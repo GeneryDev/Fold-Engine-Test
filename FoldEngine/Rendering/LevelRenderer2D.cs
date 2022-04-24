@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Graphics;
@@ -43,6 +44,8 @@ namespace FoldEngine.Rendering {
             if(!anyCamera) Console.WriteLine("No cameras in scene");
         }
 
+        private List<RenderableKey> _entitiesToRender = new List<RenderableKey>();
+
         private void RenderCamera(
             Camera camera,
             Transform view,
@@ -85,10 +88,22 @@ namespace FoldEngine.Rendering {
             if(layer == null) return;
 
             _meshRenderables.Reset();
+            _entitiesToRender.Clear();
 
             while(_meshRenderables.Next()) {
-                var transform = _meshRenderables.GetCoComponent<Transform>();
                 ref MeshRenderable meshRenderable = ref _meshRenderables.GetComponent();
+                var effect = Scene.Resources.Get<EffectR>(ref meshRenderable.EffectIdentifier, null);
+                int sortKey = effect?.Order ?? 0;
+                _entitiesToRender.Add(new RenderableKey() {
+                    EntityId = _meshRenderables.GetEntityId(),
+                    SortKey = sortKey
+                });
+            }
+
+            for(int i = 0; i < _entitiesToRender.Count; i++) {
+                var entity = new Entity(Scene, _entitiesToRender[i].EntityId);
+                Transform transform = entity.Transform;
+                ref MeshRenderable meshRenderable = ref entity.GetComponent<MeshRenderable>();
                 if(camera.SnapPosition > 0) {
                     Vector2 pos = transform.Position;
                     pos.X = (float) (Math.Round(pos.X / camera.SnapPosition) * camera.SnapPosition);
@@ -172,6 +187,11 @@ namespace FoldEngine.Rendering {
             }
 
             return -1;
+        }
+
+        private struct RenderableKey {
+            public long EntityId;
+            public int SortKey;
         }
     }
 }

@@ -20,8 +20,9 @@ namespace FoldEngine.Graphics {
             Pm.Platform = FoldGame.Game.Core.TargetPlatform;
         }
         
-        public static Effect Compile(string path) {
+        public static Effect Compile(string path, out string source) {
             EffectContent content = Importer.Import(path, null);
+            source = content.EffectCode;
             CompiledEffectContent cecontent = Processor.Process(content, Ppc);
             return new Effect(FoldGame.Game.GraphicsDevice, cecontent.GetEffectCode());
         }
