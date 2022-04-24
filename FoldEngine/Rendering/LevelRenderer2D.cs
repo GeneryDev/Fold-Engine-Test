@@ -99,6 +99,8 @@ namespace FoldEngine.Rendering {
                     SortKey = sortKey
                 });
             }
+            
+            _entitiesToRender.Sort((a, b) => a.SortKey - b.SortKey);
 
             for(int i = 0; i < _entitiesToRender.Count; i++) {
                 var entity = new Entity(Scene, _entitiesToRender[i].EntityId);
