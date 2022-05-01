@@ -336,12 +336,14 @@ namespace FoldEngine.Graphics {
         private EffectParameter _matrixParam;
         private Viewport _lastViewport;
         private Matrix _projection;
+        private float _zNearPlane;
         private float _zFarPlane;
 
-        public CustomSpriteEffect(GraphicsDevice device, float farPlane = -100)
+        public CustomSpriteEffect(GraphicsDevice device, float nearPlane = 100, float farPlane = -100)
             : base(device)
         {
             _matrixParam = Parameters["MatrixTransform"];
+            _zNearPlane = nearPlane;
             _zFarPlane = farPlane;
         }
 
@@ -352,14 +354,14 @@ namespace FoldEngine.Graphics {
 
         public override Effect Clone()
         {
-            return new CustomSpriteEffect(GraphicsDevice, _zFarPlane);
+            return new CustomSpriteEffect(GraphicsDevice, _zNearPlane, _zFarPlane);
         }
 
         public Matrix SetupMatrix() {
             var vp = GraphicsDevice.Viewport;
             if ((vp.Width != _lastViewport.Width) || (vp.Height != _lastViewport.Height))
             {
-                Matrix.CreateOrthographicOffCenter(0, vp.Width, vp.Height, 0, 0, _zFarPlane, out _projection);
+                Matrix.CreateOrthographicOffCenter(0, vp.Width, vp.Height, 0, _zNearPlane, _zFarPlane, out _projection);
 
                 if (TriangleBatch.UseHalfPixelOffset)
                 {
