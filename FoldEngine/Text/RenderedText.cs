@@ -14,10 +14,11 @@ namespace FoldEngine.Text {
         public bool HasValue => Glyphs != null;
 
         public void DrawOnto(RenderSurface surface, Point start, Color color, float scale = 1) {
+            Update();
             foreach(RenderedTextGlyph glyph in Glyphs) glyph.DrawOnto(surface, start, color, scale, BitmapFont);
         }
 
-        public RenderedText Update() {
+        private RenderedText Update() {
             if(Generation != BitmapFont.Generation) TextRenderer.Instance.Render(BitmapFont, Text, out this, Size);
             return this;
         }
