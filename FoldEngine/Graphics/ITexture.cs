@@ -81,6 +81,7 @@ namespace FoldEngine.Graphics {
     public class Texture : Resource, ITexture {
         public static Texture White;
         public static Texture Missing;
+        
         private Rectangle _bounds;
         private Texture _parent;
         private Texture2D _texture;
@@ -91,6 +92,8 @@ namespace FoldEngine.Graphics {
         public Texture2D Source => _texture ?? _parent.Source;
         public int Width => _bounds.Width;
         public int Height => _bounds.Height;
+
+        public Texture Parent => _parent;
 
         public void DrawOnto(SpriteBatch batch, Vector2 pos) {
             batch.Draw(_texture, pos, _bounds, Color.White);

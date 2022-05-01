@@ -18,6 +18,7 @@ namespace FoldEngine.Resources {
         void Attach(Resource resource);
         void Detach(Resource resource);
         void UnloadUnused();
+        IEnumerable<Resource> GetAll();
     }
 
     public class ResourceCollection<T> : IResourceCollection where T : Resource, new() {
@@ -60,6 +61,15 @@ namespace FoldEngine.Resources {
             }
 
             InvalidateCaches();
+        }
+
+        public IEnumerable<Resource> GetAll() {
+            for(int i = 0; i < Resources.Count; i++) {
+                T resource = Resources[i];
+                yield return resource;
+            }
+
+            yield break;
         }
 
         public void InvalidateCaches() {

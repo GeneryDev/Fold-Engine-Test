@@ -75,7 +75,7 @@ namespace FoldEngine.Editor.Views {
         public SystemHierarchy(GuiEnvironment environment) : base(environment) { }
         public SystemHierarchy(GuiPanel parent) : base(parent) { }
         public override Type DefaultId { get; } = null;
-        public override bool CanDragInto { get; } = false;
+        public override bool CanDragInto { get; set; } = false;
 
         public override void Drop() {
             if(DragTargetId == null) return;

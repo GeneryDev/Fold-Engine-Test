@@ -4,12 +4,12 @@ using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 
 namespace FoldEngine.Editor.Views {
-    public class EditorSceneControlView : EditorView {
-        public EditorSceneControlView() {
+    public class EditorDebugActionsView : EditorView {
+        public EditorDebugActionsView() {
             Icon = new ResourceIdentifier("editor/info");
         }
 
-        public override string Name => "Scene Controls";
+        public override string Name => "Debug Actions";
 
         public override void Render(IRenderingUnit renderer) {
             ContentPanel.MayScroll = true;
@@ -26,6 +26,15 @@ namespace FoldEngine.Editor.Views {
             if(ContentPanel.Button("Breakpoint", 14).IsPressed()) {
                 Console.WriteLine("Breakpoint!");
             }
+            
+            
+            if(ContentPanel.Button("Save All Resources", 14).IsPressed()) {
+                Scene.Resources.SaveAll();
+                Console.WriteLine("Save resources!");
+            }
+
+            if(ContentPanel.Button("Reload Resources", 14).IsPressed()) Scene.Core.ResourceIndex.Update();
+            if(ContentPanel.Button("Invoke GC", 14).IsPressed()) GC.Collect(GC.MaxGeneration);
         }
     }
 }

@@ -47,18 +47,22 @@ namespace FoldEngine.Text {
         }
 
         public bool Append(char c) {
-            if(c == '\n') {
-                //NEWLINE
-                FlushLine();
-            } else {
-                RenderedTextGlyph glyph = NextGlyph(c);
-                if(!glyph.HasValue) return false;
-                _minPoint = _minPoint.Min(glyph.Destination.Location);
-                _maxPoint = _maxPoint.Max(glyph.Destination.Location + glyph.Destination.Size);
-                _glyphs.Add(glyph);
+            switch(c) {
+                case '\r':
+                    return true;
+                case '\n':
+                    //NEWLINE
+                    FlushLine();
+                    return true;
+                default: {
+                    RenderedTextGlyph glyph = NextGlyph(c);
+                    if(!glyph.HasValue) return false;
+                    _minPoint = _minPoint.Min(glyph.Destination.Location);
+                    _maxPoint = _maxPoint.Max(glyph.Destination.Location + glyph.Destination.Size);
+                    _glyphs.Add(glyph);
+                    return true;
+                }
             }
-
-            return true;
         }
 
         public void DumpChars(IEnumerable<char> chars) {

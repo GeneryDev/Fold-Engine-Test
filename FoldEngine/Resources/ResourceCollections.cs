@@ -228,6 +228,11 @@ namespace FoldEngine.Resources {
                     : null;
         }
 
+        public IEnumerable<Resource> GetAll(Type type) {
+            IResourceCollection collection = CollectionFor(type, createIfMissing: false);
+            return collection == null ? Array.Empty<Resource>() : collection.GetAll();
+        }
+
         private IResourceCollection FindOwner<T>(ref ResourceIdentifier identifier) where T : Resource, new() {
             return FindOwner(typeof(T), ref identifier);
         }

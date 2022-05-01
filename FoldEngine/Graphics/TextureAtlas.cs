@@ -30,7 +30,7 @@ namespace FoldEngine.Graphics {
             _containedTextures.Add(new KeyValuePair<string, ITexture>(identifier, texture));
         }
 
-        public void Pack() {
+        public string Pack() {
             // _containedTextures.Sort((a, b) => b.Value.Width * b.Value.Height - a.Value.Width * a.Value.Height); //Largest to smallest (area)
             // _containedTextures.Sort((a, b) => a.Value.Width * a.Value.Height - b.Value.Width * b.Value.Height); //Smallest to largest (area)
             _containedTextures.Sort((a, b) =>
@@ -83,7 +83,9 @@ namespace FoldEngine.Graphics {
 
             TargetTexture = new RenderTarget2D(FoldGame.Game.GraphicsDevice, finalWidth, finalHeight);
 
-            Texture atlas = _resources.Create<Texture>("__atlas." + Name).Direct(TargetTexture);
+            string createdIdentifier = "__atlas." + Name;
+
+            Texture atlas = _resources.Create<Texture>(createdIdentifier).Direct(TargetTexture);
             foreach(KeyValuePair<string, Rectangle> pair in _textureBounds)
                 _resources.Create<Texture>(pair.Key).Atlased(atlas, pair.Value);
 
@@ -91,6 +93,8 @@ namespace FoldEngine.Graphics {
             FoldGame.Game.GraphicsDevice.Clear(Color.TransparentBlack);
             _batch.End();
             FoldGame.Game.GraphicsDevice.SetRenderTarget(null);
+
+            return createdIdentifier;
         }
     }
 }

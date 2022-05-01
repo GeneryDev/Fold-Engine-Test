@@ -97,7 +97,7 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
                 Environment.HoverTarget.Hierarchy = _hierarchy;
             }
 
-            if(Pressed(MouseEvent.LeftButton) && Environment.HoverTargetPrevious.Element != this) {
+            if(Pressed(MouseEvent.LeftButton) && Environment.HoverTargetPrevious.Element != this && _hierarchy.CanDrag) {
                 _dragging = true;
                 if(_hierarchy != null) _hierarchy.Dragging = true;
             }

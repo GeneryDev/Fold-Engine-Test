@@ -170,6 +170,51 @@ namespace FoldEngine.Gui {
         }
     }
 
+    public class GuiImage : GuiElement {
+        protected ITexture _image;
+        protected Color _color = Color.White;
+        protected Point _iconSize;
+
+        public override void Reset(GuiPanel parent) {
+            _image = null;
+            _color = Color.White;
+            _iconSize = Point.Zero;
+        }
+
+        public override void AdjustSpacing(GuiPanel parent) {
+            Bounds.Size = _iconSize;
+            Margin = 0;
+        }
+
+        public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default) {
+            if(Bounds.Contains(Environment.MousePos)) Environment.HoverTarget.Element = this;
+
+            if(_image != null) {
+                layer.Surface.Draw(new DrawRectInstruction {
+                    Texture = _image,
+                    Color = _color,
+                    DestinationRectangle = Bounds.Translate(offset)
+                });
+            }
+        }
+
+        public GuiImage Image(ITexture img, Color color, int? width, int? height = null) {
+            _image = img;
+            _color = color;
+            if(width == null && height == null) {
+                _iconSize = new Point(img.Width, img.Height);
+            } else if(width != null && height != null) {
+                _iconSize = new Point(width.Value, height.Value);
+            } else if(width != null) {
+                _iconSize = new Point(width.Value, (int) ((float)img.Height / img.Width * width.Value));
+            } else {
+                _iconSize = new Point((int) ((float)img.Width / img.Height * height.Value), height.Value);
+            }
+
+            return this;
+        }
+    }
+
     public class GuiButton : GuiLabel {
         private MouseEvent _lastEvent;
 

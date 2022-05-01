@@ -11,7 +11,7 @@ namespace FoldEngine.Editor.Tools {
         private Vector2 _dragStartWorldPos;
 
         public HandTool(EditorEnvironment environment) : base(environment) {
-            Icon = EditorIcons.Cursor;
+            Icon = EditorIcons.Hand;
         }
 
         public override void OnMousePressed(ref MouseEvent e) {

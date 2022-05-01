@@ -103,6 +103,10 @@
         <Compile Include="Editor\Gui\InspectorField.cs" />
         <Compile Include="Editor\Gui\ToolbarButton.cs" />
         <Compile Include="Editor\Inspector\ComponentInfo.cs" />
+        <Compile Include="Editor\Inspector\CustomInspector.cs" />
+        <Compile Include="Editor\Inspector\CustomInspectors\ResourceInspector.cs" />
+        <Compile Include="Editor\Inspector\CustomInspectors\SoundInspector.cs" />
+        <Compile Include="Editor\Inspector\CustomInspectors\TextureInspector.cs" />
         <Compile Include="Editor\Inspector\HideInInspectorAttribute.cs" />
         <Compile Include="Editor\Inspector\NameAttribute.cs" />
         <Compile Include="Editor\Inspector\ShowOnlyIf.cs" />
@@ -125,7 +129,7 @@
         <Compile Include="Editor\Views\EditorHierarchyView.cs" />
         <Compile Include="Editor\Views\EditorInspectorView.cs" />
         <Compile Include="Editor\Views\EditorResourcesView.cs" />
-        <Compile Include="Editor\Views\EditorSceneControlView.cs" />
+        <Compile Include="Editor\Views\EditorDebugActionsView.cs" />
         <Compile Include="Editor\Views\EditorSystemsView.cs" />
         <Compile Include="Editor\Views\EditorTestView.cs" />
         <Compile Include="Editor\Views\EditorToolbarView.cs" />

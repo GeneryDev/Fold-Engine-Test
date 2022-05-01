@@ -37,7 +37,8 @@ namespace EntryProject.Editor.Gui.Hierarchy {
         }
 
         public virtual T DefaultId { get; } = default;
-        public virtual bool CanDragInto { get; } = true;
+        public virtual bool CanDrag { get; set; } = true;
+        public virtual bool CanDragInto { get; set; } = true;
         public GuiEnvironment Environment { get; set; }
         public bool Pressed { get; set; }
         public bool Dragging { get; set; }

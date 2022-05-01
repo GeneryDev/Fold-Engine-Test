@@ -36,7 +36,7 @@ namespace FoldEngine.Graphics.Atlas {
                             });
                         }
                     } else if(atlasComponent.WaitingForLoad == 0) {
-                        atlasComponent.Atlas.Pack();
+                        atlasComponent.AtlasIdentifier = new ResourceIdentifier(atlasComponent.Atlas.Pack());
                         Console.WriteLine("Generated atlas " + atlasComponent.Group);
                         atlasComponent.Generated = true;
                         atlasComponent.Atlas = null;

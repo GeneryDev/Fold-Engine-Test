@@ -18,6 +18,7 @@ namespace FoldEngine.Components {
         public abstract void Remove(long entityId);
         public abstract void CreateFor(long entityId);
 
+        public abstract object GetBoxedComponent(long entityId);
         public abstract object GetFieldValue(long entityId, FieldInfo fieldInfo);
         public abstract void SetFieldValue(long entityId, FieldInfo fieldInfo, object value);
 
@@ -87,6 +88,10 @@ namespace FoldEngine.Components {
 
         public override void CreateFor(long entityId) {
             Create(entityId);
+        }
+
+        public override object GetBoxedComponent(long entityId) {
+            return Get(entityId);
         }
 
         public override object GetFieldValue(long entityId, FieldInfo fieldInfo) {
