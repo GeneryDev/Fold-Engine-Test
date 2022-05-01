@@ -67,8 +67,10 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="Audio\Sound.cs" />
+        <Compile Include="Commands\ChangeSystemOrderCommand.cs" />
         <Compile Include="Commands\CommandQueue.cs" />
         <Compile Include="Commands\ICommand.cs" />
+        <Compile Include="Commands\InsertSystemAtIndexCommand.cs" />
         <Compile Include="Commands\RendererCommands.cs" />
         <Compile Include="Commands\SceneCommands.cs" />
         <Compile Include="Commands\WindowCommands.cs" />
@@ -113,6 +115,7 @@
         <Compile Include="Editor\Tools\SelectTool.cs" />
         <Compile Include="Editor\Transactions\AddSystemTransaction.cs" />
         <Compile Include="Editor\Transactions\ChangeEntityHierarchyTransaction.cs" />
+        <Compile Include="Editor\Transactions\ChangeSystemOrderTransaction.cs" />
         <Compile Include="Editor\Transactions\ComponentTransactions.cs" />
         <Compile Include="Editor\Transactions\CreateEntityTransaction.cs" />
         <Compile Include="Editor\Transactions\DeleteEntityTransaction.cs" />

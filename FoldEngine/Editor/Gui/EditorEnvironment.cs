@@ -186,6 +186,10 @@ namespace FoldEngine.Editor.Gui {
             return null;
         }
 
+        public bool SwitchToView<T>() where T : EditorView {
+            return SwitchToView(GetView<T>());
+        }
+
         public bool SwitchToView(EditorView view) {
             foreach(BorderPanel borderPanel in VisiblePanels) {
                 foreach(ViewListPanel viewListPanel in borderPanel.ViewLists)

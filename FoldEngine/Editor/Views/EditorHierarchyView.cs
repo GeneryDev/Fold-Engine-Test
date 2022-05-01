@@ -136,8 +136,10 @@ namespace FoldEngine.Editor.Views {
                 editorBase.EditingEntity.Add(id);
             }
 
-            if(ContentPanel.Environment is EditorEnvironment editorEnvironment)
-                editorEnvironment.SwitchToView(editorEnvironment.GetView<EditorInspectorView>());
+            if(ContentPanel.Environment is EditorEnvironment editorEnvironment) {
+                editorEnvironment.GetView<EditorInspectorView>().SetObject(null);                
+                editorEnvironment.SwitchToView<EditorInspectorView>();
+            }
         }
 
         private void ShowEntityContextMenu(long id, Point point) {

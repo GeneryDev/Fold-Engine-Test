@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using FoldEngine.Commands;
 using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
 using FoldEngine.Scenes;
@@ -30,6 +31,7 @@ namespace FoldEngine.Editor.Transactions {
     public class RemoveSystemTransaction : Transaction<EditorEnvironment> {
         private Type _type;
         private GameSystem _system;
+        private int _index;
 
         public RemoveSystemTransaction(Type type) {
             _type = type;
@@ -37,12 +39,13 @@ namespace FoldEngine.Editor.Transactions {
 
         public override bool Redo(EditorEnvironment target) {
             _system = target.Scene.Systems.Get(_type);
+            _index = target.Scene.Systems.GetSystemIndex(_type);
             target.Scene.Systems.Remove(_system);
             return true;
         }
 
         public override bool Undo(EditorEnvironment target) {
-            target.Scene.Systems.Add(_system); //TODO preserve order
+            target.Scene.Core.CommandQueue.Enqueue(new InsertSystemAtIndexCommand(_system, _index));
             return true;
         }
     }

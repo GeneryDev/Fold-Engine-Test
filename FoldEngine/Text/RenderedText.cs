@@ -18,7 +18,7 @@ namespace FoldEngine.Text {
             foreach(RenderedTextGlyph glyph in Glyphs) glyph.DrawOnto(surface, start, color, scale, BitmapFont);
         }
 
-        private RenderedText Update() {
+        public RenderedText Update() {
             if(Generation != BitmapFont.Generation) TextRenderer.Instance.Render(BitmapFont, Text, out this, Size);
             return this;
         }

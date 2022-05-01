@@ -132,6 +132,10 @@ namespace FoldEngine.Editor.Views {
         public void SetObject(object obj) {
             _object = obj;
         }
+        
+        public object GetObject() {
+            return _object;
+        }
     }
 
     public class ComponentMemberLabel : GuiLabel {

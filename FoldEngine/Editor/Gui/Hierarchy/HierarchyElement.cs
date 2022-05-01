@@ -135,9 +135,9 @@ namespace FoldEngine.Editor.Gui.Hierarchy {
 
             if(_hierarchy != null && _hierarchy.Dragging && Environment.HoverTarget.Element == this) {
                 int relative = 0;
-                if(Environment.MousePos.Y <= Bounds.Top + Bounds.Height / 3)
+                if(Environment.MousePos.Y <= Bounds.Top + Bounds.Height / (_hierarchy.CanDragInto ? 3 : 2))
                     relative = -1;
-                else if(Environment.MousePos.Y > Bounds.Bottom - Bounds.Height / 3) relative = 1;
+                else if(Environment.MousePos.Y > Bounds.Bottom - Bounds.Height / (_hierarchy.CanDragInto ? 3 : 2)) relative = 1;
                 _hierarchy.DragTargetId = _id;
                 _hierarchy.DragRelative = relative;
 

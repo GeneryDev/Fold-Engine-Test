@@ -119,7 +119,7 @@ namespace FoldEngine.Scenes {
             }
         }
 
-        private void AddDirectly(GameSystem sys) {
+        internal void AddDirectly(GameSystem sys) {
             _all.Add(sys);
             if(sys.ProcessingCycles.Has(ProcessingCycles.Input)) _inputSystems.Add(sys);
 
@@ -206,6 +206,25 @@ namespace FoldEngine.Scenes {
                     return sys;
 
             return null;
+        }
+
+        public int GetSystemIndex(Type type) {
+            int i = 0;
+            foreach(GameSystem sys in _all) {
+                if(type.IsInstanceOfType(sys))
+                    return i;
+                i++;
+            }
+
+            return -1;
+        }
+
+        public void ChangeSystemOrder(Type sysType, int toIndex) {
+            GameSystem sys = Get(sysType);
+            if(sys == null) throw new ArgumentException($"Cannot change order of system {sysType}: such system doesn't exist in the scene");
+            _all.Remove(sys);
+            _all.Insert(Math.Max(0, Math.Min(toIndex, _all.Count)), sys);
+            UpdateProcessingGroups();
         }
     }
 }

@@ -33,7 +33,7 @@ namespace FoldEngine.Editor.Tools {
 
             if(intersectingEntities != -1 && !editorBase.EditingEntity.Contains(intersectingEntities))
                 editorBase.EditingEntity.Add(intersectingEntities);
-            Environment.SwitchToView(Environment.GetView<EditorInspectorView>());
+            Environment.SwitchToView<EditorInspectorView>();
         }
 
         public override void OnMouseReleased(ref MouseEvent e) { }
