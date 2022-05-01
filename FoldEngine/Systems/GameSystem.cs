@@ -5,23 +5,31 @@ using FoldEngine.Components;
 using FoldEngine.Events;
 using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
+using FoldEngine.Serialization;
 
 namespace FoldEngine.Systems {
+    [GenericSerializable]
     public abstract class GameSystem {
         private static Dictionary<Type, string> _typeToIdentifierMap;
         private static Dictionary<string, Type> _identifierToTypeMap;
         private static Dictionary<string, ConstructorInfo> _identifierToConstructorMap;
 
+        [DoNotSerialize]
         private readonly GameSystemAttribute _attribute;
+        [DoNotSerialize]
         private readonly List<EventUnsubscriber> _eventUnsubscribers = new List<EventUnsubscriber>();
 
         protected GameSystem() {
             _attribute = (GameSystemAttribute) GetType().GetCustomAttribute(typeof(GameSystemAttribute));
         }
 
+        [DoNotSerialize]
         public Scene Scene { get; internal set; }
+        [DoNotSerialize]
         public string SystemName => _attribute.SystemName;
+        [DoNotSerialize]
         public ProcessingCycles ProcessingCycles => _attribute.ProcessingCycles;
+        [DoNotSerialize]
         public bool RunWhenPaused => _attribute.RunWhenPaused;
 
         public virtual void OnInput() { }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using FoldEngine.Interfaces;
+using FoldEngine.Resources;
 using FoldEngine.Serialization;
 using FoldEngine.Systems;
 
@@ -28,22 +29,31 @@ namespace FoldEngine.Scenes {
 
         public void Serialize(SaveOperation writer) {
             writer.WriteCompound((ref SaveOperation.Compound c) => {
-                c.WriteMember(nameof(_all), () => {
-                    int count = _all.Count;
-                    if(writer.Options.Has(SerializeExcludeSystems.Instance)) {
-                        count = 0;
+                //Old format, list of strings:
+                // c.WriteMember(nameof(_all), () => {
+                //     int count = _all.Count;
+                //     if(writer.Options.Has(SerializeExcludeSystems.Instance)) {
+                //         count = 0;
+                //         foreach(GameSystem sys in _all) {
+                //             if(writer.Options.Get(SerializeExcludeSystems.Instance).Contains(sys.GetType())) continue;
+                //             count++;
+                //         }
+                //     }
+                //     writer.Write(count);
+                //     
+                //     foreach(GameSystem sys in _all) {
+                //         if(count != _all.Count
+                //            && writer.Options.Get(SerializeExcludeSystems.Instance).Contains(sys.GetType())) continue;
+                //         writer.Write(sys.SystemName);
+                //     }
+                // });
+                c.WriteMember(nameof(AllSystems), () => {
+                    writer.WriteCompound((ref SaveOperation.Compound c2) => {
                         foreach(GameSystem sys in _all) {
-                            if(writer.Options.Get(SerializeExcludeSystems.Instance).Contains(sys.GetType())) continue;
-                            count++;
+                            if(writer.Options.Get(SerializeExcludeSystems.Instance)?.Contains(sys.GetType()) ?? false) continue;
+                            c2.WriteMember(sys.SystemName, sys);
                         }
-                    }
-                    writer.Write(count);
-                    
-                    foreach(GameSystem sys in _all) {
-                        if(count != _all.Count
-                           && writer.Options.Get(SerializeExcludeSystems.Instance).Contains(sys.GetType())) continue;
-                        writer.Write(sys.SystemName);
-                    }
+                    });
                 });
             });
         }
@@ -54,11 +64,24 @@ namespace FoldEngine.Scenes {
                     Remove(sys);
 
             reader.ReadCompound(c => {
-                c.StartReadMember(nameof(_all));
-                int count = reader.ReadInt32();
-                for(int i = 0; i < count; i++) {
-                    string sysName = reader.ReadString();
-                    Add(GameSystem.CreateForIdentifier(sysName));
+                if(c.HasMember(nameof(_all))) {
+                    //Old format, list of strings:
+                    c.StartReadMember(nameof(_all));
+                    int count = reader.ReadInt32();
+                    for(int i = 0; i < count; i++) {
+                        string sysName = reader.ReadString();
+                        Add(GameSystem.CreateForIdentifier(sysName));
+                    }
+                } else {
+                    c.StartReadMember(nameof(AllSystems));
+                    reader.ReadCompound(c2 => {
+                        foreach(string sysName in c2.MemberNames) {
+                            GameSystem sys = GameSystem.CreateForIdentifier(sysName);
+                            Add(sys);
+                            c2.StartReadMember(sysName);
+                            GenericSerializer.Deserialize(sys, reader);
+                        }
+                    });
                 }
             });
         }

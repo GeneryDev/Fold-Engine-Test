@@ -8,6 +8,7 @@ using FoldEngine.Interfaces;
 using FoldEngine.Physics;
 using FoldEngine.Rendering;
 using FoldEngine.Scenes;
+using FoldEngine.Serialization;
 using FoldEngine.Systems;
 
 namespace FoldEngine.Editor {
@@ -16,6 +17,7 @@ namespace FoldEngine.Editor {
         public List<long> EditingEntity = new List<long>();
         // public override bool ShouldSave => false;
 
+        [DoNotSerialize]
         public EditorEnvironment Environment;
 
         public override void SubscribeToEvents() {

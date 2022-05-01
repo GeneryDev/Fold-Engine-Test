@@ -248,7 +248,7 @@ namespace FoldEngine.Physics {
                 if(!physics.Static && !(collider.IsTrigger || otherCollider.IsTrigger)) {
                     float friction = otherPhysics.Friction;
                     float restitution = Math.Max(physics.Restitution, otherPhysics.Restitution);
-                    if(AttemptDisplacement(entity, /*-collision.Direction.Normalized() * collision.DirectionDepth*/ collision.Normal.Normalized() * collision.NormalDepth,
+                    if(AttemptDisplacement(entity, -collision.Direction.Normalized() * collision.DirectionDepth /*collision.Normal.Normalized() * collision.NormalDepth*/,
                         collision.Normal.Normalized(), friction))
                         ApplyContactForces(ref physics, ref otherPhysics, collision.Normal, friction, restitution);
                 }
@@ -288,7 +288,7 @@ namespace FoldEngine.Physics {
             displacementInTangentDirection *= friction * Time.FixedDeltaTime;
 
             amount = new Complex(displacementInNormalDirection, displacementInTangentDirection) * normalComplex;
-            // amount *= 1.001f;
+            amount *= 1.001f;
 
             entity.Transform.Position += amount;
             return true;
