@@ -46,7 +46,7 @@ namespace FoldEngine.Graphics {
             foreach(KeyValuePair<string, ITexture> pair in _containedTextures) {
                 ITexture texture = pair.Value;
 
-                Rectangle firstFit = availableRects.OrderBy(b => b.Width * b.Height)
+                Rectangle firstFit = availableRects.OrderBy(b => b.Location.ToVector2().LengthSquared())
                     .FirstOrDefault(rect => rect.Width >= texture.Width && rect.Height >= texture.Height);
                 if(firstFit == Rectangle.Empty) throw new Exception("Cannot fit texture " + pair.Key + " into atlas");
 
@@ -58,7 +58,7 @@ namespace FoldEngine.Graphics {
                 usedRect = Rectangle.Union(usedRect, thisTextureBounds);
                 texture.DrawOnto(_batch, new Vector2(firstFit.X, firstFit.Y));
 
-                bool choice = false;
+                bool choice = true;
                 if(choice) {
                     var a = new Rectangle(firstFit.X + texture.Width, firstFit.Y, firstFit.Width - texture.Width,
                         firstFit.Height);
