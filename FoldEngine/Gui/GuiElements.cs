@@ -66,11 +66,15 @@ namespace FoldEngine.Gui {
         protected int _textMargin = 4;
 
         public override void Reset(GuiPanel parent) {
-            _fontSize = 2;
-            _textAlignment = 0;
-            _textMargin = 4;
+            _fontSize = 14;
+            _icon = null;
+            _iconColor = Color.White;
+            _iconSize = default;
             _shouldCache = true;
+            _text = null;
+            _textAlignment = 0;
             _textColor = Color.White;
+            _textMargin = 4;
         }
 
         public override void AdjustSpacing(GuiPanel parent) {
