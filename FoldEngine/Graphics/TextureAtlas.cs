@@ -59,7 +59,7 @@ namespace FoldEngine.Graphics {
                 texture.DrawOnto(_batch, new Vector2(firstFit.X, firstFit.Y));
 
                 bool choice = true;
-                if(choice) {
+                if(choice) { //Vertical partition
                     var a = new Rectangle(firstFit.X + texture.Width, firstFit.Y, firstFit.Width - texture.Width,
                         firstFit.Height);
                     var b = new Rectangle(firstFit.X, firstFit.Y + texture.Height, texture.Width,
@@ -67,7 +67,7 @@ namespace FoldEngine.Graphics {
 
                     availableRects.Add(a);
                     availableRects.Add(b);
-                } else {
+                } else { //Horizontal partition
                     var a = new Rectangle(firstFit.X + texture.Width, firstFit.Y, firstFit.Width - texture.Width,
                         texture.Height);
                     var b = new Rectangle(firstFit.X, firstFit.Y + texture.Height, firstFit.Width,
