@@ -79,68 +79,81 @@ namespace FoldEngine.Editor.Views {
                 if(ShowRuntimeResources) {
                     foreach(Resource resource in scene.Resources.GetAll(selectedType)) {
                         string hierarchyId = RuntimePrefix + resource.Identifier;
-                        HierarchyElement<string> element = (HierarchyElement<string>) _main.Element<HierarchyElement<string>>()
-                                .Hierarchy(_resourceHierarchy)
-                                .Id(hierarchyId)
-                                .Selected(_resourceHierarchy.IsSelected(hierarchyId))
-                                .Text(resource.Identifier)
-                                .FontSize(9)
-                            ;
-                        switch(element.GetEvent()) {
-                            case HierarchyElement<string>.HierarchyEventType.Down: {
-                                _resourceHierarchy.Selected.Clear();
-                                _resourceHierarchy.Selected.Add(hierarchyId);
-                                
-                                var identifier = new ResourceIdentifier(resource.Identifier);
-
-                                if(ContentPanel.Environment is EditorEnvironment editorEnvironment) {
-                                    editorEnvironment.Scene.Systems.Get<EditorBase>().EditingEntity.Clear();
-                                    editorEnvironment.GetView<EditorInspectorView>().SetObject(scene.Resources.Get(selectedType, ref identifier));
-                                    editorEnvironment.SwitchToView<EditorInspectorView>();
-                                }
-                                break;
-                            }
-                        }
+                        CreateHierarchyElement(selectedType, resource.Identifier, hierarchyId, resource);
                     }
                 }
 
                 foreach(string resourceIdentifier in scene.Core.ResourceIndex.GetIdentifiers(
                     selectedType)) {
                     
-                    HierarchyElement<string> element = (HierarchyElement<string>) _main.Element<HierarchyElement<string>>()
-                            .Hierarchy(_resourceHierarchy)
-                            .Selected(_resourceHierarchy.IsSelected(resourceIdentifier))
-                            .Text(resourceIdentifier)
-                            .FontSize(9)
-                        ;
-                    switch(element.GetEvent()) {
-                        case HierarchyElement<string>.HierarchyEventType.Down: {
-                            _resourceHierarchy.Selected.Clear();
-                            _resourceHierarchy.Selected.Add(resourceIdentifier);
-                            
-                            var identifier = new ResourceIdentifier(resourceIdentifier);
-
-                            if(scene.Core.Resources.Exists(selectedType, ref identifier)) {
-                                if(ContentPanel.Environment is EditorEnvironment editorEnvironment) {
-                                    editorEnvironment.Scene.Systems.Get<EditorBase>().EditingEntity.Clear();
-                                    editorEnvironment.GetView<EditorInspectorView>().SetObject(scene.Core.Resources.Get(selectedType, ref identifier));
-                                    editorEnvironment.SwitchToView<EditorInspectorView>();
-                                }
-                            } else {
-                                if(ContentPanel.Environment is EditorEnvironment editorEnvironment) {
-                                    editorEnvironment.Scene.Systems.Get<EditorBase>().EditingEntity.Clear();
-                                    editorEnvironment.GetView<EditorInspectorView>().SetObject(new Loading() {
-                                        Type = selectedType,
-                                        Identifier = identifier
-                                    });
-                                    editorEnvironment.SwitchToView<EditorInspectorView>();
-                                }
-                            }
-                            break;
-                        }
-                    }                    
+                    CreateHierarchyElement(selectedType, resourceIdentifier);
                 }
             }
+        }
+
+        private HierarchyElement<string> CreateHierarchyElement(Type type, string resourceId, string hierarchyId = null, Resource resource = null) {
+            hierarchyId = hierarchyId ?? resourceId;
+            
+            var element = (HierarchyElement<string>) _main.Element<HierarchyElement<string>>()
+                    .Hierarchy(_resourceHierarchy)
+                    .Selected(_resourceHierarchy.IsSelected(hierarchyId ?? resourceId))
+                    .Text(resource != null ? "[R] " + resourceId : resourceId)
+                    .FontSize(9)
+            ;
+
+            var loaded = false;
+            
+            var identifier = new ResourceIdentifier(resourceId);
+            
+            switch(element.GetEvent()) {
+                case HierarchyElement<string>.HierarchyEventType.Down: {
+                    _resourceHierarchy.Selected.Clear();
+                    _resourceHierarchy.Selected.Add(hierarchyId);
+
+                    if(resource != null) { // Runtime
+                        
+                        if(ContentPanel.Environment is EditorEnvironment editorEnvironment) {
+                            editorEnvironment.Scene.Systems.Get<EditorBase>().EditingEntity.Clear();
+                            editorEnvironment.GetView<EditorInspectorView>().SetObject(ContentPanel.Environment.Scene.Resources.Get(type, ref identifier));
+                            editorEnvironment.SwitchToView<EditorInspectorView>();
+                        }
+
+                        loaded = true;
+
+                    } else { // Global
+
+                        if(ContentPanel.Environment.Scene.Core.Resources.Exists(type, ref identifier)) {
+                            if(ContentPanel.Environment is EditorEnvironment editorEnvironment) {
+                                editorEnvironment.Scene.Systems.Get<EditorBase>().EditingEntity.Clear();
+                                editorEnvironment.GetView<EditorInspectorView>().SetObject(ContentPanel.Environment.Scene.Core.Resources.Get(type, ref identifier));
+                                editorEnvironment.SwitchToView<EditorInspectorView>();
+                            }
+
+                            loaded = true;
+                        } else {
+                            if(ContentPanel.Environment is EditorEnvironment editorEnvironment) {
+                                editorEnvironment.Scene.Systems.Get<EditorBase>().EditingEntity.Clear();
+                                editorEnvironment.GetView<EditorInspectorView>().SetObject(new Loading() {
+                                    Type = type,
+                                    Identifier = identifier
+                                });
+                                editorEnvironment.SwitchToView<EditorInspectorView>();
+                            }
+                        }
+                    }
+                    break;
+                }
+                default: {
+                    loaded = resource != null || ContentPanel.Environment.Scene.Core.Resources.Exists(type, ref identifier);
+                    break;
+                }
+            }
+
+            if(!loaded) {
+                element.TextColor(new Color(128, 128, 128));
+            }
+            
+            return element;
         }
     }
 
@@ -159,7 +172,7 @@ namespace FoldEngine.Editor.Views {
             panel.Element<GuiLabel>().Text($"Type: {obj.Type}").FontSize(9).TextAlignment(-1);
             panel.Element<GuiLabel>().Text($"Identifier: {obj.Identifier.Identifier}").FontSize(9).TextAlignment(-1);
 
-            Resource resource = panel.Environment.Scene.Resources.Get(obj.Type, ref obj.Identifier);
+            Resource resource = panel.Environment.Scene.Core.Resources.Get(obj.Type, ref obj.Identifier);
             if(resource != null && panel.Environment is EditorEnvironment editorEnvironment) {
                 editorEnvironment.GetView<EditorInspectorView>().SetObject(resource);
             }
