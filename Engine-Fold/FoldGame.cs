@@ -62,8 +62,6 @@ namespace FoldEngine {
                 }
             };
 
-            Component.PopulateIdentifiers();
-
             base.Initialize();
         }
 

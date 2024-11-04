@@ -18,7 +18,7 @@ namespace FoldEngine.Events {
 
         private int _insertionIndex;
 
-        private readonly List<Event.EventListener<T>> _listeners = new List<Event.EventListener<T>>();
+        private readonly List<EventListener<T>> _listeners = new List<EventListener<T>>();
 
         public EventQueue() {
             EventAttribute = typeof(T).GetCustomAttribute<EventAttribute>();
@@ -28,7 +28,7 @@ namespace FoldEngine.Events {
         public void Flush() {
             _flushIndex = 0;
             while(_flushIndex < _insertionIndex) {
-                foreach(Event.EventListener<T> listener in _listeners) listener(ref _events[_flushIndex]);
+                foreach(EventListener<T> listener in _listeners) listener(ref _events[_flushIndex]);
 
                 _flushIndex++;
             }
@@ -37,7 +37,7 @@ namespace FoldEngine.Events {
         }
 
         public void Unsubscribe(object listener) {
-            _listeners.Remove(listener as Event.EventListener<T>);
+            _listeners.Remove(listener as EventListener<T>);
         }
 
         public ref T Enqueue(T evt) {
@@ -55,7 +55,7 @@ namespace FoldEngine.Events {
 
             // If flush mode is immediate, invoke all listeners.
             if(EventAttribute.FlushMode == EventFlushMode.Immediate) {
-                foreach(Event.EventListener<T> listener in _listeners) listener(ref _events[_flushIndex]);
+                foreach(EventListener<T> listener in _listeners) listener(ref _events[_flushIndex]);
                 return ref _events[_insertionIndex];
             }
 
@@ -66,12 +66,12 @@ namespace FoldEngine.Events {
             return ref _events[_insertionIndex - 1];
         }
 
-        public static EventQueue<T> operator +(EventQueue<T> queue, Event.EventListener<T> listener) {
+        public static EventQueue<T> operator +(EventQueue<T> queue, EventListener<T> listener) {
             queue._listeners.Add(listener);
             return queue;
         }
 
-        public EventUnsubscriber Subscribe(Event.EventListener<T> listener) {
+        public EventUnsubscriber Subscribe(EventListener<T> listener) {
             _listeners.Add(listener);
             return new EventUnsubscriber {
                 EventQueue = this,

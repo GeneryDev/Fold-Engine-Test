@@ -28,7 +28,7 @@ namespace FoldEngine.Editor.Views {
             if(ContentPanel.Button("Add System", 14).IsPressed(out Point p)) {
                 GuiPopupMenu contextMenu = ContentPanel.Environment.ContextMenu;
                 contextMenu.Show(p, m => {
-                    foreach(Type type in GameSystem.GetAllTypes())
+                    foreach(Type type in Scene.Core.RegistryUnit.Systems.GetAllTypes())
                         if(Scene.Systems.Get(type) == null && m.Button(type.Name, 9).IsPressed())
                             ((EditorEnvironment) ContentPanel.Environment).TransactionManager.InsertTransaction(
                                 new AddSystemTransaction(type));

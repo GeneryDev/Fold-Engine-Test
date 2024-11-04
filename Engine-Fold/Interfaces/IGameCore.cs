@@ -1,4 +1,5 @@
 ﻿using FoldEngine.Commands;
+using FoldEngine.Registries;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
 
@@ -13,6 +14,11 @@ namespace FoldEngine.Interfaces {
         ///     The scene that is currently being played
         /// </summary>
         Scene ActiveScene { get; set; }
+
+        /// <summary>
+        ///     This Core's registry unit
+        /// </summary>
+        RegistryUnit RegistryUnit { get; }
 
         /// <summary>
         ///     This Core's rendering unit

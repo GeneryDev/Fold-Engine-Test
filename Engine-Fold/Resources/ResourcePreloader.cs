@@ -19,7 +19,7 @@ namespace FoldEngine.Resources {
                 ref ResourceToPreload component = ref _resourcesToLoad.GetComponent();
                 if(component.Type == null) continue;
                 if(component.Identifier.Identifier == null) continue;
-                ResourceAttribute resourceAttribute = Resource.AttributeOf(component.Type);
+                ResourceAttribute resourceAttribute = Scene.Core.RegistryUnit.Resources.AttributeOf(component.Type);
                 if(resourceAttribute != null) {
                     if(component.Identifier.Identifier.StartsWith("#")) {
                         if(Scene.Core.ResourceIndex.Exists(resourceAttribute.ResourceType,

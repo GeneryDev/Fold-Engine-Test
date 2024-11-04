@@ -102,7 +102,10 @@ namespace FoldEngine.Components {
             fieldInfo.SetValueDirect(__makeref(Get(entityId)), value);
         }
 
-        public ref T Create(long entityId) {
+        public ref T Create(long entityId)
+        {
+            var componentRegistry = Scene.Core.RegistryUnit.Components;
+            
             if((int) entityId < MinId || (int) entityId >= MaxId) {
                 // Console.WriteLine("Resizing ComponentSet to fit new entity ID");
                 //Resize sparse array to fit new entity ID
@@ -148,7 +151,7 @@ namespace FoldEngine.Components {
                     _dsMarkedForRemoval.Remove((int) entityId);
                     Dense[Sparse[sparseIndex]].Component = default; //Reset component data
                     Dense[Sparse[sparseIndex]].EntityId = entityId;
-                    Component.InitializeComponent(ref Dense[Sparse[sparseIndex]].Component, Scene, entityId);
+                    componentRegistry.InitializeComponent(ref Dense[Sparse[sparseIndex]].Component, Scene, entityId);
                     return ref Dense[Sparse[sparseIndex]].Component;
                 }
 
@@ -166,13 +169,13 @@ namespace FoldEngine.Components {
                 Dense[N - 1].ModifiedTimestamp = CurrentTimestamp;
                 Dense[N - 1].EntityId = entityId;
                 Dense[N - 1].Component = default;
-                Component.InitializeComponent(ref Dense[N - 1].Component, Scene, entityId);
+                componentRegistry.InitializeComponent(ref Dense[N - 1].Component, Scene, entityId);
                 return ref Dense[N - 1].Component;
             }
 
             //Have no space in dense. Use the backup set
             ref T component = ref BackupSet.Create(entityId);
-            Component.InitializeComponent<T>(ref component, Scene, entityId);
+            componentRegistry.InitializeComponent<T>(ref component, Scene, entityId);
             return ref component;
         }
 

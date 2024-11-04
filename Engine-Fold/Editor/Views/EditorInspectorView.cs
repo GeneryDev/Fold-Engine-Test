@@ -73,7 +73,7 @@ namespace FoldEngine.Editor.Views {
 
                     // ContentPanel.Label(componentInfo.Name, 14).TextAlignment(-1);
                     
-                    CustomInspector<object>.RenderCustomInspectorsBefore(set.GetBoxedComponent(id), ContentPanel);
+                    Scene.Core.RegistryUnit.CustomInspectors.RenderCustomInspectorsBefore(set.GetBoxedComponent(id), ContentPanel);
 
                     foreach(ComponentMember member in componentInfo.Members) {
                         if(!member.ShouldShowInInspector(Scene, id)) continue;
@@ -98,13 +98,13 @@ namespace FoldEngine.Editor.Views {
                         // ContentPanel.Spacing(5);
                     }
                     
-                    CustomInspector<object>.RenderCustomInspectorsAfter(set.GetBoxedComponent(id), ContentPanel);
+                    Scene.Core.RegistryUnit.CustomInspectors.RenderCustomInspectorsAfter(set.GetBoxedComponent(id), ContentPanel);
                 }
 
             if(ContentPanel.Button("Add Component", 14).IsPressed(out Point p)) {
                 GuiPopupMenu contextMenu = ContentPanel.Environment.ContextMenu;
                 contextMenu.Show(p, m => {
-                    foreach(Type type in Component.GetAllTypes()) {
+                    foreach(Type type in Scene.Core.RegistryUnit.Components.GetAllTypes()) {
                         if(type.GetCustomAttribute<HideInInspector>() == null && !Scene.Components.HasComponent(type, id) && m.Button(type.Name, 9).IsPressed())
                             ((EditorEnvironment) ContentPanel.Environment).TransactionManager.InsertTransaction(
                                 new AddComponentTransaction(type, id));
@@ -122,7 +122,7 @@ namespace FoldEngine.Editor.Views {
                 .Icon(Scene.Resources.Get<Texture>(ref EditorIcons.Cog));
             ContentPanel.Spacing(12);
 
-            CustomInspector<object>.RenderCustomInspectorsBefore(_object, ContentPanel);
+            Scene.Core.RegistryUnit.CustomInspectors.RenderCustomInspectorsBefore(_object, ContentPanel);
 
             foreach(ComponentMember member in info.Members) {
                 object value = member.FieldInfo.GetValue(_object);
@@ -134,7 +134,7 @@ namespace FoldEngine.Editor.Views {
                 ContentPanel.Element<ComponentMemberBreak>();
             }
             
-            CustomInspector<object>.RenderCustomInspectorsAfter(_object, ContentPanel);
+            Scene.Core.RegistryUnit.CustomInspectors.RenderCustomInspectorsAfter(_object, ContentPanel);
         }
 
         public void SetObject(object obj) {

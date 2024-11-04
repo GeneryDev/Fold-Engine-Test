@@ -55,8 +55,8 @@ namespace FoldEngine.Editor.Views {
             _main.Bounds = new Rectangle(_sidebar.Bounds.X + _sidebar.Bounds.Width, _sidebar.Bounds.Y, 0, _sidebar.Bounds.Height);
             _main.Bounds.Width = ContentPanel.Bounds.X + ContentPanel.Bounds.Width - _main.Bounds.X;
 
-            foreach(Type type in Resource.GetAllTypes()) {
-                ResourceAttribute resourceAttribute = Resource.AttributeOf(type);
+            foreach(Type type in scene.Core.RegistryUnit.Resources.GetAllTypes()) {
+                ResourceAttribute resourceAttribute = scene.Core.RegistryUnit.Resources.AttributeOf(type);
                 
                 HierarchyElement<Type> element = (HierarchyElement<Type>) _sidebar.Element<HierarchyElement<Type>>()
                         .Hierarchy(_typeHierarchy)

@@ -3,6 +3,7 @@ using FoldEngine;
 using FoldEngine.Commands;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
+using FoldEngine.Registries;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
 using Sandbox;
@@ -13,16 +14,19 @@ namespace Woofer {
             Console.WriteLine("Constructing Core");
             FoldGame = new FoldGame(this, runtimeConfig);
 
+            RegistryUnit = new RegistryUnit(this);
             RenderingUnit = new WooferRenderingUnit(this);
             InputUnit = new InputUnit(this);
             AudioUnit = new AudioUnit(this);
             CommandQueue = new CommandQueue(this);
             Resources = new ResourceCollections(this);
-            ResourceIndex = new ResourceIndex();
+            ResourceIndex = new ResourceIndex(this);
         }
 
         public float TimeScale => 1;
         public FoldGame FoldGame { get; }
+
+        public RegistryUnit RegistryUnit { get; }
 
         public IRenderingUnit RenderingUnit { get; }
 
@@ -40,6 +44,7 @@ namespace Woofer {
 
         public void Initialize() {
             Console.WriteLine("Initializing Core");
+            RegistryUnit.Initialize();
             RenderingUnit.Initialize();
             AudioUnit.Initialize();
             ResourceIndex.Update();

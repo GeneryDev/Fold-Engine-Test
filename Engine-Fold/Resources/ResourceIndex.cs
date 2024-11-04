@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using FoldEngine.Interfaces;
 using FoldEngine.IO;
 using Newtonsoft.Json.Linq;
 
 namespace FoldEngine.Resources {
     public class ResourceIndex {
         private const string GroupDirectoryName = "groups";
+        
+        public IGameCore Core { get; }
 
         private readonly Dictionary<Type, Dictionary<string, HashSet<string>>> _groups =
             new Dictionary<Type, Dictionary<string, HashSet<string>>>();
@@ -15,15 +18,20 @@ namespace FoldEngine.Resources {
         private readonly Dictionary<Type, Dictionary<string, string>> _identifierToPathMap =
             new Dictionary<Type, Dictionary<string, string>>();
 
+        public ResourceIndex(IGameCore core)
+        {
+            Core = core;
+        }
 
         public void Update() {
             _identifierToPathMap.Clear();
             _groups.Clear();
 
             var groupsNeedExpanding = new HashSet<string>();
+            var registry = Core.RegistryUnit.Resources;
 
-            foreach(Type type in Resource.GetAllTypes()) {
-                ResourceAttribute resourceAttribute = Resource.AttributeOf(type);
+            foreach(Type type in registry.GetAllTypes()) {
+                ResourceAttribute resourceAttribute = registry.AttributeOf(type);
 
                 Dictionary<string, string> paths = _identifierToPathMap[type] = new Dictionary<string, string>();
                 ScanResources(paths, Path.Combine("resources", resourceAttribute.DirectoryName), resourceAttribute);
@@ -49,7 +57,7 @@ namespace FoldEngine.Resources {
 
 #if DEBUG
             Console.WriteLine("Resources available: ");
-            foreach(Type type in Resource.GetAllTypes()) {
+            foreach(Type type in registry.GetAllTypes()) {
                 Dictionary<string, string> paths = _identifierToPathMap[type];
                 if(paths.Count == 0) continue;
                 Console.WriteLine($"  {type}:");
@@ -57,7 +65,7 @@ namespace FoldEngine.Resources {
             }
 
             Console.WriteLine("Groups available: ");
-            foreach(Type type in Resource.GetAllTypes()) {
+            foreach(Type type in registry.GetAllTypes()) {
                 Dictionary<string, HashSet<string>> groups = _groups[type];
                 if(groups.Count == 0) continue;
                 Console.WriteLine($"  {type}:");
@@ -187,16 +195,23 @@ namespace FoldEngine.Resources {
             if(!groupsNeedExpanding.Contains(groupId)) return;
             groupsNeedExpanding.Remove(groupId);
 
+            var groupsToAdd = new HashSet<string>();
+
             groups[groupId]
                 .RemoveWhere(v => {
                     if(v.StartsWith("#") && groups.ContainsKey(v)) {
                         if(groupsNeedExpanding.Contains(v)) ExpandGroup(groups, groupsNeedExpanding, v);
-                        groups[groupId].UnionWith(groups[v]);
+                        groupsToAdd.Add(v);
                         return true;
                     }
 
                     return false;
                 });
+
+            foreach (string v in groupsToAdd)
+            {
+                groups[groupId].UnionWith(groups[v]);
+            }
         }
 
         public bool Exists(Type type, string identifier) {

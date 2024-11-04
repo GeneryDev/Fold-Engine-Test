@@ -224,7 +224,7 @@ namespace FoldEngine.Resources {
             return _collections.ContainsKey(type)
                 ? _collections[type]
                 : createIfMissing
-                    ? _collections[type] = Resource.CreateCollectionForType(type)
+                    ? _collections[type] = _core.RegistryUnit.Resources.CreateCollectionForType(type, _core)
                     : null;
         }
 

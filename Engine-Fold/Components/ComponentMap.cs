@@ -38,7 +38,7 @@ namespace FoldEngine.Components {
                     if(writer.Options.Has(SerializeOnlyComponents.Instance))
                         if(!writer.Options.Get(SerializeOnlyComponents.Instance).Contains(entry.Key))
                             continue;
-                    c.WriteMember(Component.IdentifierOf(entry.Key), (ISelfSerializer) entry.Value);
+                    c.WriteMember(_scene.Core.RegistryUnit.Components.IdentifierOf(entry.Key), (ISelfSerializer) entry.Value);
                 }
             });
         }
@@ -51,7 +51,7 @@ namespace FoldEngine.Components {
                 }
 
                 foreach(string componentIdentifier in c.MemberNames) {
-                    Type componentType = Component.TypeForIdentifier(componentIdentifier);
+                    Type componentType = _scene.Core.RegistryUnit.Components.TypeForIdentifier(componentIdentifier);
                     if(componentType == null) {
                         Console.WriteLine($"Warning: Component identifier '{componentIdentifier}' not recognized");
                         continue;
@@ -62,7 +62,7 @@ namespace FoldEngine.Components {
                     if(Sets.ContainsKey(componentType)) {
                         set = Sets[componentType];
                     } else {
-                        set = Component.CreateSetForType(componentType, _scene, 0);
+                        set = _scene.Core.RegistryUnit.Components.CreateSetForType(componentType, _scene, 0);
                         Sets[componentType] = set;
                     }
 
@@ -92,7 +92,7 @@ namespace FoldEngine.Components {
         /// <returns>The newly created component</returns>
         public void CreateComponent(Type componentType, long entityId) {
             if(!Sets.ContainsKey(componentType))
-                Sets[componentType] = Component.CreateSetForType(componentType, _scene, (int) entityId);
+                Sets[componentType] = _scene.Core.RegistryUnit.Components.CreateSetForType(componentType, _scene, (int) entityId);
 
             Sets[componentType].CreateFor(entityId);
         }

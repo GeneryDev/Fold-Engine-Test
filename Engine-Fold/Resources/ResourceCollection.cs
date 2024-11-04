@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using EntryProject.Util;
 using FoldEngine.Components;
+using FoldEngine.Interfaces;
 using FoldEngine.IO;
 using FoldEngine.Serialization;
 
 namespace FoldEngine.Resources {
     public interface IResourceCollection : ISelfSerializer {
+        IGameCore Core { get; set; }
         bool IsEmpty { get; }
         Type ResourceType { get; }
         bool Exists(ResourceIdentifier identifier);
@@ -31,6 +34,7 @@ namespace FoldEngine.Resources {
 
         public Type ResourceType => typeof(T);
 
+        public IGameCore Core { get; set; }
         public bool IsEmpty => Resources.Count == 0;
 
         public bool Exists(ResourceIdentifier identifier) {
@@ -49,7 +53,7 @@ namespace FoldEngine.Resources {
         }
 
         public void UnloadUnused() {
-            int unloadTime = Resource.AttributeOf<T>()?.UnloadTime ?? 5000;
+            int unloadTime = Core.RegistryUnit.Resources.AttributeOf<T>()?.UnloadTime ?? 5000;
             for(int i = 0; i < Resources.Count; i++) {
                 T resource = Resources[i];
                 if(Time.Now - unloadTime >= resource.LastAccessTime)
@@ -93,11 +97,13 @@ namespace FoldEngine.Resources {
             });
         }
 
-        public void Save() {
+        public void Save()
+        {
+            var attribute = Core.RegistryUnit.Resources.AttributeOf(typeof(T));
             foreach(T resource in Resources) {
                 if(resource.CanSerialize) {
                     Console.WriteLine($"Serializing resource: {resource.Identifier} of type {typeof(T)}");
-                    resource.Save();
+                    resource.Save(attribute.CreateResourcePath(resource.Identifier));
                 }
             }
         }
@@ -182,23 +188,10 @@ namespace FoldEngine.Resources {
     }
 
     public abstract class Resource {
-        private static readonly Dictionary<Type, ConstructorInfo>
-            Constructors = new Dictionary<Type, ConstructorInfo>();
-
-        private static Dictionary<Type, ResourceAttribute> _attributes;
-        private static Dictionary<string, ResourceAttribute> _attributesById;
         protected internal long LastAccessTime = Time.Now;
         public string Identifier { get; protected internal set; }
 
         public virtual bool CanSerialize { get; } = true;
-
-        public static IResourceCollection CreateCollectionForType(Type resourceType) {
-            if(!Constructors.ContainsKey(resourceType))
-                Constructors[resourceType] =
-                    typeof(ResourceCollection<>).MakeGenericType(resourceType).GetConstructor(new Type[0]);
-
-            return (IResourceCollection) Constructors[resourceType].Invoke(new object[0]);
-        }
 
         public virtual void Access() {
             if(LastAccessTime < Time.Now) LastAccessTime = Time.Now;
@@ -237,14 +230,6 @@ namespace FoldEngine.Resources {
             }
         }
 
-        public void Save(FieldCollection.Configurator configurator = null) {
-            ResourceAttribute resourceAttribute = AttributeOf(GetType());
-            string resourceFolder = Path.Combine("resources", resourceAttribute.DirectoryName);
-            string path = Path.Combine(resourceFolder, Identifier);
-            path += "." + resourceAttribute.Extensions[0];
-            Save(path, configurator);
-        }
-
         public void Save(string path, FieldCollection.Configurator configurator = null) {
             var writer = new SaveOperation(Data.Out.Stream(path));
             configurator?.Invoke(writer.Options);
@@ -253,54 +238,6 @@ namespace FoldEngine.Resources {
             } finally {
                 writer.Close();
             }
-        }
-
-        private static void Populate() {
-            if(_attributes != null) return;
-            _attributes = new Dictionary<Type, ResourceAttribute>();
-            _attributesById = new Dictionary<string, ResourceAttribute>();
-
-            PopulateDictionaryWithAssembly(Assembly.GetAssembly(typeof(Component)));
-            PopulateDictionaryWithAssembly(Assembly.GetEntryAssembly());
-        }
-
-        private static void PopulateDictionaryWithAssembly(Assembly assembly) {
-            foreach(Type type in assembly.GetTypes())
-                if(type.IsSubclassOf(typeof(Resource))) {
-                    var attribute = type.GetCustomAttribute<ResourceAttribute>(false);
-                    if(attribute != null) {
-                        attribute.ResourceType = type;
-                        _attributes[type] = attribute;
-                        _attributesById[attribute.Identifier] = attribute;
-                    }
-                }
-        }
-
-        public static ResourceAttribute AttributeOf(Type type) {
-            Populate();
-            if(_attributes.ContainsKey(type)) {
-                return _attributes[type];
-            } else {
-                foreach(Type key in _attributes.Keys) {
-                    if(type.IsSubclassOf(key)) return _attributes[key];
-                }
-
-                return null;
-            }
-        }
-
-        public static ResourceAttribute AttributeOf(string identifier) {
-            Populate();
-            return _attributesById.ContainsKey(identifier) ? _attributesById[identifier] : null;
-        }
-
-        public static ResourceAttribute AttributeOf<T>() where T : Resource {
-            return AttributeOf(typeof(T));
-        }
-
-        public static Dictionary<Type, ResourceAttribute>.KeyCollection GetAllTypes() {
-            Populate();
-            return _attributes.Keys;
         }
     }
 
@@ -319,6 +256,13 @@ namespace FoldEngine.Resources {
                 Extensions = new[] {"foldresource"};
             else
                 Extensions = extensions;
+        }
+
+        public string CreateResourcePath(string resourceIdentifier)
+        {
+            string resourceFolder = Path.Combine("resources", DirectoryName);
+            string path = Path.Combine(resourceFolder, $"{resourceIdentifier}.{Extensions[0]}");
+            return path;
         }
     }
 }

@@ -70,13 +70,13 @@ namespace FoldEngine.Scenes {
                     int count = reader.ReadInt32();
                     for(int i = 0; i < count; i++) {
                         string sysName = reader.ReadString();
-                        Add(GameSystem.CreateForIdentifier(sysName));
+                        Add(_owner.Core.RegistryUnit.Systems.CreateForIdentifier(sysName));
                     }
                 } else {
                     c.StartReadMember(nameof(AllSystems));
                     reader.ReadCompound(c2 => {
                         foreach(string sysName in c2.MemberNames) {
-                            GameSystem sys = GameSystem.CreateForIdentifier(sysName);
+                            GameSystem sys = _owner.Core.RegistryUnit.Systems.CreateForIdentifier(sysName);
                             Add(sys);
                             c2.StartReadMember(sysName);
                             GenericSerializer.Deserialize(sys, reader);

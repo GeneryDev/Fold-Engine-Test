@@ -17,8 +17,9 @@ namespace FoldEngine.Editor.Transactions {
             _type = type;
         }
 
-        public override bool Redo(EditorEnvironment target) {
-            target.Scene.Systems.Add(GameSystem.CreateForIdentifier(GameSystem.IdentifierOf(_type)));
+        public override bool Redo(EditorEnvironment target)
+        {
+            target.Scene.Systems.Add(target.Scene.Core.RegistryUnit.Systems.CreateForType(_type));
             return true;
         }
 

@@ -16,7 +16,8 @@ namespace FoldEngine.Commands {
         public void Execute(IGameCore core) {
             string oldIdentifier = core.ActiveScene.Identifier;
             core.ActiveScene.Identifier = Identifier;
-            core.ActiveScene.Save(options => {
+            string savePath = core.RegistryUnit.Resources.AttributeOf(GetType()).CreateResourcePath(Identifier);
+            core.ActiveScene.Save(savePath, options => {
                 options.Set(SerializeExcludeSystems.Instance, new List<Type> {typeof(EditorBase)});
             });
             core.ActiveScene.Identifier = oldIdentifier;
