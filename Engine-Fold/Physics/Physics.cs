@@ -6,86 +6,83 @@ using FoldEngine.Scenes;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Physics {
-    [Component("fold:physics")]
-    [ComponentInitializer(typeof(Physics), nameof(InitializeComponent))]
-    public struct Physics {
-        public static readonly bool DrawForceGizmos = false;
+namespace FoldEngine.Physics;
 
-        private Scene _scene;
-        private long _entityId;
+[Component("fold:physics")]
+[ComponentInitializer(typeof(Physics), nameof(InitializeComponent))]
+public struct Physics
+{
+    public static readonly bool DrawForceGizmos = false;
 
-        public bool Static;
+    private Scene _scene;
+    private long _entityId;
 
-        public float Mass;
+    public bool Static;
 
-        [ShowOnlyIf.Not(nameof(Static), true)]
-        public float GravityMultiplier;
+    public float Mass;
 
-        [ShowOnlyIf.Not(nameof(Static), true)]
-        public Vector2 Velocity;
+    [ShowOnlyIf.Not(nameof(Static), true)] public float GravityMultiplier;
 
-        [HideInInspector]
-        public float AngularVelocity;
+    [ShowOnlyIf.Not(nameof(Static), true)] public Vector2 Velocity;
 
-        [HideInInspector]
-        public Vector2 PreviousPosition;
+    [HideInInspector] public float AngularVelocity;
 
-        [HideInInspector]
-        public Vector2 PreviousVelocity;
+    [HideInInspector] public Vector2 PreviousPosition;
 
-        [HideInInspector]
-        public Vector2 AccelerationFromForce;
+    [HideInInspector] public Vector2 PreviousVelocity;
 
-        [HideInInspector]
-        public Vector2 PreviousAcceleration;
+    [HideInInspector] public Vector2 AccelerationFromForce;
 
-        [HideInInspector]
-        public float Torque;
+    [HideInInspector] public Vector2 PreviousAcceleration;
 
-        [HideInInspector]
-        public Vector2 ContactDisplacement;
+    [HideInInspector] public float Torque;
 
-        public float Restitution;
-        public float Friction;
+    [HideInInspector] public Vector2 ContactDisplacement;
 
-        public Vector2 LinearMomentum => Static ? Vector2.Zero : Mass * Velocity;
+    public float Restitution;
+    public float Friction;
 
-        public static Physics InitializeComponent(Scene scene, long entityId) {
-            return new Physics {
-                _scene = scene,
-                _entityId = entityId,
-                GravityMultiplier = 1,
-                Mass = 1,
-                Restitution = 0.0f,
-                Friction = 0.03f
-            };
-        }
+    public Vector2 LinearMomentum => Static ? Vector2.Zero : Mass * Velocity;
 
-        public void ApplyForce(Vector2 force, Vector2 point, ForceMode mode, Color? gizmoColor = null) {
-            if(force == default) return;
-            if(Static) return;
-
-            if(mode == ForceMode.Instant) force /= Time.FixedDeltaTime;
-
-            Complex diff = ((Complex) force.Normalized() / (Complex) point.Normalized()).Normalized;
-            if(point == Vector2.Zero) diff = force.Normalized();
-
-            Vector2 accel = force / Mass;
-            float torque = point.Length() * force.Length() / 1000 * diff.B;
-
-            AccelerationFromForce += accel;
-            Torque += torque;
-
-            if(DrawForceGizmos) {
-                Vector2 ownerPos = _scene.Components.GetComponent<Transform>(_entityId).Position;
-                _scene.DrawGizmo(ownerPos + point, ownerPos + point + force / 40, gizmoColor ?? Color.Red);
-            }
-        }
+    public static Physics InitializeComponent(Scene scene, long entityId)
+    {
+        return new Physics
+        {
+            _scene = scene,
+            _entityId = entityId,
+            GravityMultiplier = 1,
+            Mass = 1,
+            Restitution = 0.0f,
+            Friction = 0.03f
+        };
     }
 
-    public enum ForceMode {
-        Continuous,
-        Instant
+    public void ApplyForce(Vector2 force, Vector2 point, ForceMode mode, Color? gizmoColor = null)
+    {
+        if (force == default) return;
+        if (Static) return;
+
+        if (mode == ForceMode.Instant) force /= Time.FixedDeltaTime;
+
+        Complex diff = ((Complex)force.Normalized() / (Complex)point.Normalized()).Normalized;
+        if (point == Vector2.Zero) diff = force.Normalized();
+
+        Vector2 accel = force / Mass;
+        float torque = point.Length() * force.Length() / 1000 * diff.B;
+
+        AccelerationFromForce += accel;
+        Torque += torque;
+
+        if (DrawForceGizmos)
+        {
+            Vector2 ownerPos = _scene.Components.GetComponent<Transform>(_entityId).Position;
+            _scene.DrawGizmo(ownerPos + point, ownerPos + point + force / 40, gizmoColor ?? Color.Red);
+        }
     }
+}
+
+public enum ForceMode
+{
+    Continuous,
+    Instant
 }

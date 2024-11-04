@@ -1,18 +1,22 @@
 ﻿using FoldEngine.Editor.Gui.Fields.Text;
 
-namespace FoldEngine.Editor.Gui.Fields.Transactions {
-    public class InsertionEdit : DocumentTransactionBase {
-        private readonly char[] _textToInsert;
+namespace FoldEngine.Editor.Gui.Fields.Transactions;
 
-        public InsertionEdit(char[] value, TextField field) : base(field) {
-            _textToInsert = value;
-        }
+public class InsertionEdit : DocumentTransactionBase
+{
+    private readonly char[] _textToInsert;
 
-        protected override void CalculateModifications() {
-            foreach(Dot dot in PreviousProfile.Dots) {
-                Modification(dot.Min, dot.Length, _textToInsert);
-                Dot(dot.Min + _textToInsert.Length);
-            }
+    public InsertionEdit(char[] value, TextField field) : base(field)
+    {
+        _textToInsert = value;
+    }
+
+    protected override void CalculateModifications()
+    {
+        foreach (Dot dot in PreviousProfile.Dots)
+        {
+            Modification(dot.Min, dot.Length, _textToInsert);
+            Dot(dot.Min + _textToInsert.Length);
         }
     }
 }

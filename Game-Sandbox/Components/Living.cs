@@ -1,21 +1,23 @@
 ﻿using FoldEngine.Components;
 using FoldEngine.Resources;
 
-namespace Sandbox.Components {
-    [Component("sandbox:living")]
-    public struct Living {
-        public int Health;
-        public int MaxHealth;
-        public bool Grounded;
+namespace Sandbox.Components;
 
-        public ResourceIdentifier Texture;
-        public ResourceIdentifier Resource;
-        public ResourceIdentifier Resource2;
+[Component("sandbox:living")]
+public struct Living
+{
+    public int Health;
+    public int MaxHealth;
+    public bool Grounded;
 
-        public ResourceIdentifier JumpSound;
+    public ResourceIdentifier Texture;
+    public ResourceIdentifier Resource;
+    public ResourceIdentifier Resource2;
 
-        public override string ToString() {
-            return $"sandbox:living|{Health}/{MaxHealth}";
-        }
+    public ResourceIdentifier JumpSound;
+
+    public override string ToString()
+    {
+        return $"sandbox:living|{Health}/{MaxHealth}";
     }
 }

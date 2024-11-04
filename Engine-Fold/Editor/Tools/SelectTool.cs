@@ -8,34 +8,42 @@ using FoldEngine.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
-namespace FoldEngine.Editor.Tools {
-    public class SelectTool : EditorTool {
-        public SelectTool(EditorEnvironment environment) : base(environment) {
-            Icon = EditorIcons.Cursor;
-        }
+namespace FoldEngine.Editor.Tools;
 
-        public override void OnInput(ControlScheme controls) { }
+public class SelectTool : EditorTool
+{
+    public SelectTool(EditorEnvironment environment) : base(environment)
+    {
+        Icon = EditorIcons.Cursor;
+    }
 
-        public override void OnMousePressed(ref MouseEvent e) {
-            ref Transform cameraTransform = ref Scene.MainCameraTransform;
+    public override void OnInput(ControlScheme controls)
+    {
+    }
 
-            IRenderingLayer worldLayer = Environment.Scene.Core.RenderingUnit.WorldLayer;
-            Vector2 cameraRelativePos =
-                worldLayer.LayerToCamera(worldLayer.WindowToLayer(Environment.MousePos.ToVector2()));
-            Vector2 worldPos = cameraTransform.Apply(cameraRelativePos);
+    public override void OnMousePressed(ref MouseEvent e)
+    {
+        ref Transform cameraTransform = ref Scene.MainCameraTransform;
 
-            long intersectingEntities = Scene.Systems.Get<LevelRenderer2D>()?.ListEntitiesIntersectingPosition(worldPos) ?? -1;
+        IRenderingLayer worldLayer = Environment.Scene.Core.RenderingUnit.WorldLayer;
+        Vector2 cameraRelativePos =
+            worldLayer.LayerToCamera(worldLayer.WindowToLayer(Environment.MousePos.ToVector2()));
+        Vector2 worldPos = cameraTransform.Apply(cameraRelativePos);
 
-            var editorBase = Scene.Systems.Get<EditorBase>();
-            if(!Scene.Core.InputUnit.Devices.Keyboard[Keys.LeftControl].Down
-               && !Scene.Core.InputUnit.Devices.Keyboard[Keys.RightControl].Down)
-                editorBase.EditingEntity.Clear();
+        long intersectingEntities =
+            Scene.Systems.Get<LevelRenderer2D>()?.ListEntitiesIntersectingPosition(worldPos) ?? -1;
 
-            if(intersectingEntities != -1 && !editorBase.EditingEntity.Contains(intersectingEntities))
-                editorBase.EditingEntity.Add(intersectingEntities);
-            Environment.SwitchToView<EditorInspectorView>();
-        }
+        var editorBase = Scene.Systems.Get<EditorBase>();
+        if (!Scene.Core.InputUnit.Devices.Keyboard[Keys.LeftControl].Down
+            && !Scene.Core.InputUnit.Devices.Keyboard[Keys.RightControl].Down)
+            editorBase.EditingEntity.Clear();
 
-        public override void OnMouseReleased(ref MouseEvent e) { }
+        if (intersectingEntities != -1 && !editorBase.EditingEntity.Contains(intersectingEntities))
+            editorBase.EditingEntity.Add(intersectingEntities);
+        Environment.SwitchToView<EditorInspectorView>();
+    }
+
+    public override void OnMouseReleased(ref MouseEvent e)
+    {
     }
 }

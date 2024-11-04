@@ -9,7 +9,7 @@
         </PackageReference>
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="..\Engine-Fold\Engine-Fold.csproj" />
+        <ProjectReference Include="..\Engine-Fold\Engine-Fold.csproj"/>
     </ItemGroup>
     <ItemGroup>
         <Content Include="..\data\**\*">

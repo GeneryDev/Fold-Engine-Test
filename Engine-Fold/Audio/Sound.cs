@@ -2,89 +2,106 @@
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 
-namespace FoldEngine.Audio {
-    [Resource("sound", directoryName: "sound", unloadTime: 5000, "wav", "ogg", "mp3")]
-    public class Sound : Resource {
-        internal FmodForFoxes.Sound Effect;
+namespace FoldEngine.Audio;
 
-        public override bool CanSerialize => false;
+[Resource("sound", directoryName: "sound", unloadTime: 5000, "wav", "ogg", "mp3")]
+public class Sound : Resource
+{
+    internal FmodForFoxes.Sound Effect;
 
-        public override bool Unload() {
-            Effect.Dispose();
-            return true;
-        }
+    public override bool CanSerialize => false;
 
-        public override void DeserializeResource(string path) {
-            Effect = CoreSystem.LoadSound(path);
-        }
+    public override bool Unload()
+    {
+        Effect.Dispose();
+        return true;
     }
 
-    public class SoundInstance {
-        private readonly Sound _sound;
-        private readonly AudioUnit _unit;
-        private Channel _instance;
-        internal bool FreeOnStop = false;
-        internal bool InUse = true;
+    public override void DeserializeResource(string path)
+    {
+        Effect = CoreSystem.LoadSound(path);
+    }
+}
 
-        public SoundInstance(AudioUnit unit, Sound sound) {
-            _unit = unit;
-            _sound = sound;
-            _instance = sound.Effect.Play();
-            // Console.WriteLine($"Created SoundInstance {name}");
-        }
+public class SoundInstance
+{
+    private readonly Sound _sound;
+    private readonly AudioUnit _unit;
+    private Channel _instance;
+    internal bool FreeOnStop = false;
+    internal bool InUse = true;
 
-        public bool Playing => _instance.IsPlaying;
+    public SoundInstance(AudioUnit unit, Sound sound)
+    {
+        _unit = unit;
+        _sound = sound;
+        _instance = sound.Effect.Play();
+        // Console.WriteLine($"Created SoundInstance {name}");
+    }
 
-        public bool Looping {
-            get => _instance.Looping;
-            set => _instance.Looping = value;
-        }
+    public bool Playing => _instance.IsPlaying;
 
-        public float Volume {
-            get => _instance.Volume;
-            set => _instance.Volume = value;
-        }
+    public bool Looping
+    {
+        get => _instance.Looping;
+        set => _instance.Looping = value;
+    }
 
-        public float Pitch {
-            get => _instance.Pitch;
-            set => _instance.Pitch = value;
-        }
+    public float Volume
+    {
+        get => _instance.Volume;
+        set => _instance.Volume = value;
+    }
 
-        public float LowPass {
-            get => _instance.LowPass;
-            set => _instance.LowPass = value;
-        }
+    public float Pitch
+    {
+        get => _instance.Pitch;
+        set => _instance.Pitch = value;
+    }
 
-        public void Pause() {
-            _instance.Pause();
-        }
+    public float LowPass
+    {
+        get => _instance.LowPass;
+        set => _instance.LowPass = value;
+    }
 
-        public void Resume() {
-            _instance.Resume();
-        }
+    public void Pause()
+    {
+        _instance.Pause();
+    }
 
-        public void Stop() {
-            _instance.Stop();
-        }
+    public void Resume()
+    {
+        _instance.Resume();
+    }
 
-        public void Free() {
-            // Console.WriteLine($"Freed {Name}");
-            _instance.Stop();
-            InUse = false;
-        }
+    public void Stop()
+    {
+        _instance.Stop();
+    }
 
-        public void PlayOnce() { }
+    public void Free()
+    {
+        // Console.WriteLine($"Freed {Name}");
+        _instance.Stop();
+        InUse = false;
+    }
 
-        public void Reset() {
-            Volume = 1;
-            Pitch = 0;
-            Looping = false;
-        }
+    public void PlayOnce()
+    {
+    }
 
-        public void Update() {
-            if(Playing) _sound.Access();
+    public void Reset()
+    {
+        Volume = 1;
+        Pitch = 0;
+        Looping = false;
+    }
 
-            if(!Playing && !_instance.Paused) Free();
-        }
+    public void Update()
+    {
+        if (Playing) _sound.Access();
+
+        if (!Playing && !_instance.Paused) Free();
     }
 }

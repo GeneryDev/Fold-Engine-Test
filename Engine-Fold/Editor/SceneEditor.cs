@@ -6,40 +6,45 @@ using FoldEngine.Commands;
 using FoldEngine.Editor.Views;
 using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
-using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Editor {
-    public static class SceneEditor {
-        public static void AttachEditor(Scene scene) {
-            scene.EditorComponents = new EditorComponents(scene);
+namespace FoldEngine.Editor;
 
-            scene.Core.CommandQueue.Enqueue(new SetWindowTitleCommand(scene.Name + " - Scene Editor"));
-            scene.Paused = true;
+public static class SceneEditor
+{
+    public static void AttachEditor(Scene scene)
+    {
+        scene.EditorComponents = new EditorComponents(scene);
 
-            scene.Systems.Add<EditorBase>();
-            EditorToolbarView.NewSceneLoaded();
-        }
-        public static void DetachEditor(Scene scene) {
-            scene.EditorComponents = null;
+        scene.Core.CommandQueue.Enqueue(new SetWindowTitleCommand(scene.Name + " - Scene Editor"));
+        scene.Paused = true;
 
-            scene.Core.CommandQueue.Enqueue(new SetWindowTitleCommand(scene.Name));
-            scene.Paused = false;
+        scene.Systems.Add<EditorBase>();
+        EditorToolbarView.NewSceneLoaded();
+    }
 
-            scene.Systems.Remove<EditorBase>();
+    public static void DetachEditor(Scene scene)
+    {
+        scene.EditorComponents = null;
 
-            ResetViewport(scene.Core.RenderingUnit);
-        }
+        scene.Core.CommandQueue.Enqueue(new SetWindowTitleCommand(scene.Name));
+        scene.Paused = false;
 
-        public static void ResetViewport(IRenderingUnit renderer) {
-            renderer.Core.CommandQueue.Enqueue(new SetRootRendererGroupCommand(renderer.MainGroup));
-        }
+        scene.Systems.Remove<EditorBase>();
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void ReportEditorGameConflict() {
-            StackFrame caller = new StackTrace().GetFrame(1);
-            MethodBase callerMethod = caller.GetMethod();
-            Console.WriteLine(
-                $"[WARN] Editor-Game conflict: Could not perform '{callerMethod.DeclaringType?.Name}.{callerMethod.Name}' due to scene modifications made outside the editor.");
-        }
+        ResetViewport(scene.Core.RenderingUnit);
+    }
+
+    public static void ResetViewport(IRenderingUnit renderer)
+    {
+        renderer.Core.CommandQueue.Enqueue(new SetRootRendererGroupCommand(renderer.MainGroup));
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static void ReportEditorGameConflict()
+    {
+        StackFrame caller = new StackTrace().GetFrame(1);
+        MethodBase callerMethod = caller.GetMethod();
+        Console.WriteLine(
+            $"[WARN] Editor-Game conflict: Could not perform '{callerMethod.DeclaringType?.Name}.{callerMethod.Name}' due to scene modifications made outside the editor.");
     }
 }

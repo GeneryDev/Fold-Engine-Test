@@ -1,30 +1,36 @@
 ﻿using System;
 using FoldEngine.Resources;
 
-namespace FoldEngine.Serialization {
-    public class StringSerializer : Serializer<string> {
-        public override Type WorkingType => typeof(string);
+namespace FoldEngine.Serialization;
 
-        public override void Serialize(string t, SaveOperation writer) {
-            writer.Write(t);
-        }
+public class StringSerializer : Serializer<string>
+{
+    public override Type WorkingType => typeof(string);
 
-        public override string Deserialize(LoadOperation reader) {
-            return reader.ReadString();
-        }
+    public override void Serialize(string t, SaveOperation writer)
+    {
+        writer.Write(t);
     }
 
-    public class ResourceIdentifierSerializer : Serializer<ResourceIdentifier> {
-        public override Type WorkingType => typeof(ResourceIdentifier);
+    public override string Deserialize(LoadOperation reader)
+    {
+        return reader.ReadString();
+    }
+}
 
-        public override void Serialize(ResourceIdentifier t, SaveOperation writer) {
-            writer.Write(t.Identifier ?? "");
-        }
+public class ResourceIdentifierSerializer : Serializer<ResourceIdentifier>
+{
+    public override Type WorkingType => typeof(ResourceIdentifier);
 
-        public override ResourceIdentifier Deserialize(LoadOperation reader) {
-            string identifier = reader.ReadString();
-            if(identifier.Length == 0) identifier = null;
-            return new ResourceIdentifier(identifier);
-        }
+    public override void Serialize(ResourceIdentifier t, SaveOperation writer)
+    {
+        writer.Write(t.Identifier ?? "");
+    }
+
+    public override ResourceIdentifier Deserialize(LoadOperation reader)
+    {
+        string identifier = reader.ReadString();
+        if (identifier.Length == 0) identifier = null;
+        return new ResourceIdentifier(identifier);
     }
 }

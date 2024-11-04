@@ -3,41 +3,48 @@ using System.Reflection;
 using FoldEngine.Editor.Gui;
 using FoldEngine.Util.Transactions;
 
-namespace FoldEngine.Editor.Transactions {
-    public abstract class SetFieldTransaction : Transaction<EditorEnvironment> {
-        public FieldInfo FieldInfo;
-        public object NewValue;
+namespace FoldEngine.Editor.Transactions;
 
-        public object OldValue;
+public abstract class SetFieldTransaction : Transaction<EditorEnvironment>
+{
+    public FieldInfo FieldInfo;
+    public object NewValue;
+
+    public object OldValue;
+}
+
+public class SetComponentFieldTransaction : SetFieldTransaction
+{
+    public Type ComponentType;
+
+    public long EntityId;
+
+    public override bool Redo(EditorEnvironment target)
+    {
+        target.Scene.Components.Sets[ComponentType].SetFieldValue(EntityId, FieldInfo, NewValue);
+        return OldValue != NewValue;
     }
 
-    public class SetComponentFieldTransaction : SetFieldTransaction {
-        public Type ComponentType;
+    public override bool Undo(EditorEnvironment target)
+    {
+        target.Scene.Components.Sets[ComponentType].SetFieldValue(EntityId, FieldInfo, OldValue);
+        return OldValue != NewValue;
+    }
+}
 
-        public long EntityId;
+public class SetObjectFieldTransaction : SetFieldTransaction
+{
+    public object Parent;
 
-        public override bool Redo(EditorEnvironment target) {
-            target.Scene.Components.Sets[ComponentType].SetFieldValue(EntityId, FieldInfo, NewValue);
-            return OldValue != NewValue;
-        }
-
-        public override bool Undo(EditorEnvironment target) {
-            target.Scene.Components.Sets[ComponentType].SetFieldValue(EntityId, FieldInfo, OldValue);
-            return OldValue != NewValue;
-        }
+    public override bool Redo(EditorEnvironment target)
+    {
+        FieldInfo.SetValue(Parent, NewValue);
+        return OldValue != NewValue;
     }
 
-    public class SetObjectFieldTransaction : SetFieldTransaction {
-        public object Parent;
-
-        public override bool Redo(EditorEnvironment target) {
-            FieldInfo.SetValue(Parent, NewValue);
-            return OldValue != NewValue;
-        }
-
-        public override bool Undo(EditorEnvironment target) {
-            FieldInfo.SetValue(Parent, OldValue);
-            return OldValue != NewValue;
-        }
+    public override bool Undo(EditorEnvironment target)
+    {
+        FieldInfo.SetValue(Parent, OldValue);
+        return OldValue != NewValue;
     }
 }

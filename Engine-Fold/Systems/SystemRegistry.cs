@@ -10,23 +10,27 @@ public partial class SystemRegistry : IRegistry
     private Dictionary<Type, string> _typeToIdentifierMap = new();
     private Dictionary<string, Type> _identifierToTypeMap = new();
     private Dictionary<string, ConstructorInfo> _identifierToConstructorMap = new();
-    
-    public string IdentifierOf(Type type) {
+
+    public string IdentifierOf(Type type)
+    {
         if (_typeToIdentifierMap.TryGetValue(type, out string value)) return value;
-        
+
         throw new ArgumentException($"Type '{type}' is not a game system type");
     }
 
-    public string IdentifierOf<T>() where T : struct {
+    public string IdentifierOf<T>() where T : struct
+    {
         return IdentifierOf(typeof(T));
     }
 
-    public Type TypeForIdentifier(string identifier) {
+    public Type TypeForIdentifier(string identifier)
+    {
         return _identifierToTypeMap[identifier];
     }
 
-    public GameSystem CreateForIdentifier(string identifier) {
-        return (GameSystem) _identifierToConstructorMap[identifier].Invoke(Array.Empty<object>());
+    public GameSystem CreateForIdentifier(string identifier)
+    {
+        return (GameSystem)_identifierToConstructorMap[identifier].Invoke(Array.Empty<object>());
     }
 
     public GameSystem CreateForType(Type type)
@@ -34,7 +38,8 @@ public partial class SystemRegistry : IRegistry
         return CreateForIdentifier(IdentifierOf(type));
     }
 
-    public IEnumerable<Type> GetAllTypes() {
+    public IEnumerable<Type> GetAllTypes()
+    {
         return _identifierToTypeMap.Values;
     }
 

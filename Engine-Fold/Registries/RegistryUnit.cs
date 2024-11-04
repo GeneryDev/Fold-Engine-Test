@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Reflection;
 using FoldEngine.Components;
-using FoldEngine.Editor.Inspector;
 using FoldEngine.Editor.Inspector.CustomInspectors;
 using FoldEngine.Events;
 using FoldEngine.Interfaces;
@@ -21,11 +20,11 @@ public class RegistryUnit
     public CustomInspectorRegistry CustomInspectors { get; }
 
     private readonly List<Assembly> _populatedAssemblies = [];
-    
+
     public RegistryUnit(IGameCore core)
     {
         Core = core;
-        
+
         Components = new ComponentRegistry();
         Systems = new SystemRegistry();
         Events = new EventRegistry();
@@ -53,8 +52,8 @@ public class RegistryUnit
         if (assembly == null) return;
         if (_populatedAssemblies.Contains(assembly)) return;
         _populatedAssemblies.Add(assembly);
-        
-        foreach(var type in assembly.GetTypes())
+
+        foreach (var type in assembly.GetTypes())
         {
             AcceptType(type);
         }

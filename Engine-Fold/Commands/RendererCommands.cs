@@ -1,19 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using FoldEngine.Editor;
-using FoldEngine.Interfaces;
-using FoldEngine.Scenes;
+﻿using FoldEngine.Interfaces;
 
-namespace FoldEngine.Commands {
-    public class SetRootRendererGroupCommand : ICommand {
-        public RenderGroup Group;
+namespace FoldEngine.Commands;
 
-        public SetRootRendererGroupCommand(RenderGroup group) {
-            Group = group;
-        }
+public class SetRootRendererGroupCommand : ICommand
+{
+    public RenderGroup Group;
 
-        public void Execute(IGameCore core) {
-            core.RenderingUnit.RootGroup = Group;
-        }
+    public SetRootRendererGroupCommand(RenderGroup group)
+    {
+        Group = group;
+    }
+
+    public void Execute(IGameCore core)
+    {
+        core.RenderingUnit.RootGroup = Group;
     }
 }

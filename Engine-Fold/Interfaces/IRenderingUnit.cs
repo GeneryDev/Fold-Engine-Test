@@ -2,25 +2,26 @@
 using FoldEngine.Graphics;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Interfaces {
-    public interface IRenderingUnit {
-        IGameCore Core { get; }
-        FontManager Fonts { get; set; }
+namespace FoldEngine.Interfaces;
 
-        Point WindowSize { get; set; }
-        RenderGroup RootGroup { get; set; }
-        RenderGroup MainGroup { get; set; }
-        Dictionary<string, RenderGroup> Groups { get; }
+public interface IRenderingUnit
+{
+    IGameCore Core { get; }
+    FontManager Fonts { get; set; }
 
-        ITexture WhiteTexture { get; }
+    Point WindowSize { get; set; }
+    RenderGroup RootGroup { get; set; }
+    RenderGroup MainGroup { get; set; }
+    Dictionary<string, RenderGroup> Groups { get; }
 
-        IRenderingLayer WorldLayer { get; }
-        IRenderingLayer WindowLayer { get; }
-        IRenderingLayer GizmoLayer { get; }
+    ITexture WhiteTexture { get; }
 
-        void LoadContent();
+    IRenderingLayer WorldLayer { get; }
+    IRenderingLayer WindowLayer { get; }
+    IRenderingLayer GizmoLayer { get; }
 
-        Rectangle GetGroupBounds(RenderGroup renderGroup);
-        void Initialize();
-    }
+    void LoadContent();
+
+    Rectangle GetGroupBounds(RenderGroup renderGroup);
+    void Initialize();
 }

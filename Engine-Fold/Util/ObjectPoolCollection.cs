@@ -1,32 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace EntryProject.Util {
-    public class ObjectPoolCollection<T> {
-        private Dictionary<Type, IObjectPool> _pools;
+namespace EntryProject.Util;
 
-        private ObjectPool<TS> GetPool<TS>() where TS : T, new() {
-            if(_pools == null) _pools = new Dictionary<Type, IObjectPool>();
+public class ObjectPoolCollection<T>
+{
+    private Dictionary<Type, IObjectPool> _pools;
 
-            Type type = typeof(TS);
+    private ObjectPool<TS> GetPool<TS>() where TS : T, new()
+    {
+        if (_pools == null) _pools = new Dictionary<Type, IObjectPool>();
 
-            if(!_pools.ContainsKey(type)) {
-                var newPool = new ObjectPool<TS>();
-                _pools[type] = newPool;
-                return newPool;
-            }
+        Type type = typeof(TS);
 
-            return _pools[type] as ObjectPool<TS>;
+        if (!_pools.ContainsKey(type))
+        {
+            var newPool = new ObjectPool<TS>();
+            _pools[type] = newPool;
+            return newPool;
         }
 
-        public TS Claim<TS>() where TS : T, new() {
-            return GetPool<TS>().Claim() is TS ts ? ts : default;
-        }
+        return _pools[type] as ObjectPool<TS>;
+    }
 
-        public void FreeAll() {
-            if(_pools != null)
-                foreach(IObjectPool pool in _pools.Values)
-                    pool.FreeAll();
-        }
+    public TS Claim<TS>() where TS : T, new()
+    {
+        return GetPool<TS>().Claim() is TS ts ? ts : default;
+    }
+
+    public void FreeAll()
+    {
+        if (_pools != null)
+            foreach (IObjectPool pool in _pools.Values)
+                pool.FreeAll();
     }
 }

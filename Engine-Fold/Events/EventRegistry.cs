@@ -10,17 +10,20 @@ public class EventRegistry : IRegistry
     private readonly Dictionary<Type, string> _typeToIdentifierMap = new();
     private readonly Dictionary<string, Type> _identifierToTypeMap = new();
 
-    public string IdentifierOf(Type type) {
+    public string IdentifierOf(Type type)
+    {
         if (_typeToIdentifierMap.TryGetValue(type, out string value)) return value;
 
         throw new ArgumentException($"Type '{type}' is not an event type");
     }
 
-    public string IdentifierOf<T>() where T : struct {
+    public string IdentifierOf<T>() where T : struct
+    {
         return IdentifierOf(typeof(T));
     }
 
-    public Type TypeForIdentifier(string identifier) {
+    public Type TypeForIdentifier(string identifier)
+    {
         return _identifierToTypeMap[identifier];
     }
 

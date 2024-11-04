@@ -7,61 +7,70 @@ using FoldEngine.Scenes;
 using FoldEngine.Serialization;
 using FoldEngine.Util.Transactions;
 
-namespace FoldEngine.Editor.Transactions {
-    public class DeleteEntityTransaction : Transaction<EditorEnvironment> {
-        private readonly long _entityId;
-        private long _parentEntityId;
-        private byte[] _serializedData;
+namespace FoldEngine.Editor.Transactions;
 
-        public DeleteEntityTransaction(long entityId) {
-            _entityId = entityId;
+public class DeleteEntityTransaction : Transaction<EditorEnvironment>
+{
+    private readonly long _entityId;
+    private long _parentEntityId;
+    private byte[] _serializedData;
+
+    public DeleteEntityTransaction(long entityId)
+    {
+        _entityId = entityId;
+    }
+
+    public override bool Redo(EditorEnvironment target)
+    {
+        if (_serializedData == null)
+        {
+            var stream = new MemoryStream();
+
+            var saveOp = new SaveOperation(stream);
+            saveOp.Options.Set(SerializeOnlyEntities.Instance, new List<long> { _entityId });
+
+            target.Scene.Serialize(saveOp);
+
+            saveOp.Close();
+            _serializedData = stream.GetBuffer();
+            saveOp.Dispose();
         }
 
-        public override bool Redo(EditorEnvironment target) {
-            if(_serializedData == null) {
-                var stream = new MemoryStream();
+        if (target.Scene.Components.HasComponent<Transform>(_entityId))
+        {
+            ref Transform transform = ref target.Scene.Components.GetComponent<Transform>(_entityId);
+            _parentEntityId = transform.ParentId;
 
-                var saveOp = new SaveOperation(stream);
-                saveOp.Options.Set(SerializeOnlyEntities.Instance, new List<long> {_entityId});
-
-                target.Scene.Serialize(saveOp);
-
-                saveOp.Close();
-                _serializedData = stream.GetBuffer();
-                saveOp.Dispose();
-            }
-
-            if(target.Scene.Components.HasComponent<Transform>(_entityId)) {
-                ref Transform transform = ref target.Scene.Components.GetComponent<Transform>(_entityId);
-                _parentEntityId = transform.ParentId;
-
-                if(_parentEntityId != -1 && target.Scene.Components.HasComponent<Transform>(_parentEntityId))
-                    target.Scene.Components.GetComponent<Transform>(_parentEntityId).RemoveChild(_entityId);
-                target.Scene.DeleteEntity(_entityId, true);
-            } else {
-                SceneEditor.ReportEditorGameConflict();
-            }
-
-
-            return true;
+            if (_parentEntityId != -1 && target.Scene.Components.HasComponent<Transform>(_parentEntityId))
+                target.Scene.Components.GetComponent<Transform>(_parentEntityId).RemoveChild(_entityId);
+            target.Scene.DeleteEntity(_entityId, true);
+        }
+        else
+        {
+            SceneEditor.ReportEditorGameConflict();
         }
 
-        public override bool Undo(EditorEnvironment target) {
-            if(_serializedData == null) throw new InvalidOperationException("Cannot call Undo before Redo");
 
-            if(target.Scene.Reclaim(_entityId)) {
-                var loadOp = new LoadOperation(new MemoryStream(_serializedData));
+        return true;
+    }
 
-                target.Scene.Deserialize(loadOp);
+    public override bool Undo(EditorEnvironment target)
+    {
+        if (_serializedData == null) throw new InvalidOperationException("Cannot call Undo before Redo");
 
-                loadOp.Close();
-                loadOp.Dispose();
+        if (target.Scene.Reclaim(_entityId))
+        {
+            var loadOp = new LoadOperation(new MemoryStream(_serializedData));
 
-                if(_parentEntityId != -1)
-                    target.Scene.Components.GetComponent<Transform>(_entityId).SetParent(_parentEntityId);
-            }
+            target.Scene.Deserialize(loadOp);
 
-            return true;
+            loadOp.Close();
+            loadOp.Dispose();
+
+            if (_parentEntityId != -1)
+                target.Scene.Components.GetComponent<Transform>(_entityId).SetParent(_parentEntityId);
         }
+
+        return true;
     }
 }

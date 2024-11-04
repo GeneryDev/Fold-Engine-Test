@@ -22,7 +22,7 @@ public class ComponentRegistry : IRegistry
     public string IdentifierOf(Type type)
     {
         if (_typeToIdentifierMap.TryGetValue(type, out string value)) return value;
-        
+
         throw new ArgumentException($"Type '{type}' is not a component type");
     }
 
@@ -31,11 +31,13 @@ public class ComponentRegistry : IRegistry
     /// </summary>
     /// <typeparam name="T">The component type of which to retrieve the identifier</typeparam>
     /// <returns>The identifier for the given type, if it exists</returns>
-    public string IdentifierOf<T>() where T : struct {
+    public string IdentifierOf<T>() where T : struct
+    {
         return IdentifierOf(typeof(T));
     }
 
-    public Type TypeForIdentifier(string identifier) {
+    public Type TypeForIdentifier(string identifier)
+    {
         return _identifierToTypeMap[identifier];
     }
 
@@ -55,22 +57,25 @@ public class ComponentRegistry : IRegistry
         }
     }
 
-    public void InitializeComponent<T>(ref T component, Scene scene, long entityId) where T : struct {
-        if(_customInitializers != null && _customInitializers.ContainsKey(typeof(T)))
+    public void InitializeComponent<T>(ref T component, Scene scene, long entityId) where T : struct
+    {
+        if (_customInitializers != null && _customInitializers.ContainsKey(typeof(T)))
             // Console.WriteLine($"Initializing component of type {typeof(T)}");
-            component = (T) _customInitializers[typeof(T)].Invoke(scene, entityId);
+            component = (T)_customInitializers[typeof(T)].Invoke(scene, entityId);
     }
 
-    public ComponentSet CreateSetForType(Type componentType, Scene scene, int startingId) {
-        if(!_componentSetConstructors.ContainsKey(componentType))
+    public ComponentSet CreateSetForType(Type componentType, Scene scene, int startingId)
+    {
+        if (!_componentSetConstructors.ContainsKey(componentType))
             _componentSetConstructors[componentType] =
                 typeof(ComponentSet<>).MakeGenericType(componentType)
-                    .GetConstructor(new[] {typeof(Scene), typeof(int)});
+                    .GetConstructor(new[] { typeof(Scene), typeof(int) });
 
-        return (ComponentSet) _componentSetConstructors[componentType].Invoke(new object[] {scene, startingId});
+        return (ComponentSet)_componentSetConstructors[componentType].Invoke(new object[] { scene, startingId });
     }
 
-    public IEnumerable<Type> GetAllTypes() {
+    public IEnumerable<Type> GetAllTypes()
+    {
         return _identifierToTypeMap.Values;
     }
 }

@@ -1,29 +1,35 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace FoldEngine.Input {
-    public class Players : IEnumerable<Player> {
-        public List<Player> _players = new List<Player>();
+namespace FoldEngine.Input;
 
-        public Player this[int index] {
-            get => _players[index];
-            set => _players[index] = value;
-        }
+public class Players : IEnumerable<Player>
+{
+    private readonly List<Player> _players = new List<Player>();
 
-        public IEnumerator<Player> GetEnumerator() {
-            return _players.GetEnumerator();
-        }
+    public Player this[int index]
+    {
+        get => _players[index];
+        set => _players[index] = value;
+    }
 
-        IEnumerator IEnumerable.GetEnumerator() {
-            return GetEnumerator();
-        }
+    public IEnumerator<Player> GetEnumerator()
+    {
+        return _players.GetEnumerator();
+    }
 
-        public void Update() {
-            foreach(Player player in this) player.Update();
-        }
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
 
-        public void Add(Player player) {
-            _players.Add(player);
-        }
+    public void Update()
+    {
+        foreach (Player player in this) player.Update();
+    }
+
+    public void Add(Player player)
+    {
+        _players.Add(player);
     }
 }

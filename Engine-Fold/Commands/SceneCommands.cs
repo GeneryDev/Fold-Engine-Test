@@ -5,56 +5,65 @@ using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
 
-namespace FoldEngine.Commands {
-    public class SaveSceneCommand : ICommand {
-        public string Identifier;
+namespace FoldEngine.Commands;
 
-        public SaveSceneCommand(string identifier) {
-            Identifier = identifier;
-        }
+public class SaveSceneCommand : ICommand
+{
+    public string Identifier;
 
-        public void Execute(IGameCore core) {
-            string oldIdentifier = core.ActiveScene.Identifier;
-            core.ActiveScene.Identifier = Identifier;
-            string savePath = core.RegistryUnit.Resources.AttributeOf(GetType()).CreateResourcePath(Identifier);
-            core.ActiveScene.Save(savePath, options => {
-                options.Set(SerializeExcludeSystems.Instance, new List<Type> {typeof(EditorBase)});
-            });
-            core.ActiveScene.Identifier = oldIdentifier;
-
-            core.ResourceIndex.Update();
-        }
+    public SaveSceneCommand(string identifier)
+    {
+        Identifier = identifier;
     }
 
-    public class LoadSceneCommand : ICommand {
-        public ResourceIdentifier Identifier;
-        public bool AttachEditor;
+    public void Execute(IGameCore core)
+    {
+        string oldIdentifier = core.ActiveScene.Identifier;
+        core.ActiveScene.Identifier = Identifier;
+        string savePath = core.RegistryUnit.Resources.AttributeOf(GetType()).CreateResourcePath(Identifier);
+        core.ActiveScene.Save(savePath,
+            options => { options.Set(SerializeExcludeSystems.Instance, new List<Type> { typeof(EditorBase) }); });
+        core.ActiveScene.Identifier = oldIdentifier;
 
-        public LoadSceneCommand(string identifier, bool attachEditor = false) {
-            Identifier = new ResourceIdentifier(identifier);
-            AttachEditor = attachEditor;
-        }
+        core.ResourceIndex.Update();
+    }
+}
 
-        public void Execute(IGameCore core) {
-            core.Resources.Load<Scene>(ref Identifier, s => {
-                Console.WriteLine("Successfully loaded!");
-                core.ActiveScene = (Scene)s;
-                core.Resources.Detach(s);
-                if(AttachEditor) {
-                    SceneEditor.AttachEditor((Scene)s);
-                } else {
-                    SceneEditor.ResetViewport(core.RenderingUnit);
-                }
-            });
-            // var loadOp = new LoadOperation(SourcePath);
-            //
-            // loadOp.Options.Set(DeserializeClearScene.Instance, true);
-            // loadOp.Options.Set(DeserializeRemapIds.Instance, new EntityIdRemapper(core.ActiveScene));
-            //
-            // core.ActiveScene.Deserialize(loadOp);
-            //
-            // loadOp.Close();
-            // loadOp.Dispose();
-        }
+public class LoadSceneCommand : ICommand
+{
+    public ResourceIdentifier Identifier;
+    public bool AttachEditor;
+
+    public LoadSceneCommand(string identifier, bool attachEditor = false)
+    {
+        Identifier = new ResourceIdentifier(identifier);
+        AttachEditor = attachEditor;
+    }
+
+    public void Execute(IGameCore core)
+    {
+        core.Resources.Load<Scene>(ref Identifier, s =>
+        {
+            Console.WriteLine("Successfully loaded!");
+            core.ActiveScene = (Scene)s;
+            core.Resources.Detach(s);
+            if (AttachEditor)
+            {
+                SceneEditor.AttachEditor((Scene)s);
+            }
+            else
+            {
+                SceneEditor.ResetViewport(core.RenderingUnit);
+            }
+        });
+        // var loadOp = new LoadOperation(SourcePath);
+        //
+        // loadOp.Options.Set(DeserializeClearScene.Instance, true);
+        // loadOp.Options.Set(DeserializeRemapIds.Instance, new EntityIdRemapper(core.ActiveScene));
+        //
+        // core.ActiveScene.Deserialize(loadOp);
+        //
+        // loadOp.Close();
+        // loadOp.Dispose();
     }
 }

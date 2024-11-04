@@ -2,15 +2,17 @@
 using FoldEngine.Resources;
 using Newtonsoft.Json.Linq;
 
-namespace FoldEngine.Input {
-    [Resource("input", extensions: "json")]
-    public class InputDefinition : Resource {
-        public JObject Root;
+namespace FoldEngine.Input;
 
-        public override bool CanSerialize => false;
+[Resource("input", extensions: "json")]
+public class InputDefinition : Resource
+{
+    public JObject Root;
 
-        public override void DeserializeResource(string path) {
-            Root = JObject.Parse(Data.In.ReadString(path));
-        }
+    public override bool CanSerialize => false;
+
+    public override void DeserializeResource(string path)
+    {
+        Root = JObject.Parse(Data.In.ReadString(path));
     }
 }

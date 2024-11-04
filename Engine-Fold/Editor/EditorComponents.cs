@@ -2,17 +2,19 @@
 using FoldEngine.Rendering;
 using FoldEngine.Scenes;
 
-namespace FoldEngine.Editor {
-    public class EditorComponents {
-        public Camera EditorCamera;
-        public Transform EditorTransform;
-        public Scene Scene;
+namespace FoldEngine.Editor;
 
-        public EditorComponents(Scene scene) {
-            Scene = scene;
+public class EditorComponents
+{
+    public Camera EditorCamera;
+    public Transform EditorTransform;
+    public Scene Scene;
 
-            EditorTransform = Transform.InitializeComponent(scene, -1);
-            EditorCamera = new Camera();
-        }
+    public EditorComponents(Scene scene)
+    {
+        Scene = scene;
+
+        EditorTransform = Transform.InitializeComponent(scene, -1);
+        EditorCamera = new Camera();
     }
 }

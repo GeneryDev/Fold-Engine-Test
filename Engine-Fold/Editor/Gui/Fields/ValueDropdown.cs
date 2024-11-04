@@ -2,26 +2,30 @@
 using FoldEngine.Gui;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Editor.Gui.Fields {
-    public class ValueDropdown : GuiButton {
-        private int _fieldsInRow = 1;
+namespace FoldEngine.Editor.Gui.Fields;
 
-        private int _parentWidthOccupied;
+public class ValueDropdown : GuiButton
+{
+    private int _fieldsInRow = 1;
 
-        public ValueDropdown FieldSpacing(int parentWidthOccupied, int fieldsInRow = 1) {
-            _parentWidthOccupied = parentWidthOccupied;
-            _fieldsInRow = fieldsInRow;
-            return this;
-        }
+    private int _parentWidthOccupied;
 
-        public override void AdjustSpacing(GuiPanel parent) {
-            Bounds.Width = (int) Math.Ceiling((float) (parent.Bounds.Width - _parentWidthOccupied) / _fieldsInRow);
-            Bounds.Height = 18;
-            Margin = 4;
-        }
+    public ValueDropdown FieldSpacing(int parentWidthOccupied, int fieldsInRow = 1)
+    {
+        _parentWidthOccupied = parentWidthOccupied;
+        _fieldsInRow = fieldsInRow;
+        return this;
+    }
 
-        public override void Displace(ref Point layoutPosition) {
-            layoutPosition += new Point(Bounds.Width, 0);
-        }
+    public override void AdjustSpacing(GuiPanel parent)
+    {
+        Bounds.Width = (int)Math.Ceiling((float)(parent.Bounds.Width - _parentWidthOccupied) / _fieldsInRow);
+        Bounds.Height = 18;
+        Margin = 4;
+    }
+
+    public override void Displace(ref Point layoutPosition)
+    {
+        layoutPosition += new Point(Bounds.Width, 0);
     }
 }

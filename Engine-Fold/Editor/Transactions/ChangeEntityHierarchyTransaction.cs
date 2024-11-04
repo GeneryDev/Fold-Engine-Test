@@ -5,63 +5,70 @@ using FoldEngine.Editor.Gui;
 using FoldEngine.Scenes;
 using FoldEngine.Util.Transactions;
 
-namespace FoldEngine.Editor.Transactions {
-    public class ChangeEntityHierarchyTransaction : Transaction<EditorEnvironment> {
-        private readonly long _entityId = -1;
+namespace FoldEngine.Editor.Transactions;
 
-        private readonly long _nextEntity;
-        private readonly HierarchyDropMode _nextRelationship;
-        private long _previousNextSibling;
+public class ChangeEntityHierarchyTransaction : Transaction<EditorEnvironment>
+{
+    private readonly long _entityId = -1;
 
-        private long _previousParent;
+    private readonly long _nextEntity;
+    private readonly HierarchyDropMode _nextRelationship;
+    private long _previousNextSibling;
 
-        private readonly Transform _snapshot;
+    private long _previousParent;
 
-        public ChangeEntityHierarchyTransaction(
-            long entityId,
-            long previousParent,
-            long previousNextSibling,
-            long nextEntity,
-            HierarchyDropMode nextRelationship,
-            Transform snapshot) {
-            _entityId = entityId;
-            _previousParent = previousParent;
-            _previousNextSibling = previousNextSibling;
-            _nextEntity = nextEntity;
-            _nextRelationship = nextRelationship;
-            _snapshot = snapshot;
-        }
+    private readonly Transform _snapshot;
 
-        public override bool Redo(EditorEnvironment target) {
-            var entity = new Entity(target.Scene, _entityId);
+    public ChangeEntityHierarchyTransaction(
+        long entityId,
+        long previousParent,
+        long previousNextSibling,
+        long nextEntity,
+        HierarchyDropMode nextRelationship,
+        Transform snapshot)
+    {
+        _entityId = entityId;
+        _previousParent = previousParent;
+        _previousNextSibling = previousNextSibling;
+        _nextEntity = nextEntity;
+        _nextRelationship = nextRelationship;
+        _snapshot = snapshot;
+    }
 
-            UnlinkFromHierarchy(entity);
+    public override bool Redo(EditorEnvironment target)
+    {
+        var entity = new Entity(target.Scene, _entityId);
 
-            switch(_nextRelationship) {
-                case HierarchyDropMode.Inside: {
-                    entity.Transform.SetParent(_nextEntity);
-                    break;
-                }
+        UnlinkFromHierarchy(entity);
+
+        switch (_nextRelationship)
+        {
+            case HierarchyDropMode.Inside:
+            {
+                entity.Transform.SetParent(_nextEntity);
+                break;
             }
-
-            entity.Transform.RestoreSnapshot(_snapshot);
-
-            return true;
         }
 
-        public override bool Undo(EditorEnvironment target) {
-            var entity = new Entity(target.Scene, _entityId);
+        entity.Transform.RestoreSnapshot(_snapshot);
 
-            UnlinkFromHierarchy(entity);
+        return true;
+    }
 
-            entity.Transform.RestoreSnapshot(_snapshot);
+    public override bool Undo(EditorEnvironment target)
+    {
+        var entity = new Entity(target.Scene, _entityId);
 
-            Console.WriteLine("undo");
-            return true;
-        }
+        UnlinkFromHierarchy(entity);
 
-        private static void UnlinkFromHierarchy(Entity entity) {
-            entity.Transform.SetParent(-1);
-        }
+        entity.Transform.RestoreSnapshot(_snapshot);
+
+        Console.WriteLine("undo");
+        return true;
+    }
+
+    private static void UnlinkFromHierarchy(Entity entity)
+    {
+        entity.Transform.SetParent(-1);
     }
 }
