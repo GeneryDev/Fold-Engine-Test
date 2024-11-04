@@ -1,39 +1,28 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30320.27
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Sandbox", "Sandbox\Sandbox.shproj", "{9BB3BE52-030D-4380-96E9-2C05587F929F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine-Fold", "Engine-Fold\Engine-Fold.csproj", "{3A049AB0-899C-4C81-86EB-99153E3E9683}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntryProject", "EntryProject\EntryProject.csproj", "{67D866C2-47A9-4314-9C33-713A78F62336}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entry-WindowsDesktop", "Entry-WindowsDesktop\Entry-WindowsDesktop.csproj", "{FC302240-8E68-41AE-89DF-AAA234C2DFEF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoldEngine", "FoldEngine\FoldEngine.csproj", "{793DCE0D-2AF1-4C70-8B2D-5C2AC2F23B94}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game-Sandbox", "Game-Sandbox\Game-Sandbox.csproj", "{444AB0E3-1DC7-4E21-8418-0AA8CA06B79F}"
 EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		FoldEngine\FoldEngine.projitems*{67d866c2-47a9-4314-9c33-713a78f62336}*SharedItemsImports = 4
-		Sandbox\Sandbox.projitems*{67d866c2-47a9-4314-9c33-713a78f62336}*SharedItemsImports = 4
-		Sandbox\Sandbox.projitems*{9bb3be52-030d-4380-96e9-2c05587f929f}*SharedItemsImports = 13
-		FoldEngine\FoldEngine.projitems*{ad06bf8f-7fff-4c50-944c-05f3c8568ca8}*SharedItemsImports = 13
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{67D866C2-47A9-4314-9C33-713A78F62336}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{67D866C2-47A9-4314-9C33-713A78F62336}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{67D866C2-47A9-4314-9C33-713A78F62336}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{67D866C2-47A9-4314-9C33-713A78F62336}.Release|Any CPU.Build.0 = Release|Any CPU
-		{793DCE0D-2AF1-4C70-8B2D-5C2AC2F23B94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{793DCE0D-2AF1-4C70-8B2D-5C2AC2F23B94}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{793DCE0D-2AF1-4C70-8B2D-5C2AC2F23B94}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{793DCE0D-2AF1-4C70-8B2D-5C2AC2F23B94}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {84F057BB-A655-4443-BBDF-F43C49763024}
+		{3A049AB0-899C-4C81-86EB-99153E3E9683}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A049AB0-899C-4C81-86EB-99153E3E9683}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A049AB0-899C-4C81-86EB-99153E3E9683}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A049AB0-899C-4C81-86EB-99153E3E9683}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC302240-8E68-41AE-89DF-AAA234C2DFEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC302240-8E68-41AE-89DF-AAA234C2DFEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC302240-8E68-41AE-89DF-AAA234C2DFEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC302240-8E68-41AE-89DF-AAA234C2DFEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{444AB0E3-1DC7-4E21-8418-0AA8CA06B79F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{444AB0E3-1DC7-4E21-8418-0AA8CA06B79F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{444AB0E3-1DC7-4E21-8418-0AA8CA06B79F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{444AB0E3-1DC7-4E21-8418-0AA8CA06B79F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
