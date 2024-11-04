@@ -99,6 +99,8 @@ public abstract class GuiEnvironment : IDisposable
         HandleMouseEvents(MouseLeft, MouseEvent.LeftButton);
         HandleMouseEvents(MouseMiddle, MouseEvent.MiddleButton);
         HandleMouseEvents(MouseRight, MouseEvent.RightButton);
+        
+        if (_dismissPopupsWhen == Time.TotalFixedTicks) DismissPopups();
 
         FocusOwner?.OnInput(ControlScheme);
     }
@@ -133,7 +135,7 @@ public abstract class GuiEnvironment : IDisposable
         {
             if (ContextMenu.Showing)
             {
-                _dismissPopupsWhen = Time.TotalFixedTicks + 1;
+                _dismissPopupsWhen = Time.TotalFixedTicks + 2;
             }
 
             var evt = new MouseEvent
@@ -166,8 +168,6 @@ public abstract class GuiEnvironment : IDisposable
 
         HoverTargetPrevious = HoverTarget;
         HoverTarget = default;
-
-        if (_dismissPopupsWhen == Time.TotalFixedTicks) DismissPopups();
     }
 
     public void SetFocusedElement(GuiElement element)
