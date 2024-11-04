@@ -109,25 +109,25 @@ namespace FoldEngine.Scenes {
             _renderSystems.Clear();
 
             foreach(GameSystem sys in _all) {
-                if(sys.ProcessingCycles.Has(ProcessingCycles.Input)) _inputSystems.Add(sys);
+                if(sys.ProcessingCycles.HasFlag(ProcessingCycles.Input)) _inputSystems.Add(sys);
 
-                if(sys.ProcessingCycles.Has(ProcessingCycles.FixedUpdate)) _fixedUpdateSystems.Add(sys);
+                if(sys.ProcessingCycles.HasFlag(ProcessingCycles.FixedUpdate)) _fixedUpdateSystems.Add(sys);
 
-                if(sys.ProcessingCycles.Has(ProcessingCycles.Update)) _updateSystems.Add(sys);
+                if(sys.ProcessingCycles.HasFlag(ProcessingCycles.Update)) _updateSystems.Add(sys);
 
-                if(sys.ProcessingCycles.Has(ProcessingCycles.Render)) _renderSystems.Add(sys);
+                if(sys.ProcessingCycles.HasFlag(ProcessingCycles.Render)) _renderSystems.Add(sys);
             }
         }
 
         internal void AddDirectly(GameSystem sys) {
             _all.Add(sys);
-            if(sys.ProcessingCycles.Has(ProcessingCycles.Input)) _inputSystems.Add(sys);
+            if(sys.ProcessingCycles.HasFlag(ProcessingCycles.Input)) _inputSystems.Add(sys);
 
-            if(sys.ProcessingCycles.Has(ProcessingCycles.FixedUpdate)) _fixedUpdateSystems.Add(sys);
+            if(sys.ProcessingCycles.HasFlag(ProcessingCycles.FixedUpdate)) _fixedUpdateSystems.Add(sys);
 
-            if(sys.ProcessingCycles.Has(ProcessingCycles.Update)) _updateSystems.Add(sys);
+            if(sys.ProcessingCycles.HasFlag(ProcessingCycles.Update)) _updateSystems.Add(sys);
 
-            if(sys.ProcessingCycles.Has(ProcessingCycles.Render)) _renderSystems.Add(sys);
+            if(sys.ProcessingCycles.HasFlag(ProcessingCycles.Render)) _renderSystems.Add(sys);
 
             sys.Scene = _owner;
             sys.Initialize();

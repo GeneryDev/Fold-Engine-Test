@@ -132,12 +132,6 @@ namespace FoldEngine.Systems {
         All = Input | FixedUpdate | Update | Render
     }
 
-    public static class ProcessingCyclesExt {
-        public static bool Has(this ProcessingCycles t, ProcessingCycles mask) {
-            return (t & mask) != 0;
-        }
-    }
-
     public sealed class GameSystemAttribute : Attribute {
         public readonly ProcessingCycles ProcessingCycles;
         public readonly bool RunWhenPaused;
