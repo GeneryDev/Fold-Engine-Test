@@ -5,13 +5,18 @@ using Sound = FoldEngine.Audio.Sound;
 
 namespace FoldEngine.Interfaces {
     public class AudioUnit {
-        IGameCore Core { get; }
+        public IGameCore Core { get; }
+        
         private readonly List<SoundInstance> _instances = new List<SoundInstance>();
 
         public AudioUnit(IGameCore core)
         {
             this.Core = core;
-            FmodManager.Init(core.FoldGame.RuntimeConfig.FmodNativeLibrary, FmodInitMode.Core, "data");
+        }
+
+        public void Initialize()
+        {
+            FmodManager.Init(Core.FoldGame.RuntimeConfig.FmodNativeLibrary, FmodInitMode.Core, "data");
         }
 
         public SoundInstance CreateInstance(Sound sound) {

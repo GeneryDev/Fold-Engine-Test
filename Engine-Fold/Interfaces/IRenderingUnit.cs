@@ -5,7 +5,6 @@ using Microsoft.Xna.Framework;
 namespace FoldEngine.Interfaces {
     public interface IRenderingUnit {
         IGameCore Core { get; }
-
         FontManager Fonts { get; set; }
 
         Point WindowSize { get; set; }

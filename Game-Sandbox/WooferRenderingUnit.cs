@@ -7,15 +7,15 @@ using Microsoft.Xna.Framework;
 
 namespace Woofer {
     public class WooferRenderingUnit : IRenderingUnit {
+        public IGameCore Core { get; }
+        public FontManager Fonts { get; set; }
+        
         private Point _windowSize = new Point(1280, 720);
 
-        public WooferRenderingUnit(WooferGameCore core) {
+        public WooferRenderingUnit(IGameCore core) {
             Core = core;
+            Fonts = new FontManager(Core);
         }
-
-        public IGameCore Core { get; }
-
-        public FontManager Fonts { get; set; }
 
         public Point WindowSize {
             get => _windowSize;
@@ -41,7 +41,8 @@ namespace Woofer {
         public IRenderingLayer WorldLayer => MainGroup["world"];
         public IRenderingLayer GizmoLayer => MainGroup["gizmos"];
 
-        public void Initialize() {
+        public void Initialize()
+        {
             Console.WriteLine("Initializing Rendering Unit");
             var mainSize = new Point(1280, 720);
 

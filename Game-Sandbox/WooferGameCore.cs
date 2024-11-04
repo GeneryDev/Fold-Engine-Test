@@ -14,14 +14,11 @@ namespace Woofer {
             FoldGame = new FoldGame(this, runtimeConfig);
 
             RenderingUnit = new WooferRenderingUnit(this);
-            InputUnit = new InputUnit();
+            InputUnit = new InputUnit(this);
             AudioUnit = new AudioUnit(this);
             CommandQueue = new CommandQueue(this);
             Resources = new ResourceCollections(this);
             ResourceIndex = new ResourceIndex();
-            ResourceIndex.Update();
-
-            ActiveScene = new DemoScene(this);
         }
 
         public float TimeScale => 1;
@@ -44,6 +41,10 @@ namespace Woofer {
         public void Initialize() {
             Console.WriteLine("Initializing Core");
             RenderingUnit.Initialize();
+            AudioUnit.Initialize();
+            ResourceIndex.Update();
+            
+            ActiveScene = new DemoScene(this);
         }
 
         public void LoadContent() {

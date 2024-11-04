@@ -30,7 +30,7 @@ namespace FoldEngine.Interfaces {
         AudioUnit AudioUnit { get; }
 
         /// <summary>
-        ///     This Core's audio unit
+        ///     This Core's command queue
         /// </summary>
         CommandQueue CommandQueue { get; }
 

@@ -48,8 +48,6 @@ namespace FoldEngine {
         ///     and initialize them as well.
         /// </summary>
         protected override void Initialize() {
-            Core.RenderingUnit.Fonts = new FontManager(Core);
-
             Core.Initialize();
 
             (Graphics.PreferredBackBufferWidth, Graphics.PreferredBackBufferHeight) = Core.RenderingUnit.WindowSize;

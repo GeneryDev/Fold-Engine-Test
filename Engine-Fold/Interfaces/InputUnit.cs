@@ -3,8 +3,15 @@ using FoldEngine.Input;
 
 namespace FoldEngine.Interfaces {
     public class InputUnit {
+        public IGameCore Core { get; }
+
         public InputDevices Devices = new InputDevices();
         public Players Players = new Players();
+
+        public InputUnit(IGameCore core)
+        {
+            Core = core;
+        }
 
         public void Update() {
             Devices.Update();
