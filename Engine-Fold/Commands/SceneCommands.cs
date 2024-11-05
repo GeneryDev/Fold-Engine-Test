@@ -9,21 +9,20 @@ namespace FoldEngine.Commands;
 
 public class SaveSceneCommand : ICommand
 {
-    public string Identifier;
+    private Scene _scene;
+    private string _identifier;
 
-    public SaveSceneCommand(string identifier)
+    public SaveSceneCommand(Scene scene, string identifier)
     {
-        Identifier = identifier;
+        this._scene = scene;
+        this._identifier = identifier;
     }
 
     public void Execute(IGameCore core)
     {
-        string oldIdentifier = core.ActiveScene.Identifier;
-        core.ActiveScene.Identifier = Identifier;
-        string savePath = core.RegistryUnit.Resources.AttributeOf(GetType()).CreateResourcePath(Identifier);
-        core.ActiveScene.Save(savePath,
+        string savePath = core.RegistryUnit.Resources.AttributeOf(GetType()).CreateResourcePath(_identifier);
+        _scene.Save(savePath,
             options => { options.Set(SerializeExcludeSystems.Instance, new List<Type> { typeof(EditorBase) }); });
-        core.ActiveScene.Identifier = oldIdentifier;
 
         core.ResourceIndex.Update();
     }

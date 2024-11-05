@@ -22,7 +22,7 @@ public class ChangeSystemOrderTransaction : Transaction<EditorEnvironment>
     {
         if (target.Scene.Systems.Get(_sysType) != null)
         {
-            target.Scene.Core.CommandQueue.Enqueue(new ChangeSystemOrderCommand(_sysType, _toIndex));
+            target.Scene.Core.CommandQueue.Enqueue(new ChangeSystemOrderCommand(target.Scene, _sysType, _toIndex));
         }
         else
         {
@@ -36,7 +36,7 @@ public class ChangeSystemOrderTransaction : Transaction<EditorEnvironment>
     {
         if (target.Scene.Systems.Get(_sysType) != null)
         {
-            target.Scene.Core.CommandQueue.Enqueue(new ChangeSystemOrderCommand(_sysType, _fromIndex));
+            target.Scene.Core.CommandQueue.Enqueue(new ChangeSystemOrderCommand(target.Scene, _sysType, _fromIndex));
         }
         else
         {

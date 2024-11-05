@@ -20,7 +20,7 @@ public class EditorDebugActionsView : EditorView
 
         if (ContentPanel.Button("Save Scene", 14).IsPressed())
         {
-            Scene.Core.CommandQueue.Enqueue(new SaveSceneCommand(Scene.Identifier ?? "__new_scene"));
+            Scene.Core.CommandQueue.Enqueue(new SaveSceneCommand(Scene, Scene.Identifier ?? "__new_scene"));
         }
 
         if (ContentPanel.Button("Detach Editor (no undo!)", 14).IsPressed())

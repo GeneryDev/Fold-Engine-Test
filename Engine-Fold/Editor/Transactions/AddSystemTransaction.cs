@@ -49,7 +49,7 @@ public class RemoveSystemTransaction : Transaction<EditorEnvironment>
 
     public override bool Undo(EditorEnvironment target)
     {
-        target.Scene.Core.CommandQueue.Enqueue(new InsertSystemAtIndexCommand(_system, _index));
+        target.Scene.Core.CommandQueue.Enqueue(new InsertSystemAtIndexCommand(target.Scene, _system, _index));
         return true;
     }
 }
