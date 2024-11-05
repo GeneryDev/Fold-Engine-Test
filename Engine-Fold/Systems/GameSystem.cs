@@ -78,7 +78,17 @@ public abstract class GameSystem
 
     protected void Subscribe<T>(EventListener<T> action) where T : struct
     {
-        _eventUnsubscribers.Add(Scene.Events.Subscribe(action));
+        Subscribe(Scene.Events, action);
+    }
+
+    protected void Subscribe<T>(Scene scene, EventListener<T> action) where T : struct
+    {
+        Subscribe(scene.Events, action);
+    }
+
+    protected void Subscribe<T>(EventMap eventMap, EventListener<T> action) where T : struct
+    {
+        _eventUnsubscribers.Add(eventMap.Subscribe(action));
     }
 }
 
