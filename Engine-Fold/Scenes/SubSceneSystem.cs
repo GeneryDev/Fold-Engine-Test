@@ -118,10 +118,25 @@ public class SubSceneSystem : GameSystem
         }
     }
 
+    public override void PollResources()
+    {
+        foreach (var instance in _instances)
+        {
+            instance.Scene?.Systems.PollResources();
+        }
+    }
+
     private void DiscardScene(Scene scene)
     {
         if (scene == null) return;
         Console.WriteLine($"Discard scene: {scene.Identifier}");
+    }
+
+    public Scene GetSceneForEntityId(long entityId)
+    {
+        int instanceIndex = GetInstanceIndexForEntity(entityId);
+        if (instanceIndex >= 0) return _instances[instanceIndex].Scene;
+        return null;
     }
 
     private struct SubSceneInstance

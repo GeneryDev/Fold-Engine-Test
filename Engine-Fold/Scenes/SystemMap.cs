@@ -227,6 +227,12 @@ public class SystemMap : ISelfSerializer
             }
     }
 
+    internal void PollResources()
+    {
+        foreach (GameSystem sys in _all)
+            sys.PollResources();
+    }
+
     public T Get<T>() where T : GameSystem
     {
         foreach (GameSystem sys in _all)

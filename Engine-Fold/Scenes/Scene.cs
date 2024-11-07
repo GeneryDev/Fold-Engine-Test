@@ -189,7 +189,7 @@ public class Scene : Resource, ISelfSerializer
     {
         Systems.InvokeRender(renderer);
     }
-
+    
     private static void WriteMatrix(Matrix mat)
     {
         Console.Write("| \t");

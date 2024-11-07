@@ -335,9 +335,7 @@ public class ResourceCollections : ISelfSerializer
     {
         _lastPollTime = Time.Now;
 
-        if (_core.ActiveScene != null)
-            foreach (GameSystem sys in _core.ActiveScene.Systems.AllSystems)
-                sys.PollResources();
+        _core.ActiveScene?.Systems.PollResources();
 
         foreach (IResourceCollection collection in _collections.Values) collection.UnloadUnused();
     }
