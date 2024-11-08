@@ -17,13 +17,13 @@ public class AddSystemTransaction : Transaction<EditorEnvironment>
 
     public override bool Redo(EditorEnvironment target)
     {
-        target.Scene.Systems.Add(target.Scene.Core.RegistryUnit.Systems.CreateForType(_type));
+        target.EditingScene.Systems.Add(target.Core.RegistryUnit.Systems.CreateForType(_type));
         return true;
     }
 
     public override bool Undo(EditorEnvironment target)
     {
-        target.Scene.Systems.Remove(target.Scene.Systems.Get(_type));
+        target.EditingScene.Systems.Remove(target.EditingScene.Systems.Get(_type));
         return true;
     }
 }
@@ -41,15 +41,15 @@ public class RemoveSystemTransaction : Transaction<EditorEnvironment>
 
     public override bool Redo(EditorEnvironment target)
     {
-        _system = target.Scene.Systems.Get(_type);
-        _index = target.Scene.Systems.GetSystemIndex(_type);
-        target.Scene.Systems.Remove(_system);
+        _system = target.EditingScene.Systems.Get(_type);
+        _index = target.EditingScene.Systems.GetSystemIndex(_type);
+        target.EditingScene.Systems.Remove(_system);
         return true;
     }
 
     public override bool Undo(EditorEnvironment target)
     {
-        target.Scene.Core.CommandQueue.Enqueue(new InsertSystemAtIndexCommand(target.Scene, _system, _index));
+        target.EditingScene.Core.CommandQueue.Enqueue(new InsertSystemAtIndexCommand(target.EditingScene, _system, _index));
         return true;
     }
 }

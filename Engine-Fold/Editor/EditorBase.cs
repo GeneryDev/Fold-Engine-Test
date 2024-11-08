@@ -20,6 +20,7 @@ public class EditorBase : GameSystem
     // public override bool ShouldSave => false;
 
     [DoNotSerialize] public EditorEnvironment Environment;
+    public Scene EditingScene { get; set; }
 
     public override void SubscribeToEvents()
     {

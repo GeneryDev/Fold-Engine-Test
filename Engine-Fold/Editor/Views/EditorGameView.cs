@@ -67,7 +67,7 @@ public class GameViewPanel : GuiPanel
         {
             ref Transform cameraTransform = ref Environment.Scene.EditorComponents.EditorTransform;
 
-            IRenderingLayer worldLayer = Environment.Scene.Core.RenderingUnit.WorldLayer;
+            IRenderingLayer worldLayer = Environment.Core.RenderingUnit.WorldLayer;
             Vector2 cameraRelativePos =
                 worldLayer.LayerToCamera(worldLayer.WindowToLayer(Environment.MousePos.ToVector2()));
             Vector2 pivot = cameraTransform.Apply(cameraRelativePos);

@@ -56,8 +56,8 @@ public class EditorEnvironment : GuiEnvironment
 
     private void SetupControlScheme()
     {
-        Keyboard keyboard = Scene.Core.InputUnit.Devices.Keyboard;
-        Mouse mouse = Scene.Core.InputUnit.Devices.Mouse;
+        Keyboard keyboard = Core.InputUnit.Devices.Keyboard;
+        Mouse mouse = Core.InputUnit.Devices.Mouse;
 
         ControlScheme.PutAction("editor.undo",
             new ButtonAction(keyboard[Keys.Z]) { Repeat = true }.Modifiers(keyboard[Keys.LeftControl]));

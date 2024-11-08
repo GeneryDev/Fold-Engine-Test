@@ -32,7 +32,7 @@ public class EditorHierarchyView : EditorView
 
     public override void Initialize()
     {
-        _transforms = Scene.Components.CreateIterator<Transform>(IterationFlags.IncludeInactive);
+        _transforms = EditingScene.Components.CreateIterator<Transform>(IterationFlags.IncludeInactive);
     }
 
     public override void Render(IRenderingUnit renderer)
@@ -62,7 +62,7 @@ public class EditorHierarchyView : EditorView
         bool hasChildren = transform.FirstChildId != -1;
         bool expanded = Hierarchy.IsExpanded(entityId);
 
-        var entity = new Entity(Scene, entityId);
+        var entity = new Entity(EditingScene, entityId);
 
         HierarchyElement<long> button = panel.Element<HierarchyElement<long>>()
                 .Hierarchy(Hierarchy)
@@ -79,7 +79,7 @@ public class EditorHierarchyView : EditorView
             : Scene.Systems.Get<EditorBase>().EditingEntity.Contains(entity.EntityId);
 
         button
-            .Icon(Scene.Resources.Get<Texture>(ref EditorIcons.Cube),
+            .Icon(EditorResources.Get<Texture>(ref EditorIcons.Cube),
                 entity.Active
                     ? (selected ? Color.White : new Color(128, 128, 128))
                     : (selected ? new Color(200, 200, 200) : new Color(80, 80, 80)))
@@ -110,8 +110,8 @@ public class EditorHierarchyView : EditorView
         var editorBase = Scene.Systems.Get<EditorBase>();
         bool wasSelected = editorBase.EditingEntity.Contains(id);
 
-        bool control = Scene.Core.InputUnit.Devices.Keyboard.ControlDown;
-        bool shift = Scene.Core.InputUnit.Devices.Keyboard.ShiftDown;
+        bool control = Core.InputUnit.Devices.Keyboard.ControlDown;
+        bool shift = Core.InputUnit.Devices.Keyboard.ShiftDown;
 
         Hierarchy.Selected.Clear();
         Hierarchy.Selected.AddRange(editorBase.EditingEntity);
@@ -142,8 +142,8 @@ public class EditorHierarchyView : EditorView
         var editorBase = ContentPanel.Environment.Scene.Systems.Get<EditorBase>();
         bool wasSelected = editorBase.EditingEntity.Contains(id);
 
-        bool control = Scene.Core.InputUnit.Devices.Keyboard.ControlDown;
-        bool shift = Scene.Core.InputUnit.Devices.Keyboard.ShiftDown;
+        bool control = Core.InputUnit.Devices.Keyboard.ControlDown;
+        bool shift = Core.InputUnit.Devices.Keyboard.ShiftDown;
 
         if (control)
         {
@@ -181,8 +181,8 @@ public class EditorHierarchyView : EditorView
             if (m.Button("Delete", 9).TextMargin(20).TextAlignment(-1).IsPressed())
             {
                 EntitiesToDelete.Clear();
-                if (ContentPanel.Environment.Scene.Components.HasComponent<Transform>(id))
-                    ContentPanel.Environment.Scene.Components.GetComponent<Transform>(id)
+                if (ContentPanel.Environment.EditingScene.Components.HasComponent<Transform>(id))
+                    ContentPanel.Environment.EditingScene.Components.GetComponent<Transform>(id)
                         .DumpHierarchy(EntitiesToDelete);
 
                 var transactions = new CompoundTransaction<EditorEnvironment>();
@@ -236,11 +236,11 @@ public class EntityHierarchy : Hierarchy<long>
 
         var transactions = new CompoundTransaction<EditorEnvironment>();
 
-        var dragTargetEntity = new Entity(Environment.Scene, DragTargetId);
+        var dragTargetEntity = new Entity(Environment.EditingScene, DragTargetId);
 
         foreach (long id in Selected)
         {
-            var selectedEntity = new Entity(Environment.Scene, id);
+            var selectedEntity = new Entity(Environment.EditingScene, id);
             if (dragTargetEntity == selectedEntity || selectedEntity.IsAncestorOf(dragTargetEntity))
             {
                 Console.WriteLine("Cannot drag something into itself");
@@ -250,7 +250,7 @@ public class EntityHierarchy : Hierarchy<long>
 
         foreach (long id in Selected)
         {
-            var entity = new Entity(Environment.Scene, id);
+            var entity = new Entity(Environment.EditingScene, id);
             var transaction = new ChangeEntityHierarchyTransaction(
                 id,
                 entity.Transform.ParentId,

@@ -35,7 +35,7 @@ public class ScaleTool : SelectTool
         if (_selectedGizmo != default)
         {
             Vector2 mouseWorldPos =
-                Scene.MainCameraTransform.Apply(Environment.Renderer.GizmoLayer.LayerToCamera(
+                EditingScene.MainCameraTransform.Apply(Environment.Renderer.GizmoLayer.LayerToCamera(
                     Environment.Renderer.GizmoLayer.WindowToLayer(e.Position.ToVector2())));
             _pressMousePivotPosition = _movePivot.Relativize(mouseWorldPos);
 
@@ -47,7 +47,7 @@ public class ScaleTool : SelectTool
             {
                 if (entityId == -1) continue;
 
-                var entity = new Entity(Scene, entityId);
+                var entity = new Entity(EditingScene, entityId);
 
                 Vector2 relativeEntityPos = _movePivot.Relativize(entity.Transform.Position);
 
@@ -77,7 +77,7 @@ public class ScaleTool : SelectTool
 
     private void EnsurePivotExists()
     {
-        if (!_movePivot.IsNotNull) _movePivot = Transform.InitializeComponent(Scene, 0);
+        if (!_movePivot.IsNotNull) _movePivot = Transform.InitializeComponent(EditingScene, 0);
     }
 
     public override void Render(IRenderingUnit renderer)
@@ -91,7 +91,7 @@ public class ScaleTool : SelectTool
         if (_dragging)
         {
             Vector2 mouseWorldPos =
-                Scene.MainCameraTransform.Apply(Environment.Renderer.GizmoLayer.LayerToCamera(
+                EditingScene.MainCameraTransform.Apply(Environment.Renderer.GizmoLayer.LayerToCamera(
                     Environment.Renderer.GizmoLayer.WindowToLayer(Environment.MousePos.ToVector2())));
 
             Vector2 newScale = _movePivot.Relativize(mouseWorldPos) / _pressMousePivotPosition;
@@ -107,7 +107,7 @@ public class ScaleTool : SelectTool
                 if (entityId == -1) continue;
                 any = true;
 
-                var entity = new Entity(Scene, entityId);
+                var entity = new Entity(EditingScene, entityId);
 
                 entity.Transform.Position = _movePivot.Position;
                 entity.Transform.Position = _movePivot.Apply(_pressEntityPivotPosition[i]);
@@ -129,7 +129,7 @@ public class ScaleTool : SelectTool
                 if (entityId == -1) continue;
                 any = true;
 
-                var entity = new Entity(Scene, entityId);
+                var entity = new Entity(EditingScene, entityId);
 
                 _movePivot.LocalPosition += entity.Transform.Position;
                 _movePivot.Rotation = entity.Transform.Rotation;
@@ -179,8 +179,8 @@ public class ScaleTool : SelectTool
         bool? forceHoverState,
         float fixedLength = 0)
     {
-        start = renderer.GizmoLayer.CameraToLayer(Scene.MainCameraTransform.Relativize(start));
-        end = renderer.GizmoLayer.CameraToLayer(Scene.MainCameraTransform.Relativize(end));
+        start = renderer.GizmoLayer.CameraToLayer(EditingScene.MainCameraTransform.Relativize(start));
+        end = renderer.GizmoLayer.CameraToLayer(EditingScene.MainCameraTransform.Relativize(end));
 
         if (fixedLength > 0) end = (end - start).Normalized() * fixedLength + start;
 

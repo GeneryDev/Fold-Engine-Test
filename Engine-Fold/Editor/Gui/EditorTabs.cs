@@ -75,7 +75,7 @@ public class ViewTab : GuiElement
 
         layer.Surface.Draw(new DrawRectInstruction
         {
-            Texture = Environment.Scene.Core.Resources.Get<Texture>(ref _view.Icon),
+            Texture = Environment.EditorResources.Get<Texture>(ref _view.Icon),
             DestinationRectangle =
                 new Rectangle(x, renderingBounds.Center.Y - iconSize.Y / 2, iconSize.X, iconSize.Y)
         });

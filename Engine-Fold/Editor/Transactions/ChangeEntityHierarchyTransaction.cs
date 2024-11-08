@@ -37,7 +37,7 @@ public class ChangeEntityHierarchyTransaction : Transaction<EditorEnvironment>
 
     public override bool Redo(EditorEnvironment target)
     {
-        var entity = new Entity(target.Scene, _entityId);
+        var entity = new Entity(target.EditingScene, _entityId);
 
         UnlinkFromHierarchy(entity);
 
@@ -57,7 +57,7 @@ public class ChangeEntityHierarchyTransaction : Transaction<EditorEnvironment>
 
     public override bool Undo(EditorEnvironment target)
     {
-        var entity = new Entity(target.Scene, _entityId);
+        var entity = new Entity(target.EditingScene, _entityId);
 
         UnlinkFromHierarchy(entity);
 

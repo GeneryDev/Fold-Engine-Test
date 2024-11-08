@@ -20,7 +20,7 @@ public class EditorDebugActionsView : EditorView
 
         if (ContentPanel.Button("Save Scene", 14).IsPressed())
         {
-            Scene.Core.CommandQueue.Enqueue(new SaveSceneCommand(Scene, Scene.Identifier ?? "__new_scene"));
+            Core.CommandQueue.Enqueue(new SaveSceneCommand(EditingScene, EditingScene.Identifier ?? "__new_scene"));
         }
 
         if (ContentPanel.Button("Detach Editor (no undo!)", 14).IsPressed())
@@ -37,11 +37,11 @@ public class EditorDebugActionsView : EditorView
 
         if (ContentPanel.Button("Save All Resources", 14).IsPressed())
         {
-            Scene.Resources.SaveAll();
+            EditingScene.Resources.SaveAll();
             Console.WriteLine("Save resources!");
         }
 
-        if (ContentPanel.Button("Reload Resources", 14).IsPressed()) Scene.Core.ResourceIndex.Update();
+        if (ContentPanel.Button("Reload Resources", 14).IsPressed()) Core.ResourceIndex.Update();
         if (ContentPanel.Button("Invoke GC", 14).IsPressed()) GC.Collect(GC.MaxGeneration);
     }
 }

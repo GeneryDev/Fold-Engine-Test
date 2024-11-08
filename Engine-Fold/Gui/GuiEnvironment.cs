@@ -4,6 +4,7 @@ using EntryProject.Editor.Gui.Hierarchy;
 using EntryProject.Util;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
+using FoldEngine.Resources;
 using FoldEngine.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -33,6 +34,9 @@ public abstract class GuiEnvironment : IDisposable
     public ButtonAction MouseRight = ButtonAction.Default;
 
     public Scene Scene;
+    public IGameCore Core => Scene.Core;
+    public ResourceCollections EditorResources => Scene.Resources;
+    public Scene EditingScene => Scene;
 
 
     public GuiEnvironment(Scene scene)
@@ -41,8 +45,8 @@ public abstract class GuiEnvironment : IDisposable
         ContextMenu = new GuiPopupMenu(this);
         scene.Core.FoldGame.Window.TextInput += WindowOnTextInput;
 
-        ControlScheme.AddDevice(Scene.Core.InputUnit.Devices.Keyboard);
-        ControlScheme.AddDevice(Scene.Core.InputUnit.Devices.Mouse);
+        ControlScheme.AddDevice(Core.InputUnit.Devices.Keyboard);
+        ControlScheme.AddDevice(Core.InputUnit.Devices.Mouse);
     }
 
     public GuiElement FocusOwner { get; private set; }

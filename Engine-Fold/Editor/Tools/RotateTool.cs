@@ -40,7 +40,7 @@ public class RotateTool : SelectTool
         if (hoveringRing)
         {
             Vector2 mouseWorldPos =
-                Scene.MainCameraTransform.Apply(Environment.Renderer.GizmoLayer.LayerToCamera(
+                EditingScene.MainCameraTransform.Apply(Environment.Renderer.GizmoLayer.LayerToCamera(
                     Environment.Renderer.GizmoLayer.WindowToLayer(e.Position.ToVector2())));
             _pressMousePivotPosition = _movePivot.Relativize(mouseWorldPos);
             _pressMousePivotRotation = (float)Math.Atan2(_pressMousePivotPosition.Y, _pressMousePivotPosition.X);
@@ -53,7 +53,7 @@ public class RotateTool : SelectTool
             {
                 if (entityId == -1) continue;
 
-                var entity = new Entity(Scene, entityId);
+                var entity = new Entity(EditingScene, entityId);
 
                 Vector2 relativeEntityPos = _movePivot.Relativize(entity.Transform.Position);
 
@@ -83,7 +83,7 @@ public class RotateTool : SelectTool
 
     private void EnsurePivotExists()
     {
-        if (!_movePivot.IsNotNull) _movePivot = Transform.InitializeComponent(Scene, 0);
+        if (!_movePivot.IsNotNull) _movePivot = Transform.InitializeComponent(EditingScene, 0);
     }
 
     private float SnapAngle(float angle)
@@ -102,14 +102,14 @@ public class RotateTool : SelectTool
         if (_dragging)
         {
             Vector2 mouseWorldPos =
-                Scene.MainCameraTransform.Apply(Environment.Renderer.GizmoLayer.LayerToCamera(
+                EditingScene.MainCameraTransform.Apply(Environment.Renderer.GizmoLayer.LayerToCamera(
                     Environment.Renderer.GizmoLayer.WindowToLayer(Environment.MousePos.ToVector2())));
 
             Vector2 mouseOffset = _movePivot.Relativize(mouseWorldPos);
             float newRotation = (float)Math.Atan2(mouseOffset.Y, mouseOffset.X);
 
-            if (Scene.Core.InputUnit.Devices.Keyboard[Keys.LeftShift].Down
-                || Scene.Core.InputUnit.Devices.Keyboard[Keys.RightShift].Down)
+            if (Core.InputUnit.Devices.Keyboard[Keys.LeftShift].Down
+                || Core.InputUnit.Devices.Keyboard[Keys.RightShift].Down)
                 newRotation = SnapAngle(newRotation - _pressMousePivotRotation + _startRotation)
                               + _pressMousePivotRotation
                               - _startRotation;
@@ -121,7 +121,7 @@ public class RotateTool : SelectTool
                 if (entityId == -1) continue;
                 any = true;
 
-                var entity = new Entity(Scene, entityId);
+                var entity = new Entity(EditingScene, entityId);
 
                 entity.Transform.Position = _movePivot.Position;
                 entity.Transform.Position = _movePivot.Apply(_pressEntityPivotPosition[i]);
@@ -145,7 +145,7 @@ public class RotateTool : SelectTool
                 if (entityId == -1) continue;
                 any = true;
 
-                var entity = new Entity(Scene, entityId);
+                var entity = new Entity(EditingScene, entityId);
 
                 _movePivot.LocalPosition += entity.Transform.Position;
                 _startRotation = _movePivot.Rotation = entity.Transform.Rotation;
@@ -204,8 +204,8 @@ public class RotateTool : SelectTool
         Color color,
         float fixedLength = 0)
     {
-        start = renderer.GizmoLayer.CameraToLayer(Scene.MainCameraTransform.Relativize(start));
-        end = renderer.GizmoLayer.CameraToLayer(Scene.MainCameraTransform.Relativize(end));
+        start = renderer.GizmoLayer.CameraToLayer(EditingScene.MainCameraTransform.Relativize(start));
+        end = renderer.GizmoLayer.CameraToLayer(EditingScene.MainCameraTransform.Relativize(end));
 
         if (fixedLength > 0) end = (end - start).Normalized() * fixedLength + start;
 
@@ -246,8 +246,8 @@ public class RotateTool : SelectTool
         bool? forceHoverState,
         float fixedRadius = 0)
     {
-        start = renderer.GizmoLayer.CameraToLayer(Scene.MainCameraTransform.Relativize(start));
-        end = renderer.GizmoLayer.CameraToLayer(Scene.MainCameraTransform.Relativize(end));
+        start = renderer.GizmoLayer.CameraToLayer(EditingScene.MainCameraTransform.Relativize(start));
+        end = renderer.GizmoLayer.CameraToLayer(EditingScene.MainCameraTransform.Relativize(end));
 
         if (fixedRadius > 0) end = (end - start).Normalized() * fixedRadius + start;
 

@@ -33,7 +33,7 @@ public class EditorInspectorView : EditorView
         var editorBase = Scene.Systems.Get<EditorBase>();
         if (editorBase.EditingEntity.Count == 1) id = editorBase.EditingEntity[0];
 
-        if (id != -1 && Scene.Components.HasComponent<Transform>(id))
+        if (id != -1 && EditingScene.Components.HasComponent<Transform>(id))
             RenderEntityView(renderer, id);
         else if (_object != null) RenderObjectView(renderer);
         // ContentPanel.Label(Scene.Name, 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
@@ -41,9 +41,9 @@ public class EditorInspectorView : EditorView
 
     private void RenderEntityView(IRenderingUnit renderer, long id)
     {
-        ContentPanel.Label(Scene.Components.GetComponent<EntityName>(id).Name, 14)
+        ContentPanel.Label(EditingScene.Components.GetComponent<EntityName>(id).Name, 14)
             .TextAlignment(-1)
-            .Icon(Scene.Resources.Get<Texture>(ref EditorIcons.Cube));
+            .Icon(EditorResources.Get<Texture>(ref EditorIcons.Cube));
         if (id >= int.MaxValue)
         {
             ContentPanel.Label($"ID: {id} ({(int)id})", 7).TextAlignment(-1);
@@ -53,7 +53,7 @@ public class EditorInspectorView : EditorView
             ContentPanel.Label($"ID: {id}", 7).TextAlignment(-1);
         }
 
-        Entity entity = new Entity(Scene, id);
+        Entity entity = new Entity(EditingScene, id);
 
         if (entity.Active != ContentPanel.Element<Checkbox>().Value(entity.Active).IsChecked())
         {
@@ -73,7 +73,7 @@ public class EditorInspectorView : EditorView
         ContentPanel.Element<ComponentMemberBreak>();
         // ContentPanel.Spacing(12);
 
-        foreach (ComponentSet set in Scene.Components.Sets.Values)
+        foreach (ComponentSet set in EditingScene.Components.Sets.Values)
             if (set.Has(id))
             {
                 ComponentInfo componentInfo = ComponentInfo.Get(set.ComponentType);
@@ -87,12 +87,12 @@ public class EditorInspectorView : EditorView
 
                 // ContentPanel.Label(componentInfo.Name, 14).TextAlignment(-1);
 
-                Scene.Core.RegistryUnit.CustomInspectors.RenderCustomInspectorsBefore(set.GetBoxedComponent(id),
+                Core.RegistryUnit.CustomInspectors.RenderCustomInspectorsBefore(set.GetBoxedComponent(id),
                     ContentPanel);
 
                 foreach (ComponentMember member in componentInfo.Members)
                 {
-                    if (!member.ShouldShowInInspector(Scene, id)) continue;
+                    if (!member.ShouldShowInInspector(EditingScene, id)) continue;
                     object value = set.GetFieldValue(id, member.FieldInfo);
                     // ContentPanel
                     //     .Label(
@@ -114,7 +114,7 @@ public class EditorInspectorView : EditorView
                     // ContentPanel.Spacing(5);
                 }
 
-                Scene.Core.RegistryUnit.CustomInspectors.RenderCustomInspectorsAfter(set.GetBoxedComponent(id),
+                Core.RegistryUnit.CustomInspectors.RenderCustomInspectorsAfter(set.GetBoxedComponent(id),
                     ContentPanel);
             }
 
@@ -123,10 +123,10 @@ public class EditorInspectorView : EditorView
             GuiPopupMenu contextMenu = ContentPanel.Environment.ContextMenu;
             contextMenu.Show(p, m =>
             {
-                foreach (Type type in Scene.Core.RegistryUnit.Components.GetAllTypes())
+                foreach (Type type in Core.RegistryUnit.Components.GetAllTypes())
                 {
                     if (type.GetCustomAttribute<HideInInspector>() == null &&
-                        !Scene.Components.HasComponent(type, id) && m.Button(type.Name, 9).IsPressed())
+                        !EditingScene.Components.HasComponent(type, id) && m.Button(type.Name, 9).IsPressed())
                         ((EditorEnvironment)ContentPanel.Environment).TransactionManager.InsertTransaction(
                             new AddComponentTransaction(type, id));
                 }
@@ -141,10 +141,10 @@ public class EditorInspectorView : EditorView
 
         ContentPanel.Label(info.Name, 14)
             .TextAlignment(-1)
-            .Icon(Scene.Resources.Get<Texture>(ref EditorIcons.Cog));
+            .Icon(EditorResources.Get<Texture>(ref EditorIcons.Cog));
         ContentPanel.Spacing(12);
 
-        Scene.Core.RegistryUnit.CustomInspectors.RenderCustomInspectorsBefore(_object, ContentPanel);
+        Core.RegistryUnit.CustomInspectors.RenderCustomInspectorsBefore(_object, ContentPanel);
 
         foreach (ComponentMember member in info.Members)
         {
@@ -157,7 +157,7 @@ public class EditorInspectorView : EditorView
             ContentPanel.Element<ComponentMemberBreak>();
         }
 
-        Scene.Core.RegistryUnit.CustomInspectors.RenderCustomInspectorsAfter(_object, ContentPanel);
+        Core.RegistryUnit.CustomInspectors.RenderCustomInspectorsAfter(_object, ContentPanel);
     }
 
     public void SetObject(object obj)

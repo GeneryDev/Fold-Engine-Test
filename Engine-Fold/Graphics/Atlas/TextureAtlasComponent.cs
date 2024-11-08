@@ -28,7 +28,7 @@ public class TextureAtlasComponentInspector : CustomInspector<TextureAtlasCompon
     {
         if (obj.Generated)
         {
-            var texture = panel.Environment.Scene.Resources.Get<Texture>(ref obj.AtlasIdentifier);
+            var texture = panel.Environment.EditingScene.Resources.Get<Texture>(ref obj.AtlasIdentifier);
             panel.Element<GuiLabel>().Text("Generated").FontSize(9).TextAlignment(-1);
             panel.Element<GuiLabel>().Text("Dimensions: " + texture.Width + " x " + texture.Height).FontSize(9)
                 .TextAlignment(-1);

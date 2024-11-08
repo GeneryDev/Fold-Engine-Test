@@ -23,19 +23,19 @@ public class SelectTool : EditorTool
 
     public override void OnMousePressed(ref MouseEvent e)
     {
-        ref Transform cameraTransform = ref Scene.MainCameraTransform;
+        ref Transform cameraTransform = ref EditingScene.MainCameraTransform;
 
-        IRenderingLayer worldLayer = Environment.Scene.Core.RenderingUnit.WorldLayer;
+        IRenderingLayer worldLayer = Environment.Core.RenderingUnit.WorldLayer;
         Vector2 cameraRelativePos =
             worldLayer.LayerToCamera(worldLayer.WindowToLayer(Environment.MousePos.ToVector2()));
         Vector2 worldPos = cameraTransform.Apply(cameraRelativePos);
 
         long intersectingEntities =
-            Scene.Systems.Get<LevelRenderer2D>()?.ListEntitiesIntersectingPosition(worldPos) ?? -1;
+            EditingScene.Systems.Get<LevelRenderer2D>()?.ListEntitiesIntersectingPosition(worldPos) ?? -1;
 
         var editorBase = Scene.Systems.Get<EditorBase>();
-        if (!Scene.Core.InputUnit.Devices.Keyboard[Keys.LeftControl].Down
-            && !Scene.Core.InputUnit.Devices.Keyboard[Keys.RightControl].Down)
+        if (!Core.InputUnit.Devices.Keyboard[Keys.LeftControl].Down
+            && !Core.InputUnit.Devices.Keyboard[Keys.RightControl].Down)
             editorBase.EditingEntity.Clear();
 
         if (intersectingEntities != -1 && !editorBase.EditingEntity.Contains(intersectingEntities))

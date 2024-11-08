@@ -12,6 +12,9 @@ public abstract class EditorView
 
     public ResourceIdentifier Icon;
     public Scene Scene;
+    public IGameCore Core => Scene.Core;
+    public ResourceCollections EditorResources => Scene.Resources;
+    public Scene EditingScene => Scene;
     public abstract string Name { get; }
 
     public virtual bool UseMargin => true;

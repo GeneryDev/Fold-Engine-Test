@@ -21,13 +21,13 @@ public class SetComponentFieldTransaction : SetFieldTransaction
 
     public override bool Redo(EditorEnvironment target)
     {
-        target.Scene.Components.Sets[ComponentType].SetFieldValue(EntityId, FieldInfo, NewValue);
+        target.EditingScene.Components.Sets[ComponentType].SetFieldValue(EntityId, FieldInfo, NewValue);
         return OldValue != NewValue;
     }
 
     public override bool Undo(EditorEnvironment target)
     {
-        target.Scene.Components.Sets[ComponentType].SetFieldValue(EntityId, FieldInfo, OldValue);
+        target.EditingScene.Components.Sets[ComponentType].SetFieldValue(EntityId, FieldInfo, OldValue);
         return OldValue != NewValue;
     }
 }

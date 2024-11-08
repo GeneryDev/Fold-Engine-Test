@@ -23,9 +23,9 @@ public class AddComponentTransaction : Transaction<EditorEnvironment>
 
     public override bool Redo(EditorEnvironment target)
     {
-        if (target.Scene.Components.HasComponent<Transform>(_entityId)
-            && !target.Scene.Components.HasComponent(_type, _entityId))
-            target.Scene.Components.CreateComponent(_type, _entityId);
+        if (target.EditingScene.Components.HasComponent<Transform>(_entityId)
+            && !target.EditingScene.Components.HasComponent(_type, _entityId))
+            target.EditingScene.Components.CreateComponent(_type, _entityId);
         else
             SceneEditor.ReportEditorGameConflict();
 
@@ -34,8 +34,8 @@ public class AddComponentTransaction : Transaction<EditorEnvironment>
 
     public override bool Undo(EditorEnvironment target)
     {
-        if (target.Scene.Components.HasComponent(_type, _entityId))
-            target.Scene.Components.RemoveComponent(_type, _entityId);
+        if (target.EditingScene.Components.HasComponent(_type, _entityId))
+            target.EditingScene.Components.RemoveComponent(_type, _entityId);
         else
             SceneEditor.ReportEditorGameConflict();
 
@@ -67,15 +67,15 @@ public class RemoveComponentTransaction : Transaction<EditorEnvironment>
             saveOp.Options.Set(SerializeOnlyEntities.Instance, new List<long> { _entityId });
             saveOp.Options.Set(SerializeOnlyComponents.Instance, new List<Type> { _type });
 
-            target.Scene.Serialize(saveOp);
+            target.EditingScene.Serialize(saveOp);
 
             saveOp.Close();
             _serializedData = stream.GetBuffer();
             saveOp.Dispose();
         }
 
-        if (target.Scene.Components.HasComponent(_type, _entityId))
-            target.Scene.Components.RemoveComponent(_type, _entityId);
+        if (target.EditingScene.Components.HasComponent(_type, _entityId))
+            target.EditingScene.Components.RemoveComponent(_type, _entityId);
         else
             SceneEditor.ReportEditorGameConflict();
 
@@ -86,12 +86,12 @@ public class RemoveComponentTransaction : Transaction<EditorEnvironment>
     {
         if (_serializedData == null) throw new InvalidOperationException("Cannot call Undo before Redo");
 
-        if (target.Scene.Components.HasComponent<Transform>(_entityId)
-            && !target.Scene.Components.HasComponent(_type, _entityId))
+        if (target.EditingScene.Components.HasComponent<Transform>(_entityId)
+            && !target.EditingScene.Components.HasComponent(_type, _entityId))
         {
             var loadOp = new LoadOperation(new MemoryStream(_serializedData));
 
-            target.Scene.Deserialize(loadOp);
+            target.EditingScene.Deserialize(loadOp);
 
             loadOp.Close();
             loadOp.Dispose();

@@ -29,21 +29,21 @@ public class DeleteEntityTransaction : Transaction<EditorEnvironment>
             var saveOp = new SaveOperation(stream);
             saveOp.Options.Set(SerializeOnlyEntities.Instance, new List<long> { _entityId });
 
-            target.Scene.Serialize(saveOp);
+            target.EditingScene.Serialize(saveOp);
 
             saveOp.Close();
             _serializedData = stream.GetBuffer();
             saveOp.Dispose();
         }
 
-        if (target.Scene.Components.HasComponent<Transform>(_entityId))
+        if (target.EditingScene.Components.HasComponent<Transform>(_entityId))
         {
-            ref Transform transform = ref target.Scene.Components.GetComponent<Transform>(_entityId);
+            ref Transform transform = ref target.EditingScene.Components.GetComponent<Transform>(_entityId);
             _parentEntityId = transform.ParentId;
 
-            if (_parentEntityId != -1 && target.Scene.Components.HasComponent<Transform>(_parentEntityId))
-                target.Scene.Components.GetComponent<Transform>(_parentEntityId).RemoveChild(_entityId);
-            target.Scene.DeleteEntity(_entityId, true);
+            if (_parentEntityId != -1 && target.EditingScene.Components.HasComponent<Transform>(_parentEntityId))
+                target.EditingScene.Components.GetComponent<Transform>(_parentEntityId).RemoveChild(_entityId);
+            target.EditingScene.DeleteEntity(_entityId, true);
         }
         else
         {
@@ -58,17 +58,17 @@ public class DeleteEntityTransaction : Transaction<EditorEnvironment>
     {
         if (_serializedData == null) throw new InvalidOperationException("Cannot call Undo before Redo");
 
-        if (target.Scene.Reclaim(_entityId))
+        if (target.EditingScene.Reclaim(_entityId))
         {
             var loadOp = new LoadOperation(new MemoryStream(_serializedData));
 
-            target.Scene.Deserialize(loadOp);
+            target.EditingScene.Deserialize(loadOp);
 
             loadOp.Close();
             loadOp.Dispose();
 
             if (_parentEntityId != -1)
-                target.Scene.Components.GetComponent<Transform>(_entityId).SetParent(_parentEntityId);
+                target.EditingScene.Components.GetComponent<Transform>(_entityId).SetParent(_parentEntityId);
         }
 
         return true;

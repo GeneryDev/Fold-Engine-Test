@@ -20,9 +20,9 @@ public class ChangeSystemOrderTransaction : Transaction<EditorEnvironment>
 
     public override bool Redo(EditorEnvironment target)
     {
-        if (target.Scene.Systems.Get(_sysType) != null)
+        if (target.EditingScene.Systems.Get(_sysType) != null)
         {
-            target.Scene.Core.CommandQueue.Enqueue(new ChangeSystemOrderCommand(target.Scene, _sysType, _toIndex));
+            target.EditingScene.Core.CommandQueue.Enqueue(new ChangeSystemOrderCommand(target.EditingScene, _sysType, _toIndex));
         }
         else
         {
@@ -34,9 +34,9 @@ public class ChangeSystemOrderTransaction : Transaction<EditorEnvironment>
 
     public override bool Undo(EditorEnvironment target)
     {
-        if (target.Scene.Systems.Get(_sysType) != null)
+        if (target.EditingScene.Systems.Get(_sysType) != null)
         {
-            target.Scene.Core.CommandQueue.Enqueue(new ChangeSystemOrderCommand(target.Scene, _sysType, _fromIndex));
+            target.EditingScene.Core.CommandQueue.Enqueue(new ChangeSystemOrderCommand(target.EditingScene, _sysType, _fromIndex));
         }
         else
         {

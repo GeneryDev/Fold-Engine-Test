@@ -139,7 +139,7 @@ public class HierarchyElement<TI> : GuiLabel
         if (_expandable)
         {
             ITexture triangleTexture =
-                Environment.Scene.Resources.Get<Texture>(
+                Environment.EditorResources.Get<Texture>(
                     ref _hierarchy?.IsExpanded(_id) ?? false
                         ? ref EditorIcons.TriangleDown
                         : ref EditorIcons.TriangleRight, null);

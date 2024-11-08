@@ -23,7 +23,7 @@ public class SetEntityTransformTransaction : Transaction<EditorEnvironment>
 
     public override bool Redo(EditorEnvironment target)
     {
-        ref Transform targetTransform = ref target.Scene.Components.GetComponent<Transform>(_entityId);
+        ref Transform targetTransform = ref target.EditingScene.Components.GetComponent<Transform>(_entityId);
 
         bool any = false;
 
@@ -50,7 +50,7 @@ public class SetEntityTransformTransaction : Transaction<EditorEnvironment>
 
     public override bool Undo(EditorEnvironment target)
     {
-        ref Transform targetTransform = ref target.Scene.Components.GetComponent<Transform>(_entityId);
+        ref Transform targetTransform = ref target.EditingScene.Components.GetComponent<Transform>(_entityId);
 
         bool any = false;
 

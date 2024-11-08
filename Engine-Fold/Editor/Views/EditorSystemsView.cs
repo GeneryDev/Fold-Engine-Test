@@ -33,8 +33,8 @@ public class EditorSystemsView : EditorView
             GuiPopupMenu contextMenu = ContentPanel.Environment.ContextMenu;
             contextMenu.Show(p, m =>
             {
-                foreach (Type type in Scene.Core.RegistryUnit.Systems.GetAllTypes())
-                    if (Scene.Systems.Get(type) == null && m.Button(type.Name, 9).IsPressed())
+                foreach (Type type in Core.RegistryUnit.Systems.GetAllTypes())
+                    if (EditingScene.Systems.Get(type) == null && m.Button(type.Name, 9).IsPressed())
                         ((EditorEnvironment)ContentPanel.Environment).TransactionManager.InsertTransaction(
                             new AddSystemTransaction(type));
             });
@@ -44,13 +44,13 @@ public class EditorSystemsView : EditorView
 
         var editorEnvironment = (EditorEnvironment)ContentPanel.Environment;
 
-        foreach (GameSystem sys in Scene.Systems.AllSystems)
+        foreach (GameSystem sys in EditingScene.Systems.AllSystems)
         {
             HierarchyElement<Type> element = (HierarchyElement<Type>)ContentPanel.Element<HierarchyElement<Type>>()
                     .Hierarchy(Hierarchy)
                     .Id(sys.GetType())
                     .Selected(editorEnvironment.GetView<EditorInspectorView>().GetObject() == sys)
-                    .Icon(Scene.Resources.Get<Texture>(ref EditorIcons.Cog, null))
+                    .Icon(EditorResources.Get<Texture>(ref EditorIcons.Cog, null))
                     .Text(sys.SystemName)
                 ;
 
@@ -103,9 +103,9 @@ public class SystemHierarchy : Hierarchy<Type>
 
         foreach (Type sysType in Selected)
         {
-            int fromIndex = Environment.Scene.Systems.GetSystemIndex(sysType);
+            int fromIndex = Environment.EditingScene.Systems.GetSystemIndex(sysType);
 
-            int toIndex = Environment.Scene.Systems.GetSystemIndex(DragTargetId);
+            int toIndex = Environment.EditingScene.Systems.GetSystemIndex(DragTargetId);
             if (DragRelative == 1) toIndex++;
 
             if (toIndex == fromIndex) continue;

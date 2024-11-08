@@ -42,7 +42,7 @@ public class EditorResourcesView : EditorView
             _main = new GuiPanel(ContentPanel.Environment) { MayScroll = true };
         }
 
-        Scene scene = ContentPanel.Environment.Scene;
+        Scene scene = ContentPanel.Environment.EditingScene;
 
         ShowRuntimeResources = ContentPanel.Element<Checkbox>().Value(ShowRuntimeResources).IsChecked();
         ContentPanel.Label("Show Runtime", 9).TextAlignment(-1);
@@ -133,7 +133,7 @@ public class EditorResourcesView : EditorView
                     {
                         editorEnvironment.Scene.Systems.Get<EditorBase>().EditingEntity.Clear();
                         editorEnvironment.GetView<EditorInspectorView>()
-                            .SetObject(ContentPanel.Environment.Scene.Resources.Get(type, ref identifier));
+                            .SetObject(ContentPanel.Environment.EditingScene.Resources.Get(type, ref identifier));
                         editorEnvironment.SwitchToView<EditorInspectorView>();
                     }
 
@@ -143,13 +143,13 @@ public class EditorResourcesView : EditorView
                 {
                     // Global
 
-                    if (ContentPanel.Environment.Scene.Core.Resources.Exists(type, ref identifier))
+                    if (ContentPanel.Environment.Core.Resources.Exists(type, ref identifier))
                     {
                         if (ContentPanel.Environment is EditorEnvironment editorEnvironment)
                         {
                             editorEnvironment.Scene.Systems.Get<EditorBase>().EditingEntity.Clear();
                             editorEnvironment.GetView<EditorInspectorView>()
-                                .SetObject(ContentPanel.Environment.Scene.Core.Resources.Get(type, ref identifier));
+                                .SetObject(ContentPanel.Environment.Core.Resources.Get(type, ref identifier));
                             editorEnvironment.SwitchToView<EditorInspectorView>();
                         }
 
@@ -174,7 +174,7 @@ public class EditorResourcesView : EditorView
             }
             default:
             {
-                loaded = resource != null || ContentPanel.Environment.Scene.Core.Resources.Exists(type, ref identifier);
+                loaded = resource != null || ContentPanel.Environment.Core.Resources.Exists(type, ref identifier);
                 break;
             }
         }
@@ -203,7 +203,7 @@ public class LoadingInspector : CustomInspector<Loading>
         panel.Element<GuiLabel>().Text($"Type: {obj.Type}").FontSize(9).TextAlignment(-1);
         panel.Element<GuiLabel>().Text($"Identifier: {obj.Identifier.Identifier}").FontSize(9).TextAlignment(-1);
 
-        Resource resource = panel.Environment.Scene.Core.Resources.Get(obj.Type, ref obj.Identifier);
+        Resource resource = panel.Environment.Core.Resources.Get(obj.Type, ref obj.Identifier);
         if (resource != null && panel.Environment is EditorEnvironment editorEnvironment)
         {
             editorEnvironment.GetView<EditorInspectorView>().SetObject(resource);

@@ -20,19 +20,19 @@ public class CreateEntityTransaction : Transaction<EditorEnvironment>
     {
         if (_newEntityId == -1)
         {
-            _newEntityId = target.Scene.CreateEntityId("Unnamed Entity");
+            _newEntityId = target.EditingScene.CreateEntityId("Unnamed Entity");
         }
         else
         {
-            if (!target.Scene.ReclaimAndCreate(_newEntityId, "Unnamed Entity"))
+            if (!target.EditingScene.ReclaimAndCreate(_newEntityId, "Unnamed Entity"))
             {
                 return true;
             }
         }
 
-        if (_parentEntityId != -1 && target.Scene.Components.HasComponent<Transform>(_parentEntityId))
+        if (_parentEntityId != -1 && target.EditingScene.Components.HasComponent<Transform>(_parentEntityId))
         {
-            target.Scene.Components.GetComponent<Transform>(_newEntityId).SetParent(_parentEntityId);
+            target.EditingScene.Components.GetComponent<Transform>(_newEntityId).SetParent(_parentEntityId);
         }
 
         return true;
@@ -40,14 +40,14 @@ public class CreateEntityTransaction : Transaction<EditorEnvironment>
 
     public override bool Undo(EditorEnvironment target)
     {
-        if (_parentEntityId != -1 && target.Scene.Components.HasComponent<Transform>(_parentEntityId))
+        if (_parentEntityId != -1 && target.EditingScene.Components.HasComponent<Transform>(_parentEntityId))
         {
-            target.Scene.Components.GetComponent<Transform>(_parentEntityId).RemoveChild(_newEntityId);
+            target.EditingScene.Components.GetComponent<Transform>(_parentEntityId).RemoveChild(_newEntityId);
         }
 
-        if (target.Scene.Components.HasComponent<Transform>(_newEntityId))
+        if (target.EditingScene.Components.HasComponent<Transform>(_newEntityId))
         {
-            target.Scene.DeleteEntity(_newEntityId, true);
+            target.EditingScene.DeleteEntity(_newEntityId, true);
         }
         else
         {

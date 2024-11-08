@@ -21,7 +21,7 @@ public class HandTool : EditorTool
     {
         if (Scene.EditorComponents == null) return;
 
-        IRenderingLayer worldLayer = Scene.Core.RenderingUnit.WorldLayer;
+        IRenderingLayer worldLayer = Core.RenderingUnit.WorldLayer;
         Vector2 cameraPos = worldLayer.LayerToCamera(worldLayer.WindowToLayer(e.Position.ToVector2()));
         Vector2 worldPos = Scene.EditorComponents.EditorTransform.Apply(cameraPos);
 
@@ -40,7 +40,7 @@ public class HandTool : EditorTool
 
         if (_dragging)
         {
-            IRenderingLayer worldLayer = Scene.Core.RenderingUnit.WorldLayer;
+            IRenderingLayer worldLayer = Core.RenderingUnit.WorldLayer;
             Vector2 cameraRelativePos =
                 worldLayer.LayerToCamera(worldLayer.WindowToLayer(Environment.MousePos.ToVector2()));
 

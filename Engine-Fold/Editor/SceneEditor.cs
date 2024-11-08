@@ -18,7 +18,10 @@ public static class SceneEditor
         scene.Core.CommandQueue.Enqueue(new SetWindowTitleCommand(scene.Name + " - Scene Editor"));
         scene.Paused = true;
 
-        scene.Systems.Add<EditorBase>();
+        scene.Systems.Add(new EditorBase()
+        {
+            EditingScene = scene
+        });
         EditorToolbarView.NewSceneLoaded();
     }
 

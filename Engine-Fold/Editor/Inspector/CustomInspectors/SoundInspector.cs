@@ -29,11 +29,11 @@ public class SoundInspector : CustomInspector<Sound>
             ;
         if (stop)
         {
-            button.Icon(panel.Environment.Scene.Resources.Get<Texture>(ref EditorIcons.Pause));
+            button.Icon(panel.Environment.EditorResources.Get<Texture>(ref EditorIcons.Pause));
         }
         else
         {
-            button.Icon(panel.Environment.Scene.Resources.Get<Texture>(ref EditorIcons.Play));
+            button.Icon(panel.Environment.EditorResources.Get<Texture>(ref EditorIcons.Play));
         }
 
         if (button.IsPressed())
@@ -42,7 +42,7 @@ public class SoundInspector : CustomInspector<Sound>
             _playingSound = null;
             if (!stop)
             {
-                _playingInstance = panel.Environment.Scene.Core.AudioUnit.CreateInstance(obj);
+                _playingInstance = panel.Environment.Core.AudioUnit.CreateInstance(obj);
                 _playingInstance.PlayOnce();
                 _playingSound = obj.Identifier;
             }
