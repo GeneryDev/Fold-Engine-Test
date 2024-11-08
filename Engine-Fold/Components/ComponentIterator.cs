@@ -144,7 +144,7 @@ public class ComponentIterator<T> : ComponentIterator where T : struct
             return false;
         }
 
-        if (_flags.Has(IterationFlags.Ordered))
+        if (_flags.HasFlag(IterationFlags.Ordered))
         {
             do
             {
@@ -152,7 +152,7 @@ public class ComponentIterator<T> : ComponentIterator where T : struct
             } while (_sparseIndex < _set.Sparse.Length
                      && (_set.Sparse[_sparseIndex] == -1
                          || _set.Dense[_set.Sparse[_sparseIndex]].ModifiedTimestamp == _iterationTimestamp
-                         || (!_flags.Has(IterationFlags.IncludeInactive) &&
+                         || (!_flags.HasFlag(IterationFlags.IncludeInactive) &&
                              _scene.Components.HasComponent<InactiveComponent>(_set.Dense[_set.Sparse[_sparseIndex]]
                                  .EntityId))
                      ));
@@ -177,7 +177,7 @@ public class ComponentIterator<T> : ComponentIterator where T : struct
             {
                 _denseIndex++;
             } while (_denseIndex < _set.N
-                     && (!_flags.Has(IterationFlags.IncludeInactive) &&
+                     && (!_flags.HasFlag(IterationFlags.IncludeInactive) &&
                          _scene.Components.HasComponent<InactiveComponent>(_set.Dense[_denseIndex].EntityId))
                     );
 
@@ -236,12 +236,4 @@ public enum IterationFlags
     None = 0,
     Ordered = 1,
     IncludeInactive = 2
-}
-
-public static class IterationFlagsExt
-{
-    public static bool Has(this IterationFlags t, IterationFlags mask)
-    {
-        return (t & mask) != 0;
-    }
 }

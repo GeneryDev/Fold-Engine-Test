@@ -8,6 +8,7 @@ public interface IEventQueue
 {
     void Flush();
     void Unsubscribe(object listener);
+    bool AnyListeners();
 }
 
 public class EventQueue<T> : IEventQueue where T : struct
@@ -45,6 +46,11 @@ public class EventQueue<T> : IEventQueue where T : struct
     public void Unsubscribe(object listener)
     {
         _listeners.Remove(listener as EventListener<T>);
+    }
+
+    public bool AnyListeners()
+    {
+        return _listeners.Count > 0;
     }
 
     public ref T Enqueue(T evt)

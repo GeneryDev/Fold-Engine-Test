@@ -56,9 +56,15 @@ public class EventMap
         return (EventQueue<T>)Map[typeof(T)];
     }
 
+    public bool HasListeners<T>() where T : struct
+    {
+        return Map.ContainsKey(typeof(T)) && Map[typeof(T)].AnyListeners();
+    }
+
     public void Invoke<T>(T evt) where T : struct
     {
-        Get<T>().Enqueue(evt);
+        if(HasListeners<T>())
+            Get<T>().Enqueue(evt);
     }
 
     public EventUnsubscriber Subscribe<T>(EventListener<T> listener) where T : struct

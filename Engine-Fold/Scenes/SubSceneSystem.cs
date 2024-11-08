@@ -13,115 +13,79 @@ public class SubSceneSystem : GameSystem
 {
     private ComponentIterator<SubScene> _subSceneComponents;
 
-    [HideInInspector] private List<SubSceneInstance> _instances = new();
-
     public override void Initialize()
     {
         _subSceneComponents = CreateComponentIterator<SubScene>(IterationFlags.Ordered);
     }
 
-    private int GetInstanceIndexForEntity(long entityId)
-    {
-        for (var i = 0; i < _instances.Count; i++)
-        {
-            if (_instances[i].EntityId == entityId)
-            {
-                //this is it
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-    private int GetOrCreateInstanceIndexForEntity(long entityId)
-    {
-        int instanceIndex = GetInstanceIndexForEntity(entityId);
-        if (instanceIndex == -1)
-        {
-            instanceIndex = _instances.Count;
-            _instances.Add(new SubSceneInstance() {EntityId = entityId});
-        }
-
-        return instanceIndex;
-    }
-    
     public override void OnInput()
     {
-        foreach (var instance in _instances)
+        _subSceneComponents.Reset();
+        while (_subSceneComponents.Next())
         {
-            if(!Scene.Components.HasComponent<InactiveComponent>(instance.EntityId))
+            ref var instance = ref _subSceneComponents.GetComponent();
+            if(!_subSceneComponents.HasCoComponent<InactiveComponent>())
                 instance.Scene?.Input();
         }
     }
 
     public override void OnUpdate()
     {
-        foreach (var instance in _instances)
+        _subSceneComponents.Reset();
+        while (_subSceneComponents.Next())
         {
-            if(!Scene.Components.HasComponent<InactiveComponent>(instance.EntityId))
+            ref var instance = ref _subSceneComponents.GetComponent();
+            if(!_subSceneComponents.HasCoComponent<InactiveComponent>())
                 instance.Scene?.Update();
         }
     }
 
     public override void OnFixedUpdate()
     {
-        for (int i = 0; i < _instances.Count; i++)
-        {
-            var instance = _instances[i];
-            if (!Scene.Components.HasComponent<SubScene>(instance.EntityId))
-            {
-                // Component removed, discard scene and remove instance
-                DiscardScene(instance.Scene);
-                _instances.RemoveAt(i);
-                i--;
-                continue;
-            } else if (Scene.Components.GetComponent<SubScene>(instance.EntityId) is { } component && component.SceneIdentifier.Identifier != instance.SceneIdentifier.Identifier)
-            {
-                // Component changed scene identifier, discard scene and reset instance
-                DiscardScene(instance.Scene);
-                _instances[i] = instance with { SceneIdentifier = default, Scene = null };
-            }
-        }
-        
         _subSceneComponents.Reset();
         while (_subSceneComponents.Next())
         {
-            long entityId = _subSceneComponents.GetEntityId();
-            var component = _subSceneComponents.GetComponent();
+            ref var component = ref _subSceneComponents.GetComponent();
             
-            int instanceIndex = GetOrCreateInstanceIndexForEntity(entityId);
-            var instance = _instances[instanceIndex];
-
-            if (instance.SceneIdentifier.Identifier == null)
+            if (component.SceneIdentifier.Identifier != component.LoadedSceneIdentifier.Identifier)
             {
-                instance.SceneIdentifier = component.SceneIdentifier;
-                _instances[instanceIndex] = instance;
+                // Component changed scene identifier, discard scene and reset instance
+                DiscardScene(component.Scene);
+                component.LoadedSceneIdentifier = default;
+                component.Scene = null;
+            }
+            
+            if (component.LoadedSceneIdentifier.Identifier == null)
+            {
+                component.LoadedSceneIdentifier = component.SceneIdentifier;
             }
 
-            if (instance.Scene == null && Scene.Resources.Get<Scene>(ref instance.SceneIdentifier, null) is {} loadedScene)
+            if (component.Scene == null && Scene.Resources.Get<Scene>(ref component.LoadedSceneIdentifier, null) is {} loadedScene)
             {
-                instance.Scene = loadedScene;
-                Scene.Resources.Detach(instance.Scene);
-                Scene.Core.Resources.Detach(instance.Scene);
-                _instances[instanceIndex] = instance;
+                component.Scene = loadedScene;
+                Scene.Resources.Detach(component.Scene);
+                Scene.Core.Resources.Detach(component.Scene);
             }
         }
     }
 
     public override void OnRender(IRenderingUnit renderer)
     {
-        foreach (var instance in _instances)
+        _subSceneComponents.Reset();
+        while (_subSceneComponents.Next())
         {
-            if(!Scene.Components.HasComponent<InactiveComponent>(instance.EntityId))
+            ref var instance = ref _subSceneComponents.GetComponent();
+            if(!_subSceneComponents.HasCoComponent<InactiveComponent>())
                 instance.Scene?.Render(renderer);
         }
     }
 
     public override void PollResources()
     {
-        foreach (var instance in _instances)
+        _subSceneComponents.Reset();
+        while (_subSceneComponents.Next())
         {
+            ref var instance = ref _subSceneComponents.GetComponent();
             instance.Scene?.Systems.PollResources();
         }
     }
@@ -132,30 +96,12 @@ public class SubSceneSystem : GameSystem
         Console.WriteLine($"Discard scene: {scene.Identifier}");
     }
 
-    public Scene GetSceneForEntityId(long entityId)
-    {
-        int instanceIndex = GetInstanceIndexForEntity(entityId);
-        if (instanceIndex >= 0) return _instances[instanceIndex].Scene;
-        return null;
-    }
-
     public override void SubscribeToEvents()
     {
         base.SubscribeToEvents();
         Subscribe((ref ComponentRemovedEvent<SubScene> evt) =>
         {
-            Console.WriteLine($"Removed sub scene: {evt.Component.SceneIdentifier.Identifier}");
+            DiscardScene(evt.Component.Scene);
         });
-        Subscribe((ref ComponentAddedEvent<SubScene> evt) =>
-        {
-            Console.WriteLine($"Added sub scene: {evt.Component.SceneIdentifier.Identifier}");
-        });
-    }
-
-    private struct SubSceneInstance
-    {
-        public long EntityId;
-        public ResourceIdentifier SceneIdentifier;
-        public Scene Scene;
     }
 }

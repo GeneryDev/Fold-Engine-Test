@@ -242,11 +242,6 @@ public enum KeyModifiers
 
 public static class KeyModifiersExt
 {
-    public static bool Has(this KeyModifiers t, KeyModifiers mask)
-    {
-        return (t & mask) != 0;
-    }
-
     public static KeyModifiers GetKeyModifiers()
     {
         KeyboardState state = Keyboard.GetState();

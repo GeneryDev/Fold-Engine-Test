@@ -204,10 +204,10 @@ public class TextField : GuiElement, IInspectorField
 
         if (e.Character == '\b')
             Transactions.InsertTransaction(new DeletionEdit(this,
-                KeyModifiersExt.GetKeyModifiers().Has(KeyModifiers.Control)));
+                KeyModifiersExt.GetKeyModifiers().HasFlag(KeyModifiers.Control)));
         else if (e.Character == 127)
             Transactions.InsertTransaction(new DeletionEdit(this,
-                KeyModifiersExt.GetKeyModifiers().Has(KeyModifiers.Control), true));
+                KeyModifiersExt.GetKeyModifiers().HasFlag(KeyModifiers.Control), true));
         else
             Transactions.InsertTransaction(new InsertionEdit(new[] { e.Character }, this));
     }
