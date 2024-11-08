@@ -139,6 +139,19 @@ public class SubSceneSystem : GameSystem
         return null;
     }
 
+    public override void SubscribeToEvents()
+    {
+        base.SubscribeToEvents();
+        Subscribe((ref ComponentRemovedEvent<SubScene> evt) =>
+        {
+            Console.WriteLine($"Removed sub scene: {evt.Component.SceneIdentifier.Identifier}");
+        });
+        Subscribe((ref ComponentAddedEvent<SubScene> evt) =>
+        {
+            Console.WriteLine($"Added sub scene: {evt.Component.SceneIdentifier.Identifier}");
+        });
+    }
+
     private struct SubSceneInstance
     {
         public long EntityId;

@@ -164,8 +164,14 @@ public class ComponentSet<T> : ComponentSet where T : struct
                 _dsMarkedForRemoval.Remove((int)entityId);
                 Dense[Sparse[sparseIndex]].Component = default; //Reset component data
                 Dense[Sparse[sparseIndex]].EntityId = entityId;
-                componentRegistry.InitializeComponent(ref Dense[Sparse[sparseIndex]].Component, Scene, entityId);
-                return ref Dense[Sparse[sparseIndex]].Component;
+                ref var reclaimedComponent = ref Dense[Sparse[sparseIndex]].Component;
+                componentRegistry.InitializeComponent(ref reclaimedComponent, Scene, entityId);
+                Scene.Events.Invoke(new ComponentAddedEvent<T>()
+                {
+                    EntityId = entityId,
+                    Component = reclaimedComponent
+                });
+                return ref reclaimedComponent;
             }
 
             if (Dense[Sparse[sparseIndex]].EntityId == entityId)
@@ -183,13 +189,25 @@ public class ComponentSet<T> : ComponentSet where T : struct
             Dense[N - 1].ModifiedTimestamp = CurrentTimestamp;
             Dense[N - 1].EntityId = entityId;
             Dense[N - 1].Component = default;
-            componentRegistry.InitializeComponent(ref Dense[N - 1].Component, Scene, entityId);
-            return ref Dense[N - 1].Component;
+            ref var newComponent = ref Dense[N - 1].Component;
+            componentRegistry.InitializeComponent(ref newComponent, Scene, entityId);
+            
+            Scene.Events.Invoke(new ComponentAddedEvent<T>()
+            {
+                EntityId = entityId,
+                Component = newComponent
+            });
+            return ref newComponent;
         }
 
         //Have no space in dense. Use the backup set
         ref T component = ref BackupSet.Create(entityId);
         componentRegistry.InitializeComponent<T>(ref component, Scene, entityId);
+        Scene.Events.Invoke(new ComponentAddedEvent<T>()
+        {
+            EntityId = entityId,
+            Component = component
+        });
         return ref component;
     }
 
@@ -210,10 +228,22 @@ public class ComponentSet<T> : ComponentSet where T : struct
 
             //Sparse will remain pointing to a location in dense for purposes of iteration
             //Will be removed on flush
+            
+            Scene.Events.Invoke(new ComponentRemovedEvent<T>()
+            {
+                EntityId = entityId,
+                Component = Dense[Sparse[(int)entityId - MinId]].Component
+            });
         }
-        else
+        else if(BackupSet.Has(entityId))
         {
+            var component = BackupSet.Get(entityId);
             BackupSet.Remove(entityId);
+            Scene.Events.Invoke(new ComponentRemovedEvent<T>()
+            {
+                EntityId = entityId,
+                Component = component
+            });
         }
     }
 
