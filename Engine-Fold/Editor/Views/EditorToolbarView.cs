@@ -73,7 +73,7 @@ public class EditorToolbarView : EditorView
 
     private void Play(EditorEnvironment environment)
     {
-        environment.Scene.EditorComponents = null;
+        environment.Scene.CameraOverrides = null;
 
         var stream = new MemoryStream();
 
@@ -98,7 +98,7 @@ public class EditorToolbarView : EditorView
         loadOp.Close();
         loadOp.Dispose();
         _storedScene = null;
-        environment.Scene.EditorComponents = new EditorComponents(environment.EditingScene);
+        environment.Scene.CameraOverrides = new CameraOverrides(environment.EditingScene);
         environment.Scene.Paused = true;
     }
 }

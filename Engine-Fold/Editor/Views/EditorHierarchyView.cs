@@ -168,6 +168,8 @@ public class EditorHierarchyView : EditorView
     private void ShowEntityContextMenu(long id, Point point)
     {
         GuiPopupMenu contextMenu = ContentPanel.Environment.ContextMenu;
+        var editorEnvironment = ((EditorEnvironment)ContentPanel.Environment);
+        var editingScene = editorEnvironment.EditingScene;
 
         contextMenu.Show(point, m =>
         {
@@ -181,21 +183,21 @@ public class EditorHierarchyView : EditorView
             if (m.Button("Delete", 9).TextMargin(20).TextAlignment(-1).IsPressed())
             {
                 EntitiesToDelete.Clear();
-                if (ContentPanel.Environment.EditingScene.Components.HasComponent<Transform>(id))
-                    ContentPanel.Environment.EditingScene.Components.GetComponent<Transform>(id)
+                if (editingScene.Components.HasComponent<Transform>(id))
+                    editingScene.Components.GetComponent<Transform>(id)
                         .DumpHierarchy(EntitiesToDelete);
 
                 var transactions = new CompoundTransaction<EditorEnvironment>();
                 foreach (long entityId in EntitiesToDelete)
                     transactions.Append(() => new DeleteEntityTransaction(entityId));
 
-                ((EditorEnvironment)ContentPanel.Environment).TransactionManager.InsertTransaction(transactions);
+                editorEnvironment.TransactionManager.InsertTransaction(transactions);
             }
 
             m.Separator();
 
             if (m.Button("Create Child", 9).TextMargin(20).TextAlignment(-1).IsPressed())
-                ((EditorEnvironment)ContentPanel.Environment).TransactionManager.InsertTransaction(
+                editorEnvironment.TransactionManager.InsertTransaction(
                     new CreateEntityTransaction(id));
         }, 120);
     }
@@ -216,6 +218,7 @@ public class EntityHierarchy : Hierarchy<long>
     public override void Drop()
     {
         if (DragTargetId == -1) return;
+        var editingScene = ((EditorEnvironment)Environment).EditingScene;
         Console.WriteLine("Dropping: ");
 
         HierarchyDropMode dropMode;
@@ -236,11 +239,11 @@ public class EntityHierarchy : Hierarchy<long>
 
         var transactions = new CompoundTransaction<EditorEnvironment>();
 
-        var dragTargetEntity = new Entity(Environment.EditingScene, DragTargetId);
+        var dragTargetEntity = new Entity(editingScene, DragTargetId);
 
         foreach (long id in Selected)
         {
-            var selectedEntity = new Entity(Environment.EditingScene, id);
+            var selectedEntity = new Entity(editingScene, id);
             if (dragTargetEntity == selectedEntity || selectedEntity.IsAncestorOf(dragTargetEntity))
             {
                 Console.WriteLine("Cannot drag something into itself");
@@ -250,7 +253,7 @@ public class EntityHierarchy : Hierarchy<long>
 
         foreach (long id in Selected)
         {
-            var entity = new Entity(Environment.EditingScene, id);
+            var entity = new Entity(editingScene, id);
             var transaction = new ChangeEntityHierarchyTransaction(
                 id,
                 entity.Transform.ParentId,

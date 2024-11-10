@@ -34,7 +34,7 @@ public class Scene : Resource, ISelfSerializer
     private long _nextEntityId;
     private List<bool> _reclaimableIds;
 
-    public EditorComponents EditorComponents;
+    public CameraOverrides CameraOverrides;
 
     public bool Paused = false;
 
@@ -67,8 +67,8 @@ public class Scene : Resource, ISelfSerializer
     {
         get
         {
-            if (EditorComponents != null)
-                return ref EditorComponents.EditorTransform;
+            if (CameraOverrides != null)
+                return ref CameraOverrides.Transform;
             return ref Components.GetComponent<Transform>(MainCameraId);
         }
     }

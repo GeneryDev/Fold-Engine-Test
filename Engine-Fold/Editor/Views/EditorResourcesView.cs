@@ -42,7 +42,7 @@ public class EditorResourcesView : EditorView
             _main = new GuiPanel(ContentPanel.Environment) { MayScroll = true };
         }
 
-        Scene scene = ContentPanel.Environment.EditingScene;
+        var editingScene = ((EditorEnvironment)ContentPanel.Environment).EditingScene;
 
         ShowRuntimeResources = ContentPanel.Element<Checkbox>().Value(ShowRuntimeResources).IsChecked();
         ContentPanel.Label("Show Runtime", 9).TextAlignment(-1);
@@ -60,9 +60,9 @@ public class EditorResourcesView : EditorView
             _sidebar.Bounds.Height);
         _main.Bounds.Width = ContentPanel.Bounds.X + ContentPanel.Bounds.Width - _main.Bounds.X;
 
-        foreach (Type type in scene.Core.RegistryUnit.Resources.GetAllTypes())
+        foreach (Type type in editingScene.Core.RegistryUnit.Resources.GetAllTypes())
         {
-            ResourceAttribute resourceAttribute = scene.Core.RegistryUnit.Resources.AttributeOf(type);
+            ResourceAttribute resourceAttribute = editingScene.Core.RegistryUnit.Resources.AttributeOf(type);
 
             HierarchyElement<Type> element = (HierarchyElement<Type>)_sidebar.Element<HierarchyElement<Type>>()
                     .Hierarchy(_typeHierarchy)
@@ -87,14 +87,14 @@ public class EditorResourcesView : EditorView
             Type selectedType = _typeHierarchy.Selected[0];
             if (ShowRuntimeResources)
             {
-                foreach (Resource resource in scene.Resources.GetAll(selectedType))
+                foreach (Resource resource in editingScene.Resources.GetAll(selectedType))
                 {
                     string hierarchyId = RuntimePrefix + resource.Identifier;
                     CreateHierarchyElement(selectedType, resource.Identifier, hierarchyId, resource);
                 }
             }
 
-            foreach (string resourceIdentifier in scene.Core.ResourceIndex.GetIdentifiers(
+            foreach (string resourceIdentifier in editingScene.Core.ResourceIndex.GetIdentifiers(
                          selectedType))
             {
                 CreateHierarchyElement(selectedType, resourceIdentifier);
@@ -133,7 +133,7 @@ public class EditorResourcesView : EditorView
                     {
                         editorEnvironment.Scene.Systems.Get<EditorBase>().EditingEntity.Clear();
                         editorEnvironment.GetView<EditorInspectorView>()
-                            .SetObject(ContentPanel.Environment.EditingScene.Resources.Get(type, ref identifier));
+                            .SetObject(editorEnvironment.EditingScene.Resources.Get(type, ref identifier));
                         editorEnvironment.SwitchToView<EditorInspectorView>();
                     }
 

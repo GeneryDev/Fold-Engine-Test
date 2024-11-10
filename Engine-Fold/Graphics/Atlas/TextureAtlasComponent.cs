@@ -1,4 +1,5 @@
 ﻿using FoldEngine.Components;
+using FoldEngine.Editor.Gui;
 using FoldEngine.Editor.Inspector;
 using FoldEngine.Gui;
 using FoldEngine.Resources;
@@ -28,7 +29,9 @@ public class TextureAtlasComponentInspector : CustomInspector<TextureAtlasCompon
     {
         if (obj.Generated)
         {
-            var texture = panel.Environment.EditingScene.Resources.Get<Texture>(ref obj.AtlasIdentifier);
+            var editorEnvironment = panel.Environment as EditorEnvironment;
+            var scene = editorEnvironment?.Scene ?? panel.Environment.Scene;
+            var texture = scene.Resources.Get<Texture>(ref obj.AtlasIdentifier);
             panel.Element<GuiLabel>().Text("Generated").FontSize(9).TextAlignment(-1);
             panel.Element<GuiLabel>().Text("Dimensions: " + texture.Width + " x " + texture.Height).FontSize(9)
                 .TextAlignment(-1);

@@ -13,7 +13,7 @@ public static class SceneEditor
 {
     public static void AttachEditor(Scene scene)
     {
-        scene.EditorComponents = new EditorComponents(scene);
+        scene.CameraOverrides = new CameraOverrides(scene);
 
         scene.Core.CommandQueue.Enqueue(new SetWindowTitleCommand(scene.Name + " - Scene Editor"));
         scene.Paused = true;
@@ -27,7 +27,7 @@ public static class SceneEditor
 
     public static void DetachEditor(Scene scene)
     {
-        scene.EditorComponents = null;
+        scene.CameraOverrides = null;
 
         scene.Core.CommandQueue.Enqueue(new SetWindowTitleCommand(scene.Name));
         scene.Paused = false;

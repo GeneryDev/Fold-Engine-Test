@@ -27,6 +27,8 @@ public class EditorEnvironment : GuiEnvironment
     public List<EditorView> AllViews = new List<EditorView>();
     public EditorTool ForcedTool;
     public EditorTool SelectedTool;
+    
+    public Scene EditingScene => Scene;
 
     public EditorEnvironment(Scene scene) : base(scene)
     {

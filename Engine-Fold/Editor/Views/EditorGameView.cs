@@ -63,9 +63,9 @@ public class GameViewPanel : GuiPanel
 
     public override void Scroll(int dir)
     {
-        if (Environment.Scene.EditorComponents != null)
+        if (Environment.Scene.CameraOverrides != null)
         {
-            ref Transform cameraTransform = ref Environment.Scene.EditorComponents.EditorTransform;
+            ref Transform cameraTransform = ref Environment.Scene.CameraOverrides.Transform;
 
             IRenderingLayer worldLayer = Environment.Core.RenderingUnit.WorldLayer;
             Vector2 cameraRelativePos =
@@ -88,9 +88,9 @@ public class GameViewPanel : GuiPanel
             float speed = 250f;
             if (controls.Get<ButtonAction>("editor.movement.faster").Down) speed *= 4;
 
-            speed *= Environment.Scene.EditorComponents.EditorTransform.LocalScale.X;
+            speed *= Environment.Scene.CameraOverrides.Transform.LocalScale.X;
 
-            Environment.Scene.EditorComponents.EditorTransform.Position += move * speed * Time.DeltaTime;
+            Environment.Scene.CameraOverrides.Transform.Position += move * speed * Time.DeltaTime;
         }
 
         ((EditorEnvironment)Environment).ActiveTool?.OnInput(controls);

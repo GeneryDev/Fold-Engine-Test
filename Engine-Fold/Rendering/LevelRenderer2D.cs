@@ -30,10 +30,10 @@ public class LevelRenderer2D : GameSystem
 
         _cameras.Reset();
 
-        if (Scene.EditorComponents != null)
+        if (Scene.CameraOverrides != null)
         {
             anyCamera = true;
-            RenderCamera(Scene.EditorComponents.EditorCamera, Scene.EditorComponents.EditorTransform, renderer,
+            RenderCamera(Scene.CameraOverrides.Camera, Scene.CameraOverrides.Transform, renderer,
                 false);
         }
         else

@@ -20,7 +20,7 @@ public abstract class EditorTool
 
     protected Scene Scene => Environment.Scene;
     public IGameCore Core => Scene.Core;
-    public Scene EditingScene => Scene;
+    public Scene EditingScene => Environment.EditingScene;
 
     public abstract void OnInput(ControlScheme controls);
     public abstract void OnMousePressed(ref MouseEvent e);

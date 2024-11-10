@@ -98,14 +98,15 @@ public class SystemHierarchy : Hierarchy<Type>
     public override void Drop()
     {
         if (DragTargetId == null) return;
+        var editingScene = ((EditorEnvironment)Environment).EditingScene;
 
         var transactions = new CompoundTransaction<EditorEnvironment>();
 
         foreach (Type sysType in Selected)
         {
-            int fromIndex = Environment.EditingScene.Systems.GetSystemIndex(sysType);
+            int fromIndex = editingScene.Systems.GetSystemIndex(sysType);
 
-            int toIndex = Environment.EditingScene.Systems.GetSystemIndex(DragTargetId);
+            int toIndex = editingScene.Systems.GetSystemIndex(DragTargetId);
             if (DragRelative == 1) toIndex++;
 
             if (toIndex == fromIndex) continue;

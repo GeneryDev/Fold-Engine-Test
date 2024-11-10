@@ -36,7 +36,6 @@ public abstract class GuiEnvironment : IDisposable
     public Scene Scene;
     public IGameCore Core => Scene.Core;
     public ResourceCollections EditorResources => Scene.Resources;
-    public Scene EditingScene => Scene;
 
 
     public GuiEnvironment(Scene scene)
