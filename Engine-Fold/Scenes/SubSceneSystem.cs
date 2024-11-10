@@ -26,6 +26,8 @@ public class SubSceneSystem : GameSystem
             ref var instance = ref _subSceneComponents.GetComponent();
             if(instance.ProcessInputs && !_subSceneComponents.HasCoComponent<InactiveComponent>())
                 instance.Scene?.Input();
+            else
+                instance.Scene?.Flush();
         }
     }
 
@@ -37,6 +39,8 @@ public class SubSceneSystem : GameSystem
             ref var instance = ref _subSceneComponents.GetComponent();
             if(instance.Update && !_subSceneComponents.HasCoComponent<InactiveComponent>())
                 instance.Scene?.Update();
+            else
+                instance.Scene?.Flush();
         }
     }
 
@@ -77,6 +81,8 @@ public class SubSceneSystem : GameSystem
             ref var instance = ref _subSceneComponents.GetComponent();
             if(instance.Render && !_subSceneComponents.HasCoComponent<InactiveComponent>())
                 instance.Scene?.Render(renderer);
+            else
+                instance.Scene?.Flush();
         }
     }
 

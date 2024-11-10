@@ -94,11 +94,6 @@ public class ComponentIterator<T> : ComponentIterator where T : struct
     private bool _finished;
 
     /// <summary>
-    ///     The game timestamp at which this iterator started iterating through the scene's components
-    /// </summary>
-    private int _iterationTimestamp;
-
-    /// <summary>
     ///     The ComponentSet of the Scene that contains the components of type T. May be null if there are no components of
     ///     that type in the scene.
     /// </summary>
@@ -130,7 +125,6 @@ public class ComponentIterator<T> : ComponentIterator where T : struct
         if (_set == null && _scene.Components.Sets.ContainsKey(typeof(T)))
             _set = (ComponentSet<T>)_scene.Components.Sets[typeof(T)];
 
-        if (_set != null) _iterationTimestamp = _set.CurrentTimestamp;
         _started = false;
         _finished = false;
     }
@@ -151,7 +145,7 @@ public class ComponentIterator<T> : ComponentIterator where T : struct
                 _sparseIndex++;
             } while (_sparseIndex < _set.Sparse.Length
                      && (_set.Sparse[_sparseIndex] == -1
-                         || _set.Dense[_set.Sparse[_sparseIndex]].ModifiedTimestamp == _iterationTimestamp
+                         || !_set.Dense[_set.Sparse[_sparseIndex]].Status.HasFlag(ComponentStatus.Enumerable)
                          || (!_flags.HasFlag(IterationFlags.IncludeInactive) &&
                              _scene.Components.HasComponent<InactiveComponent>(_set.Dense[_set.Sparse[_sparseIndex]]
                                  .EntityId))

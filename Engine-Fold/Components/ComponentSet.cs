@@ -69,7 +69,7 @@ public class ComponentSet<T> : ComponentSet where T : struct
         if ((int)entityId < MinId || (int)entityId >= MaxId || Sparse[(int)entityId - MinId] == -1)
             return ref BackupSet.Get(entityId);
 
-        if (Dense[Sparse[(int)entityId - MinId]].ModifiedTimestamp <= CurrentTimestamp
+        if (Dense[Sparse[(int)entityId - MinId]].Status.HasFlag(ComponentStatus.Retrievable)
             && Dense[Sparse[(int)entityId - MinId]].EntityId == entityId)
             return ref Dense[Sparse[(int)entityId - MinId]].Component;
         throw new ComponentRegistryException($"Component {typeof(T)} not found for entity ID {entityId}");
@@ -80,7 +80,7 @@ public class ComponentSet<T> : ComponentSet where T : struct
         if ((int)entityId < MinId || (int)entityId >= MaxId || Sparse[(int)entityId - MinId] == -1)
             return BackupSet.Has(entityId);
 
-        return Dense[Sparse[(int)entityId - MinId]].ModifiedTimestamp <= CurrentTimestamp
+        return Dense[Sparse[(int)entityId - MinId]].Status.HasFlag(ComponentStatus.Retrievable)
                && Dense[Sparse[(int)entityId - MinId]].EntityId == entityId;
     }
 
@@ -89,7 +89,7 @@ public class ComponentSet<T> : ComponentSet where T : struct
         if (entityId < MinId || entityId >= MaxId || Sparse[entityId - MinId] == -1)
             return BackupSet.Has(entityId);
 
-        return Dense[Sparse[entityId - MinId]].ModifiedTimestamp <= CurrentTimestamp;
+        return Dense[Sparse[entityId - MinId]].Status.HasFlag(ComponentStatus.Retrievable);
     }
 
     public override void CreateFor(long entityId)
@@ -156,11 +156,9 @@ public class ComponentSet<T> : ComponentSet where T : struct
         int sparseIndex = (int)entityId - MinId;
         if (Sparse[sparseIndex] >= 0) //Is in the dense array
         {
-            if (Dense[Sparse[sparseIndex]].ModifiedTimestamp > CurrentTimestamp) //Marked for removal, reclaim it
+            if (Dense[Sparse[sparseIndex]].Status.HasFlag(ComponentStatus.MarkedForRemoval)) //Marked for removal, reclaim it
             {
-                Dense[Sparse[sparseIndex]].ModifiedTimestamp -= 2; //Subtract 2 because:
-                //if ModifiedTimestamp == CurrentTimestamp + 1: it was added prior to this tick and thus should be enumerated
-                //if ModifiedTimestamp == CurrentTimestamp + 2: it was added THIS tick and thus should NOT be enumerated
+                Dense[Sparse[sparseIndex]].Status = ComponentStatus.Active;
                 _dsMarkedForRemoval.Remove((int)entityId);
                 Dense[Sparse[sparseIndex]].Component = default; //Reset component data
                 Dense[Sparse[sparseIndex]].EntityId = entityId;
@@ -186,7 +184,7 @@ public class ComponentSet<T> : ComponentSet where T : struct
             //Have space in dense
             Sparse[sparseIndex] = N;
             N++;
-            Dense[N - 1].ModifiedTimestamp = CurrentTimestamp;
+            Dense[N - 1].Status = ComponentStatus.Active;
             Dense[N - 1].EntityId = entityId;
             Dense[N - 1].Component = default;
             ref var newComponent = ref Dense[N - 1].Component;
@@ -216,16 +214,14 @@ public class ComponentSet<T> : ComponentSet where T : struct
         if ((int)entityId >= MinId && (int)entityId < MaxId && Sparse[(int)entityId - MinId] != -1)
         {
             _dsMarkedForRemoval.Add((int)entityId);
-            int timestampOffset = 1;
-            if (Dense[Sparse[(int)entityId - MinId]].ModifiedTimestamp == CurrentTimestamp
+            ComponentStatus newStatus = ComponentStatus.Inactive;
+            if (Dense[Sparse[(int)entityId - MinId]].Status == ComponentStatus.JustNowAdded
                ) //This component was added THIS tick and is being removed the same tick.
                 //In this case, set its "modified timestamp" to 2 ticks from now instead of 1.
                 //This has a special meaning when the component wants to be re-added.
-                timestampOffset = 2;
+                newStatus = ComponentStatus.Inactive;
 
-            Dense[Sparse[(int)entityId - MinId]].ModifiedTimestamp =
-                CurrentTimestamp + timestampOffset; //Mark as "removed" so Get<>() will skip it but iterators won't.
-            // TODO re-evaluate this behavior. If possible, add an alternative for removing entities/components that's deferred. 
+            Dense[Sparse[(int)entityId - MinId]].Status = newStatus; //Mark as "removed" so Get<>() will skip it but iterators won't.
 
             //Sparse will remain pointing to a location in dense for purposes of iteration
             //Will be removed on flush
@@ -286,13 +282,18 @@ public class ComponentSet<T> : ComponentSet where T : struct
         {
             Dense[N].Component = queued.Component;
             Dense[N].EntityId = queued.EntityId;
-            Dense[N].ModifiedTimestamp = CurrentTimestamp;
+            Dense[N].Status = ComponentStatus.Active;
             Sparse[(int)queued.EntityId - MinId] = N;
             N++;
         }
 
         BackupSet.Clear();
 
+        // Set all components' status to active
+        for (int denseIndex = 0; denseIndex < N; denseIndex++)
+        {
+            Dense[denseIndex].Status = ComponentStatus.Active;
+        }
 
         CurrentTimestamp++;
         if (CurrentTimestamp < 0)
@@ -357,7 +358,7 @@ public class ComponentSet<T> : ComponentSet where T : struct
     public void DebugPrint()
     {
         Console.WriteLine("Component set for type " + typeof(T) + ":");
-        Console.WriteLine("dense: " + string.Join(",", Dense.Select(d => d.ToString(CurrentTimestamp))));
+        Console.WriteLine("dense: " + string.Join(",", Dense.Select(d => d.ToString())));
         Console.WriteLine("sparse: " + string.Join(",", Sparse.Select(a => a == -1 ? "_" : a.ToString())));
         Console.WriteLine($"minId: {MinId}");
         Console.WriteLine($"maxId: {MaxId}");
@@ -479,20 +480,27 @@ internal class QueuedComponent<T>
 
 public struct ComponentSetEntry<T> where T : struct
 {
-    internal int ModifiedTimestamp;
+    internal ComponentStatus Status;
     public long EntityId;
 
     public T Component;
 
     public override string ToString()
     {
-        return $"{EntityId}:[{Component}]";
+        return $"{EntityId}:{Status}[{Component}]";
     }
+}
 
-    internal string ToString(int currentTimestamp)
-    {
-        return $"{EntityId}:{ModifiedTimestamp - currentTimestamp}[{Component}]";
-    }
+[Flags]
+internal enum ComponentStatus
+{
+    Retrievable = 1,
+    Enumerable = 2,
+    MarkedForRemoval = 4,
+    
+    Inactive = 0,
+    JustNowAdded = Retrievable,
+    Active = Retrievable | Enumerable
 }
 
 public class ComponentRegistryException : Exception
