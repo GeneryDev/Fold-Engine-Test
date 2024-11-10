@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Reflection;
 using FoldEngine.Editor.Gui;
+using FoldEngine.Scenes;
 using FoldEngine.Util.Transactions;
 
 namespace FoldEngine.Editor.Transactions;
 
-public abstract class SetFieldTransaction : Transaction<EditorEnvironment>
+public abstract class SetFieldTransaction : Transaction<Scene>
 {
     public FieldInfo FieldInfo;
     public object NewValue;
@@ -19,15 +20,15 @@ public class SetComponentFieldTransaction : SetFieldTransaction
 
     public long EntityId;
 
-    public override bool Redo(EditorEnvironment target)
+    public override bool Redo(Scene target)
     {
-        target.EditingScene.Components.Sets[ComponentType].SetFieldValue(EntityId, FieldInfo, NewValue);
+        target.Components.Sets[ComponentType].SetFieldValue(EntityId, FieldInfo, NewValue);
         return OldValue != NewValue;
     }
 
-    public override bool Undo(EditorEnvironment target)
+    public override bool Undo(Scene target)
     {
-        target.EditingScene.Components.Sets[ComponentType].SetFieldValue(EntityId, FieldInfo, OldValue);
+        target.Components.Sets[ComponentType].SetFieldValue(EntityId, FieldInfo, OldValue);
         return OldValue != NewValue;
     }
 }
@@ -36,13 +37,13 @@ public class SetObjectFieldTransaction : SetFieldTransaction
 {
     public object Parent;
 
-    public override bool Redo(EditorEnvironment target)
+    public override bool Redo(Scene target)
     {
         FieldInfo.SetValue(Parent, NewValue);
         return OldValue != NewValue;
     }
 
-    public override bool Undo(EditorEnvironment target)
+    public override bool Undo(Scene target)
     {
         FieldInfo.SetValue(Parent, OldValue);
         return OldValue != NewValue;

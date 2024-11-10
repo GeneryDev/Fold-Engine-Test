@@ -1,10 +1,11 @@
 ﻿using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
+using FoldEngine.Scenes;
 using FoldEngine.Util.Transactions;
 
 namespace FoldEngine.Editor.Transactions;
 
-public class CreateEntityTransaction : Transaction<EditorEnvironment>
+public class CreateEntityTransaction : Transaction<Scene>
 {
     private long _newEntityId = -1;
 
@@ -16,38 +17,38 @@ public class CreateEntityTransaction : Transaction<EditorEnvironment>
     }
 
 
-    public override bool Redo(EditorEnvironment target)
+    public override bool Redo(Scene target)
     {
         if (_newEntityId == -1)
         {
-            _newEntityId = target.EditingScene.CreateEntityId("Unnamed Entity");
+            _newEntityId = target.CreateEntityId("Unnamed Entity");
         }
         else
         {
-            if (!target.EditingScene.ReclaimAndCreate(_newEntityId, "Unnamed Entity"))
+            if (!target.ReclaimAndCreate(_newEntityId, "Unnamed Entity"))
             {
                 return true;
             }
         }
 
-        if (_parentEntityId != -1 && target.EditingScene.Components.HasComponent<Transform>(_parentEntityId))
+        if (_parentEntityId != -1 && target.Components.HasComponent<Transform>(_parentEntityId))
         {
-            target.EditingScene.Components.GetComponent<Transform>(_newEntityId).SetParent(_parentEntityId);
+            target.Components.GetComponent<Transform>(_newEntityId).SetParent(_parentEntityId);
         }
 
         return true;
     }
 
-    public override bool Undo(EditorEnvironment target)
+    public override bool Undo(Scene target)
     {
-        if (_parentEntityId != -1 && target.EditingScene.Components.HasComponent<Transform>(_parentEntityId))
+        if (_parentEntityId != -1 && target.Components.HasComponent<Transform>(_parentEntityId))
         {
-            target.EditingScene.Components.GetComponent<Transform>(_parentEntityId).RemoveChild(_newEntityId);
+            target.Components.GetComponent<Transform>(_parentEntityId).RemoveChild(_newEntityId);
         }
 
-        if (target.EditingScene.Components.HasComponent<Transform>(_newEntityId))
+        if (target.Components.HasComponent<Transform>(_newEntityId))
         {
-            target.EditingScene.DeleteEntity(_newEntityId, true);
+            target.DeleteEntity(_newEntityId, true);
         }
         else
         {

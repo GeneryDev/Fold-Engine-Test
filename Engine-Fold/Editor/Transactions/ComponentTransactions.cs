@@ -9,7 +9,7 @@ using FoldEngine.Util.Transactions;
 
 namespace FoldEngine.Editor.Transactions;
 
-public class AddComponentTransaction : Transaction<EditorEnvironment>
+public class AddComponentTransaction : Transaction<Scene>
 {
     private readonly long _entityId;
 
@@ -21,21 +21,21 @@ public class AddComponentTransaction : Transaction<EditorEnvironment>
         _entityId = entityId;
     }
 
-    public override bool Redo(EditorEnvironment target)
+    public override bool Redo(Scene target)
     {
-        if (target.EditingScene.Components.HasComponent<Transform>(_entityId)
-            && !target.EditingScene.Components.HasComponent(_type, _entityId))
-            target.EditingScene.Components.CreateComponent(_type, _entityId);
+        if (target.Components.HasComponent<Transform>(_entityId)
+            && !target.Components.HasComponent(_type, _entityId))
+            target.Components.CreateComponent(_type, _entityId);
         else
             SceneEditor.ReportEditorGameConflict();
 
         return true;
     }
 
-    public override bool Undo(EditorEnvironment target)
+    public override bool Undo(Scene target)
     {
-        if (target.EditingScene.Components.HasComponent(_type, _entityId))
-            target.EditingScene.Components.RemoveComponent(_type, _entityId);
+        if (target.Components.HasComponent(_type, _entityId))
+            target.Components.RemoveComponent(_type, _entityId);
         else
             SceneEditor.ReportEditorGameConflict();
 
@@ -43,7 +43,7 @@ public class AddComponentTransaction : Transaction<EditorEnvironment>
     }
 }
 
-public class RemoveComponentTransaction : Transaction<EditorEnvironment>
+public class RemoveComponentTransaction : Transaction<Scene>
 {
     private readonly long _entityId;
 
@@ -57,7 +57,7 @@ public class RemoveComponentTransaction : Transaction<EditorEnvironment>
         _entityId = entityId;
     }
 
-    public override bool Redo(EditorEnvironment target)
+    public override bool Redo(Scene target)
     {
         if (_serializedData == null)
         {
@@ -67,31 +67,31 @@ public class RemoveComponentTransaction : Transaction<EditorEnvironment>
             saveOp.Options.Set(SerializeOnlyEntities.Instance, new List<long> { _entityId });
             saveOp.Options.Set(SerializeOnlyComponents.Instance, new List<Type> { _type });
 
-            target.EditingScene.Serialize(saveOp);
+            target.Serialize(saveOp);
 
             saveOp.Close();
             _serializedData = stream.GetBuffer();
             saveOp.Dispose();
         }
 
-        if (target.EditingScene.Components.HasComponent(_type, _entityId))
-            target.EditingScene.Components.RemoveComponent(_type, _entityId);
+        if (target.Components.HasComponent(_type, _entityId))
+            target.Components.RemoveComponent(_type, _entityId);
         else
             SceneEditor.ReportEditorGameConflict();
 
         return true;
     }
 
-    public override bool Undo(EditorEnvironment target)
+    public override bool Undo(Scene target)
     {
         if (_serializedData == null) throw new InvalidOperationException("Cannot call Undo before Redo");
 
-        if (target.EditingScene.Components.HasComponent<Transform>(_entityId)
-            && !target.EditingScene.Components.HasComponent(_type, _entityId))
+        if (target.Components.HasComponent<Transform>(_entityId)
+            && !target.Components.HasComponent(_type, _entityId))
         {
             var loadOp = new LoadOperation(new MemoryStream(_serializedData));
 
-            target.EditingScene.Deserialize(loadOp);
+            target.Deserialize(loadOp);
 
             loadOp.Close();
             loadOp.Dispose();

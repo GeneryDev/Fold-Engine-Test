@@ -1,10 +1,11 @@
 ﻿using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
+using FoldEngine.Scenes;
 using FoldEngine.Util.Transactions;
 
 namespace FoldEngine.Editor.Transactions;
 
-public class SetEntityTransformTransaction : Transaction<EditorEnvironment>
+public class SetEntityTransformTransaction : Transaction<Scene>
 {
     private Transform _after;
     private readonly Transform _before;
@@ -21,9 +22,9 @@ public class SetEntityTransformTransaction : Transaction<EditorEnvironment>
         _after = after;
     }
 
-    public override bool Redo(EditorEnvironment target)
+    public override bool Redo(Scene target)
     {
-        ref Transform targetTransform = ref target.EditingScene.Components.GetComponent<Transform>(_entityId);
+        ref Transform targetTransform = ref target.Components.GetComponent<Transform>(_entityId);
 
         bool any = false;
 
@@ -48,9 +49,9 @@ public class SetEntityTransformTransaction : Transaction<EditorEnvironment>
         return any;
     }
 
-    public override bool Undo(EditorEnvironment target)
+    public override bool Undo(Scene target)
     {
-        ref Transform targetTransform = ref target.EditingScene.Components.GetComponent<Transform>(_entityId);
+        ref Transform targetTransform = ref target.Components.GetComponent<Transform>(_entityId);
 
         bool any = false;
 
@@ -75,7 +76,7 @@ public class SetEntityTransformTransaction : Transaction<EditorEnvironment>
         return any;
     }
 
-    public override bool RedoOnInsert(EditorEnvironment target)
+    public override bool RedoOnInsert(Scene target)
     {
         return true;
     }

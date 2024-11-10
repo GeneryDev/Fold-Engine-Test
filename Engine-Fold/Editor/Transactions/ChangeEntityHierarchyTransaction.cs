@@ -7,7 +7,7 @@ using FoldEngine.Util.Transactions;
 
 namespace FoldEngine.Editor.Transactions;
 
-public class ChangeEntityHierarchyTransaction : Transaction<EditorEnvironment>
+public class ChangeEntityHierarchyTransaction : Transaction<Scene>
 {
     private readonly long _entityId = -1;
 
@@ -35,9 +35,9 @@ public class ChangeEntityHierarchyTransaction : Transaction<EditorEnvironment>
         _snapshot = snapshot;
     }
 
-    public override bool Redo(EditorEnvironment target)
+    public override bool Redo(Scene target)
     {
-        var entity = new Entity(target.EditingScene, _entityId);
+        var entity = new Entity(target, _entityId);
 
         UnlinkFromHierarchy(entity);
 
@@ -55,9 +55,9 @@ public class ChangeEntityHierarchyTransaction : Transaction<EditorEnvironment>
         return true;
     }
 
-    public override bool Undo(EditorEnvironment target)
+    public override bool Undo(Scene target)
     {
-        var entity = new Entity(target.EditingScene, _entityId);
+        var entity = new Entity(target, _entityId);
 
         UnlinkFromHierarchy(entity);
 

@@ -7,6 +7,7 @@ using FoldEngine.Graphics;
 using FoldEngine.Gui;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
+using FoldEngine.Scenes;
 using FoldEngine.Systems;
 using FoldEngine.Util.Transactions;
 using Microsoft.Xna.Framework;
@@ -100,7 +101,7 @@ public class SystemHierarchy : Hierarchy<Type>
         if (DragTargetId == null) return;
         var editingScene = ((EditorEnvironment)Environment).EditingScene;
 
-        var transactions = new CompoundTransaction<EditorEnvironment>();
+        var transactions = new CompoundTransaction<Scene>();
 
         foreach (Type sysType in Selected)
         {

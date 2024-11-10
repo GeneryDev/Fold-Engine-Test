@@ -1,11 +1,12 @@
 ﻿using System;
 using FoldEngine.Commands;
 using FoldEngine.Editor.Gui;
+using FoldEngine.Scenes;
 using FoldEngine.Util.Transactions;
 
 namespace FoldEngine.Editor.Transactions;
 
-public class ChangeSystemOrderTransaction : Transaction<EditorEnvironment>
+public class ChangeSystemOrderTransaction : Transaction<Scene>
 {
     private Type _sysType;
     private int _fromIndex;
@@ -18,11 +19,11 @@ public class ChangeSystemOrderTransaction : Transaction<EditorEnvironment>
         this._toIndex = toIndex;
     }
 
-    public override bool Redo(EditorEnvironment target)
+    public override bool Redo(Scene target)
     {
-        if (target.EditingScene.Systems.Get(_sysType) != null)
+        if (target.Systems.Get(_sysType) != null)
         {
-            target.EditingScene.Core.CommandQueue.Enqueue(new ChangeSystemOrderCommand(target.EditingScene, _sysType, _toIndex));
+            target.Core.CommandQueue.Enqueue(new ChangeSystemOrderCommand(target, _sysType, _toIndex));
         }
         else
         {
@@ -32,11 +33,11 @@ public class ChangeSystemOrderTransaction : Transaction<EditorEnvironment>
         return true;
     }
 
-    public override bool Undo(EditorEnvironment target)
+    public override bool Undo(Scene target)
     {
-        if (target.EditingScene.Systems.Get(_sysType) != null)
+        if (target.Systems.Get(_sysType) != null)
         {
-            target.EditingScene.Core.CommandQueue.Enqueue(new ChangeSystemOrderCommand(target.EditingScene, _sysType, _fromIndex));
+            target.Core.CommandQueue.Enqueue(new ChangeSystemOrderCommand(target, _sysType, _fromIndex));
         }
         else
         {

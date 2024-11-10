@@ -23,7 +23,7 @@ public class EditorEnvironment : GuiEnvironment
 
     public readonly List<EditorTool> Tools = new List<EditorTool>();
 
-    public readonly TransactionManager<EditorEnvironment> TransactionManager;
+    public readonly TransactionManager<Scene> TransactionManager;
     public List<EditorView> AllViews = new List<EditorView>();
     public EditorTool ForcedTool;
     public EditorTool SelectedTool;
@@ -32,7 +32,7 @@ public class EditorEnvironment : GuiEnvironment
 
     public EditorEnvironment(Scene scene) : base(scene)
     {
-        TransactionManager = new TransactionManager<EditorEnvironment>(this);
+        TransactionManager = new TransactionManager<Scene>(scene); // TODO change to editing scene
 
         NorthPanel = new BorderPanel(this, -Vector2.UnitY);
         SouthPanel = new BorderPanel(this, Vector2.UnitY);

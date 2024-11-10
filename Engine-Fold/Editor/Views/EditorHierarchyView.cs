@@ -187,7 +187,7 @@ public class EditorHierarchyView : EditorView
                     editingScene.Components.GetComponent<Transform>(id)
                         .DumpHierarchy(EntitiesToDelete);
 
-                var transactions = new CompoundTransaction<EditorEnvironment>();
+                var transactions = new CompoundTransaction<Scene>();
                 foreach (long entityId in EntitiesToDelete)
                     transactions.Append(() => new DeleteEntityTransaction(entityId));
 
@@ -237,7 +237,7 @@ public class EntityHierarchy : Hierarchy<long>
                 throw new InvalidOperationException($"DragRelative can only be -1, 0 or 1, was {DragRelative}");
         }
 
-        var transactions = new CompoundTransaction<EditorEnvironment>();
+        var transactions = new CompoundTransaction<Scene>();
 
         var dragTargetEntity = new Entity(editingScene, DragTargetId);
 
