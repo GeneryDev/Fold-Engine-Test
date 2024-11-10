@@ -15,6 +15,7 @@ public class SystemMap : ISelfSerializer
     private readonly List<GameSystem> _inputSystems = new List<GameSystem>();
     private readonly Scene _owner;
 
+    private bool _queueModifications = false;
     private readonly Queue<GameSystem> _queuedToAdd = new Queue<GameSystem>();
     private readonly Queue<GameSystem> _queuedToRemove = new Queue<GameSystem>();
     private readonly List<GameSystem> _renderSystems = new List<GameSystem>();
@@ -105,7 +106,11 @@ public class SystemMap : ISelfSerializer
 
     public void Add<T>() where T : GameSystem, new()
     {
-        _queuedToAdd.Enqueue(new T());
+        var newSys = new T();
+        if(_queueModifications)
+            _queuedToAdd.Enqueue(newSys);
+        else
+            AddDirectly(newSys);
     }
 
     public void Add(GameSystem sys)
@@ -115,7 +120,10 @@ public class SystemMap : ISelfSerializer
 
     public void Remove(GameSystem sys)
     {
-        _queuedToRemove.Enqueue(sys);
+        if(_queueModifications)
+            _queuedToRemove.Enqueue(sys);
+        else
+            RemoveDirectly(sys);
     }
 
     public void Remove<T>() where T : GameSystem, new()
@@ -179,16 +187,19 @@ public class SystemMap : ISelfSerializer
 
     internal void InvokeInput()
     {
+        _queueModifications = true;
         foreach (GameSystem sys in _inputSystems)
             if (!_owner.Paused || sys.RunWhenPaused)
             {
                 sys.OnInput();
                 _owner.Events.FlushAfterSystem();
             }
+        _queueModifications = false;
     }
 
     internal void InvokeUpdate()
     {
+        _queueModifications = true;
         foreach (GameSystem sys in _updateSystems)
             if (!_owner.Paused || sys.RunWhenPaused)
             {
@@ -196,6 +207,7 @@ public class SystemMap : ISelfSerializer
                 _owner.Events.FlushAfterSystem();
             }
 
+        _queueModifications = false;
         _owner.Events.FlushEnd();
     }
 
@@ -204,12 +216,14 @@ public class SystemMap : ISelfSerializer
         Accumulator += Time.DeltaTime;
         while (Accumulator >= Time.FixedDeltaTime)
         {
+            _queueModifications = true;
             foreach (GameSystem sys in _fixedUpdateSystems)
                 if (!_owner.Paused || sys.RunWhenPaused)
                 {
                     sys.OnFixedUpdate();
                     _owner.Events.FlushAfterSystem();
                 }
+            _queueModifications = false;
 
             Accumulator -= Time.FixedDeltaTime;
 
@@ -219,18 +233,22 @@ public class SystemMap : ISelfSerializer
 
     internal void InvokeRender(IRenderingUnit renderer)
     {
+        _queueModifications = true;
         foreach (GameSystem sys in _renderSystems)
             if (!_owner.Paused || sys.RunWhenPaused)
             {
                 sys.OnRender(renderer);
                 _owner.Events.FlushAfterSystem();
             }
+        _queueModifications = false;
     }
 
     internal void PollResources()
     {
+        _queueModifications = true;
         foreach (GameSystem sys in _all)
             sys.PollResources();
+        _queueModifications = false;
     }
 
     public T Get<T>() where T : GameSystem
@@ -273,5 +291,15 @@ public class SystemMap : ISelfSerializer
         _all.Remove(sys);
         _all.Insert(Math.Max(0, Math.Min(toIndex, _all.Count)), sys);
         UpdateProcessingGroups();
+        ResubscribeAll();
+    }
+
+    private void ResubscribeAll()
+    {
+        foreach (GameSystem sys in _all)
+        {
+            sys.UnsubscribeFromEvents();
+            sys.SubscribeToEvents();
+        }
     }
 }

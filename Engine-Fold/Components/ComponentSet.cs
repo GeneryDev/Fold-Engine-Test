@@ -225,6 +225,7 @@ public class ComponentSet<T> : ComponentSet where T : struct
 
             Dense[Sparse[(int)entityId - MinId]].ModifiedTimestamp =
                 CurrentTimestamp + timestampOffset; //Mark as "removed" so Get<>() will skip it but iterators won't.
+            // TODO re-evaluate this behavior. If possible, add an alternative for removing entities/components that's deferred. 
 
             //Sparse will remain pointing to a location in dense for purposes of iteration
             //Will be removed on flush

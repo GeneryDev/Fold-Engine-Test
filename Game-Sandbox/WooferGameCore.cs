@@ -1,6 +1,7 @@
 ﻿using System;
 using FoldEngine;
 using FoldEngine.Commands;
+using FoldEngine.Editor;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Registries;
@@ -53,7 +54,9 @@ public class WooferGameCore : IGameCore
         AudioUnit.Initialize();
         ResourceIndex.Update();
 
-        ActiveScene = new DemoScene(this);
+        ActiveScene = new EditorScene(this);
+        ActiveScene.Systems.Get<EditorBase>().OpenScene(new DemoScene(this));
+        ActiveScene.Systems.Get<EditorBase>().OpenScene(new Scene(this, "blank"));
     }
 
     public void LoadContent()

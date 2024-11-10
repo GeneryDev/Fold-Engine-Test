@@ -1,4 +1,5 @@
-﻿using FoldEngine.Gui;
+﻿using FoldEngine.Editor.Gui;
+using FoldEngine.Gui;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
@@ -14,7 +15,7 @@ public abstract class EditorView
     public Scene Scene;
     public IGameCore Core => Scene.Core;
     public ResourceCollections EditorResources => Scene.Resources;
-    public Scene EditingScene => Scene;
+    public Scene EditingScene => ((EditorEnvironment)ContentPanel?.Environment)?.EditingScene;
     public abstract string Name { get; }
 
     public virtual bool UseMargin => true;

@@ -8,14 +8,14 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Views;
 
-public class EditorGameView : EditorView
+public class EditorSceneView : EditorView
 {
-    public EditorGameView()
+    public EditorSceneView()
     {
         Icon = new ResourceIdentifier("editor/play");
     }
 
-    public override string Name => "Game";
+    public override string Name => "Scene";
 
     public override bool UseMargin => false;
     public override Color? BackgroundColor => Color.Black;
@@ -30,13 +30,13 @@ public class EditorGameView : EditorView
 
     public override void EnsurePanelExists(GuiEnvironment environment)
     {
-        if (ContentPanel == null) ContentPanel = new GameViewPanel(this, environment);
+        if (ContentPanel == null) ContentPanel = new SceneViewPanel(this, environment);
     }
 }
 
-public class GameViewPanel : GuiPanel
+public class SceneViewPanel : GuiPanel
 {
-    public GameViewPanel(EditorGameView editorGameView, GuiEnvironment environment) : base(environment)
+    public SceneViewPanel(EditorSceneView editorSceneView, GuiEnvironment environment) : base(environment)
     {
         MayScroll = true;
     }

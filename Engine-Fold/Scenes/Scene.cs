@@ -28,7 +28,6 @@ public class Scene : Resource, ISelfSerializer
     private List<long> _deletedIds = new List<long>();
 
 
-    private bool _initialized;
     private bool _hasAnything;
 
     private long _nextEntityId;
@@ -154,33 +153,27 @@ public class Scene : Resource, ISelfSerializer
         return new Entity(this, CreateEntityId(name));
     }
 
-    public virtual void Initialize()
-    {
-    }
-
     public virtual void Input()
     {
         Systems.InvokeInput();
 
-        Systems.Flush();
-        Components.Flush();
+        Flush();
     }
 
     public virtual void Update()
     {
         Access();
 
-        if (!_initialized)
-        {
-            Initialize();
-            _initialized = true;
-        }
-
         Systems.InvokeFixedUpdate();
         Systems.InvokeUpdate();
 
         Core.CommandQueue.ExecuteAll();
 
+        Flush();
+    }
+
+    public void Flush()
+    {
         Systems.Flush();
         Components.Flush();
     }

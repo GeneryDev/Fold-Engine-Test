@@ -23,16 +23,18 @@ public class EditorEnvironment : GuiEnvironment
 
     public readonly List<EditorTool> Tools = new List<EditorTool>();
 
-    public readonly TransactionManager<Scene> TransactionManager;
+
+    public EditorBase EditorBase;
+    public TransactionManager<Scene> TransactionManager => EditorBase.CurrentTab.SceneTransactions;
     public List<EditorView> AllViews = new List<EditorView>();
     public EditorTool ForcedTool;
     public EditorTool SelectedTool;
     
-    public Scene EditingScene => Scene;
+    public Scene EditingScene => EditorBase.CurrentScene;
 
-    public EditorEnvironment(Scene scene) : base(scene)
+    public EditorEnvironment(EditorBase editor) : base(editor.Scene)
     {
-        TransactionManager = new TransactionManager<Scene>(scene); // TODO change to editing scene
+        EditorBase = editor;
 
         NorthPanel = new BorderPanel(this, -Vector2.UnitY);
         SouthPanel = new BorderPanel(this, Vector2.UnitY);

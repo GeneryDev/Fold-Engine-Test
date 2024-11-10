@@ -15,7 +15,7 @@ public class SubSceneSystem : GameSystem
 
     public override void Initialize()
     {
-        _subSceneComponents = CreateComponentIterator<SubScene>(IterationFlags.Ordered);
+        _subSceneComponents = CreateComponentIterator<SubScene>(IterationFlags.Ordered | IterationFlags.IncludeInactive);
     }
 
     public override void OnInput()
@@ -24,7 +24,7 @@ public class SubSceneSystem : GameSystem
         while (_subSceneComponents.Next())
         {
             ref var instance = ref _subSceneComponents.GetComponent();
-            if(!_subSceneComponents.HasCoComponent<InactiveComponent>())
+            if(instance.ProcessInputs && !_subSceneComponents.HasCoComponent<InactiveComponent>())
                 instance.Scene?.Input();
         }
     }
@@ -35,7 +35,7 @@ public class SubSceneSystem : GameSystem
         while (_subSceneComponents.Next())
         {
             ref var instance = ref _subSceneComponents.GetComponent();
-            if(!_subSceneComponents.HasCoComponent<InactiveComponent>())
+            if(instance.Update && !_subSceneComponents.HasCoComponent<InactiveComponent>())
                 instance.Scene?.Update();
         }
     }
@@ -75,7 +75,7 @@ public class SubSceneSystem : GameSystem
         while (_subSceneComponents.Next())
         {
             ref var instance = ref _subSceneComponents.GetComponent();
-            if(!_subSceneComponents.HasCoComponent<InactiveComponent>())
+            if(instance.Render && !_subSceneComponents.HasCoComponent<InactiveComponent>())
                 instance.Scene?.Render(renderer);
         }
     }
@@ -86,6 +86,7 @@ public class SubSceneSystem : GameSystem
         while (_subSceneComponents.Next())
         {
             ref var instance = ref _subSceneComponents.GetComponent();
+            instance.Scene?.Access();
             instance.Scene?.Systems.PollResources();
         }
     }

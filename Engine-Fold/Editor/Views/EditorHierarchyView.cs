@@ -19,6 +19,7 @@ public class EditorHierarchyView : EditorView
 {
     private static readonly List<long> EntitiesToDelete = new List<long>();
 
+    private EditorScene _lastRenderedScene;
     private ComponentIterator<Transform> _transforms;
 
     public Hierarchy<long> Hierarchy;
@@ -32,11 +33,18 @@ public class EditorHierarchyView : EditorView
 
     public override void Initialize()
     {
-        _transforms = EditingScene.Components.CreateIterator<Transform>(IterationFlags.IncludeInactive);
     }
 
     public override void Render(IRenderingUnit renderer)
     {
+        var editingScene = EditingScene;
+        if (editingScene != _lastRenderedScene)
+        {
+            _transforms = editingScene?.Components.CreateIterator<Transform>(IterationFlags.IncludeInactive);
+        }
+
+        if (_transforms == null) return;
+        
         if (Hierarchy == null) Hierarchy = new EntityHierarchy(ContentPanel);
         ContentPanel.MayScroll = true;
 
@@ -170,6 +178,7 @@ public class EditorHierarchyView : EditorView
         GuiPopupMenu contextMenu = ContentPanel.Environment.ContextMenu;
         var editorEnvironment = ((EditorEnvironment)ContentPanel.Environment);
         var editingScene = editorEnvironment.EditingScene;
+        if (editingScene == null) return;
 
         contextMenu.Show(point, m =>
         {
@@ -219,6 +228,7 @@ public class EntityHierarchy : Hierarchy<long>
     {
         if (DragTargetId == -1) return;
         var editingScene = ((EditorEnvironment)Environment).EditingScene;
+        if (editingScene == null) return;
         Console.WriteLine("Dropping: ");
 
         HierarchyDropMode dropMode;

@@ -98,7 +98,7 @@ public class EditorToolbarView : EditorView
         loadOp.Close();
         loadOp.Dispose();
         _storedScene = null;
-        environment.Scene.CameraOverrides = new CameraOverrides(environment.EditingScene);
+        environment.EditingScene.CameraOverrides = new CameraOverrides(environment.EditingScene);
         environment.Scene.Paused = true;
     }
 }

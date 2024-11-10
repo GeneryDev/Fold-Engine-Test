@@ -100,6 +100,7 @@ public class SystemHierarchy : Hierarchy<Type>
     {
         if (DragTargetId == null) return;
         var editingScene = ((EditorEnvironment)Environment).EditingScene;
+        if (editingScene == null) return;
 
         var transactions = new CompoundTransaction<Scene>();
 

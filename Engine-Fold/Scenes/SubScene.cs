@@ -11,4 +11,8 @@ public struct SubScene
     public ResourceIdentifier SceneIdentifier;
     [DoNotSerialize] [HideInInspector] public ResourceIdentifier LoadedSceneIdentifier;
     [DoNotSerialize] [HideInInspector] public Scene Scene;
+
+    public bool Render;
+    public bool Update;
+    public bool ProcessInputs;
 }
