@@ -1,5 +1,5 @@
-﻿using EntryProject.Util.JsonSerialization;
-using FoldEngine.Input;
+﻿using FoldEngine.Input;
+using FoldEngine.Util.JsonSerialization;
 
 namespace FoldEngine.Interfaces;
 

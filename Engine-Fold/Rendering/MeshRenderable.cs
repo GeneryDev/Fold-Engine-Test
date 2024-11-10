@@ -1,7 +1,7 @@
-﻿using EntryProject.Util;
-using FoldEngine.Components;
+﻿using FoldEngine.Components;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
+using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Rendering;

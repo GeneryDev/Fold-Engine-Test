@@ -1,5 +1,4 @@
 ﻿using FoldEngine.Components;
-using FoldEngine.Editor.Gui;
 using FoldEngine.Scenes;
 using FoldEngine.Util.Transactions;
 

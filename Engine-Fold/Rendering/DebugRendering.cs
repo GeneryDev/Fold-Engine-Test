@@ -1,5 +1,4 @@
-﻿using EntryProject.Util;
-using FoldEngine.Components;
+﻿using FoldEngine.Components;
 using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
 using FoldEngine.Systems;

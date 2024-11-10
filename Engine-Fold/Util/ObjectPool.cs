@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace EntryProject.Util;
+namespace FoldEngine.Util;
 
 public interface IObjectPool
 {

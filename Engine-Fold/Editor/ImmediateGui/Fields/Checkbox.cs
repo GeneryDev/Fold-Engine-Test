@@ -1,11 +1,11 @@
 ﻿using System;
-using EntryProject.Util;
 using FoldEngine.Graphics;
-using FoldEngine.Gui;
+using FoldEngine.ImmediateGui;
 using FoldEngine.Interfaces;
+using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Editor.Gui.Fields;
+namespace FoldEngine.Editor.ImmediateGui.Fields;
 
 public class Checkbox : GuiElement, IInspectorField
 {

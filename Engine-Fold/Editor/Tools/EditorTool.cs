@@ -1,5 +1,5 @@
-﻿using FoldEngine.Editor.Gui;
-using FoldEngine.Gui;
+﻿using FoldEngine.Editor.ImmediateGui;
+using FoldEngine.ImmediateGui;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;

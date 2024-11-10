@@ -5,7 +5,7 @@ using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
 using Microsoft.Xna.Framework;
 
-namespace Woofer;
+namespace Sandbox;
 
 public class WooferRenderingUnit : IRenderingUnit
 {

@@ -1,7 +1,6 @@
 ﻿using System;
-using EntryProject.Editor.Gui.Hierarchy;
 using FoldEngine.Components;
-using FoldEngine.Editor.Gui;
+using FoldEngine.Editor.ImmediateGui.Hierarchy;
 using FoldEngine.Scenes;
 using FoldEngine.Util.Transactions;
 

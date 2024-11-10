@@ -1,6 +1,6 @@
-﻿using FoldEngine.Editor.Gui.Fields.Text;
+﻿using FoldEngine.Editor.ImmediateGui.Fields.Text;
 
-namespace FoldEngine.Editor.Gui.Fields.Transactions;
+namespace FoldEngine.Editor.ImmediateGui.Fields.Transactions;
 
 public class InsertionEdit : DocumentTransactionBase
 {

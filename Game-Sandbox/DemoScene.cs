@@ -3,6 +3,7 @@ using FoldEngine.Editor;
 using FoldEngine.Graphics.Atlas;
 using FoldEngine.Interfaces;
 using FoldEngine.Physics;
+using FoldEngine.Physics.Systems;
 using FoldEngine.Rendering;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Reflection;
-using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Editor.Transactions;
-using FoldEngine.Gui;
+using FoldEngine.ImmediateGui;
+using FoldEngine.Util;
 
-namespace FoldEngine.Editor.Gui;
+namespace FoldEngine.Editor.ImmediateGui;
 
 public interface IInspectorField
 {

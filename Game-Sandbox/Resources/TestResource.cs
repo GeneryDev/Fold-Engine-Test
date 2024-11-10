@@ -2,7 +2,7 @@
 using FoldEngine.Serialization;
 using Microsoft.Xna.Framework;
 
-namespace EntryProject.Resources;
+namespace Sandbox.Resources;
 
 [Resource("test")]
 public class TestResource : Resource

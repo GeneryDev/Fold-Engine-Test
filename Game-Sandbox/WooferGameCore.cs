@@ -7,9 +7,8 @@ using FoldEngine.Interfaces;
 using FoldEngine.Registries;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
-using Sandbox;
 
-namespace Woofer;
+namespace Sandbox;
 
 public class WooferGameCore : IGameCore
 {

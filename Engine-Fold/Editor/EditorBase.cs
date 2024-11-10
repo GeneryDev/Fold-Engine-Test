@@ -1,6 +1,6 @@
 ﻿using FoldEngine.Commands;
 using FoldEngine.Components;
-using FoldEngine.Editor.Gui;
+using FoldEngine.Editor.ImmediateGui;
 using FoldEngine.Editor.Views;
 using FoldEngine.Events;
 using FoldEngine.Interfaces;

@@ -1,7 +1,7 @@
 ﻿using System;
 using FoldEngine.Resources;
 
-namespace FoldEngine.Serialization;
+namespace FoldEngine.Serialization.Serializers;
 
 public class StringSerializer : Serializer<string>
 {

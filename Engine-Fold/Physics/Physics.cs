@@ -1,6 +1,4 @@
-﻿using EntryProject.Editor.Inspector;
-using EntryProject.Util;
-using FoldEngine.Components;
+﻿using FoldEngine.Components;
 using FoldEngine.Editor.Inspector;
 using FoldEngine.Scenes;
 using FoldEngine.Util;

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using FoldEngine.Components;
-using FoldEngine.Editor.Gui;
 using FoldEngine.Scenes;
 using FoldEngine.Serialization;
 using FoldEngine.Util.Transactions;

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace EntryProject.Util;
+namespace FoldEngine.Util;
 
 public static class Extensions
 {

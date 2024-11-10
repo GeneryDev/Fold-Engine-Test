@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using FoldEngine.Resources;
+using FoldEngine.Serialization.Serializers;
 
 namespace FoldEngine.Serialization;
 

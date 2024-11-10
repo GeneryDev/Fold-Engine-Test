@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using EntryProject.Util;
 using FoldEngine.Components;
 using FoldEngine.Events;
 using FoldEngine.Scenes;
@@ -8,7 +7,7 @@ using FoldEngine.Systems;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Physics;
+namespace FoldEngine.Physics.Systems;
 
 [GameSystem("fold:physics.simple", ProcessingCycles.FixedUpdate)]
 public class SimplePhysicsSystem : GameSystem

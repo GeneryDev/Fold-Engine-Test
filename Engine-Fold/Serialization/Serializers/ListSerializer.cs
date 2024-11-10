@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace FoldEngine.Serialization;
+namespace FoldEngine.Serialization.Serializers;
 
 public class ListSerializer<T> : Serializer<List<T>>
 {

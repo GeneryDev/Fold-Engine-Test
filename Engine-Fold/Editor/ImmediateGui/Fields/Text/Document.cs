@@ -4,7 +4,7 @@ using FoldEngine.Text;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Editor.Gui.Fields.Text;
+namespace FoldEngine.Editor.ImmediateGui.Fields.Text;
 
 public class Document
 {

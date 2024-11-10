@@ -1,6 +1,6 @@
 ﻿using FoldEngine.Audio;
 using FoldEngine.Graphics;
-using FoldEngine.Gui;
+using FoldEngine.ImmediateGui;
 
 namespace FoldEngine.Editor.Inspector.CustomInspectors;
 

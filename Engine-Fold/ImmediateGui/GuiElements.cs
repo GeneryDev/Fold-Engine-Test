@@ -1,11 +1,11 @@
-﻿using EntryProject.Util;
-using FoldEngine.Graphics;
+﻿using FoldEngine.Graphics;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Text;
+using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Gui;
+namespace FoldEngine.ImmediateGui;
 
 public abstract class GuiElement
 {

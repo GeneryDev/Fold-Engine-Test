@@ -1,7 +1,7 @@
 ﻿using FoldEngine.Components;
-using FoldEngine.Editor.Gui;
+using FoldEngine.Editor.ImmediateGui;
 using FoldEngine.Editor.Inspector;
-using FoldEngine.Gui;
+using FoldEngine.ImmediateGui;
 using FoldEngine.Resources;
 using FoldEngine.Serialization;
 using Microsoft.Xna.Framework;

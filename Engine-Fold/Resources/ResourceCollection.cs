@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using EntryProject.Util;
 using FoldEngine.Interfaces;
 using FoldEngine.IO;
 using FoldEngine.Serialization;
+using FoldEngine.Util;
 
 namespace FoldEngine.Resources;
 

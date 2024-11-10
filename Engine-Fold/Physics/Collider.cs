@@ -1,9 +1,9 @@
 ﻿using System;
-using EntryProject.Editor.Inspector;
-using EntryProject.Util;
 using FoldEngine.Components;
+using FoldEngine.Editor.Inspector;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
+using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Physics;

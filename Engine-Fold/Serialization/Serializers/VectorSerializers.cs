@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Serialization;
+namespace FoldEngine.Serialization.Serializers;
 
 public class Vector2Serializer : Serializer<Vector2>
 {

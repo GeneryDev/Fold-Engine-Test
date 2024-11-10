@@ -1,8 +1,8 @@
-﻿using FoldEngine.Gui;
+﻿using FoldEngine.ImmediateGui;
 using FoldEngine.Text;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Editor.Gui;
+namespace FoldEngine.Editor.ImmediateGui;
 
 public class ToolbarButton : GuiButton
 {

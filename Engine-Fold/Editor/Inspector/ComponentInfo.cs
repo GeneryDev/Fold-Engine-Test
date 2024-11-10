@@ -2,18 +2,17 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
-using EntryProject.Editor.Inspector;
 using FoldEngine.Components;
-using FoldEngine.Editor.Gui;
-using FoldEngine.Editor.Gui.Fields;
-using FoldEngine.Editor.Gui.Fields.Text;
-using FoldEngine.Editor.Inspector;
-using FoldEngine.Gui;
+using FoldEngine.Editor.ImmediateGui;
+using FoldEngine.Editor.ImmediateGui.Fields;
+using FoldEngine.Editor.ImmediateGui.Fields.Text;
+using FoldEngine.Editor.Views;
+using FoldEngine.ImmediateGui;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Editor.Views;
+namespace FoldEngine.Editor.Inspector;
 
 public class ComponentInfo
 {

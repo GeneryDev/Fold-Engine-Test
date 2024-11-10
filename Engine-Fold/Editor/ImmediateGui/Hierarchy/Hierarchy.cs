@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using FoldEngine.Graphics;
-using FoldEngine.Gui;
+using FoldEngine.ImmediateGui;
 using FoldEngine.Interfaces;
 using Microsoft.Xna.Framework;
 
-namespace EntryProject.Editor.Gui.Hierarchy;
+namespace FoldEngine.Editor.ImmediateGui.Hierarchy;
 
 public enum HierarchyDropMode
 {

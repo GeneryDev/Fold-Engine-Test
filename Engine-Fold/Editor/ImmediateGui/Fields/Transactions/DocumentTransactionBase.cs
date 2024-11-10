@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using EntryProject.Util;
-using FoldEngine.Editor.Gui.Fields.Text;
+using FoldEngine.Editor.ImmediateGui.Fields.Text;
+using FoldEngine.Util;
 using FoldEngine.Util.Transactions;
 
-namespace FoldEngine.Editor.Gui.Fields.Transactions;
+namespace FoldEngine.Editor.ImmediateGui.Fields.Transactions;
 
 public abstract class DocumentTransactionBase : Transaction<TextField>
 {

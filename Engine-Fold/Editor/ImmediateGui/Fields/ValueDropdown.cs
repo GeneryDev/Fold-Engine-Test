@@ -1,8 +1,8 @@
 ﻿using System;
-using FoldEngine.Gui;
+using FoldEngine.ImmediateGui;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Editor.Gui.Fields;
+namespace FoldEngine.Editor.ImmediateGui.Fields;
 
 public class ValueDropdown : GuiButton
 {

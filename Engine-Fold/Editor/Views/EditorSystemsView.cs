@@ -1,10 +1,9 @@
 ﻿using System;
-using EntryProject.Editor.Gui.Hierarchy;
-using FoldEngine.Editor.Gui;
-using FoldEngine.Editor.Gui.Hierarchy;
+using FoldEngine.Editor.ImmediateGui;
+using FoldEngine.Editor.ImmediateGui.Hierarchy;
 using FoldEngine.Editor.Transactions;
 using FoldEngine.Graphics;
-using FoldEngine.Gui;
+using FoldEngine.ImmediateGui;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;

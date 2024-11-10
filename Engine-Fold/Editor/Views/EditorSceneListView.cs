@@ -1,6 +1,6 @@
 ﻿using System;
 using FoldEngine.Commands;
-using FoldEngine.Editor.Gui;
+using FoldEngine.Editor.ImmediateGui;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;

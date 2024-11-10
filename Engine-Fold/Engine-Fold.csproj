@@ -15,4 +15,7 @@
             <HintPath>Shard.dll</HintPath>
         </Reference>
     </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Gui\" />
+    </ItemGroup>
 </Project>

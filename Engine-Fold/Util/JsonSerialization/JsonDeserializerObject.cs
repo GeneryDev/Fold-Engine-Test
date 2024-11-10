@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using Newtonsoft.Json.Linq;
 
-namespace EntryProject.Util.JsonSerialization;
+namespace FoldEngine.Util.JsonSerialization;
 
 public class JsonDeserializerNode
 {

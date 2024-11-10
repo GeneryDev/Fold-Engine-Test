@@ -1,4 +1,4 @@
-﻿using FoldEngine.Gui;
+﻿using FoldEngine.ImmediateGui;
 using FoldEngine.Resources;
 
 namespace FoldEngine.Editor.Inspector.CustomInspectors;

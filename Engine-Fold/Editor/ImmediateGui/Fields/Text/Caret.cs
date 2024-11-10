@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using FoldEngine.Gui;
+using FoldEngine.ImmediateGui;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Editor.Gui.Fields.Text;
+namespace FoldEngine.Editor.ImmediateGui.Fields.Text;
 
 public class Caret
 {

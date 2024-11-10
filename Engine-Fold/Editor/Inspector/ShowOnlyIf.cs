@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace EntryProject.Editor.Inspector;
+namespace FoldEngine.Editor.Inspector;
 
 public class ShowOnlyIf : Attribute
 {

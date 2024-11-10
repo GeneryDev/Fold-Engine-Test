@@ -1,6 +1,5 @@
 ﻿using System;
 using FoldEngine.Commands;
-using FoldEngine.Editor.Gui;
 using FoldEngine.Scenes;
 using FoldEngine.Systems;
 using FoldEngine.Util.Transactions;

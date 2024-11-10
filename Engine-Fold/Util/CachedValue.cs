@@ -1,4 +1,4 @@
-﻿namespace EntryProject.Util;
+﻿namespace FoldEngine.Util;
 
 public struct CachedValue<T>
 {

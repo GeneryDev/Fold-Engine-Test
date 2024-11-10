@@ -1,13 +1,12 @@
 ﻿using System;
-using EntryProject.Editor.Gui.Hierarchy;
-using EntryProject.Util;
 using FoldEngine.Graphics;
-using FoldEngine.Gui;
+using FoldEngine.ImmediateGui;
 using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
+using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Editor.Gui.Hierarchy;
+namespace FoldEngine.Editor.ImmediateGui.Hierarchy;
 
 public class HierarchyElement<TI> : GuiLabel
 {

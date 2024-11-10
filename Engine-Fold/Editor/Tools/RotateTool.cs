@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using EntryProject.Util;
 using FoldEngine.Components;
-using FoldEngine.Editor.Gui;
+using FoldEngine.Editor.ImmediateGui;
 using FoldEngine.Editor.Transactions;
 using FoldEngine.Graphics;
-using FoldEngine.Gui;
+using FoldEngine.ImmediateGui;
 using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
 using FoldEngine.Util;

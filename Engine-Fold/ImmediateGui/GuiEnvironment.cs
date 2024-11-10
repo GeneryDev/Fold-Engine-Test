@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using EntryProject.Editor.Gui.Hierarchy;
-using EntryProject.Util;
+using FoldEngine.Editor.ImmediateGui.Hierarchy;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
+using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Keyboard = Microsoft.Xna.Framework.Input.Keyboard;
 using Mouse = Microsoft.Xna.Framework.Input.Mouse;
 
-namespace FoldEngine.Gui;
+namespace FoldEngine.ImmediateGui;
 
 public abstract class GuiEnvironment : IDisposable
 {

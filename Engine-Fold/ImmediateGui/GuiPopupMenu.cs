@@ -1,10 +1,10 @@
 ﻿using System;
-using EntryProject.Util;
 using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
+using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Gui;
+namespace FoldEngine.ImmediateGui;
 
 public class GuiPopupMenu : GuiPanel
 {

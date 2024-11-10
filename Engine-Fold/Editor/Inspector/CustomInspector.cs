@@ -1,5 +1,5 @@
 ﻿using System;
-using FoldEngine.Gui;
+using FoldEngine.ImmediateGui;
 
 namespace FoldEngine.Editor.Inspector;
 

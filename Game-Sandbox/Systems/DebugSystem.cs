@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using EntryProject.Resources;
 using FoldEngine;
 using FoldEngine.Audio;
 using FoldEngine.Commands;
@@ -9,12 +8,14 @@ using FoldEngine.Graphics;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Physics;
+using FoldEngine.Physics.Systems;
 using FoldEngine.Rendering;
 using FoldEngine.Scenes;
 using FoldEngine.Systems;
 using FoldEngine.Text;
 using Microsoft.Xna.Framework;
 using Sandbox.Components;
+using Sandbox.Resources;
 
 namespace Sandbox.Systems;
 

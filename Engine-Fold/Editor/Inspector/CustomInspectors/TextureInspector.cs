@@ -1,5 +1,5 @@
 ﻿using FoldEngine.Graphics;
-using FoldEngine.Gui;
+using FoldEngine.ImmediateGui;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Inspector.CustomInspectors;

@@ -1,4 +1,4 @@
-﻿using FoldEngine.Gui;
+﻿using FoldEngine.ImmediateGui;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;

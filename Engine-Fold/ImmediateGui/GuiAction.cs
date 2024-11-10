@@ -1,6 +1,6 @@
-﻿using EntryProject.Util;
+﻿using FoldEngine.Util;
 
-namespace FoldEngine.Gui;
+namespace FoldEngine.ImmediateGui;
 
 public interface IGuiAction : IPooledObject
 {

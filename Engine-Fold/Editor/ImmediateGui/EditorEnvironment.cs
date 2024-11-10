@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using EntryProject.Util;
 using FoldEngine.Editor.Tools;
 using FoldEngine.Editor.Views;
 using FoldEngine.Graphics;
-using FoldEngine.Gui;
+using FoldEngine.ImmediateGui;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
+using FoldEngine.Util;
 using FoldEngine.Util.Transactions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Keyboard = FoldEngine.Input.Keyboard;
 using Mouse = FoldEngine.Input.Mouse;
 
-namespace FoldEngine.Editor.Gui;
+namespace FoldEngine.Editor.ImmediateGui;
 
 public class EditorEnvironment : GuiEnvironment
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FoldEngine.Serialization;
+namespace FoldEngine.Serialization.Serializers;
 
 public class PrimitiveSerializer<T> : Serializer<T> where T : struct
 {

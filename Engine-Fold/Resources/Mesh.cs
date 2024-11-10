@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using EntryProject.Util;
 using FoldEngine.Serialization;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;

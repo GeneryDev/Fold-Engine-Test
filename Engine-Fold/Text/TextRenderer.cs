@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using EntryProject.Util;
 using FoldEngine.Graphics;
+using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Text;

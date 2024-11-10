@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using FoldEngine;
 using FoldEngine.Components;
 using FoldEngine.Resources;
-using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
-namespace EntryProject.Util;
+namespace FoldEngine.Util;
 
 [DebuggerDisplay("{" + nameof(DebugDisplayString) + ",nq}")]
 public struct Line

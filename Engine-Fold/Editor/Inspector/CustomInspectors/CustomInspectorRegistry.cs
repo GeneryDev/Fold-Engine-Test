@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using FoldEngine.Gui;
+using FoldEngine.ImmediateGui;
 using FoldEngine.Registries;
 
 namespace FoldEngine.Editor.Inspector.CustomInspectors;

@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Reflection;
-using EntryProject.Util;
 using FoldEngine.Components;
-using FoldEngine.Editor.Gui;
-using FoldEngine.Editor.Gui.Fields;
+using FoldEngine.Editor.ImmediateGui;
+using FoldEngine.Editor.ImmediateGui.Fields;
 using FoldEngine.Editor.Inspector;
 using FoldEngine.Editor.Transactions;
 using FoldEngine.Graphics;
-using FoldEngine.Gui;
+using FoldEngine.ImmediateGui;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
+using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Views;

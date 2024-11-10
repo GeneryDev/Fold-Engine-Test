@@ -1,16 +1,16 @@
 ﻿using System;
-using EntryProject.Util;
-using FoldEngine.Editor.Gui.Fields.Transactions;
+using FoldEngine.Editor.ImmediateGui.Fields.Transactions;
 using FoldEngine.Graphics;
-using FoldEngine.Gui;
+using FoldEngine.ImmediateGui;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 using FoldEngine.Text;
+using FoldEngine.Util;
 using FoldEngine.Util.Transactions;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Editor.Gui.Fields.Text;
+namespace FoldEngine.Editor.ImmediateGui.Fields.Text;
 
 public class TextField : GuiElement, IInspectorField
 {
