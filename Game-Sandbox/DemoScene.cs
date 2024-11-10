@@ -1,6 +1,7 @@
 ﻿using System;
 using FoldEngine.Editor;
 using FoldEngine.Graphics.Atlas;
+using FoldEngine.Gui;
 using FoldEngine.Interfaces;
 using FoldEngine.Physics;
 using FoldEngine.Physics.Systems;
@@ -99,6 +100,14 @@ internal class DemoScene : Scene
         e2.Transform.LocalScale = new Vector2(9, 4);
         e2.AddComponent<Physics>().Static = true;
         e2.AddComponent<Collider>().ThickFaces = true;
+        
+        
+        Entity e5 = CreateEntity("Control");
+        ref var control = ref e5.AddComponent<Control>();
+        control.Size = new Vector2(500, 500);
+        e5.AddComponent<BoxControl>().Color = Color.Salmon;
+        Systems.Add<ControlLayoutSystem>();
+        Systems.Add<ControlRenderer>();
 
 
         /*e0.Transform.Position = new Vector2(1, 2);

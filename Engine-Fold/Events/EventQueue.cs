@@ -71,6 +71,8 @@ public class EventQueue<T> : IEventQueue where T : struct
         // If flush mode is immediate, invoke all listeners.
         if (EventAttribute.FlushMode == EventFlushMode.Immediate)
         {
+            // TODO reserve the event index for as long as the listener function is running,
+            // to prevent recursive event callback overwriting each other.
             foreach (EventListener<T> listener in _listeners) listener(ref _events[_flushIndex]);
             return ref _events[_insertionIndex];
         }
