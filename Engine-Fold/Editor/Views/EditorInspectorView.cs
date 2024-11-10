@@ -31,20 +31,25 @@ public class EditorInspectorView : EditorView
         ContentPanel.MayScroll = true;
         long id = -1;
         var editorBase = Scene.Systems.Get<EditorBase>();
-        if (editorBase.EditingEntity.Count == 1) id = editorBase.EditingEntity[0];
+        var editingTab = editorBase.CurrentTab;
+        if (editingTab.Scene != null)
+        {
+            if (editingTab.EditingEntity.Count == 1) id = editingTab.EditingEntity[0];
+        }
 
-        if (id != -1 && EditingScene.Components.HasComponent<Transform>(id))
-            RenderEntityView(renderer, id);
+        if (id != -1 && (editingTab.Scene?.Components.HasComponent<Transform>(id) ?? false))
+            RenderEntityView(renderer, new Entity(editingTab.Scene, id));
         else if (_object != null) RenderObjectView(renderer);
         // ContentPanel.Label(Scene.Name, 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
     }
 
-    private void RenderEntityView(IRenderingUnit renderer, long id)
+    private void RenderEntityView(IRenderingUnit renderer, Entity entity)
     {
-        ContentPanel.Label(EditingScene.Components.GetComponent<EntityName>(id).Name, 14)
+        long id = entity.EntityId;
+        ContentPanel.Label(entity.Name, 14)
             .TextAlignment(-1)
             .Icon(EditorResources.Get<Texture>(ref EditorIcons.Cube));
-        if (id >= int.MaxValue)
+        if (entity.EntityId >= int.MaxValue)
         {
             ContentPanel.Label($"ID: {id} ({(int)id})", 7).TextAlignment(-1);
         }
@@ -52,8 +57,6 @@ public class EditorInspectorView : EditorView
         {
             ContentPanel.Label($"ID: {id}", 7).TextAlignment(-1);
         }
-
-        Entity entity = new Entity(EditingScene, id);
 
         if (entity.Active != ContentPanel.Element<Checkbox>().Value(entity.Active).IsChecked())
         {
@@ -73,7 +76,7 @@ public class EditorInspectorView : EditorView
         ContentPanel.Element<ComponentMemberBreak>();
         // ContentPanel.Spacing(12);
 
-        foreach (ComponentSet set in EditingScene.Components.Sets.Values)
+        foreach (ComponentSet set in entity.Scene.Components.Sets.Values)
             if (set.Has(id))
             {
                 ComponentInfo componentInfo = ComponentInfo.Get(set.ComponentType);
@@ -92,7 +95,7 @@ public class EditorInspectorView : EditorView
 
                 foreach (ComponentMember member in componentInfo.Members)
                 {
-                    if (!member.ShouldShowInInspector(EditingScene, id)) continue;
+                    if (!member.ShouldShowInInspector(entity.Scene, id)) continue;
                     object value = set.GetFieldValue(id, member.FieldInfo);
                     // ContentPanel
                     //     .Label(
@@ -126,7 +129,7 @@ public class EditorInspectorView : EditorView
                 foreach (Type type in Core.RegistryUnit.Components.GetAllTypes())
                 {
                     if (type.GetCustomAttribute<HideInInspector>() == null &&
-                        !EditingScene.Components.HasComponent(type, id) && m.Button(type.Name, 9).IsPressed())
+                        !entity.Scene.Components.HasComponent(type, id) && m.Button(type.Name, 9).IsPressed())
                         ((EditorEnvironment)ContentPanel.Environment).TransactionManager.InsertTransaction(
                             new AddComponentTransaction(type, id));
                 }

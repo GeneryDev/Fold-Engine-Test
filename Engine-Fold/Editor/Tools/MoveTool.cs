@@ -33,20 +33,23 @@ public class MoveTool : SelectTool
     {
         if (_selectedGizmo != default)
         {
+            var editorBase = Scene.Systems.Get<EditorBase>();
+            var editingTab = editorBase.CurrentTab;
+            if (editingTab.Scene == null) return;
+            
             Vector2 mouseWorldPos =
-                EditingScene.MainCameraTransform.Apply(Environment.Renderer.GizmoLayer.LayerToCamera(
+                editingTab.Scene.MainCameraTransform.Apply(Environment.Renderer.GizmoLayer.LayerToCamera(
                     Environment.Renderer.GizmoLayer.WindowToLayer(e.Position.ToVector2())));
             _pressPivotPosition = _movePivot.Position;
             _pressMousePivotPosition = _movePivot.Relativize(mouseWorldPos);
 
             _transactions.Clear();
             _pressEntityPivotPosition.Clear();
-            var editorBase = Scene.Systems.Get<EditorBase>();
-            foreach (long entityId in editorBase.EditingEntity)
+            foreach (long entityId in editingTab.EditingEntity)
             {
                 if (entityId == -1) continue;
 
-                var entity = new Entity(EditingScene, entityId);
+                var entity = new Entity(editingTab.Scene, entityId);
 
                 Vector2 relativeEntityPos = _movePivot.Relativize(entity.Transform.Position);
 
@@ -75,7 +78,7 @@ public class MoveTool : SelectTool
 
     private void EnsurePivotExists()
     {
-        if (!_movePivot.IsNotNull) _movePivot = Transform.InitializeComponent(EditingScene, 0);
+        if (!_movePivot.IsNotNull) _movePivot = Transform.InitializeComponent(Scene, 0);
     }
 
     public override void Render(IRenderingUnit renderer)
@@ -83,13 +86,16 @@ public class MoveTool : SelectTool
         EnsurePivotExists();
         if (!_dragging) _selectedGizmo = default;
 
-        bool any = false;
-
         var editorBase = Scene.Systems.Get<EditorBase>();
+        var editingTab = editorBase.CurrentTab;
+        if (editingTab.Scene == null) return;
+
+        bool any = false;
+        
         if (_dragging)
         {
             Vector2 mouseWorldPos =
-                EditingScene.MainCameraTransform.Apply(Environment.Renderer.GizmoLayer.LayerToCamera(
+                editingTab.Scene.MainCameraTransform.Apply(Environment.Renderer.GizmoLayer.LayerToCamera(
                     Environment.Renderer.GizmoLayer.WindowToLayer(Environment.MousePos.ToVector2())));
 
             _movePivot.Position = mouseWorldPos;
@@ -105,12 +111,12 @@ public class MoveTool : SelectTool
             _movePivot.Position = _pressPivotPosition + filteredDelta;
 
             int i = 0;
-            foreach (long entityId in editorBase.EditingEntity)
+            foreach (long entityId in editingTab.EditingEntity)
             {
                 if (entityId == -1) continue;
                 any = true;
 
-                var entity = new Entity(EditingScene, entityId);
+                var entity = new Entity(editingTab.Scene, entityId);
 
                 entity.Transform.Position = _movePivot.Position;
                 entity.Transform.Position = _movePivot.Apply(_pressEntityPivotPosition[i]);
@@ -123,18 +129,18 @@ public class MoveTool : SelectTool
         else
         {
             _movePivot.LocalPosition = default;
-            foreach (long entityId in editorBase.EditingEntity)
+            foreach (long entityId in editingTab.EditingEntity)
             {
                 if (entityId == -1) continue;
                 any = true;
 
-                var entity = new Entity(EditingScene, entityId);
+                var entity = new Entity(editingTab.Scene, entityId);
 
                 _movePivot.LocalPosition += entity.Transform.Position;
                 _movePivot.Rotation = entity.Transform.Rotation;
             }
 
-            if (any) _movePivot.LocalPosition /= editorBase.EditingEntity.Count;
+            if (any) _movePivot.LocalPosition /= editingTab.EditingEntity.Count;
         }
 
         if (any)
@@ -151,6 +157,7 @@ public class MoveTool : SelectTool
                     200),
                 out bool hoveredX,
                 _dragging ? _selectedGizmo.X > 0 : (bool?)null,
+                editingTab.Scene.MainCameraTransform,
                 100);
             RenderArrow(renderer,
                 origin,
@@ -161,6 +168,7 @@ public class MoveTool : SelectTool
                     200),
                 out bool hoveredY,
                 _dragging ? _selectedGizmo.Y > 0 : (bool?)null,
+                editingTab.Scene.MainCameraTransform,
                 100);
 
             if (hoveredX) _selectedGizmo.X = 1;
@@ -176,10 +184,11 @@ public class MoveTool : SelectTool
         Color hoverColor,
         out bool hovered,
         bool? forceHoverState,
+        Transform cameraTransform,
         float fixedLength = 0)
     {
-        start = renderer.GizmoLayer.CameraToLayer(EditingScene.MainCameraTransform.Relativize(start));
-        end = renderer.GizmoLayer.CameraToLayer(EditingScene.MainCameraTransform.Relativize(end));
+        start = renderer.GizmoLayer.CameraToLayer(cameraTransform.Relativize(start));
+        end = renderer.GizmoLayer.CameraToLayer(cameraTransform.Relativize(end));
 
         if (fixedLength > 0) end = (end - start).Normalized() * fixedLength + start;
 

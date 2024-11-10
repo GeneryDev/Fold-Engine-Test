@@ -19,7 +19,7 @@ public class EditorHierarchyView : EditorView
 {
     private static readonly List<long> EntitiesToDelete = new List<long>();
 
-    private EditorScene _lastRenderedScene;
+    private Scene _lastRenderedScene;
     private ComponentIterator<Transform> _transforms;
 
     public Hierarchy<long> Hierarchy;
@@ -37,10 +37,15 @@ public class EditorHierarchyView : EditorView
 
     public override void Render(IRenderingUnit renderer)
     {
-        var editingScene = EditingScene;
+        var editorBase = Scene.Systems.Get<EditorBase>();
+        var editingTab = editorBase.CurrentTab;
+        if (editingTab.Scene == null) return;
+        
+        var editingScene = editingTab.Scene;
         if (editingScene != _lastRenderedScene)
         {
             _transforms = editingScene?.Components.CreateIterator<Transform>(IterationFlags.IncludeInactive);
+            _lastRenderedScene = editingScene;
         }
 
         if (_transforms == null) return;
@@ -65,12 +70,16 @@ public class EditorHierarchyView : EditorView
 
     private void RenderEntity(ref Transform transform, GuiPanel panel, IRenderingUnit renderer, int depth = 0)
     {
+        var editorBase = Scene.Systems.Get<EditorBase>();
+        var editingTab = editorBase.CurrentTab;
+        if (editingTab.Scene == null) return;
+        
         long entityId = transform.EntityId;
 
         bool hasChildren = transform.FirstChildId != -1;
         bool expanded = Hierarchy.IsExpanded(entityId);
 
-        var entity = new Entity(EditingScene, entityId);
+        var entity = new Entity(editingTab.Scene, entityId);
 
         HierarchyElement<long> button = panel.Element<HierarchyElement<long>>()
                 .Hierarchy(Hierarchy)
@@ -84,7 +93,7 @@ public class EditorHierarchyView : EditorView
 
         bool selected = Hierarchy.Pressed
             ? Hierarchy.IsSelected(entityId)
-            : Scene.Systems.Get<EditorBase>().EditingEntity.Contains(entity.EntityId);
+            : editingTab.EditingEntity.Contains(entity.EntityId);
 
         button
             .Icon(EditorResources.Get<Texture>(ref EditorIcons.Cube),
@@ -116,13 +125,16 @@ public class EditorHierarchyView : EditorView
     private void SelectEntityDown(long id)
     {
         var editorBase = Scene.Systems.Get<EditorBase>();
-        bool wasSelected = editorBase.EditingEntity.Contains(id);
+        var editingTab = editorBase.CurrentTab;
+        if (editingTab.Scene == null) return;
+        
+        bool wasSelected = editingTab.EditingEntity.Contains(id);
 
         bool control = Core.InputUnit.Devices.Keyboard.ControlDown;
         bool shift = Core.InputUnit.Devices.Keyboard.ShiftDown;
 
         Hierarchy.Selected.Clear();
-        Hierarchy.Selected.AddRange(editorBase.EditingEntity);
+        Hierarchy.Selected.AddRange(editingTab.EditingEntity);
 
         if (control)
         {
@@ -147,8 +159,11 @@ public class EditorHierarchyView : EditorView
     private void SelectEntityUp(
         long id)
     {
-        var editorBase = ContentPanel.Environment.Scene.Systems.Get<EditorBase>();
-        bool wasSelected = editorBase.EditingEntity.Contains(id);
+        var editorBase = Scene.Systems.Get<EditorBase>();
+        var editingTab = editorBase.CurrentTab;
+        if (editingTab.Scene == null) return;
+        
+        bool wasSelected = editingTab.EditingEntity.Contains(id);
 
         bool control = Core.InputUnit.Devices.Keyboard.ControlDown;
         bool shift = Core.InputUnit.Devices.Keyboard.ShiftDown;
@@ -156,14 +171,14 @@ public class EditorHierarchyView : EditorView
         if (control)
         {
             if (wasSelected)
-                editorBase.EditingEntity.Remove(id);
+                editingTab.EditingEntity.Remove(id);
             else
-                editorBase.EditingEntity.Add(id);
+                editingTab.EditingEntity.Add(id);
         }
         else
         {
-            editorBase.EditingEntity.Clear();
-            editorBase.EditingEntity.Add(id);
+            editingTab.EditingEntity.Clear();
+            editingTab.EditingEntity.Add(id);
         }
 
         if (ContentPanel.Environment is EditorEnvironment editorEnvironment)
@@ -177,7 +192,7 @@ public class EditorHierarchyView : EditorView
     {
         GuiPopupMenu contextMenu = ContentPanel.Environment.ContextMenu;
         var editorEnvironment = ((EditorEnvironment)ContentPanel.Environment);
-        var editingScene = editorEnvironment.EditingScene;
+        var editingScene = editorEnvironment.EditingTab.Scene;
         if (editingScene == null) return;
 
         contextMenu.Show(point, m =>
@@ -227,7 +242,7 @@ public class EntityHierarchy : Hierarchy<long>
     public override void Drop()
     {
         if (DragTargetId == -1) return;
-        var editingScene = ((EditorEnvironment)Environment).EditingScene;
+        var editingScene = ((EditorEnvironment)Environment).EditingTab.Scene;
         if (editingScene == null) return;
         Console.WriteLine("Dropping: ");
 

@@ -19,7 +19,6 @@ public static class SceneEditor
         scene.Paused = true;
 
         scene.Systems.Add(new EditorBase());
-        EditorToolbarView.NewSceneLoaded();
     }
 
     public static void DetachEditor(Scene scene)

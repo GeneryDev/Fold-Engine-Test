@@ -26,6 +26,11 @@ public class EditorSystemsView : EditorView
 
     public override void Render(IRenderingUnit renderer)
     {
+        var editorBase = Scene.Systems.Get<EditorBase>();
+        var editingTab = editorBase.CurrentTab;
+        if (editingTab.Scene == null) return;
+        var editingScene = editingTab.Scene;
+        
         if (Hierarchy == null) Hierarchy = new SystemHierarchy(ContentPanel);
         ContentPanel.MayScroll = true;
 
@@ -35,7 +40,7 @@ public class EditorSystemsView : EditorView
             contextMenu.Show(p, m =>
             {
                 foreach (Type type in Core.RegistryUnit.Systems.GetAllTypes())
-                    if (EditingScene.Systems.Get(type) == null && m.Button(type.Name, 9).IsPressed())
+                    if (editingScene.Systems.Get(type) == null && m.Button(type.Name, 9).IsPressed())
                         ((EditorEnvironment)ContentPanel.Environment).TransactionManager.InsertTransaction(
                             new AddSystemTransaction(type));
             });
@@ -45,7 +50,7 @@ public class EditorSystemsView : EditorView
 
         var editorEnvironment = (EditorEnvironment)ContentPanel.Environment;
 
-        foreach (GameSystem sys in EditingScene.Systems.AllSystems)
+        foreach (GameSystem sys in editingScene.Systems.AllSystems)
         {
             HierarchyElement<Type> element = (HierarchyElement<Type>)ContentPanel.Element<HierarchyElement<Type>>()
                     .Hierarchy(Hierarchy)
@@ -59,7 +64,7 @@ public class EditorSystemsView : EditorView
             {
                 case HierarchyElement<Type>.HierarchyEventType.Down:
                 {
-                    editorEnvironment.Scene.Systems.Get<EditorBase>().EditingEntity.Clear();
+                    editingTab.EditingEntity?.Clear();
                     editorEnvironment.GetView<EditorInspectorView>().SetObject(sys);
                     editorEnvironment.SwitchToView<EditorInspectorView>();
 
@@ -99,7 +104,7 @@ public class SystemHierarchy : Hierarchy<Type>
     public override void Drop()
     {
         if (DragTargetId == null) return;
-        var editingScene = ((EditorEnvironment)Environment).EditingScene;
+        var editingScene = ((EditorEnvironment)Environment).EditingTab.Scene;
         if (editingScene == null) return;
 
         var transactions = new CompoundTransaction<Scene>();

@@ -30,7 +30,7 @@ public class EditorEnvironment : GuiEnvironment
     public EditorTool ForcedTool;
     public EditorTool SelectedTool;
     
-    public Scene EditingScene => EditorBase.CurrentScene;
+    public ref EditorTab EditingTab => ref EditorBase.CurrentTab;
 
     public EditorEnvironment(EditorBase editor) : base(editor.Scene)
     {
@@ -103,8 +103,8 @@ public class EditorEnvironment : GuiEnvironment
     {
         base.Input(inputUnit);
 
-        if (ControlScheme.Get<ButtonAction>("editor.undo").Consume()) TransactionManager.Undo();
-        if (ControlScheme.Get<ButtonAction>("editor.redo").Consume()) TransactionManager.Redo();
+        if (ControlScheme.Get<ButtonAction>("editor.undo").Consume()) EditorBase.Undo();
+        if (ControlScheme.Get<ButtonAction>("editor.redo").Consume()) EditorBase.Redo();
 
         if (HoverTarget.ScrollablePanel != null)
             if (HoverTarget.ScrollablePanel.IsAncestorOf(HoverTarget.Element))

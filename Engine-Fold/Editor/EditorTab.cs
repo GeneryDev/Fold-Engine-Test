@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using FoldEngine.Components;
+using FoldEngine.Editor.Inspector;
 using FoldEngine.Scenes;
 using FoldEngine.Serialization;
 using FoldEngine.Util.Transactions;
@@ -10,11 +11,17 @@ namespace FoldEngine.Editor;
 [ComponentInitializer(typeof(EditorTab), nameof(InitializeComponent))]
 public struct EditorTab
 {
+    [DoNotSerialize] [HideInInspector] public Scene Scene;
+    
     [DoNotSerialize]
     public TransactionManager<Scene> SceneTransactions;
     public List<long> EditingEntity;
-    [EntityId] public long EditorCameraEntityId; 
+    
+    [EntityId] public long EditorCameraEntityId;
     public bool PreviewSceneCamera;
+    
+    [HideInInspector] public bool Playing;
+    [HideInInspector] [DoNotSerialize] public byte[] StoredSceneData;
 
     public EditorTab()
     {

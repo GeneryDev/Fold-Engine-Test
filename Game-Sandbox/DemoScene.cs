@@ -22,7 +22,7 @@ internal class DemoScene : Scene
 
     public void Initialize()
     {
-        BuildMeshes();
+        // BuildMeshes();
 
         Systems.Add<TextureAtlasSystem>();
         Systems.Add<SimplePhysicsSystem>();

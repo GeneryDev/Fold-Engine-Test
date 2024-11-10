@@ -23,7 +23,10 @@ public class SelectTool : EditorTool
 
     public override void OnMousePressed(ref MouseEvent e)
     {
-        ref Transform cameraTransform = ref EditingScene.MainCameraTransform;
+        var editorBase = Scene.Systems.Get<EditorBase>();
+        var editingTab = editorBase.CurrentTab;
+        if (editingTab.Scene == null) return;
+        ref Transform cameraTransform = ref editingTab.Scene.MainCameraTransform;
 
         IRenderingLayer worldLayer = Environment.Core.RenderingUnit.WorldLayer;
         Vector2 cameraRelativePos =
@@ -31,15 +34,14 @@ public class SelectTool : EditorTool
         Vector2 worldPos = cameraTransform.Apply(cameraRelativePos);
 
         long intersectingEntities =
-            EditingScene.Systems.Get<LevelRenderer2D>()?.ListEntitiesIntersectingPosition(worldPos) ?? -1;
+            editingTab.Scene.Systems.Get<LevelRenderer2D>()?.ListEntitiesIntersectingPosition(worldPos) ?? -1;
 
-        var editorBase = Scene.Systems.Get<EditorBase>();
         if (!Core.InputUnit.Devices.Keyboard[Keys.LeftControl].Down
             && !Core.InputUnit.Devices.Keyboard[Keys.RightControl].Down)
-            editorBase.EditingEntity.Clear();
+            editingTab.EditingEntity.Clear();
 
-        if (intersectingEntities != -1 && !editorBase.EditingEntity.Contains(intersectingEntities))
-            editorBase.EditingEntity.Add(intersectingEntities);
+        if (intersectingEntities != -1 && !editingTab.EditingEntity.Contains(intersectingEntities))
+            editingTab.EditingEntity.Add(intersectingEntities);
         Environment.SwitchToView<EditorInspectorView>();
     }
 

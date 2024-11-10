@@ -42,7 +42,7 @@ public class EditorResourcesView : EditorView
             _main = new GuiPanel(ContentPanel.Environment) { MayScroll = true };
         }
 
-        var editingScene = ((EditorEnvironment)ContentPanel.Environment).EditingScene;
+        var editingScene = ((EditorEnvironment)ContentPanel.Environment).EditingTab.Scene;
 
         ShowSceneLocalResources = ContentPanel.Element<Checkbox>().Value(ShowSceneLocalResources).IsChecked();
         ContentPanel.Label("Show Local to Scene", 9).TextAlignment(-1);
@@ -105,6 +105,9 @@ public class EditorResourcesView : EditorView
     private HierarchyElement<string> CreateHierarchyElement(Type type, string resourceId, string hierarchyId = null,
         Resource resource = null)
     {
+        var editorBase = Scene.Systems.Get<EditorBase>();
+        var editingTab = editorBase.CurrentTab;
+        
         hierarchyId = hierarchyId ?? resourceId;
 
         var element = (HierarchyElement<string>)_main.Element<HierarchyElement<string>>()
@@ -131,9 +134,9 @@ public class EditorResourcesView : EditorView
 
                     if (ContentPanel.Environment is EditorEnvironment editorEnvironment)
                     {
-                        editorEnvironment.Scene.Systems.Get<EditorBase>().EditingEntity.Clear();
+                        editingTab.EditingEntity.Clear();
                         editorEnvironment.GetView<EditorInspectorView>()
-                            .SetObject((editorEnvironment.EditingScene?.Resources ?? Scene.Core.Resources).Get(type, ref identifier));
+                            .SetObject((editorEnvironment.EditingTab.Scene?.Resources ?? Scene.Core.Resources).Get(type, ref identifier));
                         editorEnvironment.SwitchToView<EditorInspectorView>();
                     }
 
@@ -147,7 +150,7 @@ public class EditorResourcesView : EditorView
                     {
                         if (ContentPanel.Environment is EditorEnvironment editorEnvironment)
                         {
-                            editorEnvironment.Scene.Systems.Get<EditorBase>().EditingEntity.Clear();
+                            editingTab.EditingEntity.Clear();
                             editorEnvironment.GetView<EditorInspectorView>()
                                 .SetObject(ContentPanel.Environment.Core.Resources.Get(type, ref identifier));
                             editorEnvironment.SwitchToView<EditorInspectorView>();
@@ -159,7 +162,7 @@ public class EditorResourcesView : EditorView
                     {
                         if (ContentPanel.Environment is EditorEnvironment editorEnvironment)
                         {
-                            editorEnvironment.Scene.Systems.Get<EditorBase>().EditingEntity.Clear();
+                            editingTab.EditingEntity.Clear();
                             editorEnvironment.GetView<EditorInspectorView>().SetObject(new Loading()
                             {
                                 Type = type,

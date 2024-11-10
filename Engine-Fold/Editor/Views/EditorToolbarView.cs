@@ -12,8 +12,6 @@ namespace FoldEngine.Editor.Views;
 
 public class EditorToolbarView : EditorView
 {
-    private static byte[] _storedScene;
-
     public EditorToolbarView()
     {
         Icon = new ResourceIdentifier("editor/cog");
@@ -23,6 +21,9 @@ public class EditorToolbarView : EditorView
 
     public override void Render(IRenderingUnit renderer)
     {
+        var editorBase = Scene.Systems.Get<EditorBase>();
+        ref var editingTab = ref editorBase.CurrentTab;
+        
         foreach (EditorTool tool in ((EditorEnvironment)ContentPanel.Environment).Tools)
             if (ContentPanel.Element<ToolbarButton>()
                 .Down(tool == ((EditorEnvironment)ContentPanel.Environment).ActiveTool)
@@ -41,64 +42,67 @@ public class EditorToolbarView : EditorView
             .Icon(EditorResources.Get<Texture>(ref EditorIcons.Play))
             .IsPressed())
         {
-            if (_storedScene == null)
+            if (editingTab.StoredSceneData == null)
             {
-                Play(ContentPanel.Environment as EditorEnvironment);
+                Play(ContentPanel.Environment as EditorEnvironment, ref editingTab);
             }
             else
             {
-                Stop(ContentPanel.Environment as EditorEnvironment);
+                Stop(ContentPanel.Environment as EditorEnvironment, ref editingTab);
                 Core.AudioUnit.StopAll();
                 GC.Collect(GC.MaxGeneration);
             }
         }
 
-        if (ContentPanel.Element<ToolbarButton>()
-            .Down(EditingScene.Paused)
+        if (editingTab.Scene != null && editingTab.Playing
+            && ContentPanel.Element<ToolbarButton>()
+            .Down(editingTab.Scene.Paused)
             .Text("")
             .FontSize(14)
             .Icon(EditorResources.Get<Texture>(ref EditorIcons.Pause))
             .IsPressed())
-            EditingScene.Paused = !EditingScene.Paused;
+            editingTab.Scene.Paused = !editingTab.Scene.Paused;
         // ContentPanel.Button("Entities").Action(SceneEditor.Actions.ChangeToMenu, 1);
         // ContentPanel.Button("Systems").Action(SceneEditor.Actions.ChangeToMenu, 2);
         // ContentPanel.Button("Edit Save Data").Action(SceneEditor.Actions.Test, 0);
         // ContentPanel.Element<ToolbarButton>().Text("Quit").FontSize(14);
     }
 
-    internal static void NewSceneLoaded()
+    private void Play(EditorEnvironment environment, ref EditorTab editingTab)
     {
-        _storedScene = null;
-    }
-
-    private void Play(EditorEnvironment environment)
-    {
-        environment.Scene.CameraOverrides = null;
-
         var stream = new MemoryStream();
 
         var saveOp = new SaveOperation(stream);
         saveOp.Options.Set(SerializeTempResources.Instance, true);
-        environment.Scene.Serialize(saveOp);
+        environment.EditingTab.Scene.Serialize(saveOp);
 
         saveOp.Close();
-        _storedScene = stream.GetBuffer();
+        editingTab.StoredSceneData = stream.GetBuffer();
         saveOp.Dispose();
-        environment.Scene.Paused = false;
+        SetScenePlaying(environment, ref editingTab, true);
     }
 
-    private void Stop(EditorEnvironment environment)
+    private void Stop(EditorEnvironment environment, ref EditorTab editingTab)
     {
-        var loadOp = new LoadOperation(new MemoryStream(_storedScene));
+        var loadOp = new LoadOperation(new MemoryStream(editingTab.StoredSceneData));
 
         loadOp.Options.Set(DeserializeClearScene.Instance, true);
 
-        environment.Scene.Deserialize(loadOp);
+        environment.EditingTab.Scene.Deserialize(loadOp);
+        environment.EditingTab.Scene.Flush();
 
         loadOp.Close();
         loadOp.Dispose();
-        _storedScene = null;
-        environment.EditingScene.CameraOverrides = new CameraOverrides(environment.EditingScene);
-        environment.Scene.Paused = true;
+        editingTab.StoredSceneData = null;
+        SetScenePlaying(environment, ref editingTab, false);
+    }
+
+    private void SetScenePlaying(EditorEnvironment environment, ref EditorTab editingTab, bool playing)
+    {
+        editingTab.Playing = playing;
+
+        ref var subScene = ref environment.Scene.Systems.Get<EditorBase>().CurrentSubScene;
+        subScene.Update = subScene.ProcessInputs = playing;
+        subScene.Render = true;
     }
 }

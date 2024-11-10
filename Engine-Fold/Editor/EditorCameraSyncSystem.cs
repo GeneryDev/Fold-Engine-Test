@@ -31,17 +31,17 @@ public class EditorCameraSyncSystem : GameSystem
                 ref var tab = ref parentEntity.GetComponent<EditorTab>();
                 var subScene = parentEntity.GetComponent<SubScene>().Scene;
                 if (subScene == null) continue;
-                if (tab.PreviewSceneCamera)
-                {
-                    subScene.CameraOverrides = null;
-                }
-                else
+                if (tab is { PreviewSceneCamera: false, Playing: false })
                 {
                     subScene.CameraOverrides ??= new CameraOverrides(subScene);
                     subScene.CameraOverrides.Transform.RestoreSnapshot(transform);
-                    
+
                     subScene.CameraOverrides.Camera.SnapPosition = camera.SnapPosition;
                     subScene.CameraOverrides.Camera.RenderToLayer = camera.RenderToLayer;
+                }
+                else
+                {
+                    subScene.CameraOverrides = null;
                 }
             }
         }

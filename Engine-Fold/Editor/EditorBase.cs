@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using FoldEngine.Commands;
+﻿using FoldEngine.Commands;
 using FoldEngine.Components;
 using FoldEngine.Editor.Gui;
 using FoldEngine.Editor.Views;
@@ -17,18 +16,19 @@ namespace FoldEngine.Editor;
 [GameSystem("fold:editor.base", ProcessingCycles.All, true)]
 public class EditorBase : GameSystem
 {
-    public List<long> EditingEntity = new List<long>();
-    // public override bool ShouldSave => false;
-
-    [DoNotSerialize] public EditorEnvironment Environment;
+    [DoNotSerialize] private EditorEnvironment _environment;
 
     public bool InspectSelf = false;
     private long _currentSceneTabId = -1;
+    private SubScene _nullSubScene;
+    
     private EditorTab _selfTab;
     private EditorTab _nullTab;
+    
     private Transform _selfCameraTransform;
     private Transform _nullTransform;
     
+    [DoNotSerialize]
     public ComponentIterator<EditorTab> TabIterator;
 
     public ref EditorTab CurrentTab
@@ -40,6 +40,18 @@ public class EditorBase : GameSystem
             if (_currentSceneTabId != -1 && Scene.Components.HasComponent<EditorTab>(_currentSceneTabId))
                 return ref Scene.Components.GetComponent<EditorTab>(_currentSceneTabId);
             return ref _nullTab;
+        }
+    }
+
+    public ref SubScene CurrentSubScene
+    {
+        get
+        {
+            if (InspectSelf)
+                return ref _nullSubScene;
+            if (_currentSceneTabId != -1 && Scene.Components.HasComponent<SubScene>(_currentSceneTabId))
+                return ref Scene.Components.GetComponent<SubScene>(_currentSceneTabId);
+            return ref _nullSubScene;
         }
     }
 
@@ -72,43 +84,44 @@ public class EditorBase : GameSystem
 
     public override void SubscribeToEvents()
     {
-        Subscribe<WindowSizeChangedEvent>((ref WindowSizeChangedEvent evt) => { Environment.LayoutValidated = false; });
+        Subscribe<WindowSizeChangedEvent>((ref WindowSizeChangedEvent evt) => { _environment.LayoutValidated = false; });
     }
 
     public override void Initialize()
     {
         _selfTab = new EditorTab()
         {
-            SceneTransactions = new TransactionManager<Scene>(Scene)
+            SceneTransactions = new TransactionManager<Scene>(Scene),
+            Scene = Scene
         };
         
-        Environment = new EditorEnvironment(this);
+        _environment = new EditorEnvironment(this);
 
-        Environment.AddView<EditorToolbarView>(Environment.NorthPanel);
-        Environment.AddView<EditorHierarchyView>(Environment.WestPanel);
-        Environment.AddView<EditorSystemsView>(Environment.WestPanel);
-        Environment.AddView<EditorInspectorView>(Environment.EastPanel);
-        Environment.AddView<EditorSceneView>(Environment.CenterPanel);
-        Environment.AddView<EditorResourcesView>(Environment.SouthPanel);
-        Environment.AddView<EditorDebugActionsView>(Environment.EastPanel);
-        Environment.AddView<EditorSceneListView>(Environment.SouthPanel);
+        _environment.AddView<EditorToolbarView>(_environment.NorthPanel);
+        _environment.AddView<EditorHierarchyView>(_environment.WestPanel);
+        _environment.AddView<EditorSystemsView>(_environment.WestPanel);
+        _environment.AddView<EditorInspectorView>(_environment.EastPanel);
+        _environment.AddView<EditorSceneView>(_environment.CenterPanel);
+        _environment.AddView<EditorResourcesView>(_environment.SouthPanel);
+        _environment.AddView<EditorDebugActionsView>(_environment.EastPanel);
+        _environment.AddView<EditorSceneListView>(_environment.SouthPanel);
         // Environment.AddView<EditorTestView>(Environment.SouthPanel);
 
-        Environment.WestPanel.ViewLists[0].ActiveView = Environment.GetView<EditorHierarchyView>();
-        Environment.NorthPanel.ViewLists[0].ActiveView = Environment.GetView<EditorToolbarView>();
-        Environment.SouthPanel.ViewLists[0].ActiveView = Environment.GetView<EditorResourcesView>();
+        _environment.WestPanel.ViewLists[0].ActiveView = _environment.GetView<EditorHierarchyView>();
+        _environment.NorthPanel.ViewLists[0].ActiveView = _environment.GetView<EditorToolbarView>();
+        _environment.SouthPanel.ViewLists[0].ActiveView = _environment.GetView<EditorResourcesView>();
 
         TabIterator = CreateComponentIterator<EditorTab>(IterationFlags.Ordered | IterationFlags.IncludeInactive);
     }
 
     public override void OnInput()
     {
-        Environment.Input(Scene.Core.InputUnit);
+        _environment.Input(Scene.Core.InputUnit);
     }
 
     public override void OnUpdate()
     {
-        Environment.Update();
+        _environment.Update();
     }
 
     public override void OnRender(IRenderingUnit renderer)
@@ -120,16 +133,22 @@ public class EditorBase : GameSystem
             return;
         }
 
-        Environment.Render(renderer, renderer.RootGroup["editor_gui"], renderer.RootGroup["editor_gui_overlay"]);
+        _environment.Render(renderer, renderer.RootGroup["editor_gui"], renderer.RootGroup["editor_gui_overlay"]);
 
-        foreach (long entityId in EditingEntity)
-            if (Scene.Components.HasComponent<Transform>(entityId))
+        if (_currentSceneTabId != -1)
+        {
+            var currentTab = CurrentTab;
+            foreach (long entityId in CurrentTab.EditingEntity)
             {
-                var entity = new Entity(Scene, entityId);
+                if (currentTab.Scene.Components.HasComponent<Transform>(entityId))
+                {
+                    var entity = new Entity(currentTab.Scene, entityId);
 
-                LevelRenderer2D.DrawOutline(entity);
-                ColliderGizmoRenderer.DrawColliderGizmos(entity);
+                    LevelRenderer2D.DrawOutline(entity);
+                    ColliderGizmoRenderer.DrawColliderGizmos(entity);
+                }
             }
+        }
     }
 
     public void OpenScene(Scene editedScene)
@@ -144,6 +163,7 @@ public class EditorBase : GameSystem
         subScene.ProcessInputs = false;
 
         ref var tab = ref tabEntity.AddComponent<EditorTab>();
+        tab.Scene = editedScene;
         tab.SceneTransactions = new TransactionManager<Scene>(editedScene);
 
         if (_currentSceneTabId == -1)
@@ -171,6 +191,22 @@ public class EditorBase : GameSystem
         {
             var entity = new Entity(Scene, TabIterator.GetEntityId());
             entity.Active = entity.EntityId == tabId;
+        }
+    }
+
+    public void Undo()
+    {
+        if (_currentSceneTabId != -1)
+        {
+            CurrentTab.SceneTransactions.Undo();
+        }
+    }
+
+    public void Redo()
+    {
+        if (_currentSceneTabId != -1)
+        {
+            CurrentTab.SceneTransactions.Redo();
         }
     }
 }

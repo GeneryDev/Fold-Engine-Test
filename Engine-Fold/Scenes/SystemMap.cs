@@ -71,9 +71,15 @@ public class SystemMap : ISelfSerializer
     public void Deserialize(LoadOperation reader)
     {
         if (reader.Options.Get(DeserializeClearScene.Instance))
+        {
+            _queueModifications = true;
             foreach (GameSystem sys in _all)
                 Remove(sys);
+            _queueModifications = false;
+            Flush();
+        }
 
+        _queueModifications = true;
         reader.ReadCompound(c =>
         {
             if (c.HasMember(nameof(_all)))
@@ -102,20 +108,26 @@ public class SystemMap : ISelfSerializer
                 });
             }
         });
+        _queueModifications = false;
+        Flush();
     }
 
     public void Add<T>() where T : GameSystem, new()
     {
-        var newSys = new T();
-        if(_queueModifications)
-            _queuedToAdd.Enqueue(newSys);
-        else
-            AddDirectly(newSys);
+        Add(new T());
     }
 
     public void Add(GameSystem sys)
     {
-        _queuedToAdd.Enqueue(sys);
+        if(_queueModifications)
+            _queuedToAdd.Enqueue(sys);
+        else
+            AddDirectly(sys);
+    }
+
+    public void Remove<T>() where T : GameSystem, new()
+    {
+        Remove(Get<T>());
     }
 
     public void Remove(GameSystem sys)
@@ -124,11 +136,6 @@ public class SystemMap : ISelfSerializer
             _queuedToRemove.Enqueue(sys);
         else
             RemoveDirectly(sys);
-    }
-
-    public void Remove<T>() where T : GameSystem, new()
-    {
-        Remove(Get<T>());
     }
 
     private void UpdateProcessingGroups()
