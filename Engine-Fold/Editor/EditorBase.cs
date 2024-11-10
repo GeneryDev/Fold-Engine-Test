@@ -22,18 +22,53 @@ public class EditorBase : GameSystem
 
     [DoNotSerialize] public EditorEnvironment Environment;
 
-    public long CurrentSceneTabId = -1;
+    public bool InspectSelf = false;
+    private long _currentSceneTabId = -1;
+    private EditorTab _selfTab;
+    private EditorTab _nullTab;
+    private Transform _selfCameraTransform;
+    private Transform _nullTransform;
     
     public ComponentIterator<EditorTab> TabIterator;
 
-    public EditorTab CurrentTab =>
-        CurrentSceneTabId != -1 && Scene.Components.HasComponent<EditorTab>(CurrentSceneTabId)
-            ? Scene.Components.GetComponent<EditorTab>(CurrentSceneTabId)
-            : default;
+    public ref EditorTab CurrentTab
+    {
+        get
+        {
+            if (InspectSelf)
+                return ref _selfTab;
+            if (_currentSceneTabId != -1 && Scene.Components.HasComponent<EditorTab>(_currentSceneTabId))
+                return ref Scene.Components.GetComponent<EditorTab>(_currentSceneTabId);
+            return ref _nullTab;
+        }
+    }
 
-    public Scene CurrentScene => CurrentSceneTabId != -1 && Scene.Components.HasComponent<SubScene>(CurrentSceneTabId)
-        ? Scene.Components.GetComponent<SubScene>(CurrentSceneTabId).Scene
-        : null;
+    public Scene CurrentScene
+    {
+        get
+        {
+            if (InspectSelf)
+                return Scene;
+            if (_currentSceneTabId != -1 && Scene.Components.HasComponent<SubScene>(_currentSceneTabId))
+                return Scene.Components.GetComponent<SubScene>(_currentSceneTabId).Scene;
+            return null;
+        }
+    }
+
+    public ref Transform CurrentCameraTransform
+    {
+        get
+        {
+            if (InspectSelf)
+                return ref _selfCameraTransform;
+            if (_currentSceneTabId != -1 && Scene.Components.HasComponent<EditorTab>(_currentSceneTabId))
+            {
+                var tab = Scene.Components.GetComponent<EditorTab>(_currentSceneTabId);
+                return ref Scene.Components.GetComponent<Transform>(tab.EditorCameraEntityId);
+            }
+            return ref _nullTransform;
+        }
+    }
 
     public override void SubscribeToEvents()
     {
@@ -42,6 +77,11 @@ public class EditorBase : GameSystem
 
     public override void Initialize()
     {
+        _selfTab = new EditorTab()
+        {
+            SceneTransactions = new TransactionManager<Scene>(Scene)
+        };
+        
         Environment = new EditorEnvironment(this);
 
         Environment.AddView<EditorToolbarView>(Environment.NorthPanel);
@@ -105,21 +145,26 @@ public class EditorBase : GameSystem
 
         ref var tab = ref tabEntity.AddComponent<EditorTab>();
         tab.SceneTransactions = new TransactionManager<Scene>(editedScene);
-        tab.EditingEntity = new List<long>();
 
-        if (CurrentSceneTabId == -1)
+        if (_currentSceneTabId == -1)
         {
-            CurrentSceneTabId = tabEntity.EntityId;
+            _currentSceneTabId = tabEntity.EntityId;
         }
         else
         {
             tabEntity.AddComponent<InactiveComponent>();
         }
+        
+        var editorCameraEntity = Scene.CreateEntity("Editor Camera");
+        editorCameraEntity.AddComponent<Camera>();
+        editorCameraEntity.Transform.SetParent(tabEntity.EntityId);
+
+        tab.EditorCameraEntityId = editorCameraEntity.EntityId;
     }
 
     public void SelectTab(long tabId)
     {
-        CurrentSceneTabId = tabId;
+        _currentSceneTabId = tabId;
 
         TabIterator.Reset();
         while (TabIterator.Next())

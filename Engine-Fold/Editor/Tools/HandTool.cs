@@ -19,11 +19,14 @@ public class HandTool : EditorTool
 
     public override void OnMousePressed(ref MouseEvent e)
     {
-        if (Scene.CameraOverrides == null) return;
+        var editorBase = Environment.EditorBase;
+        
+        ref Transform cameraTransform = ref editorBase.CurrentCameraTransform;
+        if (cameraTransform.IsNull) return;
 
         IRenderingLayer worldLayer = Core.RenderingUnit.WorldLayer;
         Vector2 cameraPos = worldLayer.LayerToCamera(worldLayer.WindowToLayer(e.Position.ToVector2()));
-        Vector2 worldPos = Scene.CameraOverrides.Transform.Apply(cameraPos);
+        Vector2 worldPos = cameraTransform.Apply(cameraPos);
 
         _dragStartWorldPos = worldPos;
         _dragging = true;
@@ -36,15 +39,16 @@ public class HandTool : EditorTool
 
     public override void OnInput(ControlScheme controls)
     {
-        if (Scene.CameraOverrides == null) return;
+        var editorBase = Environment.EditorBase;
+        
+        ref Transform cameraTransform = ref editorBase.CurrentCameraTransform;
+        if (cameraTransform.IsNull) return;
 
         if (_dragging)
         {
             IRenderingLayer worldLayer = Core.RenderingUnit.WorldLayer;
             Vector2 cameraRelativePos =
                 worldLayer.LayerToCamera(worldLayer.WindowToLayer(Environment.MousePos.ToVector2()));
-
-            ref Transform cameraTransform = ref Scene.CameraOverrides.Transform;
 
             cameraTransform.Position = _dragStartWorldPos;
             cameraTransform.Position = cameraTransform.Apply(-cameraRelativePos);

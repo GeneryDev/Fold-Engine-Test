@@ -1,5 +1,6 @@
 ﻿using System;
 using FoldEngine.Commands;
+using FoldEngine.Editor.Gui;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 
@@ -17,6 +18,8 @@ public class EditorDebugActionsView : EditorView
     public override void Render(IRenderingUnit renderer)
     {
         ContentPanel.MayScroll = true;
+
+        var editorBase = ((EditorEnvironment)ContentPanel.Environment).EditorBase;
 
         if (ContentPanel.Button("Save Scene", 14).IsPressed())
         {
@@ -43,5 +46,13 @@ public class EditorDebugActionsView : EditorView
 
         if (ContentPanel.Button("Reload Resources", 14).IsPressed()) Core.ResourceIndex.Update();
         if (ContentPanel.Button("Invoke GC", 14).IsPressed()) GC.Collect(GC.MaxGeneration);
+        if (!editorBase.InspectSelf)
+        {
+            if (ContentPanel.Button("Start Inspecting Editor Scene", 14).IsPressed()) editorBase.InspectSelf = true;
+        }
+        else
+        {
+            if (ContentPanel.Button("Stop Inspecting Editor Scene", 14).IsPressed()) editorBase.InspectSelf = false;
+        }
     }
 }

@@ -24,6 +24,8 @@ public struct Transform
     /// </summary>
     [HideInInspector] public readonly bool IsNotNull;
 
+    public bool IsNull => !IsNotNull;
+
     /// <summary>
     ///     Reference to the scene this component belongs to.
     /// </summary>

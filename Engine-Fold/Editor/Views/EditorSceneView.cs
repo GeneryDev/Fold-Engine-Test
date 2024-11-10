@@ -63,24 +63,29 @@ public class SceneViewPanel : GuiPanel
 
     public override void Scroll(int dir)
     {
-        if (Environment.Scene.CameraOverrides != null)
-        {
-            ref Transform cameraTransform = ref Environment.Scene.CameraOverrides.Transform;
+        var editorBase = ((EditorEnvironment)Environment).EditorBase;
+        
+        ref Transform cameraTransform = ref editorBase.CurrentCameraTransform;
+        if (!cameraTransform.IsNotNull) return;
 
-            IRenderingLayer worldLayer = Environment.Core.RenderingUnit.WorldLayer;
-            Vector2 cameraRelativePos =
-                worldLayer.LayerToCamera(worldLayer.WindowToLayer(Environment.MousePos.ToVector2()));
-            Vector2 pivot = cameraTransform.Apply(cameraRelativePos);
+        IRenderingLayer worldLayer = Environment.Core.RenderingUnit.WorldLayer;
+        Vector2 cameraRelativePos =
+            worldLayer.LayerToCamera(worldLayer.WindowToLayer(Environment.MousePos.ToVector2()));
+        Vector2 pivot = cameraTransform.Apply(cameraRelativePos);
 
-            cameraTransform.LocalScale -= cameraTransform.LocalScale * 0.1f * dir;
+        cameraTransform.LocalScale -= cameraTransform.LocalScale * 0.1f * dir;
 
-            cameraTransform.Position = pivot;
-            cameraTransform.Position = cameraTransform.Apply(-cameraRelativePos);
-        }
+        cameraTransform.Position = pivot;
+        cameraTransform.Position = cameraTransform.Apply(-cameraRelativePos);
     }
 
     public override void OnInput(ControlScheme controls)
     {
+        var editorBase = ((EditorEnvironment)Environment).EditorBase;
+        
+        ref Transform cameraTransform = ref editorBase.CurrentCameraTransform;
+        if (cameraTransform.IsNull) return;
+        
         Vector2 move = controls.Get<AnalogAction>("editor.movement.axis.x") * Vector2.UnitX
                        + controls.Get<AnalogAction>("editor.movement.axis.y") * Vector2.UnitY;
         if (move != default)
@@ -88,9 +93,9 @@ public class SceneViewPanel : GuiPanel
             float speed = 250f;
             if (controls.Get<ButtonAction>("editor.movement.faster").Down) speed *= 4;
 
-            speed *= Environment.Scene.CameraOverrides.Transform.LocalScale.X;
+            speed *= cameraTransform.LocalScale.X;
 
-            Environment.Scene.CameraOverrides.Transform.Position += move * speed * Time.DeltaTime;
+            cameraTransform.Position += move * speed * Time.DeltaTime;
         }
 
         ((EditorEnvironment)Environment).ActiveTool?.OnInput(controls);
