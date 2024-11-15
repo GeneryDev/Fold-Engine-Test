@@ -105,15 +105,16 @@ internal class DemoScene : Scene
         Entity e5 = CreateEntity("Control");
         ref var control = ref e5.AddComponent<Control>();
         control.Size = new Vector2(500, 500);
+        e5.AddComponent<FreeContainer>();
         e5.AddComponent<BoxControl>().Color = Color.Salmon;
         Systems.Add<ControlLayoutSystem>();
         Systems.Add<ControlRenderer>();
 
         Entity e6 = CreateEntity("Control 2");
-        ref var control2 = ref e6.AddComponent<Control>();
-        control2 = control2 with
+        e6.AddComponent<Control>();
+        ref var e6Anchors = ref e6.AddComponent<AnchoredControl>();
+        e6Anchors = e6Anchors with
         {
-            UseAnchors = true,
             AnchorLeft = 0.5f,
             AnchorRight = 0.5f,
             AnchorTop = 1.0f,
@@ -126,6 +127,30 @@ internal class DemoScene : Scene
         e6.AddComponent<BoxControl>().Color = Color.Lime;
         e6.Transform.SetParent(e5);
 
+        Entity container = CreateEntity("Container");
+        container.AddComponent<Control>();
+        container.AddComponent<FlowContainer>();
+        container.Transform.SetParent(e5);
+        ref var containerAnchored = ref container.AddComponent<AnchoredControl>();
+        containerAnchored = containerAnchored with
+        {
+            AnchorRight = 1,
+            AnchorBottom = 1
+        };
+
+        void AddBoxInContainer()
+        {
+            var color = new Color(Random.Shared.Next(256), Random.Shared.Next(256), Random.Shared.Next(256));
+            var box = CreateEntity("Box");
+            box.AddComponent<Control>().Size = new Vector2(Random.Shared.Next(40, 80), Random.Shared.Next(40, 80));
+            box.AddComponent<BoxControl>().Color = color;
+            box.Transform.SetParent(container);
+        }
+
+        for (int i = 0; i < 10; i++)
+        {
+            AddBoxInContainer();
+        }
 
         /*e0.Transform.Position = new Vector2(1, 2);
         e1.Transform.Parent = e0.Transform;
