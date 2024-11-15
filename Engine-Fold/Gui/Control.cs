@@ -7,7 +7,6 @@ namespace FoldEngine.Gui;
 [Component("fold:control")]
 public struct Control
 {
-    public Vector2 Position;
     public Vector2 Size;
 
     public float ZOrder;

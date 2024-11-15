@@ -109,6 +109,23 @@ internal class DemoScene : Scene
         Systems.Add<ControlLayoutSystem>();
         Systems.Add<ControlRenderer>();
 
+        Entity e6 = CreateEntity("Control 2");
+        ref var control2 = ref e6.AddComponent<Control>();
+        control2 = control2 with
+        {
+            UseAnchors = true,
+            AnchorLeft = 0.5f,
+            AnchorRight = 0.5f,
+            AnchorTop = 1.0f,
+            AnchorBottom = 1.0f,
+            OffsetLeft = -202,
+            OffsetRight = 202,
+            OffsetTop = -70,
+            OffsetBottom = -48,
+        };
+        e6.AddComponent<BoxControl>().Color = Color.Lime;
+        e6.Transform.SetParent(e5);
+
 
         /*e0.Transform.Position = new Vector2(1, 2);
         e1.Transform.Parent = e0.Transform;

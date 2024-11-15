@@ -47,9 +47,9 @@ public class ControlLayoutSystem : GameSystem
         ref var transform = ref Scene.Components.GetComponent<Transform>(entityId);
         ref var control = ref Scene.Components.GetComponent<Control>(entityId);
 
-        DeconstructParentBounds(ref transform, out var parentPosition, out var parentSize);
-        var parentBegin = parentPosition;
-        var parentEnd = parentPosition + parentSize;
+        DeconstructParentBounds(ref transform, out _, out var parentSize);
+        var parentBegin = Vector2.Zero; // TODO zero
+        var parentEnd = Vector2.Zero + parentSize;
 
         if (control.UseAnchors)
         {
@@ -65,19 +65,21 @@ public class ControlLayoutSystem : GameSystem
             var ownBegin = anchorBegin + new Vector2(control.OffsetLeft, control.OffsetTop);
             var ownEnd = anchorEnd + new Vector2(control.OffsetRight, control.OffsetBottom);
 
-            control.Position = ownBegin;
+            transform.LocalPosition = ownBegin;
             control.Size = ownEnd - ownBegin;
         }
+        
+        LayoutChildren(ref transform);
     }
 
     private void DeconstructParentBounds(ref Transform transform, out Vector2 parentPosition, out Vector2 parentSize)
     {
         if (transform is { HasParent: true, ParentId: var parentId } && Scene.Components.HasComponent<Control>(parentId))
         {
+            ref var parentTransform = ref Scene.Components.GetComponent<Transform>(parentId);
             ref var parentControl = ref Scene.Components.GetComponent<Control>(parentId);
-            Scene.Events.Invoke(new LayoutRequestedEvent(parentId));
 
-            parentPosition = parentControl.Position;
+            parentPosition = parentTransform.Position;
             parentSize = parentControl.Size;
         }
         else
@@ -86,6 +88,24 @@ public class ControlLayoutSystem : GameSystem
             
             parentPosition = Vector2.Zero;
             parentSize = Scene.Core.RenderingUnit.WorldLayer.LayerSize.ToVector2();
+        }
+    }
+
+    private void LayoutChildren(ref Transform transform)
+    {
+        long childId = transform.FirstChildId;
+        while (childId != -1)
+        {
+            var childTransform = Scene.Components.GetComponent<Transform>(childId);
+
+            if (Scene.Components.HasComponent<Control>(childId))
+            {
+                var childControl = Scene.Components.GetComponent<Control>(childId);
+                if(childControl.UseAnchors)
+                    Scene.Events.Invoke(new LayoutRequestedEvent(childId));
+            }
+
+            childId = childTransform.NextSiblingId;
         }
     }
 }

@@ -52,6 +52,7 @@ public class ControlRenderer : GameSystem
         for (var i = 0; i < _entitiesToRender.Count; i++)
         {
             var entity = new Entity(Scene, _entitiesToRender[i].EntityId);
+            ref Transform transform = ref entity.Transform;
             ref Control control = ref entity.GetComponent<Control>();
             ref BoxControl box = ref entity.GetComponent<BoxControl>();
 
@@ -59,7 +60,7 @@ public class ControlRenderer : GameSystem
             {
                 Texture = renderer.WhiteTexture,
                 Color = box.Color,
-                DestinationRectangle = new Rectangle(control.Position.ToPoint(), control.Size.ToPoint())
+                DestinationRectangle = new Rectangle(transform.Position.ToPoint(), control.Size.ToPoint())
             });
         }
     }
