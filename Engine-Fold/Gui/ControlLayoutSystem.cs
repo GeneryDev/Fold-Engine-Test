@@ -113,11 +113,16 @@ public class ControlLayoutSystem : GameSystem
         float separationSec = vertical ? flow.HSeparation : flow.VSeparation;
 
         float maxSecSize = 0;
-        
+
         long childId = transform.FirstChildId;
+        long rowStartId = childId;
+        long prevChildId = -1;
         while (childId != -1)
         {
             ref var childTransform = ref Scene.Components.GetComponent<Transform>(childId);
+
+            var overflowed = false;
+            float remainingRowGap = 0;
 
             if (Scene.Components.HasComponent<Control>(childId))
             {
@@ -129,6 +134,8 @@ public class ControlLayoutSystem : GameSystem
 
                 if (offsetMain + sizeMain > containerSizeMain)
                 {
+                    overflowed = true;
+                    remainingRowGap = containerSizeMain - (offsetMain == 0 ? 0 : offsetMain - separationMain);
                     // wrap
                     offsetSec += maxSecSize + separationSec;
                     offsetMain = 0;
@@ -142,8 +149,50 @@ public class ControlLayoutSystem : GameSystem
                 offsetMain += sizeMain + separationMain;
                 maxSecSize = Math.Max(maxSecSize, sizeSec);
             }
+            
+            // End of row. Iterate through all of the prior
+            if (overflowed)
+            {
+                AlignFlowRow(rowStartId, prevChildId, flow, remainingRowGap);
+                rowStartId = childId;
+            }
 
+            prevChildId = childId;
             childId = childTransform.NextSiblingId;
+            if (childId == -1)
+            {
+                //reached end
+                remainingRowGap = containerSizeMain - (offsetMain == 0 ? 0 : offsetMain - separationMain);
+                AlignFlowRow(rowStartId, prevChildId, flow, remainingRowGap);
+            }
+        }
+    }
+
+    private void AlignFlowRow(long rowStartId, long rowEndId, FlowContainer container, float remainingGap)
+    {
+        // Process previous row
+        float rowOffsetMain = remainingGap * (container.Alignment switch
+        {
+            Alignment.Begin => 0.0f,
+            Alignment.Center => 0.5f,
+            Alignment.End => 1.0f,
+            _ => 0
+        });
+        Console.WriteLine("row offset main: " + rowOffsetMain);
+
+        long rowElementId = rowStartId;
+        while (rowElementId != -1)
+        {
+            ref var rowElementTransform = ref Scene.Components.GetComponent<Transform>(rowElementId);
+
+            if (Scene.Components.HasComponent<Control>(rowElementId))
+            {
+                rowElementTransform.Position += (container.Vertical ? Vector2.UnitY : Vector2.UnitX) * rowOffsetMain;
+            }
+
+            if (rowElementId == rowEndId) break;
+            
+            rowElementId = rowElementTransform.NextSiblingId;
         }
     }
 

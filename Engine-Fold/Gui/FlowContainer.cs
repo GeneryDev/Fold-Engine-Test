@@ -6,6 +6,7 @@ namespace FoldEngine.Gui;
 public struct FlowContainer
 {
     public bool Vertical;
+    public Alignment Alignment;
 
     public float HSeparation;
     public float VSeparation;
