@@ -6,13 +6,15 @@ namespace FoldEngine.Gui;
 public struct LayoutRequestedEvent
 {
     public long EntityId;
+    public long ViewportId;
 
     public LayoutRequestedEvent()
     {
     }
     
-    public LayoutRequestedEvent(long entityId)
+    public LayoutRequestedEvent(long entityId, long viewportId)
     {
         EntityId = entityId;
+        ViewportId = viewportId;
     }
 }

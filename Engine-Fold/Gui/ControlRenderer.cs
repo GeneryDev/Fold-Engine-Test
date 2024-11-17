@@ -17,18 +17,30 @@ namespace FoldEngine.Gui;
 [GameSystem("fold:control_renderer", ProcessingCycles.Render, true)]
 public class ControlRenderer : GameSystem
 {
+    private ComponentIterator<Viewport> _viewports;
     private ComponentIterator<Control> _controls;
 
     private List<RenderableKey> _entitiesToRender = new List<RenderableKey>();
 
     public override void Initialize()
     {
+        _viewports = CreateComponentIterator<Viewport>(IterationFlags.None);
         _controls = CreateComponentIterator<Control>(IterationFlags.None);
     }
 
     public override void OnRender(IRenderingUnit renderer)
     {
-        var layer = renderer.WindowLayer;
+        IRenderingLayer layer = null;
+
+        _viewports.Reset();
+        while (_viewports.Next())
+        {
+            ref var viewport = ref _viewports.GetComponent();
+            layer = viewport.GetLayer(renderer);
+            break;
+        }
+
+        if (layer == null) return;
         
         _entitiesToRender.Clear();
         

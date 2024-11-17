@@ -10,7 +10,7 @@ public struct DrawRectInstruction
     public Color? Color;
     public float Z;
 
-    public DrawRectInstruction(ITexture texture, Vector2 destination, Rectangle? sourceRectangle = null, float z = 50)
+    public DrawRectInstruction(ITexture texture, Vector2 destination, Rectangle? sourceRectangle = null, float z = 0)
     {
         Texture = texture;
         DestinationRectangle = new Rectangle(destination.ToPoint(),
@@ -24,12 +24,13 @@ public struct DrawRectInstruction
     public DrawRectInstruction(
         ITexture texture,
         Rectangle destinationRectangle,
-        Rectangle? sourceRectangle = null)
+        Rectangle? sourceRectangle = null, float z = 0)
     {
         Texture = texture;
         DestinationRectangle = destinationRectangle;
         SourceRectangle = sourceRectangle;
         Color = null;
+        Z = z;
     }
 
     public static implicit operator DrawQuadInstruction(DrawRectInstruction instruction)

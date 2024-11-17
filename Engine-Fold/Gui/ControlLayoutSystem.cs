@@ -10,15 +10,30 @@ namespace FoldEngine.Gui;
 [GameSystem("fold:control.layout", ProcessingCycles.Render, true)]
 public class ControlLayoutSystem : GameSystem
 {
+    private ComponentIterator<Viewport> _viewports;
     private ComponentIterator<Control> _controls;
+
+    private long _mainViewportId = -1;
 
     public override void Initialize()
     {
+        _viewports = CreateComponentIterator<Viewport>(IterationFlags.None);
         _controls = CreateComponentIterator<Control>(IterationFlags.None);
     }
 
     public override void OnRender(IRenderingUnit renderer)
     {
+        _mainViewportId = -1;
+        
+        _viewports.Reset();
+        while (_viewports.Next())
+        {
+            _mainViewportId = _viewports.GetEntityId();
+            break;
+        }
+
+        if (_mainViewportId == -1) return;
+        
         _controls.Reset();
         while (_controls.Next())
         {
@@ -26,7 +41,7 @@ public class ControlLayoutSystem : GameSystem
             if (control.RequestLayout)
             {
                 control.RequestLayout = false;
-                Scene.Events.Invoke(new LayoutRequestedEvent(_controls.GetEntityId()));
+                Scene.Events.Invoke(new LayoutRequestedEvent(_controls.GetEntityId(), _mainViewportId));
             }
         }
     }
@@ -35,13 +50,14 @@ public class ControlLayoutSystem : GameSystem
     {
         this.Subscribe((ref LayoutRequestedEvent evt) =>
         {
+            if (evt.ViewportId == -1) return;
             if (!Scene.Components.HasComponent<Control>(evt.EntityId)) return;
 
-            Layout(evt.EntityId);
+            Layout(evt.EntityId, evt.ViewportId);
         });
     }
 
-    private void Layout(long entityId)
+    private void Layout(long entityId, long viewportId)
     {
         Console.WriteLine($"Performing layout on entity ID {entityId}");
         ref var transform = ref Scene.Components.GetComponent<Transform>(entityId);
@@ -49,21 +65,21 @@ public class ControlLayoutSystem : GameSystem
 
         if (Scene.Components.HasComponent<AnchoredControl>(entityId))
         {
-            LayoutAnchoredControl(ref transform, ref control, ref Scene.Components.GetComponent<AnchoredControl>(entityId));
+            LayoutAnchoredControl(viewportId, ref transform, ref control, ref Scene.Components.GetComponent<AnchoredControl>(entityId));
         }
         if (Scene.Components.HasComponent<FreeContainer>(entityId))
         {
-            LayoutFreeContainer(ref transform);
+            LayoutFreeContainer(viewportId, ref transform);
         }
         if (Scene.Components.HasComponent<FlowContainer>(entityId))
         {
-            LayoutBoxContainer(ref transform, ref control, ref Scene.Components.GetComponent<FlowContainer>(entityId));
+            LayoutBoxContainer(viewportId, ref transform, ref control, ref Scene.Components.GetComponent<FlowContainer>(entityId));
         }
     }
 
-    private void LayoutAnchoredControl(ref Transform transform, ref Control control, ref AnchoredControl anchored)
+    private void LayoutAnchoredControl(long viewportId, ref Transform transform, ref Control control, ref AnchoredControl anchored)
     {
-        DeconstructParentBounds(ref transform, out _, out var parentSize);
+        DeconstructParentBounds(viewportId, ref transform, out _, out var parentSize);
         var parentBegin = Vector2.Zero;
         var parentEnd = Vector2.Zero + parentSize;
 
@@ -119,10 +135,10 @@ public class ControlLayoutSystem : GameSystem
         transform.LocalPosition = ownBegin;
         control.Size = ownEnd - ownBegin;
         
-        LayoutChildren(ref transform);
+        LayoutChildren(viewportId, ref transform);
     }
 
-    private void LayoutFreeContainer(ref Transform transform)
+    private void LayoutFreeContainer(long viewportId, ref Transform transform)
     {
         long childId = transform.FirstChildId;
         while (childId != -1)
@@ -131,14 +147,14 @@ public class ControlLayoutSystem : GameSystem
 
             if (Scene.Components.HasComponent<Control>(childId))
             {
-                Scene.Events.Invoke(new LayoutRequestedEvent(childId));
+                Scene.Events.Invoke(new LayoutRequestedEvent(childId, viewportId));
             }
 
             childId = childTransform.NextSiblingId;
         }
     }
     
-    private void LayoutBoxContainer(ref Transform transform, ref Control control, ref FlowContainer flow)
+    private void LayoutBoxContainer(long viewportId, ref Transform transform, ref Control control, ref FlowContainer flow)
     {
         bool vertical = flow.Vertical;
 
@@ -164,7 +180,7 @@ public class ControlLayoutSystem : GameSystem
             if (Scene.Components.HasComponent<Control>(childId))
             {
                 ref var childControl = ref Scene.Components.GetComponent<Control>(childId);
-                Scene.Events.Invoke(new LayoutRequestedEvent(childId));
+                Scene.Events.Invoke(new LayoutRequestedEvent(childId, viewportId));
 
                 float sizeMain = vertical ? childControl.Size.Y : childControl.Size.X;
                 float sizeSec = vertical ? childControl.Size.X : childControl.Size.Y;
@@ -233,7 +249,7 @@ public class ControlLayoutSystem : GameSystem
         }
     }
 
-    private void DeconstructParentBounds(ref Transform transform, out Vector2 parentPosition, out Vector2 parentSize)
+    private void DeconstructParentBounds(long viewportId, ref Transform transform, out Vector2 parentPosition, out Vector2 parentSize)
     {
         if (transform is { HasParent: true, ParentId: var parentId } && Scene.Components.HasComponent<Control>(parentId))
         {
@@ -245,14 +261,23 @@ public class ControlLayoutSystem : GameSystem
         }
         else
         {
-            // get size from rendering layer
-            
             parentPosition = Vector2.Zero;
-            parentSize = Scene.Core.RenderingUnit.WindowLayer.LayerSize.ToVector2();
+            
+            // get size from rendering layer
+            if (viewportId != -1 && Scene.Components.HasComponent<Viewport>(viewportId))
+            {
+                var viewport = Scene.Components.GetComponent<Viewport>(viewportId);
+                var layer = viewport.GetLayer(Scene.Core.RenderingUnit);
+                parentSize = layer?.LayerSize.ToVector2() ?? Vector2.One;
+            }
+            else
+            {
+                parentSize = Scene.Core.RenderingUnit.WindowLayer.LayerSize.ToVector2();
+            }
         }
     }
 
-    private void LayoutChildren(ref Transform transform)
+    private void LayoutChildren(long viewportId, ref Transform transform)
     {
         long childId = transform.FirstChildId;
         while (childId != -1)
@@ -261,7 +286,7 @@ public class ControlLayoutSystem : GameSystem
 
             if (Scene.Components.HasComponent<Control>(childId))
             {
-                Scene.Events.Invoke(new LayoutRequestedEvent(childId));
+                Scene.Events.Invoke(new LayoutRequestedEvent(childId, viewportId));
             }
 
             childId = childTransform.NextSiblingId;

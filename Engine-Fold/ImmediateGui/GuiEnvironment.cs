@@ -28,10 +28,10 @@ public abstract class GuiEnvironment : IDisposable
     public HoverTarget HoverTargetPrevious;
     public ButtonAction MouseLeft = ButtonAction.Default;
     public ButtonAction MouseMiddle = ButtonAction.Default;
+    public ButtonAction MouseRight = ButtonAction.Default;
 
     // Input
     public Point MousePos;
-    public ButtonAction MouseRight = ButtonAction.Default;
 
     public Scene Scene;
     public IGameCore Core => Scene.Core;

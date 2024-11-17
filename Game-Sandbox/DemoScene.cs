@@ -100,16 +100,24 @@ internal class DemoScene : Scene
         e2.Transform.LocalScale = new Vector2(9, 4);
         e2.AddComponent<Physics>().Static = true;
         e2.AddComponent<Collider>().ThickFaces = true;
+
         
+        
+        Systems.Add<ControlLayoutSystem>();
+        Systems.Add<ControlRenderer>();
+        Systems.Add<ControlInterfaceSystem>();
+        
+        
+        Entity viewport = CreateEntity("Viewport");
+        viewport.AddComponent<Viewport>();
         
         Entity e5 = CreateEntity("Control");
+        e5.Transform.SetParent(viewport);
         ref var control = ref e5.AddComponent<Control>();
         control.Size = new Vector2(500, 500);
         control.RequestLayout = true;
         e5.AddComponent<FreeContainer>();
         e5.AddComponent<BoxControl>().Color = Color.Salmon;
-        Systems.Add<ControlLayoutSystem>();
-        Systems.Add<ControlRenderer>();
 
         Entity e6 = CreateEntity("Control 2");
         e6.AddComponent<Control>();
