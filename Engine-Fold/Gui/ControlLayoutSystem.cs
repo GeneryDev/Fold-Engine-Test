@@ -79,6 +79,43 @@ public class ControlLayoutSystem : GameSystem
         var ownBegin = anchorBegin + new Vector2(anchored.OffsetLeft, anchored.OffsetTop);
         var ownEnd = anchorEnd + new Vector2(anchored.OffsetRight, anchored.OffsetBottom);
 
+        var minimumSize = control.EffectiveMinimumSize;
+        if(minimumSize != Vector2.Zero) {
+            //Apply minimum size
+            var growAmount = minimumSize - (ownEnd - ownBegin);
+            growAmount = new Vector2(
+                Math.Max(0, growAmount.X),
+                Math.Max(0, growAmount.Y)
+                );
+
+            if (growAmount.X > 0)
+            {
+                var growRatio = anchored.GrowHorizontal switch
+                {
+                    AnchoredControl.GrowDirection.Begin => (-1f, 0f),
+                    AnchoredControl.GrowDirection.Both => (-0.5f, 0.5f),
+                    AnchoredControl.GrowDirection.End => (0f, 1f),
+                    _ => (0f, 0f)
+                }; 
+                ownBegin.X += growAmount.X * growRatio.Item1;
+                ownEnd.X += growAmount.X * growRatio.Item2;
+            }
+
+            if (growAmount.Y > 0)
+            {
+                var growRatio = anchored.GrowVertical switch
+                {
+                    AnchoredControl.GrowDirection.Begin => (-1f, 0f),
+                    AnchoredControl.GrowDirection.Both => (-0.5f, 0.5f),
+                    AnchoredControl.GrowDirection.End => (0f, 1f),
+                    _ => (0f, 0f)
+                }; 
+                ownBegin.Y += growAmount.Y * growRatio.Item1;
+                ownEnd.Y += growAmount.Y * growRatio.Item2;
+            }
+
+        }
+
         transform.LocalPosition = ownBegin;
         control.Size = ownEnd - ownBegin;
         

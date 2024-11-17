@@ -1,8 +1,10 @@
 ﻿using FoldEngine.Components;
+using FoldEngine.Scenes;
 
 namespace FoldEngine.Gui;
 
 [Component("fold:control.anchored")]
+[ComponentInitializer(typeof(AnchoredControl), nameof(InitializeComponent))]
 public struct AnchoredControl
 {
     public float AnchorLeft;
@@ -23,5 +25,18 @@ public struct AnchoredControl
         Begin,
         End,
         Both
+    }
+
+    public AnchoredControl()
+    {
+        GrowHorizontal = GrowVertical = GrowDirection.Both;
+    }
+    
+    /// <summary>
+    ///     Returns an initialized anchored component with all its correct default values.
+    /// </summary>
+    public static AnchoredControl InitializeComponent(Scene scene, long entityId)
+    {
+        return new AnchoredControl();
     }
 }

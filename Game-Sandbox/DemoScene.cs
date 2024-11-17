@@ -105,6 +105,7 @@ internal class DemoScene : Scene
         Entity e5 = CreateEntity("Control");
         ref var control = ref e5.AddComponent<Control>();
         control.Size = new Vector2(500, 500);
+        control.RequestLayout = true;
         e5.AddComponent<FreeContainer>();
         e5.AddComponent<BoxControl>().Color = Color.Salmon;
         Systems.Add<ControlLayoutSystem>();
@@ -151,6 +152,42 @@ internal class DemoScene : Scene
         {
             AddBoxInContainer();
         }
+
+        var labelEntity = CreateEntity("Label");
+        labelEntity.Transform.SetParent(e5);
+        labelEntity.AddComponent<Control>() = new Control()
+        {
+            ZOrder = 5
+        };
+        labelEntity.AddComponent<FreeContainer>();
+        labelEntity.AddComponent<AnchoredControl>() = new AnchoredControl()
+        {
+            AnchorLeft = 0.5f,
+            AnchorTop = 0.5f,
+            AnchorRight = 0.5f,
+            AnchorBottom = 0.5f
+        };
+        labelEntity.AddComponent<LabelControl>() = new LabelControl()
+        {
+            Text = "top text\nhello world\nbottom text",
+            Alignment = Alignment.Center
+        };
+
+        var labelBounds = CreateEntity("Label Bounds");
+        labelBounds.Transform.SetParent(labelEntity);
+        labelBounds.AddComponent<Control>() = new Control
+        {
+            ZOrder = 4
+        };
+        labelBounds.AddComponent<AnchoredControl>() = new AnchoredControl
+        {
+            AnchorRight = 1,
+            AnchorBottom = 1
+        };
+        labelBounds.AddComponent<BoxControl>() = new BoxControl()
+        {
+            Color = new Color(0, 0, 0, 200)
+        };
 
         /*e0.Transform.Position = new Vector2(1, 2);
         e1.Transform.Parent = e0.Transform;
