@@ -8,8 +8,9 @@ public struct DrawRectInstruction
     public Rectangle DestinationRectangle;
     public Rectangle? SourceRectangle;
     public Color? Color;
+    public float Z;
 
-    public DrawRectInstruction(ITexture texture, Vector2 destination, Rectangle? sourceRectangle = null)
+    public DrawRectInstruction(ITexture texture, Vector2 destination, Rectangle? sourceRectangle = null, float z = 50)
     {
         Texture = texture;
         DestinationRectangle = new Rectangle(destination.ToPoint(),
@@ -17,6 +18,7 @@ public struct DrawRectInstruction
                 sourceRectangle?.Height ?? texture.Height));
         SourceRectangle = sourceRectangle;
         Color = null;
+        Z = z;
     }
 
     public DrawRectInstruction(
@@ -35,10 +37,10 @@ public struct DrawRectInstruction
         return new DrawQuadInstruction
         {
             Texture = instruction.Texture,
-            A = new Vector3(instruction.DestinationRectangle.Left, instruction.DestinationRectangle.Bottom, 50),
-            B = new Vector3(instruction.DestinationRectangle.Left, instruction.DestinationRectangle.Top, 50),
-            C = new Vector3(instruction.DestinationRectangle.Right, instruction.DestinationRectangle.Bottom, 50),
-            D = new Vector3(instruction.DestinationRectangle.Right, instruction.DestinationRectangle.Top, 50),
+            A = new Vector3(instruction.DestinationRectangle.Left, instruction.DestinationRectangle.Bottom, instruction.Z),
+            B = new Vector3(instruction.DestinationRectangle.Left, instruction.DestinationRectangle.Top, instruction.Z),
+            C = new Vector3(instruction.DestinationRectangle.Right, instruction.DestinationRectangle.Bottom, instruction.Z),
+            D = new Vector3(instruction.DestinationRectangle.Right, instruction.DestinationRectangle.Top, instruction.Z),
             TexA = new Vector2(instruction.SourceRectangle?.Left ?? 0, instruction.SourceRectangle?.Bottom ?? 1),
             TexB = new Vector2(instruction.SourceRectangle?.Left ?? 0, instruction.SourceRectangle?.Top ?? 0),
             TexC = new Vector2(instruction.SourceRectangle?.Right ?? 1, instruction.SourceRectangle?.Bottom ?? 1),

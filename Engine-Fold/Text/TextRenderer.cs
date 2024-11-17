@@ -130,8 +130,8 @@ public class TextRenderer
         return default;
     }
 
-    public void DrawOnto(RenderSurface surface, Point start, Color color, float scale = 1)
+    public void DrawOnto(RenderSurface surface, Point start, Color color, float scale = 1, float z = 0)
     {
-        foreach (RenderedTextGlyph glyph in _glyphs) glyph.DrawOnto(surface, start, color, scale, _bitmapFont);
+        foreach (RenderedTextGlyph glyph in _glyphs) glyph.DrawOnto(surface, start, color, scale, _bitmapFont, z);
     }
 }

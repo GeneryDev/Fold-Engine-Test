@@ -28,7 +28,7 @@ public class ControlRenderer : GameSystem
 
     public override void OnRender(IRenderingUnit renderer)
     {
-        var layer = renderer.WorldLayer;
+        var layer = renderer.WindowLayer;
         
         _entitiesToRender.Clear();
         
@@ -71,7 +71,8 @@ public class ControlRenderer : GameSystem
         {
             Texture = renderer.WhiteTexture,
             Color = box.Color,
-            DestinationRectangle = bounds
+            DestinationRectangle = bounds,
+            Z = -control.ZOrder
         });
     }
 
@@ -111,7 +112,14 @@ public class ControlRenderer : GameSystem
         Point offset = Point.Zero;
 
         renderedText.DrawOnto(layer.Surface, new Point(x, bounds.Center.Y - renderedText.Height / 2 + label.FontSize) + offset,
-            label.Color);
+            label.Color, z: -control.ZOrder);
+        // layer.Surface.Draw(new DrawRectInstruction
+        // {
+        //     Texture = renderer.WhiteTexture,
+        //     Color = Color.White,
+        //     DestinationRectangle = new Rectangle(new Point(x - 2, bounds.Center.Y - renderedText.Height / 2 + label.FontSize), new Point(2, 2)),
+        //     Z = control.ZOrder
+        // });
     }
 
     private struct RenderableKey

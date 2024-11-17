@@ -248,7 +248,7 @@ public class ControlLayoutSystem : GameSystem
             // get size from rendering layer
             
             parentPosition = Vector2.Zero;
-            parentSize = Scene.Core.RenderingUnit.WorldLayer.LayerSize.ToVector2();
+            parentSize = Scene.Core.RenderingUnit.WindowLayer.LayerSize.ToVector2();
         }
     }
 
