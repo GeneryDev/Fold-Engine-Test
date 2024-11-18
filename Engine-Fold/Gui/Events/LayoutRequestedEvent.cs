@@ -1,6 +1,6 @@
 ﻿using FoldEngine.Events;
 
-namespace FoldEngine.Gui;
+namespace FoldEngine.Gui.Events;
 
 [Event("fold:control.layout_requested", EventFlushMode.Immediate)]
 public struct LayoutRequestedEvent

@@ -1,8 +1,9 @@
 ﻿using FoldEngine.Components;
+using FoldEngine.Gui.Components.Traits;
 
-namespace FoldEngine.Gui;
+namespace FoldEngine.Gui.Components.Containers;
 
-[Component("fold:control.flow_container")]
+[Component("fold:control.flow_container", traits: [typeof(Control), typeof(Container)])]
 public struct FlowContainer
 {
     public bool Vertical;

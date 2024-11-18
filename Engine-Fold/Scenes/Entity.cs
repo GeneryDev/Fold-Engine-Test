@@ -66,6 +66,11 @@ public struct Entity
         Scene.Components.RemoveComponent<T>(EntityId);
     }
 
+    public bool HasTrait<T>() where T : struct
+    {
+        return Scene.Components.HasTrait<T>(EntityId);
+    }
+
     public void Delete()
     {
         Scene.DeleteEntity(EntityId);

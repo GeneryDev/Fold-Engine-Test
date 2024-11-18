@@ -1,9 +1,9 @@
 ﻿using FoldEngine.Components;
 using FoldEngine.Scenes;
 
-namespace FoldEngine.Gui;
+namespace FoldEngine.Gui.Components;
 
-[Component("fold:control.anchored")]
+[Component("fold:control.anchored", traits: [typeof(Control)])]
 [ComponentInitializer(typeof(AnchoredControl), nameof(InitializeComponent))]
 public struct AnchoredControl
 {

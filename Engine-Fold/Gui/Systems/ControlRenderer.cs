@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using FoldEngine.Components;
 using FoldEngine.Graphics;
+using FoldEngine.Gui.Components;
 using FoldEngine.Interfaces;
-using FoldEngine.Rendering;
-using FoldEngine.Resources;
 using FoldEngine.Scenes;
 using FoldEngine.Systems;
 using FoldEngine.Text;
-using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Gui;
+namespace FoldEngine.Gui.Systems;
 
 [GameSystem("fold:control_renderer", ProcessingCycles.Render, true)]
 public class ControlRenderer : GameSystem

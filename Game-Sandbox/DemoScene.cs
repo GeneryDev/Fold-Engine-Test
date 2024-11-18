@@ -2,6 +2,9 @@
 using FoldEngine.Editor;
 using FoldEngine.Graphics.Atlas;
 using FoldEngine.Gui;
+using FoldEngine.Gui.Components;
+using FoldEngine.Gui.Components.Containers;
+using FoldEngine.Gui.Systems;
 using FoldEngine.Interfaces;
 using FoldEngine.Physics;
 using FoldEngine.Physics.Systems;
@@ -116,7 +119,6 @@ internal class DemoScene : Scene
         ref var control = ref e5.AddComponent<Control>();
         control.Size = new Vector2(500, 500);
         control.RequestLayout = true;
-        e5.AddComponent<FreeContainer>();
         e5.AddComponent<BoxControl>().Color = Color.Salmon;
 
         Entity e6 = CreateEntity("Control 2");
@@ -167,7 +169,6 @@ internal class DemoScene : Scene
         {
             ZOrder = 5
         };
-        labelEntity.AddComponent<FreeContainer>();
         labelEntity.AddComponent<AnchoredControl>() = new AnchoredControl()
         {
             AnchorLeft = 0.5f,

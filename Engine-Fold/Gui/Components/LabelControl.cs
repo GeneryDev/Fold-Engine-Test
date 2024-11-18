@@ -1,14 +1,15 @@
 ﻿using FoldEngine.Components;
 using FoldEngine.Editor.Inspector;
+using FoldEngine.Gui.Components.Traits;
 using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
 using FoldEngine.Serialization;
 using FoldEngine.Text;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Gui;
+namespace FoldEngine.Gui.Components;
 
-[Component("fold:control.label")]
+[Component("fold:control.label", traits: [typeof(Control), typeof(MousePickable)])]
 [ComponentInitializer(typeof(LabelControl), nameof(InitializeComponent))]
 public struct LabelControl
 {

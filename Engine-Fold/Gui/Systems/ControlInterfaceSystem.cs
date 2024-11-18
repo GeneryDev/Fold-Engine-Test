@@ -1,16 +1,17 @@
 ﻿using System;
 using FoldEngine.Components;
 using FoldEngine.Editor.Inspector;
+using FoldEngine.Gui.Components;
+using FoldEngine.Gui.Components.Traits;
 using FoldEngine.ImmediateGui;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
-using FoldEngine.Scenes;
 using FoldEngine.Serialization;
 using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
 using Mouse = Microsoft.Xna.Framework.Input.Mouse;
 
-namespace FoldEngine.Gui;
+namespace FoldEngine.Gui.Systems;
 
 [GameSystem("fold:control.interface", ProcessingCycles.Input, true)]
 public class ControlInterfaceSystem : GameSystem
@@ -127,10 +128,12 @@ public class ControlInterfaceSystem : GameSystem
 
             if (topEntity == -1 || control.ZOrder >= topZ)
             {
+                if (!Scene.Components.HasTrait<MousePickable>(_controls.GetEntityId())) continue;
+                
                 var position = transform.Position;
                 var containsPoint = (position.X <= point.X && point.X <= position.X + control.Size.X) &&
                                     (position.Y <= point.Y && point.Y <= position.Y + control.Size.Y);
-
+                
                 if (containsPoint)
                 {
                     topZ = control.ZOrder;

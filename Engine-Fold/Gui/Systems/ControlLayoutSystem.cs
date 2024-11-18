@@ -1,11 +1,15 @@
 ﻿using System;
 using FoldEngine.Components;
+using FoldEngine.Gui.Components;
+using FoldEngine.Gui.Components.Containers;
+using FoldEngine.Gui.Components.Traits;
+using FoldEngine.Gui.Events;
 using FoldEngine.Interfaces;
 using FoldEngine.Systems;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Gui;
+namespace FoldEngine.Gui.Systems;
 
 [GameSystem("fold:control.layout", ProcessingCycles.Render, true)]
 public class ControlLayoutSystem : GameSystem
@@ -59,7 +63,7 @@ public class ControlLayoutSystem : GameSystem
 
     private void Layout(long entityId, long viewportId)
     {
-        Console.WriteLine($"Performing layout on entity ID {entityId}");
+        // Console.WriteLine($"Performing layout on entity ID {entityId}");
         ref var transform = ref Scene.Components.GetComponent<Transform>(entityId);
         ref var control = ref Scene.Components.GetComponent<Control>(entityId);
 
@@ -67,13 +71,13 @@ public class ControlLayoutSystem : GameSystem
         {
             LayoutAnchoredControl(viewportId, ref transform, ref control, ref Scene.Components.GetComponent<AnchoredControl>(entityId));
         }
-        if (Scene.Components.HasComponent<FreeContainer>(entityId))
-        {
-            LayoutFreeContainer(viewportId, ref transform);
-        }
         if (Scene.Components.HasComponent<FlowContainer>(entityId))
         {
             LayoutBoxContainer(viewportId, ref transform, ref control, ref Scene.Components.GetComponent<FlowContainer>(entityId));
+        }
+        if (!Scene.Components.HasTrait<Container>(entityId))
+        {
+            LayoutFreeContainer(viewportId, ref transform);
         }
     }
 

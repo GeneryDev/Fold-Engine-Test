@@ -186,6 +186,27 @@ public class ComponentMap : ISelfSerializer
     }
 
     /// <summary>
+    /// Checks whether the entity with the given ID has any component with the given trait, given by type T.
+    /// </summary>
+    /// <param name="entityId">The ID of the entity whose components' traits are to be queried</param>
+    /// <typeparam name="T">The type of Component Trait to search for</typeparam>
+    /// <returns>true if the entity has a component with the specified trait, false otherwise</returns>
+    public bool HasTrait<T>(long entityId) where T : struct
+    {
+        Type traitType = typeof(T);
+        var componentsRegistry = _scene.Core.RegistryUnit.Components;
+        foreach (KeyValuePair<Type,ComponentSet> entry in Sets)
+        {
+            if (componentsRegistry.HasTrait(entry.Key, traitType) && entry.Value.Has(entityId))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
     ///     Checks whether or not a component of the given type is attached to the entity of the given ID.<br></br>
     ///     <br></br>
     /// </summary>

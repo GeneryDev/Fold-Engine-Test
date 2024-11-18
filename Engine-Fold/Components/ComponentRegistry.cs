@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using FoldEngine.Registries;
 using FoldEngine.Scenes;
@@ -8,8 +9,8 @@ namespace FoldEngine.Components;
 
 public class ComponentRegistry : IRegistry
 {
-    private Dictionary<Type, string> _typeToIdentifierMap = new();
-    private Dictionary<string, Type> _identifierToTypeMap = new();
+    private Dictionary<Type, ComponentDefinition> _defsByType = new();
+    private Dictionary<string, ComponentDefinition> _defsByIdentifier = new();
 
     private Dictionary<Type, Func<Scene, long, object>> _customInitializers = new();
     private readonly Dictionary<Type, ConstructorInfo> _componentSetConstructors = new();
@@ -21,9 +22,20 @@ public class ComponentRegistry : IRegistry
     /// <returns>The identifier for the given type, if it exists</returns>
     public string IdentifierOf(Type type)
     {
-        if (_typeToIdentifierMap.TryGetValue(type, out string value)) return value;
+        if (_defsByType.TryGetValue(type, out var def)) return def.Identifier;
 
         throw new ArgumentException($"Type '{type}' is not a component type");
+    }
+
+    /// <summary>
+    /// Checks whether the given component type has the given component trait.
+    /// Throws an exception if the given component type is not valid.
+    /// </summary>
+    public bool HasTrait(Type componentType, Type traitType)
+    {
+        if (_defsByType.TryGetValue(componentType, out var def)) return def.Traits.Contains(traitType);
+
+        throw new ArgumentException($"Type '{componentType}' is not a component type");
     }
 
     /// <summary>
@@ -38,7 +50,7 @@ public class ComponentRegistry : IRegistry
 
     public Type TypeForIdentifier(string identifier)
     {
-        return _identifierToTypeMap[identifier];
+        return _defsByIdentifier[identifier].Type;
     }
 
     public void AcceptType(Type type)
@@ -47,8 +59,14 @@ public class ComponentRegistry : IRegistry
         if (type.GetCustomAttribute<ComponentAttribute>(false) is { } componentAttribute)
         {
             string thisIdentifier = componentAttribute.ComponentName;
-            _identifierToTypeMap[thisIdentifier] = type;
-            _typeToIdentifierMap[type] = thisIdentifier;
+            var def = new ComponentDefinition()
+            {
+                Type = type,
+                Identifier = thisIdentifier,
+                Traits = [..componentAttribute.Traits ?? Enumerable.Empty<Type>()]
+            };
+            _defsByIdentifier[thisIdentifier] = def;
+            _defsByType[type] = def;
         }
 
         if (type.GetCustomAttribute<ComponentInitializerAttribute>(false) is { } initializerAttribute)
@@ -74,8 +92,15 @@ public class ComponentRegistry : IRegistry
         return (ComponentSet)_componentSetConstructors[componentType].Invoke(new object[] { scene, startingId });
     }
 
-    public IEnumerable<Type> GetAllTypes()
+    public IEnumerable<ComponentDefinition> GetAllDefinitions()
     {
-        return _identifierToTypeMap.Values;
+        return _defsByIdentifier.Values;
     }
+}
+
+public struct ComponentDefinition
+{
+    public Type Type;
+    public string Identifier;
+    public HashSet<Type> Traits;
 }

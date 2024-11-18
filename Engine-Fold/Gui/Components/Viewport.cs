@@ -4,7 +4,7 @@ using FoldEngine.Scenes;
 using FoldEngine.Serialization;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Gui;
+namespace FoldEngine.Gui.Components;
 
 [Component("fold:control.viewport")]
 [ComponentInitializer(typeof(Viewport), nameof(InitializeComponent))]

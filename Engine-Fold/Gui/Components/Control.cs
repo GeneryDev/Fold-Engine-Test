@@ -1,11 +1,11 @@
 ﻿using System;
 using FoldEngine.Components;
-using FoldEngine.Editor.Inspector;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Gui;
+namespace FoldEngine.Gui.Components;
 
 [Component("fold:control")]
+[ComponentTrait("#fold:control")]
 public struct Control
 {
     public Vector2 Size;

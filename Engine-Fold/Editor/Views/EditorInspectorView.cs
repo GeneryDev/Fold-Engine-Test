@@ -126,12 +126,12 @@ public class EditorInspectorView : EditorView
             GuiPopupMenu contextMenu = ContentPanel.Environment.ContextMenu;
             contextMenu.Show(p, m =>
             {
-                foreach (Type type in Core.RegistryUnit.Components.GetAllTypes())
+                foreach (ComponentDefinition def in Core.RegistryUnit.Components.GetAllDefinitions())
                 {
-                    if (type.GetCustomAttribute<HideInInspector>() == null &&
-                        !entity.Scene.Components.HasComponent(type, id) && m.Button(type.Name, 9).IsPressed())
+                    if (def.Type.GetCustomAttribute<HideInInspector>() == null &&
+                        !entity.Scene.Components.HasComponent(def.Type, id) && m.Button(def.Type.Name, 9).IsPressed())
                         ((EditorEnvironment)ContentPanel.Environment).TransactionManager.InsertTransaction(
-                            new AddComponentTransaction(type, id));
+                            new AddComponentTransaction(def.Type, id));
                 }
             });
         }
