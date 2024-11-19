@@ -3,13 +3,14 @@ using FoldEngine.Components;
 using FoldEngine.Editor.Inspector;
 using FoldEngine.Gui.Components;
 using FoldEngine.Gui.Components.Traits;
+using FoldEngine.Gui.Events;
 using FoldEngine.ImmediateGui;
 using FoldEngine.Input;
-using FoldEngine.Interfaces;
 using FoldEngine.Serialization;
 using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
 using Mouse = Microsoft.Xna.Framework.Input.Mouse;
+using MouseEventType = FoldEngine.Gui.Events.MouseEventType;
 
 namespace FoldEngine.Gui.Systems;
 
@@ -22,11 +23,16 @@ public class ControlInterfaceSystem : GameSystem
     
     private ComponentIterator<Viewport> _viewports;
     private ComponentIterator<Control> _controls;
+
+    [DoNotSerialize] private Point _mousePos;
+    [DoNotSerialize] private readonly long[] _pressedControls = new long[MouseButtonEvent.MaxButtons];
     
     public override void Initialize()
     {
         _viewports = CreateComponentIterator<Viewport>(IterationFlags.None);
         _controls = CreateComponentIterator<Control>(IterationFlags.None);
+        
+        Array.Fill(_pressedControls, -1L);
     }
 
     public override void OnInput()
@@ -44,32 +50,45 @@ public class ControlInterfaceSystem : GameSystem
         while (_viewports.Next())
         {
             ref var viewport = ref _viewports.GetComponent();
-            HandleViewport(ref viewport, inputUnit);
+            HandleViewport(ref viewport);
             break;
         }
     }
 
-    private void HandleViewport(ref Viewport viewport, InputUnit inputUnit)
+    private void HandleViewport(ref Viewport viewport)
     {
         var layer = viewport.GetLayer(Scene.Core.RenderingUnit);
         if (layer == null) return;
         
-        var mousePos = Mouse.GetState().Position;
+        _mousePos = Mouse.GetState().Position;
         try
         {
-            mousePos = layer.WindowToLayer(mousePos.ToVector2()).ToPoint();
+            _mousePos = layer.WindowToLayer(_mousePos.ToVector2()).ToPoint();
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
         }
         
-        HandleMouseEvents(MouseLeft, MouseEvent.LeftButton);
-        HandleMouseEvents(MouseMiddle, MouseEvent.MiddleButton);
-        HandleMouseEvents(MouseRight, MouseEvent.RightButton);
+        HandleMouseEvents(MouseLeft, MouseButtonEvent.LeftButton);
+        HandleMouseEvents(MouseMiddle, MouseButtonEvent.MiddleButton);
+        HandleMouseEvents(MouseRight, MouseButtonEvent.RightButton);
 
-        viewport.HoverTargetId = GetControlAtPoint(mousePos);
-        Console.WriteLine($"Hover target: {viewport.HoverTargetId}");
+        viewport.PrevHoverTargetId = viewport.HoverTargetId;
+        viewport.HoverTargetId = GetControlAtPoint(_mousePos);
+
+        if (viewport.PrevHoverTargetId != viewport.HoverTargetId)
+        {
+            if (viewport.PrevHoverTargetId != -1)
+            {
+                Scene.Events.Invoke(new MouseExitedEvent(viewport.PrevHoverTargetId, _mousePos));
+            }
+            if (viewport.HoverTargetId != -1)
+            {
+                Scene.Events.Invoke(new MouseEnteredEvent(viewport.HoverTargetId, _mousePos));
+            }
+        }
+        // Console.WriteLine($"Hover target: {viewport.HoverTargetId}");
 
         //
         // FocusOwner?.OnInput(ControlScheme);
@@ -77,41 +96,31 @@ public class ControlInterfaceSystem : GameSystem
 
     private void HandleMouseEvents(ButtonAction mouseButton, int buttonIndex)
     {
-        // if (mouseButton.Pressed)
-        // {
-        //     for (int i = VisiblePanels.Count - 1; i >= 0; i--)
-        //     {
-        //         GuiPanel panel = VisiblePanels[i];
-        //         if (panel.Visible && panel.Bounds.Contains(MousePos))
-        //         {
-        //             _pressedPanels[buttonIndex] = panel;
-        //
-        //             var evt = new MouseEvent
-        //             {
-        //                 Type = MouseEventType.Pressed,
-        //                 Position = MousePos,
-        //                 Button = buttonIndex,
-        //                 When = Time.Now
-        //             };
-        //
-        //             panel.OnMousePressed(ref evt);
-        //             break;
-        //         }
-        //     }
-        // }
-        // else if (mouseButton.Released)
-        // {
-        //     var evt = new MouseEvent
-        //     {
-        //         Type = MouseEventType.Released,
-        //         Position = MousePos,
-        //         Button = buttonIndex,
-        //         When = Time.Now
-        //     };
-        //
-        //     _pressedPanels[buttonIndex]?.OnMouseReleased(ref evt);
-        //     _pressedPanels[buttonIndex] = null;
-        // }
+        if (mouseButton.Pressed)
+        {
+            long onEntityId = GetControlAtPoint(_mousePos);
+            _pressedControls[buttonIndex] = onEntityId;
+            Scene.Events.Invoke(new MouseButtonEvent
+            {
+                Type = MouseEventType.Pressed,
+                EntityId = onEntityId,
+                Position = _mousePos,
+                Button = buttonIndex,
+                When = Time.Now
+            });
+        }
+        else if (mouseButton.Released)
+        {
+            Scene.Events.Invoke(new MouseButtonEvent
+            {
+                Type = MouseEventType.Released,
+                EntityId = _pressedControls[buttonIndex],
+                Position = _mousePos,
+                Button = buttonIndex,
+                When = Time.Now
+            });
+            _pressedControls[buttonIndex] = -1;
+        }
     }
 
     private long GetControlAtPoint(Point point)

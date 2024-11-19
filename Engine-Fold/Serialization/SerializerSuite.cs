@@ -36,6 +36,7 @@ public class SerializerSuite
         AddSerializer(new StringSerializer());
         AddSerializer(new ResourceIdentifierSerializer());
 
+        AddSerializer(new PointSerializer());
         AddSerializer(new Vector2Serializer());
         AddSerializer(new Vector3Serializer());
         AddSerializer(new Vector4Serializer());

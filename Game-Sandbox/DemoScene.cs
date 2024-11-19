@@ -135,7 +135,7 @@ internal class DemoScene : Scene
             OffsetTop = -70,
             OffsetBottom = -48,
         };
-        e6.AddComponent<BoxControl>().Color = Color.Lime;
+        e6.AddComponent<ButtonControl>().Text = "Click Me!";
         e6.Transform.SetParent(e5);
 
         Entity container = CreateEntity("Container");

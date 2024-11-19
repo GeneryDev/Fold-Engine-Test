@@ -3,6 +3,21 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Serialization.Serializers;
 
+public class PointSerializer : Serializer<Point>
+{
+    public override Type WorkingType => typeof(Point);
+
+    public override void Serialize(Point vec, SaveOperation writer)
+    {
+        writer.Write(vec.X).Write(vec.Y);
+    }
+
+    public override Point Deserialize(LoadOperation reader)
+    {
+        return new Point(reader.ReadInt32(), reader.ReadInt32());
+    }
+}
+
 public class Vector2Serializer : Serializer<Vector2>
 {
     public override Type WorkingType => typeof(Vector2);
