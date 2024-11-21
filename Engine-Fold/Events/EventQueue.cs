@@ -82,7 +82,7 @@ public class EventQueue<T> : IEventQueue where T : struct
         // even if there are no listeners - this is so we can return a reference to it.
         if (_insertionIndex >= _events.Length)
         {
-            Console.WriteLine("Resizing event array");
+            Console.WriteLine($"Resizing event array for {EventAttribute.EventIdentifier}");
             Array.Resize(ref _events, _events.Length * 2);
         }
 

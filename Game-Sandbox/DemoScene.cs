@@ -121,7 +121,7 @@ internal class DemoScene : Scene
         control.RequestLayout = true;
         e5.AddComponent<BoxControl>().Color = Color.Salmon;
 
-        Entity e6 = CreateEntity("Control 2");
+        Entity e6 = CreateEntity("Button");
         e6.AddComponent<Control>();
         ref var e6Anchors = ref e6.AddComponent<AnchoredControl>();
         e6Anchors = e6Anchors with
@@ -130,8 +130,8 @@ internal class DemoScene : Scene
             AnchorRight = 0.5f,
             AnchorTop = 1.0f,
             AnchorBottom = 1.0f,
-            OffsetLeft = -202,
-            OffsetRight = 202,
+            OffsetLeft = 0,
+            OffsetRight = 0,
             OffsetTop = -70,
             OffsetBottom = -48,
         };

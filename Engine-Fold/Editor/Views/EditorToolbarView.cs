@@ -36,32 +36,37 @@ public class EditorToolbarView : EditorView
         // ContentPanel.Label(Scene.Name, 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
         // ContentPanel.Element<ToolbarButton>().Text("Save").FontSize(14).Icon(renderer.Textures["editor:cog"]);
         // ContentPanel.Separator();
-        if (ContentPanel.Element<ToolbarButton>()
-            .Text("")
-            .FontSize(14)
-            .Icon(EditorResources.Get<Texture>(ref EditorIcons.Play))
-            .IsPressed())
-        {
-            if (editingTab.StoredSceneData == null)
-            {
-                Play(ContentPanel.Environment as EditorEnvironment, ref editingTab);
-            }
-            else
-            {
-                Stop(ContentPanel.Environment as EditorEnvironment, ref editingTab);
-                Core.AudioUnit.StopAll();
-                GC.Collect(GC.MaxGeneration);
-            }
-        }
 
-        if (editingTab.Scene != null && editingTab.Playing
-            && ContentPanel.Element<ToolbarButton>()
-            .Down(editingTab.Scene.Paused)
-            .Text("")
-            .FontSize(14)
-            .Icon(EditorResources.Get<Texture>(ref EditorIcons.Pause))
-            .IsPressed())
-            editingTab.Scene.Paused = !editingTab.Scene.Paused;
+        if (editingTab.Scene != ContentPanel.Environment.Scene)
+        {
+            
+            if (ContentPanel.Element<ToolbarButton>()
+                .Text("")
+                .FontSize(14)
+                .Icon(EditorResources.Get<Texture>(ref EditorIcons.Play))
+                .IsPressed())
+            {
+                if (editingTab.StoredSceneData == null)
+                {
+                    Play(ContentPanel.Environment as EditorEnvironment, ref editingTab);
+                }
+                else
+                {
+                    Stop(ContentPanel.Environment as EditorEnvironment, ref editingTab);
+                    Core.AudioUnit.StopAll();
+                    GC.Collect(GC.MaxGeneration);
+                }
+            }
+
+            if (editingTab.Scene != null && editingTab.Playing
+                && ContentPanel.Element<ToolbarButton>()
+                .Down(editingTab.Scene.Paused)
+                .Text("")
+                .FontSize(14)
+                .Icon(EditorResources.Get<Texture>(ref EditorIcons.Pause))
+                .IsPressed())
+                editingTab.Scene.Paused = !editingTab.Scene.Paused;
+        }
         // ContentPanel.Button("Entities").Action(SceneEditor.Actions.ChangeToMenu, 1);
         // ContentPanel.Button("Systems").Action(SceneEditor.Actions.ChangeToMenu, 2);
         // ContentPanel.Button("Edit Save Data").Action(SceneEditor.Actions.Test, 0);

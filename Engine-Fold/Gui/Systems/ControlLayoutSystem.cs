@@ -1,5 +1,6 @@
 ﻿using System;
 using FoldEngine.Components;
+using FoldEngine.Editor.Transactions;
 using FoldEngine.Gui.Components;
 using FoldEngine.Gui.Components.Containers;
 using FoldEngine.Gui.Components.Traits;
@@ -45,6 +46,7 @@ public partial class ControlLayoutSystem : GameSystem
             if (control.RequestLayout)
             {
                 control.RequestLayout = false;
+                Scene.Events.Invoke(new MinimumSizeRequestedEvent(_controls.GetEntityId(), _mainViewportId));
                 Scene.Events.Invoke(new LayoutRequestedEvent(_controls.GetEntityId(), _mainViewportId));
             }
         }
@@ -62,8 +64,22 @@ public partial class ControlLayoutSystem : GameSystem
 
             if (!Scene.Components.HasTrait<Container>(evt.EntityId))
             {
-                // Free container
-                LayoutChildren(evt.ViewportId, ref transform);
+                LayoutFreeContainer(evt.ViewportId, ref transform);
+            }
+        });
+        this.Subscribe((ref InspectorEditedComponentEvent evt) =>
+        {
+            if (!Scene.Components.HasComponent<Control>(evt.EntityId)) return;
+            if (!(evt.ComponentType == typeof(Control) || Scene.Core.RegistryUnit.Components.HasTrait(evt.ComponentType, typeof(Control)))) return;
+            ref var transform = ref Scene.Components.GetComponent<Transform>(evt.EntityId);
+            ref var control = ref Scene.Components.GetComponent<Control>(evt.EntityId);
+            if (transform.HasParent && Scene.Components.HasComponent<Control>(transform.ParentId))
+            {
+                Scene.Components.GetComponent<Control>(transform.ParentId).RequestLayout = true;
+            }
+            else
+            {
+                control.RequestLayout = true;
             }
         });
     }
@@ -93,6 +109,23 @@ public partial class ControlLayoutSystem : GameSystem
             {
                 parentSize = Scene.Core.RenderingUnit.WindowLayer.LayerSize.ToVector2();
             }
+        }
+    }
+
+    private void LayoutFreeContainer(long viewportId, ref Transform transform)
+    {
+        long childId = transform.FirstChildId;
+        while (childId != -1)
+        {
+            var childTransform = Scene.Components.GetComponent<Transform>(childId);
+
+            if (Scene.Components.HasComponent<Control>(childId))
+            {
+                Scene.Events.Invoke(new MinimumSizeRequestedEvent(childId, viewportId));
+                Scene.Events.Invoke(new LayoutRequestedEvent(childId, viewportId));
+            }
+
+            childId = childTransform.NextSiblingId;
         }
     }
 

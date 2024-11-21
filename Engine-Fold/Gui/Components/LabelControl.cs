@@ -60,11 +60,7 @@ namespace FoldEngine.Gui.Systems
         {
             var bounds = new Rectangle(transform.Position.ToPoint(), control.Size.ToPoint());
 
-            if (label.UpdateRenderedText(renderer))
-            {
-                control.ComputedMinimumSize = new Vector2(label.RenderedText.Width, label.RenderedText.Height);
-                control.RequestLayout = true;
-            }
+            label.UpdateRenderedText(renderer);
 
             ref RenderedText renderedText = ref label.RenderedText;
             if (!renderedText.HasValue) return;
@@ -115,10 +111,7 @@ namespace FoldEngine.Gui.Systems
                     ref var control = ref Scene.Components.GetComponent<Control>(evt.EntityId);
 
                     if (label.UpdateRenderedText(Scene.Core.RenderingUnit))
-                    {
                         control.ComputedMinimumSize = new Vector2(label.RenderedText.Width, label.RenderedText.Height);
-                        control.RequestLayout = true;
-                    }
                 }
             });
         }
