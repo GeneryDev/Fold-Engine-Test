@@ -135,7 +135,11 @@ internal class DemoScene : Scene
             OffsetTop = -70,
             OffsetBottom = -48,
         };
-        e6.AddComponent<ButtonControl>().Text = "Click Me!";
+        e6.AddComponent<ButtonControl>() = new ButtonControl()
+        {
+            Text = "Click me!",
+            Icon = new ResourceIdentifier("editor/cog")
+        };
         e6.Transform.SetParent(e5);
 
         Entity container = CreateEntity("Container");
@@ -153,7 +157,8 @@ internal class DemoScene : Scene
         {
             var color = new Color(Random.Shared.Next(256), Random.Shared.Next(256), Random.Shared.Next(256));
             var box = CreateEntity("Box");
-            box.AddComponent<Control>().Size = new Vector2(Random.Shared.Next(40, 80), Random.Shared.Next(40, 80));
+            ref var boxControl = ref box.AddComponent<Control>();
+            boxControl.Size = boxControl.MinimumSize = new Vector2(Random.Shared.Next(40, 80), Random.Shared.Next(40, 80));
             box.AddComponent<BoxControl>().Color = color;
             box.Transform.SetParent(container);
         }

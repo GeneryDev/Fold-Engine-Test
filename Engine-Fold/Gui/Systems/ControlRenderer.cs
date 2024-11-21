@@ -75,6 +75,12 @@ public partial class ControlRenderer : GameSystem
             }
         }
     }
+    public override void SubscribeToEvents()
+    {
+        base.SubscribeToEvents();
+        SubscribeToButtonEvents();
+        SubscribeToLabelEvents();
+    }
 
     private struct RenderableKey
     {

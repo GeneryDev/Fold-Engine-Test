@@ -53,8 +53,31 @@ public class EventQueue<T> : IEventQueue where T : struct
         return _listeners.Count > 0;
     }
 
-    public ref T Enqueue(T evt)
+    public T Enqueue(T evt)
     {
+        // If flush mode is immediate, invoke all listeners.
+        if (EventAttribute.FlushMode == EventFlushMode.Immediate)
+        {
+            foreach (EventListener<T> listener in _listeners)
+            {
+                // Use the local event variable reference to hold the event in the stack, rather than the array.
+                // This is necessary so that recursive event calls won't trigger the array resizing and result
+                // in prior methods that haven't returned losing the event reference.
+                listener(ref evt);
+            }
+
+            // Return a copy of the event stored in the stack,
+            // so that systems hoping to invoke events for other systems to modify,
+            // and get results immediately, can do so.
+            return evt;
+        }
+
+        // If there are no listeners, do nothing else.
+        if (_listeners.Count == 0)
+        {
+            return evt;
+        }
+        
         // Add the event to the array (resize if needed)
         // even if there are no listeners - this is so we can return a reference to it.
         if (_insertionIndex >= _events.Length)
@@ -65,23 +88,11 @@ public class EventQueue<T> : IEventQueue where T : struct
 
         _events[_insertionIndex] = evt;
 
-        // If there are no listeners, do nothing else.
-        if (_listeners.Count == 0) return ref _events[_insertionIndex];
-
-        // If flush mode is immediate, invoke all listeners.
-        if (EventAttribute.FlushMode == EventFlushMode.Immediate)
-        {
-            // TODO reserve the event index for as long as the listener function is running,
-            // to prevent recursive event callback overwriting each other.
-            foreach (EventListener<T> listener in _listeners) listener(ref _events[_flushIndex]);
-            return ref _events[_insertionIndex];
-        }
-
         // The event was added, with the intention of adding more later.
         // Increment the insertion index.
         _insertionIndex++;
-
-        return ref _events[_insertionIndex - 1];
+        
+        return evt;
     }
 
     public static EventQueue<T> operator +(EventQueue<T> queue, EventListener<T> listener)
