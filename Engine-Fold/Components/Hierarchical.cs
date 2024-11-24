@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using FoldEngine.Editor.Inspector;
 using FoldEngine.Scenes;
@@ -20,13 +21,18 @@ public struct Hierarchical
     ///     not-null
     /// </summary>
     [HideInInspector] public readonly bool IsNotNull;
-
     public bool IsNull => !IsNotNull;
 
     /// <summary>
     ///     Reference to the scene this component belongs to.
     /// </summary>
-    public Scene Scene { get; internal set; }
+    public Scene Scene { get; internal init; }
+
+    /// <summary>
+    ///     ID of the entity that owns this hierarchical component (-1 for null)
+    /// </summary>
+    [field: EntityId]
+    public long EntityId { get; }
 
     /// <summary>
     ///     ID of the parent entity (-1 for null and hierarchicals without parent)
@@ -47,6 +53,8 @@ public struct Hierarchical
     ///     Entity ID of this hierarchical's next sibling (or -1 if it's the last child)
     /// </summary>
     [HideInInspector] [EntityId] public long NextSiblingId;
+
+    public bool Active = true;
 
     /// <summary>
     ///     Returns an initialized hierarchical component with all its correct default values.
@@ -255,14 +263,6 @@ public struct Hierarchical
         }
     }
 
-
-    /// <summary>
-    ///     ID of the entity that owns this hierarchical component (-1 for null)
-    /// </summary>
-    [field: EntityId]
-    public long EntityId { get; }
-
-
     public List<long> DumpHierarchy(List<long> list)
     {
         Hierarchical nextChild = FirstChild;
@@ -330,5 +330,79 @@ public struct Hierarchical
                 NextSiblingId = -1;
             }
         }
+    }
+
+    public HierarchicalEnumerable GetChildren(bool includeInactive = true)
+    {
+        return new HierarchicalEnumerable(Scene, FirstChildId, includeInactive);
+    }
+}
+
+public struct HierarchicalEnumerable : IEnumerator<long>, IEnumerable<long>
+{
+    private Scene _scene;
+    private long _firstId;
+    private long _currentId;
+    private bool _includeInactive;
+
+    public HierarchicalEnumerable(Scene scene, long firstId, bool includeInactive)
+    {
+        this._scene = scene;
+        this._firstId = firstId;
+        this._currentId = -1;
+        this._includeInactive = includeInactive;
+    }
+    
+    public bool MoveNext()
+    {
+        while (true)
+        {
+            if (_currentId == -1 && _firstId != -1)
+            {
+                _currentId = _firstId;
+            }
+            else if (_currentId == -1)
+            {
+                return false;
+            }
+            else
+            {
+                NextSibling();
+            }
+
+            if (_currentId == -1) return false;
+            var currentHierarchical = _scene.Components.GetComponent<Hierarchical>(_currentId);
+            if (!_includeInactive && !currentHierarchical.Active) continue;
+            return true;
+        }
+    }
+
+    private void NextSibling()
+    {
+        ref var component = ref _scene.Components.GetComponent<Hierarchical>(_currentId);
+        _currentId = component.NextSiblingId;
+    }
+
+    public void Reset()
+    {
+        _currentId = _firstId;
+    }
+
+    public long Current => _currentId;
+
+    object IEnumerator.Current => Current;
+
+    public void Dispose()
+    {
+    }
+
+    public IEnumerator<long> GetEnumerator()
+    {
+        return this;
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return this;
     }
 }

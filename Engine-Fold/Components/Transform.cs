@@ -136,8 +136,6 @@ public struct Transform
         }
     }
 
-    public bool HasParent => ParentId != -1;
-
     /// <summary>
     ///     This transform's absolute rotation, in radians.
     /// </summary>

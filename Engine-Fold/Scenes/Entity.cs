@@ -16,21 +16,7 @@ public struct Entity
 
     public ref Transform Transform => ref GetComponent<Transform>();
 
-    public bool Active
-    {
-        get => !HasComponent<InactiveComponent>();
-        set
-        {
-            if (value)
-            {
-                if (HasComponent<InactiveComponent>()) RemoveComponent<InactiveComponent>();
-            }
-            else
-            {
-                if (!HasComponent<InactiveComponent>()) AddComponent<InactiveComponent>();
-            }
-        }
-    }
+    public bool Active => Hierarchical.Active;
 
     public string Name
     {

@@ -86,13 +86,11 @@ namespace FoldEngine.Gui.Systems
                 control.Size.Y - (sizeNorth + sizeSouth));
             
             // Iterate over children again and set their appropriate bounds
-            long childId = hierarchical.FirstChildId;
-            while (childId != -1)
+            foreach(long childId in hierarchical.GetChildren())
             {
-                ref var childHierarchical = ref Scene.Components.GetComponent<Hierarchical>(childId);
                 ref var childTransform = ref Scene.Components.GetComponent<Transform>(childId);
 
-                if (Scene.Components.HasComponent<Control>(childId) && !Scene.Components.HasComponent<InactiveComponent>(childId))
+                if (Scene.Components.HasComponent<Control>(childId))
                 {
                     ref var childControl = ref Scene.Components.GetComponent<Control>(childId);
                     Scene.Events.Invoke(new MinimumSizeRequestedEvent(childId, viewportId));
@@ -152,8 +150,6 @@ namespace FoldEngine.Gui.Systems
                     childTransform.LocalPosition = childBounds.Position;
                     childControl.Size = childBounds.Size;
                 }
-            
-                childId = childHierarchical.NextSiblingId;
             }
             
             LayoutChildren(viewportId, ref hierarchical);
@@ -169,12 +165,9 @@ namespace FoldEngine.Gui.Systems
             
             // First, request the minimum sizes of all children
             
-            long childId = hierarchical.FirstChildId;
-            while (childId != -1)
+            foreach(long childId in hierarchical.GetChildren())
             {
-                ref var childHierarchical = ref Scene.Components.GetComponent<Hierarchical>(childId);
-
-                if (Scene.Components.HasComponent<Control>(childId) && !Scene.Components.HasComponent<InactiveComponent>(childId))
+                if (Scene.Components.HasComponent<Control>(childId))
                 {
                     ref var childControl = ref Scene.Components.GetComponent<Control>(childId);
                     Scene.Events.Invoke(new MinimumSizeRequestedEvent(childId, viewportId));
@@ -230,8 +223,6 @@ namespace FoldEngine.Gui.Systems
                             );
                     }
                 }
-            
-                childId = childHierarchical.NextSiblingId;
             }
         }
 

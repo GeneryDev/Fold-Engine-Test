@@ -140,7 +140,7 @@ public class EditorBase : GameSystem
             var currentTab = CurrentTab;
             foreach (long entityId in CurrentTab.EditingEntity)
             {
-                if (currentTab.Scene.Components.HasComponent<Transform>(entityId))
+                if (currentTab.Scene.Components.HasComponent<Hierarchical>(entityId))
                 {
                     var entity = new Entity(currentTab.Scene, entityId);
 
@@ -172,7 +172,7 @@ public class EditorBase : GameSystem
         }
         else
         {
-            tabEntity.AddComponent<InactiveComponent>();
+            tabEntity.Hierarchical.Active = false;
         }
         
         var editorCameraEntity = Scene.CreateEntity("Editor Camera");
@@ -190,7 +190,7 @@ public class EditorBase : GameSystem
         while (TabIterator.Next())
         {
             var entity = new Entity(Scene, TabIterator.GetEntityId());
-            entity.Active = entity.EntityId == tabId;
+            entity.Hierarchical.Active = entity.EntityId == tabId;
         }
     }
 

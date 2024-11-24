@@ -89,16 +89,16 @@ public partial class ControlLayoutSystem : GameSystem
             ref var control = ref Scene.Components.GetComponent<Control>(evt.EntityId);
             control.RequestLayout = true;
         });
-        this.Subscribe((ref ComponentRemovedEvent<InactiveComponent> evt) =>
-        {
-            if (!Scene.Components.HasComponent<Control>(evt.EntityId)) return;
-            UpdateControl(evt.EntityId);
-        });
-        this.Subscribe((ref ComponentAddedEvent<InactiveComponent> evt) =>
-        {
-            if (!Scene.Components.HasComponent<Control>(evt.EntityId)) return;
-            UpdateControl(evt.EntityId);
-        });
+        // this.Subscribe((ref ComponentRemovedEvent<InactiveComponent> evt) =>
+        // {
+        //     if (!Scene.Components.HasComponent<Control>(evt.EntityId)) return;
+        //     UpdateControl(evt.EntityId);
+        // });
+        // this.Subscribe((ref ComponentAddedEvent<InactiveComponent> evt) =>
+        // {
+        //     if (!Scene.Components.HasComponent<Control>(evt.EntityId)) return;
+        //     UpdateControl(evt.EntityId);
+        // });
         // TODO request layout for top-level controls when window size changes
         Subscribe((ref WindowSizeChangedEvent evt) =>
         {
@@ -136,34 +136,24 @@ public partial class ControlLayoutSystem : GameSystem
 
     private void LayoutFreeContainer(long viewportId, ref Hierarchical hierarchical)
     {
-        long childId = hierarchical.FirstChildId;
-        while (childId != -1)
+        foreach(long childId in hierarchical.GetChildren())
         {
-            var childHierarchical = Scene.Components.GetComponent<Hierarchical>(childId);
-
-            if (Scene.Components.HasComponent<Control>(childId) && !Scene.Components.HasComponent<InactiveComponent>(childId))
+            if (Scene.Components.HasComponent<Control>(childId))
             {
                 Scene.Events.Invoke(new MinimumSizeRequestedEvent(childId, viewportId));
                 Scene.Events.Invoke(new LayoutRequestedEvent(childId, viewportId));
             }
-
-            childId = childHierarchical.NextSiblingId;
         }
     }
 
     private void LayoutChildren(long viewportId, ref Hierarchical hierarchical)
     {
-        long childId = hierarchical.FirstChildId;
-        while (childId != -1)
+        foreach(long childId in hierarchical.GetChildren())
         {
-            var childHierarchical = Scene.Components.GetComponent<Hierarchical>(childId);
-
-            if (Scene.Components.HasComponent<Control>(childId) && !Scene.Components.HasComponent<InactiveComponent>(childId))
+            if (Scene.Components.HasComponent<Control>(childId))
             {
                 Scene.Events.Invoke(new LayoutRequestedEvent(childId, viewportId));
             }
-
-            childId = childHierarchical.NextSiblingId;
         }
     }
 }

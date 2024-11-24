@@ -37,7 +37,7 @@ public class EditorInspectorView : EditorView
             if (editingTab.EditingEntity.Count == 1) id = editingTab.EditingEntity[0];
         }
 
-        if (id != -1 && (editingTab.Scene?.Components.HasComponent<Transform>(id) ?? false))
+        if (id != -1 && (editingTab.Scene?.Components.HasComponent<Hierarchical>(id) ?? false))
             RenderEntityView(renderer, new Entity(editingTab.Scene, id));
         else if (_object != null) RenderObjectView(renderer);
         // ContentPanel.Label(Scene.Name, 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
@@ -58,18 +58,17 @@ public class EditorInspectorView : EditorView
             ContentPanel.Label($"ID: {id}", 7).TextAlignment(-1);
         }
 
-        if (entity.Active != ContentPanel.Element<Checkbox>().Value(entity.Active).IsChecked())
+        bool active = entity.Hierarchical.Active;
+        if (active != ContentPanel.Element<Checkbox>().Value(entity.Active).IsChecked())
         {
-            if (entity.Active)
-            {
-                ((EditorEnvironment)ContentPanel.Environment).TransactionManager.InsertTransaction(
-                    new AddComponentTransaction(typeof(InactiveComponent), id));
-            }
-            else
-            {
-                ((EditorEnvironment)ContentPanel.Environment).TransactionManager.InsertTransaction(
-                    new RemoveComponentTransaction(typeof(InactiveComponent), id));
-            }
+            ((EditorEnvironment)ContentPanel.Environment).TransactionManager.InsertTransaction(
+                new SetComponentFieldTransaction()
+                {
+                    EntityId = id,
+                    ComponentType = typeof(Hierarchical),
+                    FieldInfo = typeof(Hierarchical).GetField("Active"),
+                    NewValue = !active, OldValue = active
+                });
         }
 
         ContentPanel.Label("Active", 9).TextAlignment(-1);

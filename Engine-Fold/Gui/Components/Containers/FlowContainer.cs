@@ -79,7 +79,7 @@ namespace FoldEngine.Gui.Systems
                 var overflowed = false;
                 float remainingRowGap = 0;
 
-                if (Scene.Components.HasComponent<Control>(childId) && !Scene.Components.HasComponent<InactiveComponent>(childId))
+                if (Scene.Components.HasComponent<Control>(childId) && childHierarchical.Active)
                 {
                     ref var childControl = ref Scene.Components.GetComponent<Control>(childId);
                     Scene.Events.Invoke(new MinimumSizeRequestedEvent(childId, viewportId));
@@ -181,12 +181,9 @@ namespace FoldEngine.Gui.Systems
             bool vertical = flow.Vertical;
             var minimumMainSize = 0f;
 
-            long childId = hierarchical.FirstChildId;
-            while (childId != -1)
+            foreach(long childId in hierarchical.GetChildren())
             {
-                ref var childHierarchical = ref Scene.Components.GetComponent<Hierarchical>(childId);
-                
-                if (Scene.Components.HasComponent<Control>(childId) && !Scene.Components.HasComponent<InactiveComponent>(childId))
+                if (Scene.Components.HasComponent<Control>(childId))
                 {
                     ref var childControl = ref Scene.Components.GetComponent<Control>(childId);
                     Scene.Events.Invoke(new MinimumSizeRequestedEvent(childId, viewportId));
@@ -195,7 +192,6 @@ namespace FoldEngine.Gui.Systems
 
                     minimumMainSize = Math.Max(minimumMainSize, sizeMain);
                 }
-                childId = childHierarchical.NextSiblingId;
             }
 
             control.ComputedMinimumSize = vertical

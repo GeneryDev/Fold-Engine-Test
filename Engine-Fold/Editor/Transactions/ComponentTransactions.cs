@@ -22,7 +22,7 @@ public class AddComponentTransaction : Transaction<Scene>
 
     public override bool Redo(Scene target)
     {
-        if (target.Components.HasComponent<Transform>(_entityId)
+        if (target.Components.HasComponent<Hierarchical>(_entityId)
             && !target.Components.HasComponent(_type, _entityId))
             target.Components.CreateComponent(_type, _entityId);
         else
@@ -85,7 +85,7 @@ public class RemoveComponentTransaction : Transaction<Scene>
     {
         if (_serializedData == null) throw new InvalidOperationException("Cannot call Undo before Redo");
 
-        if (target.Components.HasComponent<Transform>(_entityId)
+        if (target.Components.HasComponent<Hierarchical>(_entityId)
             && !target.Components.HasComponent(_type, _entityId))
         {
             var loadOp = new LoadOperation(new MemoryStream(_serializedData));
