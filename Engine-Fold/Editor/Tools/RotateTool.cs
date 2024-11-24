@@ -85,7 +85,7 @@ public class RotateTool : SelectTool
 
     private void EnsurePivotExists()
     {
-        if (!_movePivot.IsNotNull) _movePivot = Transform.InitializeComponent(Scene, 0);
+        if (_movePivot.IsNull) _movePivot = Transform.InitializeComponent(Scene, 0);
     }
 
     private float SnapAngle(float angle)

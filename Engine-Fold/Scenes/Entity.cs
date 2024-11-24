@@ -81,9 +81,9 @@ public struct Entity
     public bool IsAncestorOf(Entity other)
     {
         if (!ReferenceEquals(Scene, other.Scene)) return false;
-        while (other.Transform.HasParent)
+        while (other.Hierarchical.HasParent)
         {
-            other = new Entity(Scene, other.Transform.ParentId);
+            other = new Entity(Scene, other.Hierarchical.ParentId);
             if (other.EntityId == EntityId) return true;
         }
 

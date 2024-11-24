@@ -35,13 +35,13 @@ public class DeleteEntityTransaction : Transaction<Scene>
             saveOp.Dispose();
         }
 
-        if (target.Components.HasComponent<Transform>(_entityId))
+        if (target.Components.HasComponent<Hierarchical>(_entityId))
         {
-            ref Transform transform = ref target.Components.GetComponent<Transform>(_entityId);
-            _parentEntityId = transform.ParentId;
+            ref Hierarchical hierarchical = ref target.Components.GetComponent<Hierarchical>(_entityId);
+            _parentEntityId = hierarchical.ParentId;
 
-            if (_parentEntityId != -1 && target.Components.HasComponent<Transform>(_parentEntityId))
-                target.Components.GetComponent<Transform>(_parentEntityId).RemoveChild(_entityId);
+            if (_parentEntityId != -1 && target.Components.HasComponent<Hierarchical>(_parentEntityId))
+                target.Components.GetComponent<Hierarchical>(_parentEntityId).RemoveChild(_entityId);
             target.DeleteEntity(_entityId, true);
         }
         else
@@ -67,7 +67,7 @@ public class DeleteEntityTransaction : Transaction<Scene>
             loadOp.Dispose();
 
             if (_parentEntityId != -1)
-                target.Components.GetComponent<Transform>(_entityId).SetParent(_parentEntityId);
+                target.Components.GetComponent<Hierarchical>(_entityId).SetParent(_parentEntityId);
         }
 
         return true;

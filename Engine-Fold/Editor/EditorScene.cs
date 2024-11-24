@@ -41,7 +41,7 @@ public class EditorScene : Scene
         };
 
         var docksContainer = CreateEntity("Docks");
-        docksContainer.Transform.SetParent(entViewport);
+        docksContainer.Hierarchical.SetParent(entViewport);
         docksContainer.AddComponent<Control>();
         docksContainer.AddComponent<AnchoredControl>() = new AnchoredControl()
         {
@@ -65,7 +65,7 @@ public class EditorScene : Scene
             ref var dockControl = ref dock.AddComponent<Control>();
             dockControl.MinimumSize = dockControl.Size = new Vector2(160, 80);
             dock.AddComponent<BoxControl>().Color = new Color(Random.Shared.Next(256), Random.Shared.Next(256), Random.Shared.Next(256), 120);
-            dock.Transform.SetParent(docksContainer);
+            dock.Hierarchical.SetParent(docksContainer);
 
             var dockContent = CreateEntity("Dock Content");
             dockContent.AddComponent<Control>();
@@ -78,7 +78,7 @@ public class EditorScene : Scene
                 OffsetRight = -dockMargin,
                 OffsetBottom = -dockMargin
             };
-            dockContent.Transform.SetParent(dock);
+            dockContent.Hierarchical.SetParent(dock);
 
             dockContentEntityId = dockContent.EntityId;
 
@@ -106,7 +106,7 @@ public class EditorScene : Scene
                 MinimumSize = dockControl.MinimumSize,
                 EntityToResize = dock.EntityId
             };
-            dockResizer.Transform.SetParent(dock);
+            dockResizer.Hierarchical.SetParent(dock);
             
             return dock;
         }
@@ -146,7 +146,7 @@ public class EditorScene : Scene
                     Icon = new ResourceIdentifier(icon),
                     KeepPressedOutside = true
                 };
-                btnEntity.Transform.SetParent(view);
+                btnEntity.Hierarchical.SetParent(view);
             }
             
             AddToolbarButton("editor/hand");
@@ -160,6 +160,6 @@ public class EditorScene : Scene
             return view;
         }
         
-        CreateToolbarView().Transform.SetParent(topDock);
+        CreateToolbarView().Hierarchical.SetParent(topDock);
     }
 }

@@ -44,7 +44,7 @@ internal class DemoScene : Scene
         Entity cam = CreateEntity("Main Camera");
         cam.Transform.LocalScale *= 1 / 64f;
         // cam.Transform.LocalPosition = Vector2.UnitY * -8;
-        cam.Transform.SetParent(e1);
+        cam.Hierarchical.SetParent(e1);
         cam.AddComponent<Camera>();
         cam.GetComponent<Camera>().SnapPosition = 1 / 16f;
 
@@ -115,7 +115,7 @@ internal class DemoScene : Scene
         viewport.AddComponent<Viewport>();
         
         Entity e5 = CreateEntity("Control");
-        e5.Transform.SetParent(viewport);
+        e5.Hierarchical.SetParent(viewport);
         ref var control = ref e5.AddComponent<Control>();
         control.Size = new Vector2(500, 500);
         control.RequestLayout = true;
@@ -140,12 +140,12 @@ internal class DemoScene : Scene
             Text = "Click me!",
             Icon = new ResourceIdentifier("editor/cog")
         };
-        e6.Transform.SetParent(e5);
+        e6.Hierarchical.SetParent(e5);
 
         Entity container = CreateEntity("Container");
         container.AddComponent<Control>();
         container.AddComponent<FlowContainer>();
-        container.Transform.SetParent(e5);
+        container.Hierarchical.SetParent(e5);
         ref var containerAnchored = ref container.AddComponent<AnchoredControl>();
         containerAnchored = containerAnchored with
         {
@@ -160,7 +160,7 @@ internal class DemoScene : Scene
             ref var boxControl = ref box.AddComponent<Control>();
             boxControl.Size = boxControl.MinimumSize = new Vector2(Random.Shared.Next(40, 80), Random.Shared.Next(40, 80));
             box.AddComponent<BoxControl>().Color = color;
-            box.Transform.SetParent(container);
+            box.Hierarchical.SetParent(container);
         }
 
         for (int i = 0; i < 10; i++)
@@ -169,7 +169,7 @@ internal class DemoScene : Scene
         }
 
         var labelEntity = CreateEntity("Label");
-        labelEntity.Transform.SetParent(e5);
+        labelEntity.Hierarchical.SetParent(e5);
         labelEntity.AddComponent<Control>() = new Control()
         {
             ZOrder = 5
@@ -188,7 +188,7 @@ internal class DemoScene : Scene
         };
 
         var labelBounds = CreateEntity("Label Bounds");
-        labelBounds.Transform.SetParent(labelEntity);
+        labelBounds.Hierarchical.SetParent(labelEntity);
         labelBounds.AddComponent<Control>() = new Control
         {
             ZOrder = 4
@@ -229,7 +229,7 @@ internal class DemoScene : Scene
         // e0.AddComponent<Living>();
         // e1.AddComponent<Living>();
         //
-        // // e1.Transform.SetParent(e0);
+        // // e1.Hierarchical.SetParent(e0);
         //
         //
         // ComponentReference<Transform>[] e0Children = e0.Transform.Children;

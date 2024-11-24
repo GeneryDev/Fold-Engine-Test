@@ -66,7 +66,7 @@ public class SceneViewPanel : GuiPanel
         var editorBase = ((EditorEnvironment)Environment).EditorBase;
         
         ref Transform cameraTransform = ref editorBase.CurrentCameraTransform;
-        if (!cameraTransform.IsNotNull) return;
+        if (cameraTransform.IsNull) return;
 
         IRenderingLayer worldLayer = Environment.Core.RenderingUnit.WorldLayer;
         Vector2 cameraRelativePos =

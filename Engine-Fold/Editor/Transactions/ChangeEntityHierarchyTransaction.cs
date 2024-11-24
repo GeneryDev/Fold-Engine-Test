@@ -44,7 +44,7 @@ public class ChangeEntityHierarchyTransaction : Transaction<Scene>
         {
             case HierarchyDropMode.Inside:
             {
-                entity.Transform.SetParent(_nextEntity);
+                entity.Hierarchical.SetParent(_nextEntity);
                 break;
             }
         }
@@ -68,6 +68,6 @@ public class ChangeEntityHierarchyTransaction : Transaction<Scene>
 
     private static void UnlinkFromHierarchy(Entity entity)
     {
-        entity.Transform.SetParent(-1);
+        entity.Hierarchical.SetParent(-1);
     }
 }

@@ -30,9 +30,9 @@ public class CreateEntityTransaction : Transaction<Scene>
             }
         }
 
-        if (_parentEntityId != -1 && target.Components.HasComponent<Transform>(_parentEntityId))
+        if (_parentEntityId != -1 && target.Components.HasComponent<Hierarchical>(_parentEntityId))
         {
-            target.Components.GetComponent<Transform>(_newEntityId).SetParent(_parentEntityId);
+            target.Components.GetComponent<Hierarchical>(_newEntityId).SetParent(_parentEntityId);
         }
 
         return true;
@@ -40,12 +40,12 @@ public class CreateEntityTransaction : Transaction<Scene>
 
     public override bool Undo(Scene target)
     {
-        if (_parentEntityId != -1 && target.Components.HasComponent<Transform>(_parentEntityId))
+        if (_parentEntityId != -1 && target.Components.HasComponent<Hierarchical>(_parentEntityId))
         {
-            target.Components.GetComponent<Transform>(_parentEntityId).RemoveChild(_newEntityId);
+            target.Components.GetComponent<Hierarchical>(_parentEntityId).RemoveChild(_newEntityId);
         }
 
-        if (target.Components.HasComponent<Transform>(_newEntityId))
+        if (target.Components.HasComponent<Hierarchical>(_newEntityId))
         {
             target.DeleteEntity(_newEntityId, true);
         }

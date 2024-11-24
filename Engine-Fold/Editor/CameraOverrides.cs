@@ -9,6 +9,7 @@ public class CameraOverrides
     // TODO Repurpose this class as "camera overrides", a field in Scene that will be used as the camera if set.
     // All editor related usages of these can simply use plain components in an Editor scene. 
     public Camera Camera;
+    public Hierarchical Hierarchical;
     public Transform Transform;
 
     public CameraOverrides(Scene scene)

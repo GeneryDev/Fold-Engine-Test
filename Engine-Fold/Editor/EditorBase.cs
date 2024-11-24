@@ -177,7 +177,7 @@ public class EditorBase : GameSystem
         
         var editorCameraEntity = Scene.CreateEntity("Editor Camera");
         editorCameraEntity.AddComponent<Camera>();
-        editorCameraEntity.Transform.SetParent(tabEntity.EntityId);
+        editorCameraEntity.Hierarchical.SetParent(tabEntity.EntityId);
 
         tab.EditorCameraEntityId = editorCameraEntity.EntityId;
     }

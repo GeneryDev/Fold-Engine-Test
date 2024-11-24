@@ -51,11 +51,11 @@ namespace FoldEngine.Gui.Systems
                 if (!Scene.Components.HasComponent<BorderContainer>(evt.EntityId)) return;
                 if (!Scene.Components.HasComponent<Control>(evt.EntityId)) return;
 
-                ref var transform = ref Scene.Components.GetComponent<Transform>(evt.EntityId);
+                ref var hierarchical = ref Scene.Components.GetComponent<Hierarchical>(evt.EntityId);
                 ref var control = ref Scene.Components.GetComponent<Control>(evt.EntityId);
                 ref var container = ref Scene.Components.GetComponent<BorderContainer>(evt.EntityId);
                 
-                LayoutBorderContainer(evt.ViewportId, ref transform, ref control, ref container);
+                LayoutBorderContainer(evt.ViewportId, ref hierarchical, ref control, ref container);
             });
             this.Subscribe((ref MinimumSizeRequestedEvent evt) =>
             {
@@ -63,18 +63,18 @@ namespace FoldEngine.Gui.Systems
                 if (!Scene.Components.HasComponent<BorderContainer>(evt.EntityId)) return;
                 if (!Scene.Components.HasComponent<Control>(evt.EntityId)) return;
 
-                ref var transform = ref Scene.Components.GetComponent<Transform>(evt.EntityId);
+                ref var hierarchical = ref Scene.Components.GetComponent<Hierarchical>(evt.EntityId);
                 ref var control = ref Scene.Components.GetComponent<Control>(evt.EntityId);
                 ref var container = ref Scene.Components.GetComponent<BorderContainer>(evt.EntityId);
                 
-                ComputeBorderContainerSize(evt.ViewportId, ref transform, ref control, ref container);
+                ComputeBorderContainerSize(evt.ViewportId, ref hierarchical, ref control, ref container);
             });
         }
 
-        private void LayoutBorderContainer(long viewportId, ref Transform transform, ref Control control, ref BorderContainer container)
+        private void LayoutBorderContainer(long viewportId, ref Hierarchical hierarchical, ref Control control, ref BorderContainer container)
         {
             ComputeBorderContainerSizes(viewportId,
-                ref transform,
+                ref hierarchical,
                 ref container,
                 out float sizeNorth,
                 out float sizeWest,
@@ -86,9 +86,10 @@ namespace FoldEngine.Gui.Systems
                 control.Size.Y - (sizeNorth + sizeSouth));
             
             // Iterate over children again and set their appropriate bounds
-            long childId = transform.FirstChildId;
+            long childId = hierarchical.FirstChildId;
             while (childId != -1)
             {
+                ref var childHierarchical = ref Scene.Components.GetComponent<Hierarchical>(childId);
                 ref var childTransform = ref Scene.Components.GetComponent<Transform>(childId);
 
                 if (Scene.Components.HasComponent<Control>(childId) && !Scene.Components.HasComponent<InactiveComponent>(childId))
@@ -152,13 +153,13 @@ namespace FoldEngine.Gui.Systems
                     childControl.Size = childBounds.Size;
                 }
             
-                childId = childTransform.NextSiblingId;
+                childId = childHierarchical.NextSiblingId;
             }
             
-            LayoutChildren(viewportId, ref transform);
+            LayoutChildren(viewportId, ref hierarchical);
         }
 
-        private void ComputeBorderContainerSizes(long viewportId, ref Transform transform, ref BorderContainer container, out float sizeNorth, out float sizeWest, out float sizeEast, out float sizeSouth, out Vector2 sizeCenter)
+        private void ComputeBorderContainerSizes(long viewportId, ref Hierarchical hierarchical, ref BorderContainer container, out float sizeNorth, out float sizeWest, out float sizeEast, out float sizeSouth, out Vector2 sizeCenter)
         {
             sizeNorth = 0;
             sizeSouth = 0;
@@ -168,10 +169,10 @@ namespace FoldEngine.Gui.Systems
             
             // First, request the minimum sizes of all children
             
-            long childId = transform.FirstChildId;
+            long childId = hierarchical.FirstChildId;
             while (childId != -1)
             {
-                ref var childTransform = ref Scene.Components.GetComponent<Transform>(childId);
+                ref var childHierarchical = ref Scene.Components.GetComponent<Hierarchical>(childId);
 
                 if (Scene.Components.HasComponent<Control>(childId) && !Scene.Components.HasComponent<InactiveComponent>(childId))
                 {
@@ -230,15 +231,15 @@ namespace FoldEngine.Gui.Systems
                     }
                 }
             
-                childId = childTransform.NextSiblingId;
+                childId = childHierarchical.NextSiblingId;
             }
         }
 
-        private void ComputeBorderContainerSize(long viewportId, ref Transform transform, ref Control control,
+        private void ComputeBorderContainerSize(long viewportId, ref Hierarchical hierarchical, ref Control control,
             ref BorderContainer container)
         {
             ComputeBorderContainerSizes(viewportId,
-                ref transform,
+                ref hierarchical,
                 ref container,
                 out float sizeNorth,
                 out float sizeWest,

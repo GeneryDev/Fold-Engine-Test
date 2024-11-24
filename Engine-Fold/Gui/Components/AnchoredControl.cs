@@ -60,17 +60,18 @@ namespace FoldEngine.Gui.Systems
                 if (!Scene.Components.HasComponent<Control>(evt.EntityId)) return;
                 if (!Scene.Components.HasComponent<AnchoredControl>(evt.EntityId)) return;
 
+                ref var hierarchical = ref Scene.Components.GetComponent<Hierarchical>(evt.EntityId);
                 ref var transform = ref Scene.Components.GetComponent<Transform>(evt.EntityId);
                 ref var control = ref Scene.Components.GetComponent<Control>(evt.EntityId);
                 ref var anchored = ref Scene.Components.GetComponent<AnchoredControl>(evt.EntityId);
                 
-                LayoutAnchoredControl(evt.ViewportId, ref transform, ref control, ref anchored);
+                LayoutAnchoredControl(evt.ViewportId, ref hierarchical, ref transform, ref control, ref anchored);
             });
         }
 
-        private void LayoutAnchoredControl(long viewportId, ref Transform transform, ref Control control, ref AnchoredControl anchored)
+        private void LayoutAnchoredControl(long viewportId, ref Hierarchical hierarchical, ref Transform transform, ref Control control, ref AnchoredControl anchored)
         {
-            DeconstructParentBounds(viewportId, ref transform, out _, out var parentSize);
+            DeconstructParentBounds(viewportId, ref hierarchical, out _, out var parentSize);
             var parentBegin = Vector2.Zero;
             var parentEnd = Vector2.Zero + parentSize;
 
@@ -126,7 +127,7 @@ namespace FoldEngine.Gui.Systems
             transform.LocalPosition = ownBegin;
             control.Size = ownEnd - ownBegin;
         
-            LayoutChildren(viewportId, ref transform);
+            LayoutChildren(viewportId, ref hierarchical);
         }
     }
 }

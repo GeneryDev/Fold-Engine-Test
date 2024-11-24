@@ -79,7 +79,7 @@ public class ScaleTool : SelectTool
 
     private void EnsurePivotExists()
     {
-        if (!_movePivot.IsNotNull) _movePivot = Transform.InitializeComponent(Scene, 0);
+        if (_movePivot.IsNull) _movePivot = Transform.InitializeComponent(Scene, 0);
     }
 
     public override void Render(IRenderingUnit renderer)

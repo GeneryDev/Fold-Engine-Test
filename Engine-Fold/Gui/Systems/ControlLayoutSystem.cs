@@ -55,11 +55,11 @@ public partial class ControlLayoutSystem : GameSystem
 
     private void UpdateControl(long requestTarget)
     {
-        ref var transform = ref Scene.Components.GetComponent<Transform>(requestTarget);
-        if (transform.HasParent && Scene.Components.HasComponent<Control>(transform.ParentId))
+        ref var hierarchical = ref Scene.Components.GetComponent<Hierarchical>(requestTarget);
+        if (hierarchical.HasParent && Scene.Components.HasComponent<Control>(hierarchical.ParentId))
         {
             //request layout for parent instead of this control
-            requestTarget = transform.ParentId;
+            requestTarget = hierarchical.ParentId;
         }
                 
         Scene.Events.Invoke(new MinimumSizeRequestedEvent(requestTarget, _mainViewportId));
@@ -75,11 +75,11 @@ public partial class ControlLayoutSystem : GameSystem
         {
             if (evt.ViewportId == -1) return;
             if (!Scene.Components.HasComponent<Control>(evt.EntityId)) return;
-            ref var transform = ref Scene.Components.GetComponent<Transform>(evt.EntityId);
+            ref var hierarchical = ref Scene.Components.GetComponent<Hierarchical>(evt.EntityId);
 
             if (!Scene.Components.HasTrait<Container>(evt.EntityId))
             {
-                LayoutFreeContainer(evt.ViewportId, ref transform);
+                LayoutFreeContainer(evt.ViewportId, ref hierarchical);
             }
         });
         this.Subscribe((ref InspectorEditedComponentEvent evt) =>
@@ -106,9 +106,9 @@ public partial class ControlLayoutSystem : GameSystem
         });
     }
 
-    private void DeconstructParentBounds(long viewportId, ref Transform transform, out Vector2 parentPosition, out Vector2 parentSize)
+    private void DeconstructParentBounds(long viewportId, ref Hierarchical hierarchical, out Vector2 parentPosition, out Vector2 parentSize)
     {
-        if (transform is { HasParent: true, ParentId: var parentId } && Scene.Components.HasComponent<Control>(parentId))
+        if (hierarchical is { HasParent: true, ParentId: var parentId } && Scene.Components.HasComponent<Control>(parentId))
         {
             ref var parentTransform = ref Scene.Components.GetComponent<Transform>(parentId);
             ref var parentControl = ref Scene.Components.GetComponent<Control>(parentId);
@@ -134,12 +134,12 @@ public partial class ControlLayoutSystem : GameSystem
         }
     }
 
-    private void LayoutFreeContainer(long viewportId, ref Transform transform)
+    private void LayoutFreeContainer(long viewportId, ref Hierarchical hierarchical)
     {
-        long childId = transform.FirstChildId;
+        long childId = hierarchical.FirstChildId;
         while (childId != -1)
         {
-            var childTransform = Scene.Components.GetComponent<Transform>(childId);
+            var childHierarchical = Scene.Components.GetComponent<Hierarchical>(childId);
 
             if (Scene.Components.HasComponent<Control>(childId) && !Scene.Components.HasComponent<InactiveComponent>(childId))
             {
@@ -147,23 +147,23 @@ public partial class ControlLayoutSystem : GameSystem
                 Scene.Events.Invoke(new LayoutRequestedEvent(childId, viewportId));
             }
 
-            childId = childTransform.NextSiblingId;
+            childId = childHierarchical.NextSiblingId;
         }
     }
 
-    private void LayoutChildren(long viewportId, ref Transform transform)
+    private void LayoutChildren(long viewportId, ref Hierarchical hierarchical)
     {
-        long childId = transform.FirstChildId;
+        long childId = hierarchical.FirstChildId;
         while (childId != -1)
         {
-            var childTransform = Scene.Components.GetComponent<Transform>(childId);
+            var childHierarchical = Scene.Components.GetComponent<Hierarchical>(childId);
 
             if (Scene.Components.HasComponent<Control>(childId) && !Scene.Components.HasComponent<InactiveComponent>(childId))
             {
                 Scene.Events.Invoke(new LayoutRequestedEvent(childId, viewportId));
             }
 
-            childId = childTransform.NextSiblingId;
+            childId = childHierarchical.NextSiblingId;
         }
     }
 }

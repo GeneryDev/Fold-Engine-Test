@@ -78,7 +78,7 @@ public class Scene : Resource, ISelfSerializer
 
     public void DeleteEntity(long entityId, bool reclaimable = false)
     {
-        ref Transform transform = ref Components.GetComponent<Transform>(entityId);
+        ref Hierarchical transform = ref Components.GetComponent<Hierarchical>(entityId);
         if (transform.HasParent)
         {
             transform.MutableParent.RemoveChild(entityId);

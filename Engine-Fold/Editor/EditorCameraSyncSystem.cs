@@ -23,9 +23,10 @@ public class EditorCameraSyncSystem : GameSystem
         {
             ref var camera = ref _cameras.GetComponent();
             ref var transform = ref _cameras.GetCoComponent<Transform>();
-            if (!transform.HasParent) continue;
+            ref var hierarchical = ref _cameras.GetCoComponent<Hierarchical>();
+            if (!hierarchical.HasParent) continue;
 
-            var parentEntity = new Entity(Scene, transform.ParentId);
+            var parentEntity = new Entity(Scene, hierarchical.ParentId);
             if (parentEntity.HasComponent<EditorTab>() && parentEntity.HasComponent<SubScene>())
             {
                 ref var tab = ref parentEntity.GetComponent<EditorTab>();

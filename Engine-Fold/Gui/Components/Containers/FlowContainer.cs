@@ -34,11 +34,11 @@ namespace FoldEngine.Gui.Systems
                 if (!Scene.Components.HasComponent<FlowContainer>(evt.EntityId)) return;
                 if (!Scene.Components.HasComponent<Control>(evt.EntityId)) return;
 
-                ref var transform = ref Scene.Components.GetComponent<Transform>(evt.EntityId);
+                ref var hierarchical = ref Scene.Components.GetComponent<Hierarchical>(evt.EntityId);
                 ref var control = ref Scene.Components.GetComponent<Control>(evt.EntityId);
                 ref var flow = ref Scene.Components.GetComponent<FlowContainer>(evt.EntityId);
                 
-                LayoutFlowContainer(evt.ViewportId, ref transform, ref control, ref flow);
+                LayoutFlowContainer(evt.ViewportId, ref hierarchical, ref control, ref flow);
             });
             this.Subscribe((ref MinimumSizeRequestedEvent evt) =>
             {
@@ -46,15 +46,15 @@ namespace FoldEngine.Gui.Systems
                 if (!Scene.Components.HasComponent<FlowContainer>(evt.EntityId)) return;
                 if (!Scene.Components.HasComponent<Control>(evt.EntityId)) return;
 
-                ref var transform = ref Scene.Components.GetComponent<Transform>(evt.EntityId);
+                ref var hierarchical = ref Scene.Components.GetComponent<Hierarchical>(evt.EntityId);
                 ref var control = ref Scene.Components.GetComponent<Control>(evt.EntityId);
                 ref var flow = ref Scene.Components.GetComponent<FlowContainer>(evt.EntityId);
                 
-                ComputeFlowContainerSize(evt.ViewportId, ref transform, ref control, ref flow);
+                ComputeFlowContainerSize(evt.ViewportId, ref hierarchical, ref control, ref flow);
             });
         }
 
-        private void LayoutFlowContainer(long viewportId, ref Transform transform, ref Control control, ref FlowContainer flow)
+        private void LayoutFlowContainer(long viewportId, ref Hierarchical hierarchical, ref Control control, ref FlowContainer flow)
         {
             bool vertical = flow.Vertical;
 
@@ -68,11 +68,12 @@ namespace FoldEngine.Gui.Systems
             float lastRowSecSize = 0;
             float maxSecSize = 0;
 
-            long childId = transform.FirstChildId;
+            long childId = hierarchical.FirstChildId;
             long rowStartId = childId;
             long prevChildId = -1;
             while (childId != -1)
             {
+                ref var childHierarchical = ref Scene.Components.GetComponent<Hierarchical>(childId);
                 ref var childTransform = ref Scene.Components.GetComponent<Transform>(childId);
 
                 var overflowed = false;
@@ -115,7 +116,7 @@ namespace FoldEngine.Gui.Systems
                 }
 
                 prevChildId = childId;
-                childId = childTransform.NextSiblingId;
+                childId = childHierarchical.NextSiblingId;
                 if (childId == -1)
                 {
                     //reached end
@@ -133,7 +134,7 @@ namespace FoldEngine.Gui.Systems
                 }
             }
             
-            LayoutChildren(viewportId, ref transform);
+            LayoutChildren(viewportId, ref hierarchical);
         }
 
         private void AlignFlowRow(long rowStartId, long rowEndId, FlowContainer container, float remainingGap, float rowSecSize)
@@ -150,6 +151,7 @@ namespace FoldEngine.Gui.Systems
             long rowElementId = rowStartId;
             while (rowElementId != -1)
             {
+                ref var rowElementHierarchical = ref Scene.Components.GetComponent<Hierarchical>(rowElementId);
                 ref var rowElementTransform = ref Scene.Components.GetComponent<Transform>(rowElementId);
 
                 if (Scene.Components.HasComponent<Control>(rowElementId))
@@ -169,20 +171,20 @@ namespace FoldEngine.Gui.Systems
 
                 if (rowElementId == rowEndId) break;
             
-                rowElementId = rowElementTransform.NextSiblingId;
+                rowElementId = rowElementHierarchical.NextSiblingId;
             }
         }
 
-        private void ComputeFlowContainerSize(long viewportId, ref Transform transform, ref Control control,
+        private void ComputeFlowContainerSize(long viewportId, ref Hierarchical hierarchical, ref Control control,
             ref FlowContainer flow)
         {
             bool vertical = flow.Vertical;
             var minimumMainSize = 0f;
 
-            long childId = transform.FirstChildId;
+            long childId = hierarchical.FirstChildId;
             while (childId != -1)
             {
-                ref var childTransform = ref Scene.Components.GetComponent<Transform>(childId);
+                ref var childHierarchical = ref Scene.Components.GetComponent<Hierarchical>(childId);
                 
                 if (Scene.Components.HasComponent<Control>(childId) && !Scene.Components.HasComponent<InactiveComponent>(childId))
                 {
@@ -193,7 +195,7 @@ namespace FoldEngine.Gui.Systems
 
                     minimumMainSize = Math.Max(minimumMainSize, sizeMain);
                 }
-                childId = childTransform.NextSiblingId;
+                childId = childHierarchical.NextSiblingId;
             }
 
             control.ComputedMinimumSize = vertical
