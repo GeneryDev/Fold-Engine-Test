@@ -135,6 +135,7 @@ public class Scene : Resource, ISelfSerializer
             newEntityId = _nextEntityId++;
         }
 
+        ref Hierarchical hierarchical = ref Components.CreateComponent<Hierarchical>(newEntityId);
         ref Transform transform = ref Components.CreateComponent<Transform>(newEntityId);
         // try {
         //     Components.GetComponent<Transform>(newEntityId);

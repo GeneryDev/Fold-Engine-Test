@@ -19,7 +19,7 @@ public class EditorHierarchyView : EditorView
     private static readonly List<long> EntitiesToDelete = new List<long>();
 
     private Scene _lastRenderedScene;
-    private ComponentIterator<Transform> _transforms;
+    private ComponentIterator<Hierarchical> _hierarchicals;
 
     public Hierarchy<long> Hierarchy;
 
@@ -43,11 +43,11 @@ public class EditorHierarchyView : EditorView
         var editingScene = editingTab.Scene;
         if (editingScene != _lastRenderedScene)
         {
-            _transforms = editingScene?.Components.CreateIterator<Transform>(IterationFlags.IncludeInactive);
+            _hierarchicals = editingScene?.Components.CreateIterator<Hierarchical>(IterationFlags.IncludeInactive);
             _lastRenderedScene = editingScene;
         }
 
-        if (_transforms == null) return;
+        if (_hierarchicals == null) return;
         
         if (Hierarchy == null) Hierarchy = new EntityHierarchy(ContentPanel);
         ContentPanel.MayScroll = true;
@@ -59,23 +59,23 @@ public class EditorHierarchyView : EditorView
                 new CreateEntityTransaction(-1));
         ContentPanel.Separator();
 
-        _transforms.Reset();
-        while (_transforms.Next())
+        _hierarchicals.Reset();
+        while (_hierarchicals.Next())
         {
-            ref Transform current = ref _transforms.GetComponent();
+            ref Hierarchical current = ref _hierarchicals.GetComponent();
             if (!current.Parent.IsNotNull) RenderEntity(ref current, ContentPanel, renderer);
         }
     }
 
-    private void RenderEntity(ref Transform transform, GuiPanel panel, IRenderingUnit renderer, int depth = 0)
+    private void RenderEntity(ref Hierarchical hierarchical, GuiPanel panel, IRenderingUnit renderer, int depth = 0)
     {
         var editorBase = Scene.Systems.Get<EditorBase>();
         var editingTab = editorBase.CurrentTab;
         if (editingTab.Scene == null) return;
         
-        long entityId = transform.EntityId;
+        long entityId = hierarchical.EntityId;
 
-        bool hasChildren = transform.FirstChildId != -1;
+        bool hasChildren = hierarchical.FirstChildId != -1;
         bool expanded = Hierarchy.IsExpanded(entityId);
 
         var entity = new Entity(editingTab.Scene, entityId);
@@ -86,9 +86,9 @@ public class EditorHierarchyView : EditorView
             ;
 
         if (hasChildren && expanded)
-            foreach (ComponentReference<Transform> childTransform in transform.Children)
-                if (childTransform.Has())
-                    RenderEntity(ref childTransform.Get(), panel, renderer, depth + 1);
+            foreach (ComponentReference<Hierarchical> childHierarchical in hierarchical.Children)
+                if (childHierarchical.Has())
+                    RenderEntity(ref childHierarchical.Get(), panel, renderer, depth + 1);
 
         bool selected = Hierarchy.Pressed
             ? Hierarchy.IsSelected(entityId)
@@ -206,8 +206,8 @@ public class EditorHierarchyView : EditorView
             if (m.Button("Delete", 9).TextMargin(20).TextAlignment(-1).IsPressed())
             {
                 EntitiesToDelete.Clear();
-                if (editingScene.Components.HasComponent<Transform>(id))
-                    editingScene.Components.GetComponent<Transform>(id)
+                if (editingScene.Components.HasComponent<Hierarchical>(id))
+                    editingScene.Components.GetComponent<Hierarchical>(id)
                         .DumpHierarchy(EntitiesToDelete);
 
                 var transactions = new CompoundTransaction<Scene>();
@@ -280,8 +280,8 @@ public class EntityHierarchy : Hierarchy<long>
             var entity = new Entity(editingScene, id);
             var transaction = new ChangeEntityHierarchyTransaction(
                 id,
-                entity.Transform.ParentId,
-                entity.Transform.NextSiblingId,
+                entity.Hierarchical.ParentId,
+                entity.Hierarchical.NextSiblingId,
                 DragTargetId,
                 dropMode,
                 entity.Transform.CreateSnapshot()

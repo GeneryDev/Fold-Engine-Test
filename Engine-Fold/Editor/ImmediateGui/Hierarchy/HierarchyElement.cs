@@ -67,7 +67,7 @@ public class HierarchyElement<TI> : GuiLabel
 
             Text(entity.Name);
             TextMargin(4 + 16 * (depth + 1) + 4);
-            _expandable = entity.Transform.FirstChildId != -1;
+            _expandable = entity.Hierarchical.FirstChildId != -1;
             _depth = depth;
         }
         else

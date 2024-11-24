@@ -12,6 +12,8 @@ public struct Entity
     public readonly Scene Scene;
     public readonly long EntityId;
 
+    public ref Hierarchical Hierarchical => ref GetComponent<Hierarchical>();
+
     public ref Transform Transform => ref GetComponent<Transform>();
 
     public bool Active
