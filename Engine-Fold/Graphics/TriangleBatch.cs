@@ -45,7 +45,7 @@ public class TriangleBatch
         RasterizerState rasterizerState = null,
         Effect effect = null)
     {
-        blendState = blendState ?? BlendState.AlphaBlend;
+        blendState = blendState ?? BlendState.NonPremultiplied;
         samplerState = samplerState ?? SamplerState.LinearClamp;
         depthStencilState = depthStencilState ?? DepthStencilState.None;
         rasterizerState = rasterizerState ?? RasterizerState.CullCounterClockwise;
