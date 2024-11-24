@@ -78,7 +78,7 @@ namespace FoldEngine.Gui.Systems
                 var overflowed = false;
                 float remainingRowGap = 0;
 
-                if (Scene.Components.HasComponent<Control>(childId))
+                if (Scene.Components.HasComponent<Control>(childId) && !Scene.Components.HasComponent<InactiveComponent>(childId))
                 {
                     ref var childControl = ref Scene.Components.GetComponent<Control>(childId);
                     Scene.Events.Invoke(new MinimumSizeRequestedEvent(childId, viewportId));
@@ -184,7 +184,7 @@ namespace FoldEngine.Gui.Systems
             {
                 ref var childTransform = ref Scene.Components.GetComponent<Transform>(childId);
                 
-                if (Scene.Components.HasComponent<Control>(childId))
+                if (Scene.Components.HasComponent<Control>(childId) && !Scene.Components.HasComponent<InactiveComponent>(childId))
                 {
                     ref var childControl = ref Scene.Components.GetComponent<Control>(childId);
                     Scene.Events.Invoke(new MinimumSizeRequestedEvent(childId, viewportId));

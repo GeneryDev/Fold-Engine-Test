@@ -47,19 +47,23 @@ public partial class ControlLayoutSystem : GameSystem
             if (control.RequestLayout)
             {
                 control.RequestLayout = false;
-                var requestTarget = _controls.GetEntityId();
-                
-                ref var transform = ref Scene.Components.GetComponent<Transform>(requestTarget);
-                if (transform.HasParent && Scene.Components.HasComponent<Control>(transform.ParentId))
-                {
-                    //request layout for parent instead of this control
-                    requestTarget = transform.ParentId;
-                }
-                
-                Scene.Events.Invoke(new MinimumSizeRequestedEvent(requestTarget, _mainViewportId));
-                Scene.Events.Invoke(new LayoutRequestedEvent(requestTarget, _mainViewportId));
+                long requestTarget = _controls.GetEntityId();
+                UpdateControl(requestTarget);
             }
         }
+    }
+
+    private void UpdateControl(long requestTarget)
+    {
+        ref var transform = ref Scene.Components.GetComponent<Transform>(requestTarget);
+        if (transform.HasParent && Scene.Components.HasComponent<Control>(transform.ParentId))
+        {
+            //request layout for parent instead of this control
+            requestTarget = transform.ParentId;
+        }
+                
+        Scene.Events.Invoke(new MinimumSizeRequestedEvent(requestTarget, _mainViewportId));
+        Scene.Events.Invoke(new LayoutRequestedEvent(requestTarget, _mainViewportId));
     }
 
     public override void SubscribeToEvents()
@@ -84,6 +88,16 @@ public partial class ControlLayoutSystem : GameSystem
             if (!(evt.ComponentType == typeof(Control) || Scene.Core.RegistryUnit.Components.HasTrait(evt.ComponentType, typeof(Control)))) return;
             ref var control = ref Scene.Components.GetComponent<Control>(evt.EntityId);
             control.RequestLayout = true;
+        });
+        this.Subscribe((ref ComponentRemovedEvent<InactiveComponent> evt) =>
+        {
+            if (!Scene.Components.HasComponent<Control>(evt.EntityId)) return;
+            UpdateControl(evt.EntityId);
+        });
+        this.Subscribe((ref ComponentAddedEvent<InactiveComponent> evt) =>
+        {
+            if (!Scene.Components.HasComponent<Control>(evt.EntityId)) return;
+            UpdateControl(evt.EntityId);
         });
         // TODO request layout for top-level controls when window size changes
         Subscribe((ref WindowSizeChangedEvent evt) =>
@@ -127,7 +141,7 @@ public partial class ControlLayoutSystem : GameSystem
         {
             var childTransform = Scene.Components.GetComponent<Transform>(childId);
 
-            if (Scene.Components.HasComponent<Control>(childId))
+            if (Scene.Components.HasComponent<Control>(childId) && !Scene.Components.HasComponent<InactiveComponent>(childId))
             {
                 Scene.Events.Invoke(new MinimumSizeRequestedEvent(childId, viewportId));
                 Scene.Events.Invoke(new LayoutRequestedEvent(childId, viewportId));
@@ -144,7 +158,7 @@ public partial class ControlLayoutSystem : GameSystem
         {
             var childTransform = Scene.Components.GetComponent<Transform>(childId);
 
-            if (Scene.Components.HasComponent<Control>(childId))
+            if (Scene.Components.HasComponent<Control>(childId) && !Scene.Components.HasComponent<InactiveComponent>(childId))
             {
                 Scene.Events.Invoke(new LayoutRequestedEvent(childId, viewportId));
             }

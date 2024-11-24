@@ -86,12 +86,12 @@ namespace FoldEngine.Gui.Systems
                 control.Size.Y - (sizeNorth + sizeSouth));
             
             // Iterate over children again and set their appropriate bounds
-            var childId = transform.FirstChildId;
+            long childId = transform.FirstChildId;
             while (childId != -1)
             {
                 ref var childTransform = ref Scene.Components.GetComponent<Transform>(childId);
 
-                if (Scene.Components.HasComponent<Control>(childId))
+                if (Scene.Components.HasComponent<Control>(childId) && !Scene.Components.HasComponent<InactiveComponent>(childId))
                 {
                     ref var childControl = ref Scene.Components.GetComponent<Control>(childId);
                     Scene.Events.Invoke(new MinimumSizeRequestedEvent(childId, viewportId));
@@ -173,7 +173,7 @@ namespace FoldEngine.Gui.Systems
             {
                 ref var childTransform = ref Scene.Components.GetComponent<Transform>(childId);
 
-                if (Scene.Components.HasComponent<Control>(childId))
+                if (Scene.Components.HasComponent<Control>(childId) && !Scene.Components.HasComponent<InactiveComponent>(childId))
                 {
                     ref var childControl = ref Scene.Components.GetComponent<Control>(childId);
                     Scene.Events.Invoke(new MinimumSizeRequestedEvent(childId, viewportId));
