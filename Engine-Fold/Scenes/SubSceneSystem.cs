@@ -24,7 +24,7 @@ public class SubSceneSystem : GameSystem
         while (_subSceneComponents.Next())
         {
             ref var instance = ref _subSceneComponents.GetComponent();
-            if(instance.ProcessInputs && _subSceneComponents.GetCoComponent<Hierarchical>().Active)
+            if(instance.ProcessInputs && _subSceneComponents.GetCoComponent<Hierarchical>().IsActiveInHierarchy())
                 instance.Scene?.Input();
             else
                 instance.Scene?.Flush();
@@ -37,7 +37,7 @@ public class SubSceneSystem : GameSystem
         while (_subSceneComponents.Next())
         {
             ref var instance = ref _subSceneComponents.GetComponent();
-            if(instance.Update && _subSceneComponents.GetCoComponent<Hierarchical>().Active)
+            if(instance.Update && _subSceneComponents.GetCoComponent<Hierarchical>().IsActiveInHierarchy())
                 instance.Scene?.Update();
             else
                 instance.Scene?.Flush();
@@ -79,7 +79,7 @@ public class SubSceneSystem : GameSystem
         while (_subSceneComponents.Next())
         {
             ref var instance = ref _subSceneComponents.GetComponent();
-            if(instance.Render && _subSceneComponents.GetCoComponent<Hierarchical>().Active)
+            if(instance.Render && _subSceneComponents.GetCoComponent<Hierarchical>().IsActiveInHierarchy())
                 instance.Scene?.Render(renderer);
             else
                 instance.Scene?.Flush();

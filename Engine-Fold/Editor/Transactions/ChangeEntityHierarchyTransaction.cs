@@ -71,3 +71,36 @@ public class ChangeEntityHierarchyTransaction : Transaction<Scene>
         entity.Hierarchical.SetParent(-1);
     }
 }
+
+public class SetEntityActiveTransaction : Transaction<Scene>
+{
+    private readonly long _entityId = -1;
+
+    private bool _newActive;
+    private bool _prevActive;
+
+    public SetEntityActiveTransaction(
+        long entityId,
+        bool active,
+        bool prevActive
+        )
+    {
+        _entityId = entityId;
+        _newActive = active;
+        _prevActive = prevActive;
+    }
+
+    public override bool Redo(Scene target)
+    {
+        var entity = new Entity(target, _entityId);
+        entity.Hierarchical.Active = _newActive;
+        return true;
+    }
+
+    public override bool Undo(Scene target)
+    {
+        var entity = new Entity(target, _entityId);
+        entity.Hierarchical.Active = _prevActive;
+        return true;
+    }
+}

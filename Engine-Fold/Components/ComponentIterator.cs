@@ -148,7 +148,7 @@ public class ComponentIterator<T> : ComponentIterator where T : struct
                          || !_set.Dense[_set.Sparse[_sparseIndex]].Status.Has(ComponentStatus.Enumerable)
                          || (!_flags.Has(IterationFlags.IncludeInactive) &&
                              !_scene.Components.GetComponent<Hierarchical>(_set.Dense[_set.Sparse[_sparseIndex]]
-                                 .EntityId).Active)
+                                 .EntityId).IsActiveInHierarchy())
                      ));
             // ModifiedTimestamp < IterationTimestamp: Component was added before this "tick" (or it was removed and recovered this same tick)
             // ModifiedTimestamp == IterationTimestamp: Component was added this very tick (so skip it)
@@ -172,7 +172,7 @@ public class ComponentIterator<T> : ComponentIterator where T : struct
                 _denseIndex++;
             } while (_denseIndex < _set.N
                      && (!_flags.Has(IterationFlags.IncludeInactive) &&
-                         !_scene.Components.GetComponent<Hierarchical>(_set.Dense[_denseIndex].EntityId).Active)
+                         !_scene.Components.GetComponent<Hierarchical>(_set.Dense[_denseIndex].EntityId).IsActiveInHierarchy())
                     );
 
             _finished = _denseIndex >= _set.N;

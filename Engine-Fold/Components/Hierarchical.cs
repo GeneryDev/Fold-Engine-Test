@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using FoldEngine.Editor.Inspector;
 using FoldEngine.Scenes;
+using FoldEngine.Serialization;
 
 namespace FoldEngine.Components;
 
@@ -54,7 +56,21 @@ public struct Hierarchical
     /// </summary>
     [HideInInspector] [EntityId] public long NextSiblingId;
 
-    public bool Active = true;
+    [Name("Active")]
+    private bool _active = true;
+
+    public bool Active
+    {
+        get => _active;
+        set
+        {
+            _active = value;
+            InvalidateActiveCache();
+        }
+    }
+    
+    [HideInInspector] [DoNotSerialize] public bool? CachedActiveFlag;
+    [HideInInspector] [DoNotSerialize] public bool? _prevCachedActiveFlag;
 
     /// <summary>
     ///     Returns an initialized hierarchical component with all its correct default values.
@@ -200,6 +216,7 @@ public struct Hierarchical
         if (ParentId != -1) Scene.Components.GetComponent<Hierarchical>(ParentId).RemoveChild(EntityId);
         ParentId = entityId;
         if (entityId != -1) AddChild(ref MutableParent, ref this);
+        else InvalidateActiveCache();
     }
 
     /// <summary>
@@ -222,6 +239,9 @@ public struct Hierarchical
 
         currentChild.NextSiblingId = child.EntityId;
         child.PreviousSiblingId = currentChild.EntityId;
+        parent.InvokeChangedEvent(EntityHierarchyChangedEvent.Type.ChildAdded);
+        child.InvokeChangedEvent(EntityHierarchyChangedEvent.Type.ParentChanged);
+        parent.InvalidateActiveCache();
     }
 
     public int ChildCount
@@ -289,6 +309,10 @@ public struct Hierarchical
                     FirstChildId = firstChild.NextSiblingId;
                     if (Scene.Components.HasComponent<Hierarchical>(FirstChildId))
                         Scene.Components.GetComponent<Hierarchical>(FirstChildId).PreviousSiblingId = -1;
+
+                    firstChild.ParentId = -1;
+                    InvokeChangedEvent(EntityHierarchyChangedEvent.Type.ChildRemoved);
+                    firstChild.InvokeChangedEvent(EntityHierarchyChangedEvent.Type.ParentChanged);
                 }
                 else
                 {
@@ -299,6 +323,7 @@ public struct Hierarchical
             {
                 FirstChildId = -1;
             }
+            InvalidateActiveCache();
         }
     }
 
@@ -316,6 +341,10 @@ public struct Hierarchical
                     nextSibling.PreviousSiblingId = -1;
                     nextSibling.ParentId = -1;
                     nextSibling.NextSiblingId = -1;
+                    
+                    if(HasParent) MutableParent.InvokeChangedEvent(EntityHierarchyChangedEvent.Type.ChildRemoved);
+                    nextSibling.InvokeChangedEvent(EntityHierarchyChangedEvent.Type.ParentChanged);
+                    nextSibling.InvalidateActiveCache();
 
                     if (Scene.Components.HasComponent<Hierarchical>(NextSiblingId))
                         Scene.Components.GetComponent<Hierarchical>(NextSiblingId).PreviousSiblingId = EntityId;
@@ -332,7 +361,40 @@ public struct Hierarchical
         }
     }
 
-    public HierarchicalEnumerable GetChildren(bool includeInactive = true)
+    public void InvalidateActiveCache()
+    {
+        CachedActiveFlag = null;
+        if (IsNull) return;
+        foreach (long childId in GetChildren(true))
+        {
+            ref var child = ref Scene.Components.GetComponent<Hierarchical>(childId);
+            child.InvalidateActiveCache();
+        }
+    }
+
+    public void InvokeChangedEvent(EntityHierarchyChangedEvent.Type type)
+    {
+        Scene?.Events?.Invoke(new EntityHierarchyChangedEvent()
+        {
+            EntityId = EntityId,
+            ChangeType = type
+        });
+    }
+
+    public bool IsActiveInHierarchy()
+    {
+        if (CachedActiveFlag != null) return CachedActiveFlag.Value;
+        bool returnValue = Active && (!HasParent || MutableParent.IsActiveInHierarchy());
+        CachedActiveFlag = returnValue;
+        if (_prevCachedActiveFlag != null && _prevCachedActiveFlag != CachedActiveFlag)
+        {
+            InvokeChangedEvent(EntityHierarchyChangedEvent.Type.ActiveStateChanged);
+        }
+        _prevCachedActiveFlag = CachedActiveFlag;
+        return returnValue;
+    }
+
+    public HierarchicalEnumerable GetChildren(bool includeInactive = false)
     {
         return new HierarchicalEnumerable(Scene, FirstChildId, includeInactive);
     }
@@ -372,7 +434,7 @@ public struct HierarchicalEnumerable : IEnumerator<long>, IEnumerable<long>
 
             if (_currentId == -1) return false;
             var currentHierarchical = _scene.Components.GetComponent<Hierarchical>(_currentId);
-            if (!_includeInactive && !currentHierarchical.Active) continue;
+            if (!_includeInactive && !currentHierarchical.IsActiveInHierarchy()) continue;
             return true;
         }
     }

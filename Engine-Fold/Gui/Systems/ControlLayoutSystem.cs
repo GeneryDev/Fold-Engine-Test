@@ -89,16 +89,11 @@ public partial class ControlLayoutSystem : GameSystem
             ref var control = ref Scene.Components.GetComponent<Control>(evt.EntityId);
             control.RequestLayout = true;
         });
-        // this.Subscribe((ref ComponentRemovedEvent<InactiveComponent> evt) =>
-        // {
-        //     if (!Scene.Components.HasComponent<Control>(evt.EntityId)) return;
-        //     UpdateControl(evt.EntityId);
-        // });
-        // this.Subscribe((ref ComponentAddedEvent<InactiveComponent> evt) =>
-        // {
-        //     if (!Scene.Components.HasComponent<Control>(evt.EntityId)) return;
-        //     UpdateControl(evt.EntityId);
-        // });
+        this.Subscribe((ref EntityHierarchyChangedEvent evt) =>
+        {
+            if (!Scene.Components.HasComponent<Control>(evt.EntityId)) return;
+            UpdateControl(evt.EntityId);
+        });
         // TODO request layout for top-level controls when window size changes
         Subscribe((ref WindowSizeChangedEvent evt) =>
         {

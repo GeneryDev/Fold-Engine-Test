@@ -59,16 +59,10 @@ public class EditorInspectorView : EditorView
         }
 
         bool active = entity.Hierarchical.Active;
-        if (active != ContentPanel.Element<Checkbox>().Value(entity.Active).IsChecked())
+        if (active != ContentPanel.Element<Checkbox>().Value(active).IsChecked())
         {
             ((EditorEnvironment)ContentPanel.Environment).TransactionManager.InsertTransaction(
-                new SetComponentFieldTransaction()
-                {
-                    EntityId = id,
-                    ComponentType = typeof(Hierarchical),
-                    FieldInfo = typeof(Hierarchical).GetField("Active"),
-                    NewValue = !active, OldValue = active
-                });
+                new SetEntityActiveTransaction(id, !active, active));
         }
 
         ContentPanel.Label("Active", 9).TextAlignment(-1);

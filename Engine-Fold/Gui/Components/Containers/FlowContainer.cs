@@ -79,7 +79,7 @@ namespace FoldEngine.Gui.Systems
                 var overflowed = false;
                 float remainingRowGap = 0;
 
-                if (Scene.Components.HasComponent<Control>(childId) && childHierarchical.Active)
+                if (Scene.Components.HasComponent<Control>(childId) && childHierarchical.IsActiveInHierarchy())
                 {
                     ref var childControl = ref Scene.Components.GetComponent<Control>(childId);
                     Scene.Events.Invoke(new MinimumSizeRequestedEvent(childId, viewportId));

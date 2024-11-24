@@ -16,7 +16,7 @@ public struct Entity
 
     public ref Transform Transform => ref GetComponent<Transform>();
 
-    public bool Active => Hierarchical.Active;
+    public bool Active => Hierarchical.IsActiveInHierarchy();
 
     public string Name
     {
