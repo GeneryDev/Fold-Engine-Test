@@ -17,6 +17,8 @@ namespace FoldEngine.Gui.Components.Containers
 
         public float HSeparation;
         public float VSeparation;
+
+        public float CachedSizeSec;
     }
 }
 
@@ -97,7 +99,7 @@ namespace FoldEngine.Gui.Systems
                         maxSecSize = 0;
                     }
                 
-                    childTransform.Position = vertical
+                    childTransform.LocalPosition = vertical
                         ? new Vector2(offsetSec, offsetMain)
                         : new Vector2(offsetMain, offsetSec);
 
@@ -120,6 +122,14 @@ namespace FoldEngine.Gui.Systems
                     remainingRowGap = containerSizeMain - (offsetMain == 0 ? 0 : offsetMain - separationMain);
                     lastRowSecSize = maxSecSize;
                     AlignFlowRow(rowStartId, prevChildId, flow, remainingRowGap, lastRowSecSize);
+
+                    float finalSizeSec = (offsetSec == 0 ? 0 : offsetSec - separationSec);
+                    // ReSharper disable once CompareOfFloatsByEqualityOperator
+                    if (flow.CachedSizeSec != finalSizeSec)
+                    {
+                        flow.CachedSizeSec = finalSizeSec;
+                        control.RequestLayout = true;
+                    }
                 }
             }
             
@@ -148,12 +158,12 @@ namespace FoldEngine.Gui.Systems
                     ref var rowElementControl = ref Scene.Components.GetComponent<Control>(rowElementId);
                     if (container.Vertical)
                     {
-                        rowElementTransform.Position += Vector2.UnitY * rowOffsetMain;
+                        rowElementTransform.LocalPosition += Vector2.UnitY * rowOffsetMain;
                         rowElementControl.Size = rowElementControl.Size with { X = rowSecSize };
                     }
                     else
                     {
-                        rowElementTransform.Position += Vector2.UnitX * rowOffsetMain;
+                        rowElementTransform.LocalPosition += Vector2.UnitX * rowOffsetMain;
                         rowElementControl.Size = rowElementControl.Size with { Y = rowSecSize };
                     }
                 }
@@ -169,11 +179,8 @@ namespace FoldEngine.Gui.Systems
         {
             bool vertical = flow.Vertical;
             var minimumMainSize = 0f;
-            var minimumSecSize = 0f;
-            float separationSec = vertical ? flow.HSeparation : flow.VSeparation;
-            
+
             long childId = transform.FirstChildId;
-            bool isFirstChildControl = true;
             while (childId != -1)
             {
                 ref var childTransform = ref Scene.Components.GetComponent<Transform>(childId);
@@ -184,23 +191,15 @@ namespace FoldEngine.Gui.Systems
                     Scene.Events.Invoke(new MinimumSizeRequestedEvent(childId, viewportId));
 
                     float sizeMain = vertical ? childControl.EffectiveMinimumSize.Y : childControl.EffectiveMinimumSize.X;
-                    float sizeSec = vertical ? childControl.EffectiveMinimumSize.X : childControl.EffectiveMinimumSize.Y;
-                    
-                    minimumMainSize = Math.Max(minimumMainSize, sizeMain);
-                    minimumSecSize += sizeSec;
-                    if (!isFirstChildControl)
-                    {
-                        minimumSecSize += separationSec;
-                    }
 
-                    isFirstChildControl = false;
+                    minimumMainSize = Math.Max(minimumMainSize, sizeMain);
                 }
                 childId = childTransform.NextSiblingId;
             }
 
             control.ComputedMinimumSize = vertical
-                ? new Vector2(minimumSecSize, minimumMainSize)
-                : new Vector2(minimumMainSize, minimumSecSize);
+                ? new Vector2(flow.CachedSizeSec, minimumMainSize)
+                : new Vector2(minimumMainSize, flow.CachedSizeSec);
         }
     }
 }
