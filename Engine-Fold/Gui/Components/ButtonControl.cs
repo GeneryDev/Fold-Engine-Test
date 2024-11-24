@@ -225,7 +225,7 @@ namespace FoldEngine.Gui.Systems
                     var performAction = false;
                     switch (evt.Type)
                     {
-                        case MouseEventType.Pressed:
+                        case MouseButtonEventType.Pressed:
                         {
                             button.Pressed = true;
                             evt.Consume();
@@ -236,7 +236,7 @@ namespace FoldEngine.Gui.Systems
 
                             break;
                         }
-                        case MouseEventType.Released:
+                        case MouseButtonEventType.Released:
                         {
                             button.Pressed = false;
                             evt.Consume();

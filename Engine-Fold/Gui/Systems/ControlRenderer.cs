@@ -22,7 +22,7 @@ public partial class ControlRenderer : GameSystem
     public override void Initialize()
     {
         _viewports = CreateComponentIterator<Viewport>(IterationFlags.None);
-        _controls = CreateComponentIterator<Control>(IterationFlags.None);
+        _controls = CreateComponentIterator<Control>(IterationFlags.Ordered);
     }
 
     public override void OnRender(IRenderingUnit renderer)
@@ -73,12 +73,17 @@ public partial class ControlRenderer : GameSystem
             {
                 RenderButton(renderer, layer, ref transform, ref control, ref entity.GetComponent<ButtonControl>());
             }
+            if (entity.HasComponent<ResizeHandleControl>())
+            {
+                RenderResizeHandle(renderer, layer, ref transform, ref control, ref entity.GetComponent<ResizeHandleControl>());
+            }
         }
     }
     public override void SubscribeToEvents()
     {
         base.SubscribeToEvents();
         SubscribeToButtonEvents();
+        SubscribeToResizeHandleEvents();
         SubscribeToLabelEvents();
     }
 

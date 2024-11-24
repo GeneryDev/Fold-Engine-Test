@@ -146,7 +146,6 @@ namespace FoldEngine.Gui.Systems
                 Alignment.End => 1.0f,
                 _ => 0
             });
-            Console.WriteLine("row offset main: " + rowOffsetMain);
 
             long rowElementId = rowStartId;
             while (rowElementId != -1)

@@ -47,8 +47,17 @@ public partial class ControlLayoutSystem : GameSystem
             if (control.RequestLayout)
             {
                 control.RequestLayout = false;
-                Scene.Events.Invoke(new MinimumSizeRequestedEvent(_controls.GetEntityId(), _mainViewportId));
-                Scene.Events.Invoke(new LayoutRequestedEvent(_controls.GetEntityId(), _mainViewportId));
+                var requestTarget = _controls.GetEntityId();
+                
+                ref var transform = ref Scene.Components.GetComponent<Transform>(requestTarget);
+                if (transform.HasParent && Scene.Components.HasComponent<Control>(transform.ParentId))
+                {
+                    //request layout for parent instead of this control
+                    requestTarget = transform.ParentId;
+                }
+                
+                Scene.Events.Invoke(new MinimumSizeRequestedEvent(requestTarget, _mainViewportId));
+                Scene.Events.Invoke(new LayoutRequestedEvent(requestTarget, _mainViewportId));
             }
         }
     }
@@ -73,16 +82,8 @@ public partial class ControlLayoutSystem : GameSystem
         {
             if (!Scene.Components.HasComponent<Control>(evt.EntityId)) return;
             if (!(evt.ComponentType == typeof(Control) || Scene.Core.RegistryUnit.Components.HasTrait(evt.ComponentType, typeof(Control)))) return;
-            ref var transform = ref Scene.Components.GetComponent<Transform>(evt.EntityId);
             ref var control = ref Scene.Components.GetComponent<Control>(evt.EntityId);
-            if (transform.HasParent && Scene.Components.HasComponent<Control>(transform.ParentId))
-            {
-                Scene.Components.GetComponent<Control>(transform.ParentId).RequestLayout = true;
-            }
-            else
-            {
-                control.RequestLayout = true;
-            }
+            control.RequestLayout = true;
         });
         // TODO request layout for top-level controls when window size changes
         Subscribe((ref WindowSizeChangedEvent evt) =>

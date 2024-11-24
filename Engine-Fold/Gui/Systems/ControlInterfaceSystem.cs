@@ -10,13 +10,14 @@ using FoldEngine.Serialization;
 using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
 using Mouse = Microsoft.Xna.Framework.Input.Mouse;
-using MouseEventType = FoldEngine.Gui.Events.MouseEventType;
 
 namespace FoldEngine.Gui.Systems;
 
 [GameSystem("fold:control.interface", ProcessingCycles.Input, true)]
 public class ControlInterfaceSystem : GameSystem
 {
+    private static readonly Point NullMousePos = new Point(-1, -1);
+
     [DoNotSerialize] [HideInInspector] public ButtonAction MouseLeft = ButtonAction.Default;
     [DoNotSerialize] [HideInInspector] public ButtonAction MouseMiddle = ButtonAction.Default;
     [DoNotSerialize] [HideInInspector] public ButtonAction MouseRight = ButtonAction.Default;
@@ -24,7 +25,8 @@ public class ControlInterfaceSystem : GameSystem
     private ComponentIterator<Viewport> _viewports;
     private ComponentIterator<Control> _controls;
 
-    [DoNotSerialize] private Point _mousePos;
+    [DoNotSerialize] private Point _prevMousePos = NullMousePos;
+    [DoNotSerialize] private Point _mousePos = NullMousePos;
     [DoNotSerialize] private readonly long[] _pressedControls = new long[MouseButtonEvent.MaxButtons];
     
     public override void Initialize()
@@ -59,7 +61,8 @@ public class ControlInterfaceSystem : GameSystem
     {
         var layer = viewport.GetLayer(Scene.Core.RenderingUnit);
         if (layer == null) return;
-        
+
+        _prevMousePos = _mousePos;
         _mousePos = Mouse.GetState().Position;
         try
         {
@@ -69,13 +72,15 @@ public class ControlInterfaceSystem : GameSystem
         {
             Console.WriteLine(ex.Message);
         }
-        
-        HandleMouseEvents(MouseLeft, MouseButtonEvent.LeftButton);
-        HandleMouseEvents(MouseMiddle, MouseButtonEvent.MiddleButton);
-        HandleMouseEvents(MouseRight, MouseButtonEvent.RightButton);
+        if (_prevMousePos == NullMousePos)
+        {
+            _prevMousePos = _mousePos;
+        }
 
         viewport.PrevHoverTargetId = viewport.HoverTargetId;
         viewport.HoverTargetId = GetControlAtPoint(_mousePos);
+        
+        HandleMouseMotionEvents(ref viewport);
 
         if (viewport.PrevHoverTargetId != viewport.HoverTargetId)
         {
@@ -88,10 +93,40 @@ public class ControlInterfaceSystem : GameSystem
                 Scene.Events.Invoke(new MouseEnteredEvent(viewport.HoverTargetId, _mousePos));
             }
         }
+        
+        HandleMouseEvents(MouseLeft, MouseButtonEvent.LeftButton);
+        HandleMouseEvents(MouseMiddle, MouseButtonEvent.MiddleButton);
+        HandleMouseEvents(MouseRight, MouseButtonEvent.RightButton);
+        
         // Console.WriteLine($"Hover target: {viewport.HoverTargetId}");
 
         //
         // FocusOwner?.OnInput(ControlScheme);
+    }
+
+    private void HandleMouseMotionEvents(ref Viewport viewport)
+    {
+        var mouseDelta = _mousePos - _prevMousePos;
+
+        if (mouseDelta == Point.Zero) return;
+        Scene.Events.Invoke(new MouseMovedEvent
+        {
+            EntityId = viewport.HoverTargetId,
+            Position = _mousePos,
+            Delta = mouseDelta
+        });
+        for (var btnIndex = 0; btnIndex < MouseButtonEvent.MaxButtons; btnIndex++)
+        {
+            if (_pressedControls[btnIndex] == -1) continue;
+            
+            Scene.Events.Invoke(new MouseDraggedEvent()
+            {
+                EntityId = _pressedControls[btnIndex],
+                Position = _mousePos,
+                Delta = mouseDelta,
+                Button = btnIndex
+            });
+        }
     }
 
     private void HandleMouseEvents(ButtonAction mouseButton, int buttonIndex)
@@ -102,22 +137,20 @@ public class ControlInterfaceSystem : GameSystem
             _pressedControls[buttonIndex] = onEntityId;
             Scene.Events.Invoke(new MouseButtonEvent
             {
-                Type = MouseEventType.Pressed,
+                Type = MouseButtonEventType.Pressed,
                 EntityId = onEntityId,
                 Position = _mousePos,
-                Button = buttonIndex,
-                When = Time.Now
+                Button = buttonIndex
             });
         }
         else if (mouseButton.Released)
         {
             Scene.Events.Invoke(new MouseButtonEvent
             {
-                Type = MouseEventType.Released,
+                Type = MouseButtonEventType.Released,
                 EntityId = _pressedControls[buttonIndex],
                 Position = _mousePos,
-                Button = buttonIndex,
-                When = Time.Now
+                Button = buttonIndex
             });
             _pressedControls[buttonIndex] = -1;
         }
