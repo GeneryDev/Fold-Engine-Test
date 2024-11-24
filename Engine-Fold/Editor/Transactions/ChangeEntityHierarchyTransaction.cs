@@ -59,6 +59,17 @@ public class ChangeEntityHierarchyTransaction : Transaction<Scene>
         var entity = new Entity(target, _entityId);
 
         UnlinkFromHierarchy(entity);
+        if (_previousParent != -1)
+        {
+            if (target.Components.HasComponent<Hierarchical>(_previousParent))
+            {
+                entity.Hierarchical.SetParent(_previousParent);
+            }
+            else
+            {
+                SceneEditor.ReportEditorGameConflict();
+            }
+        }
 
         entity.Transform.RestoreSnapshot(_snapshot);
 

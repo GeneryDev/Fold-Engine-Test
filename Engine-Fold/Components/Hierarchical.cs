@@ -214,7 +214,9 @@ public struct Hierarchical
         if (!IsNotNull) throw new InvalidOperationException();
         if (ParentId == entityId) return;
         if (ParentId != -1) Scene.Components.GetComponent<Hierarchical>(ParentId).RemoveChild(EntityId);
+        PreviousSiblingId = -1;
         ParentId = entityId;
+        NextSiblingId = -1;
         if (entityId != -1) AddChild(ref MutableParent, ref this);
         else InvalidateActiveCache();
     }
@@ -242,6 +244,7 @@ public struct Hierarchical
         parent.InvokeChangedEvent(EntityHierarchyChangedEvent.Type.ChildAdded);
         child.InvokeChangedEvent(EntityHierarchyChangedEvent.Type.ParentChanged);
         parent.InvalidateActiveCache();
+        child.InvalidateActiveCache();
     }
 
     public int ChildCount
@@ -313,6 +316,7 @@ public struct Hierarchical
                     firstChild.ParentId = -1;
                     InvokeChangedEvent(EntityHierarchyChangedEvent.Type.ChildRemoved);
                     firstChild.InvokeChangedEvent(EntityHierarchyChangedEvent.Type.ParentChanged);
+                    firstChild.InvalidateActiveCache();
                 }
                 else
                 {
@@ -363,8 +367,9 @@ public struct Hierarchical
 
     public void InvalidateActiveCache()
     {
-        CachedActiveFlag = null;
         if (IsNull) return;
+        if (CachedActiveFlag == null) return;
+        CachedActiveFlag = null;
         foreach (long childId in GetChildren(true))
         {
             ref var child = ref Scene.Components.GetComponent<Hierarchical>(childId);
