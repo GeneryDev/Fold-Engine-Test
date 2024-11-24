@@ -1,6 +1,7 @@
 ﻿using System;
 using FoldEngine.Components;
 using FoldEngine.Editor.Transactions;
+using FoldEngine.Events;
 using FoldEngine.Gui.Components;
 using FoldEngine.Gui.Components.Containers;
 using FoldEngine.Gui.Components.Traits;
@@ -56,6 +57,7 @@ public partial class ControlLayoutSystem : GameSystem
     {
         SubscribeToAnchoredControlEvents();
         SubscribeToFlowContainerEvents();
+        SubscribeToBorderContainerEvents();
         this.Subscribe((ref LayoutRequestedEvent evt) =>
         {
             if (evt.ViewportId == -1) return;
@@ -81,6 +83,11 @@ public partial class ControlLayoutSystem : GameSystem
             {
                 control.RequestLayout = true;
             }
+        });
+        // TODO request layout for top-level controls when window size changes
+        Subscribe((ref WindowSizeChangedEvent evt) =>
+        {
+            
         });
     }
 
