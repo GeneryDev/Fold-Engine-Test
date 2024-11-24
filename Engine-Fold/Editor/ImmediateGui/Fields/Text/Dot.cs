@@ -60,14 +60,14 @@ public struct Dot
         {
             case DotEventType.Left:
             {
-                if (!IsPoint && !modifiers.HasFlag(KeyModifiers.Shift))
+                if (!IsPoint && !modifiers.Has(KeyModifiers.Shift))
                 {
                     nextPos = Math.Min(Index, Mark);
-                    if (modifiers.HasFlag(KeyModifiers.Control)) nextPos = GetPositionBeforeWord();
+                    if (modifiers.Has(KeyModifiers.Control)) nextPos = GetPositionBeforeWord();
                 }
                 else
                 {
-                    nextPos = modifiers.HasFlag(KeyModifiers.Control) ? GetPositionBeforeWord() : GetPositionBefore();
+                    nextPos = modifiers.Has(KeyModifiers.Control) ? GetPositionBeforeWord() : GetPositionBefore();
                 }
 
                 doUpdateX = true;
@@ -76,14 +76,14 @@ public struct Dot
             }
             case DotEventType.Right:
             {
-                if (!IsPoint && !modifiers.HasFlag(KeyModifiers.Shift))
+                if (!IsPoint && !modifiers.Has(KeyModifiers.Shift))
                 {
                     nextPos = Math.Max(Index, Mark);
-                    if (modifiers.HasFlag(KeyModifiers.Control)) nextPos = GetPositionAfterWord();
+                    if (modifiers.Has(KeyModifiers.Control)) nextPos = GetPositionAfterWord();
                 }
                 else
                 {
-                    nextPos = modifiers.HasFlag(KeyModifiers.Control) ? GetPositionAfterWord() : GetPositionAfter();
+                    nextPos = modifiers.Has(KeyModifiers.Control) ? GetPositionAfterWord() : GetPositionAfter();
                 }
 
                 doUpdateX = true;
@@ -92,7 +92,7 @@ public struct Dot
             }
             case DotEventType.Up:
             {
-                if (modifiers.HasFlag(KeyModifiers.Control)) return false;
+                if (modifiers.Has(KeyModifiers.Control)) return false;
                 nextPos = GetPositionAbove();
                 if (nextPos < 0)
                 {
@@ -105,7 +105,7 @@ public struct Dot
             }
             case DotEventType.Down:
             {
-                if (modifiers.HasFlag(KeyModifiers.Control)) return false;
+                if (modifiers.Has(KeyModifiers.Control)) return false;
                 nextPos = GetPositionBelow();
                 if (nextPos < 0)
                 {
@@ -118,14 +118,14 @@ public struct Dot
             }
             case DotEventType.Home:
             {
-                if (!modifiers.HasFlag(KeyModifiers.Control)) nextPos = GetRowHome();
+                if (!modifiers.Has(KeyModifiers.Control)) nextPos = GetRowHome();
                 doUpdateX = true;
                 actionPerformed = true;
                 break;
             }
             case DotEventType.End:
             {
-                if (modifiers.HasFlag(KeyModifiers.Control)) nextPos = Document.Length;
+                if (modifiers.Has(KeyModifiers.Control)) nextPos = Document.Length;
                 else nextPos = GetRowEnd();
                 doUpdateX = true;
                 actionPerformed = true;
@@ -136,7 +136,7 @@ public struct Dot
         if (actionPerformed)
         {
             Index = nextPos;
-            if (!modifiers.HasFlag(KeyModifiers.Shift)) Mark = nextPos;
+            if (!modifiers.Has(KeyModifiers.Shift)) Mark = nextPos;
             if (doUpdateX) UpdateX();
         }
 

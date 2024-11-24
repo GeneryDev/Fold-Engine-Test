@@ -69,7 +69,7 @@ public class ComponentSet<T> : ComponentSet where T : struct
         if ((int)entityId < MinId || (int)entityId >= MaxId || Sparse[(int)entityId - MinId] == -1)
             return ref BackupSet.Get(entityId);
 
-        if (Dense[Sparse[(int)entityId - MinId]].Status.HasFlag(ComponentStatus.Retrievable)
+        if (Dense[Sparse[(int)entityId - MinId]].Status.Has(ComponentStatus.Retrievable)
             && Dense[Sparse[(int)entityId - MinId]].EntityId == entityId)
             return ref Dense[Sparse[(int)entityId - MinId]].Component;
         throw new ComponentRegistryException($"Component {typeof(T)} not found for entity ID {entityId}");
@@ -80,7 +80,7 @@ public class ComponentSet<T> : ComponentSet where T : struct
         if ((int)entityId < MinId || (int)entityId >= MaxId || Sparse[(int)entityId - MinId] == -1)
             return BackupSet.Has(entityId);
 
-        return Dense[Sparse[(int)entityId - MinId]].Status.HasFlag(ComponentStatus.Retrievable)
+        return Dense[Sparse[(int)entityId - MinId]].Status.Has(ComponentStatus.Retrievable)
                && Dense[Sparse[(int)entityId - MinId]].EntityId == entityId;
     }
 
@@ -89,7 +89,7 @@ public class ComponentSet<T> : ComponentSet where T : struct
         if (entityId < MinId || entityId >= MaxId || Sparse[entityId - MinId] == -1)
             return BackupSet.Has(entityId);
 
-        return Dense[Sparse[entityId - MinId]].Status.HasFlag(ComponentStatus.Retrievable);
+        return Dense[Sparse[entityId - MinId]].Status.Has(ComponentStatus.Retrievable);
     }
 
     public override void CreateFor(long entityId)
@@ -156,7 +156,7 @@ public class ComponentSet<T> : ComponentSet where T : struct
         int sparseIndex = (int)entityId - MinId;
         if (Sparse[sparseIndex] >= 0) //Is in the dense array
         {
-            if (Dense[Sparse[sparseIndex]].Status.HasFlag(ComponentStatus.MarkedForRemoval)) //Marked for removal, reclaim it
+            if (Dense[Sparse[sparseIndex]].Status.Has(ComponentStatus.MarkedForRemoval)) //Marked for removal, reclaim it
             {
                 Dense[Sparse[sparseIndex]].Status = ComponentStatus.Active;
                 _dsMarkedForRemoval.Remove((int)entityId);
@@ -502,6 +502,15 @@ internal enum ComponentStatus
     JustNowAdded = Retrievable,
     Active = Retrievable | Enumerable
 }
+
+internal static class ComponentStatusExt
+{
+    public static bool Has(this ComponentStatus a, ComponentStatus flag)
+    {
+        return ((uint)a & (uint)flag) == (uint)flag;
+    }
+}
+
 
 public class ComponentRegistryException : Exception
 {

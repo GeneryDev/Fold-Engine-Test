@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using FoldEngine.Editor.ImmediateGui.Hierarchy;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
@@ -245,6 +247,12 @@ public enum KeyModifiers
 
 public static class KeyModifiersExt
 {
+    [Pure]
+    public static bool Has(this KeyModifiers a, KeyModifiers flag)
+    {
+        return ((uint)a & (uint)flag) == (uint)flag;
+    }
+    
     public static KeyModifiers GetKeyModifiers()
     {
         KeyboardState state = Keyboard.GetState();

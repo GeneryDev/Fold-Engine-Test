@@ -103,6 +103,14 @@ public enum ProcessingCycles
     All = Input | FixedUpdate | Update | Render
 }
 
+public static class ProcessingCyclesExt
+{
+    public static bool Has(this ProcessingCycles a, ProcessingCycles flag)
+    {
+        return ((uint)a & (uint)flag) == (uint)flag;
+    }
+}
+
 public sealed class GameSystemAttribute : Attribute
 {
     public readonly ProcessingCycles ProcessingCycles;
