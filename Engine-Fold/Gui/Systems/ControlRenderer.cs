@@ -22,7 +22,7 @@ public partial class ControlRenderer : GameSystem
     public override void Initialize()
     {
         _viewports = CreateComponentIterator<Viewport>(IterationFlags.None);
-        _controls = CreateComponentIterator<Control>(IterationFlags.Ordered);
+        _controls = CreateComponentIterator<Control>(IterationFlags.None);
     }
 
     public override void OnRender(IRenderingUnit renderer)
@@ -44,7 +44,7 @@ public partial class ControlRenderer : GameSystem
         _controls.Reset();
         while (_controls.Next())
         {
-            ref var control = ref _controls.GetCoComponent<Control>();
+            ref var control = ref _controls.GetComponent();
             
             float sortKey = control.ZOrder;
             _entitiesToRender.Add(new RenderableKey()
@@ -54,7 +54,12 @@ public partial class ControlRenderer : GameSystem
             });
         }
         
-        _entitiesToRender.Sort((a, b) => Math.Sign(a.SortKey - b.SortKey));
+        _entitiesToRender.Sort((a, b) =>
+        {
+            int sortByKey = Math.Sign(a.SortKey - b.SortKey);
+            // If Z order is tied, break the tie using entity ID
+            return sortByKey != 0 ? sortByKey : Math.Sign(a.EntityId - b.EntityId);
+        });
         
         for (var i = 0; i < _entitiesToRender.Count; i++)
         {
