@@ -2,6 +2,7 @@
 using FoldEngine.Gui;
 using FoldEngine.Gui.Components;
 using FoldEngine.Gui.Components.Containers;
+using FoldEngine.Gui.Styles;
 using FoldEngine.Gui.Systems;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
@@ -19,6 +20,8 @@ public class EditorScene : Scene
 
     public void Initialize()
     {
+        BuildStyles();
+        
         Systems.Add<EditorBase>();
         Systems.Add<EditorCameraSyncSystem>();
         Systems.Add<SubSceneSystem>();
@@ -129,13 +132,10 @@ public class EditorScene : Scene
             tab.AddComponent<ButtonControl>() = new ButtonControl
             {
                 Text = name,
-                FontSize = 7,
                 Alignment = Alignment.Begin,
-                IconMaxWidth = 8,
-                IconTextSeparation = 4,
-                MarginLeft = 2,
-                MarginRight = 6,
-                Icon = new ResourceIdentifier(icon)
+                Icon = new ResourceIdentifier(icon),
+                Style = new ResourceIdentifier("editor:tab"),
+                KeepPressedOutside = true
             };
             return tab;
         }
@@ -186,5 +186,19 @@ public class EditorScene : Scene
         }
         
         CreateToolbarView().Hierarchical.SetParent(topDock);
+    }
+
+    private void BuildStyles()
+    {
+        var defaultButtonStyle = Resources.Create<ButtonStyle>("editor:button");
+        
+        var tabButtonStyle = Resources.Create<ButtonStyle>("editor:tab");
+        tabButtonStyle.FontSize = 7;
+        tabButtonStyle.IconMaxWidth = 8;
+        tabButtonStyle.IconTextSeparation = 4;
+        tabButtonStyle.MarginLeft = 2;
+        tabButtonStyle.MarginRight = 6;
+        tabButtonStyle.NormalColor = new Color(45, 45, 48);
+        tabButtonStyle.PressedColor = new Color(37, 37, 38);
     }
 }

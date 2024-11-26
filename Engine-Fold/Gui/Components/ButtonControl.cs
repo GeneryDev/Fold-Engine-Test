@@ -5,6 +5,7 @@ using FoldEngine.Graphics;
 using FoldEngine.Gui.Components;
 using FoldEngine.Gui.Components.Traits;
 using FoldEngine.Gui.Events;
+using FoldEngine.Gui.Styles;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
@@ -20,20 +21,13 @@ namespace FoldEngine.Gui.Components
     public struct ButtonControl
     {
         public string Text;
-        public int FontSize;
-        public Color Color;
         public Alignment Alignment;
+        
+        public ResourceIdentifier Style;
     
         public ResourceIdentifier Icon;
         public Color IconColor;
         public bool FitIcon;
-        public float IconMaxWidth;
-        public float IconTextSeparation;
-        
-        public float MarginTop;
-        public float MarginLeft;
-        public float MarginRight;
-        public float MarginBottom;
     
         public bool KeepPressedOutside;
         public MouseActionMode ActionMode;
@@ -41,20 +35,14 @@ namespace FoldEngine.Gui.Components
 
         [DoNotSerialize] [HideInInspector] public RenderedText RenderedText;
     
-        public Color NormalColor => new Color(37, 37, 38);
-        public Color RolloverColor => Color.CornflowerBlue;
-        public Color PressedColor => new Color(63, 63, 70);
         [DoNotSerialize] public bool Rollover;
         [DoNotSerialize] public bool Pressed;
     
         public ButtonControl()
         {
             Text = "";
-            FontSize = 14;
-            Color = Color.White;
             Alignment = Alignment.Center;
             IconColor = Color.White;
-            IconTextSeparation = 8;
             ActionMode = MouseActionMode.Release;
             ButtonMask = MouseButtonMask.LeftButton;
         }
@@ -67,14 +55,14 @@ namespace FoldEngine.Gui.Components
             return new ButtonControl();
         }
 
-        public bool UpdateRenderedText(IRenderingUnit renderer)
+        public bool UpdateRenderedText(IRenderingUnit renderer, ButtonStyle style)
         {
-            if (RenderedText.HasValue && RenderedText.Text == Text && RenderedText.Size == FontSize)
+            if (RenderedText.HasValue && RenderedText.Text == Text && RenderedText.Size == style.FontSize)
             {
                 // already up to date
                 return false;
             }
-            renderer.Fonts["default"].RenderString(Text, out RenderedText, FontSize);
+            renderer.Fonts["default"].RenderString(Text, out RenderedText, style.FontSize);
             return true;
         }
     }
@@ -100,25 +88,28 @@ namespace FoldEngine.Gui.Systems
         private void RenderButton(IRenderingUnit renderer, IRenderingLayer layer, ref Transform transform,
             ref Control control, ref ButtonControl button)
         {
+            var style = Scene.Resources.Get<ButtonStyle>(ref button.Style, out bool styleChanged, def: ButtonStyle.Default);
+            if (styleChanged) control.RequestLayout = true;
+            
             var bounds = new Rectangle(transform.Position.ToPoint(), control.Size.ToPoint());
             var innerBounds = bounds;
-            innerBounds.Location += new Point((int)button.MarginLeft, (int)button.MarginTop);
-            innerBounds.Size -= new Point((int)(button.MarginLeft + button.MarginRight), (int)(button.MarginTop + button.MarginBottom));
+            innerBounds.Location += new Point((int)style.MarginLeft, (int)style.MarginTop);
+            innerBounds.Size -= new Point((int)(style.MarginLeft + style.MarginRight), (int)(style.MarginTop + style.MarginBottom));
             Point offset = Point.Zero;
 
             layer.Surface.Draw(new DrawRectInstruction
             {
                 Texture = renderer.WhiteTexture,
                 Color = button.Pressed && (button.KeepPressedOutside || button.Rollover)
-                    ? button.PressedColor
+                    ? style.PressedColor
                     : button.Rollover
-                        ? button.RolloverColor
-                        : button.NormalColor,
+                        ? style.RolloverColor
+                        : style.NormalColor,
                 DestinationRectangle = bounds.Translate(offset),
                 Z = -control.ZOrder
             });
 
-            button.UpdateRenderedText(renderer);
+            button.UpdateRenderedText(renderer, style);
             ref RenderedText renderedText = ref button.RenderedText;
             if (!renderedText.HasValue) return;
 
@@ -134,7 +125,7 @@ namespace FoldEngine.Gui.Systems
             {
                 if (button.FitIcon)
                 {
-                    float widthLeftForIcon = innerBounds.Width - textWidth - button.IconTextSeparation;
+                    float widthLeftForIcon = innerBounds.Width - textWidth - style.IconTextSeparation;
                     float heightLeftForIcon = innerBounds.Height;
 
                     if (widthLeftForIcon <= 0 || heightLeftForIcon <= 0)
@@ -160,12 +151,12 @@ namespace FoldEngine.Gui.Systems
 
                 } else
                 {
-                    iconSize = GetButtonIconSize(ref button, icon);
+                    iconSize = GetButtonIconSize(style, icon);
                 }
                 totalWidth += iconSize.X;
                 if (!string.IsNullOrEmpty(button.Text))
                 {
-                    totalWidth += button.IconTextSeparation;
+                    totalWidth += style.IconTextSeparation;
                 }
             }
 
@@ -197,12 +188,12 @@ namespace FoldEngine.Gui.Systems
                     Z = -control.ZOrder
                 });
                 x += iconSize.X;
-                x += button.IconTextSeparation;
+                x += style.IconTextSeparation;
             }
 
             renderedText.DrawOnto(layer.Surface,
-                new Point((int)x, innerBounds.Center.Y - renderedText.Height / 2 + button.FontSize) + offset,
-                button.Color, z: -control.ZOrder);
+                new Point((int)x, innerBounds.Center.Y - renderedText.Height / 2 + style.FontSize) + offset,
+                style.TextColor, z: -control.ZOrder);
         }
 
 
@@ -275,8 +266,11 @@ namespace FoldEngine.Gui.Systems
                 {
                     ref var button = ref Scene.Components.GetComponent<ButtonControl>(evt.EntityId);
                     ref var control = ref Scene.Components.GetComponent<Control>(evt.EntityId);
+                    
+                    var style = Scene.Resources.Get<ButtonStyle>(ref button.Style, out bool styleChanged, def: ButtonStyle.Default);
+                    if (styleChanged) control.RequestLayout = true;
 
-                    button.UpdateRenderedText(Scene.Core.RenderingUnit);
+                    button.UpdateRenderedText(Scene.Core.RenderingUnit, style);
                     
                     control.ComputedMinimumSize = new Vector2(button.RenderedText.Width, button.RenderedText.Height);
 
@@ -285,28 +279,28 @@ namespace FoldEngine.Gui.Systems
 
                     if (!button.FitIcon && icon != null)
                     {
-                        var iconSize = GetButtonIconSize(ref button, icon);
+                        var iconSize = GetButtonIconSize(style, icon);
 
                         control.ComputedMinimumSize.X += iconSize.X;
                         control.ComputedMinimumSize.Y = Math.Max(control.ComputedMinimumSize.Y, iconSize.Y);
 
                         if (!string.IsNullOrEmpty(button.Text))
                         {
-                            control.ComputedMinimumSize.X += button.IconTextSeparation;
+                            control.ComputedMinimumSize.X += style.IconTextSeparation;
                         }
                     }
 
-                    control.ComputedMinimumSize.X += button.MarginLeft + button.MarginRight;
-                    control.ComputedMinimumSize.Y += button.MarginTop + button.MarginBottom;
+                    control.ComputedMinimumSize.X += style.MarginLeft + style.MarginRight;
+                    control.ComputedMinimumSize.Y += style.MarginTop + style.MarginBottom;
                 }
             });
         }
-        private static Vector2 GetButtonIconSize(ref ButtonControl button, ITexture icon)
+        private static Vector2 GetButtonIconSize(ButtonStyle style, ITexture icon)
         {
             var iconSize = new Vector2(icon.Width, icon.Height);
-            if (button.IconMaxWidth > 0 && iconSize.X > button.IconMaxWidth)
+            if (style.IconMaxWidth > 0 && iconSize.X > style.IconMaxWidth)
             {
-                iconSize = ResizeKeepAspect(iconSize, button.IconMaxWidth, null);
+                iconSize = ResizeKeepAspect(iconSize, style.IconMaxWidth, null);
             }
 
             return iconSize;
