@@ -58,11 +58,12 @@ public class EditorScene : Scene
 
         Entity CreateDock(string name, out long dockContentEntityId, Vector2 resizeDirection)
         {
-            const int dockMargin = 5;
+            const int dockMargin = 4;
             const int resizerSize = 8;
             
             var dock = CreateEntity(name);
             ref var dockControl = ref dock.AddComponent<Control>();
+            dockControl.ZOrder = 0;
             dockControl.MinimumSize = dockControl.Size = new Vector2(160, 80);
             dock.AddComponent<BoxControl>().Color = new Color(Random.Shared.Next(256), Random.Shared.Next(256), Random.Shared.Next(256), 120);
             dock.Hierarchical.SetParent(docksContainer);
@@ -78,7 +79,17 @@ public class EditorScene : Scene
                 OffsetRight = -dockMargin,
                 OffsetBottom = -dockMargin
             };
+            dockContent.AddComponent<BorderContainer>();
             dockContent.Hierarchical.SetParent(dock);
+
+            var tabBar = CreateEntity("Tab Bar");
+            dockContent.GetComponent<BorderContainer>().NorthPanelId = tabBar.EntityId;
+            tabBar.Hierarchical.SetParent(dockContent);
+            tabBar.AddComponent<Control>();
+            tabBar.AddComponent<FlowContainer>().HSeparation = 2;
+
+            CreateTab("Hierarchy", "editor/hierarchy").Hierarchical.SetParent(tabBar);
+            CreateTab("Systems", "editor/cog").Hierarchical.SetParent(tabBar);
 
             dockContentEntityId = dockContent.EntityId;
 
@@ -110,17 +121,31 @@ public class EditorScene : Scene
             
             return dock;
         }
+
+        Entity CreateTab(string name, string icon)
+        {
+            var tab = CreateEntity("Tab");
+            tab.AddComponent<Control>().MinimumSize = new Vector2(0, 14);
+            tab.AddComponent<ButtonControl>() = new ButtonControl
+            {
+                Text = name,
+                FontSize = 7,
+                Alignment = Alignment.Begin,
+                IconMaxWidth = 8,
+                IconTextSeparation = 4,
+                MarginLeft = 2,
+                MarginRight = 6,
+                Icon = new ResourceIdentifier(icon)
+            };
+            return tab;
+        }
         
         Entity CreateEditorView(string name)
         {
             const int viewMargin = 5;
             var view = CreateEntity(name);
-            view.AddComponent<Control>();
-            view.AddComponent<AnchoredControl>() = new AnchoredControl()
-            {
-                AnchorRight = 1,
-                AnchorBottom = 1
-            };
+            view.AddComponent<Control>().ZOrder = 0;
+            view.AddComponent<BoxControl>().Color = new Color(37, 37, 38, 255);
             return view;
         }
 
