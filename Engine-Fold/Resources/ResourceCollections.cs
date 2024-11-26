@@ -103,11 +103,34 @@ public class ResourceCollections : ISelfSerializer
     /// <returns>The requested resource, if it exists; the def parameter otherwise.</returns>
     public T Get<T>(ref ResourceIdentifier identifier, T def = default) where T : Resource, new()
     {
+        return Get(ref identifier, out _, def);
+    }
+
+    /// <summary>
+    ///     Retrieves the resource of the given type and identifier, if it is exists and is loaded.
+    ///     If it is not loaded, it returns the provided default value,
+    ///     and schedules the resource to be loaded from disk asynchronously.
+    /// </summary>
+    /// <typeparam name="T">The type of the resource</typeparam>
+    /// <param name="identifier">The identifier of the resource</param>
+    /// <param name="changed">Output boolean; true if and only if the resource has changed since the last time
+    /// it was retrieved using the given identifier</param>
+    /// <param name="def">The default value to return in case the resource is not loaded.</param>
+    /// <returns>The requested resource, if it exists; the def parameter otherwise.</returns>
+    public T Get<T>(ref ResourceIdentifier identifier, out bool changed, T def = default) where T : Resource, new()
+    {
+        changed = false;
         if (identifier.Identifier == null) return def;
 
         IResourceCollection collection = FindOwner<T>(ref identifier);
         if (collection != null)
-            return ((ResourceCollection<T>)collection).Get(ref identifier, def);
+        {
+            int genBefore = identifier.IndexIntoCollection.Generation;
+            var res = ((ResourceCollection<T>)collection).Get(ref identifier, def);
+            int genAfter = identifier.IndexIntoCollection.Generation;
+            changed = genAfter != genBefore;
+            return res;
+        }
         Root.StartLoad<T>(identifier.Identifier);
 
         return def;
