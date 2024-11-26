@@ -31,7 +31,7 @@ public class WooferRenderingUnit : IRenderingUnit
                 if (value != oldSize)
                 {
                     foreach (RenderGroup group in Groups.Values) group.WindowSizeChanged(oldSize, value);
-                    Core.ActiveScene?.Events.Invoke(new WindowSizeChangedEvent(oldSize, value));
+                    Core.Events.Invoke(new WindowSizeChangedEvent(oldSize, value));
                 }
         }
     }

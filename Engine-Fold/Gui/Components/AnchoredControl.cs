@@ -68,7 +68,7 @@ namespace FoldEngine.Gui.Systems
                 
                 LayoutAnchoredControl(evt.ViewportId, ref hierarchical, ref transform, ref control, ref anchored);
             });
-            this.Subscribe((ref WindowSizeChangedEvent evt) =>
+            this.Subscribe(Scene.Core.Events, (ref WindowSizeChangedEvent evt) =>
             {
                 _anchoredControls.Reset();
                 while (_anchoredControls.Next())

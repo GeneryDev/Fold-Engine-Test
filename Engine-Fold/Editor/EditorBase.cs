@@ -84,7 +84,7 @@ public class EditorBase : GameSystem
 
     public override void SubscribeToEvents()
     {
-        Subscribe<WindowSizeChangedEvent>((ref WindowSizeChangedEvent evt) => { _environment.LayoutValidated = false; });
+        Subscribe(Scene.Core.Events, (ref WindowSizeChangedEvent evt) => { _environment.LayoutValidated = false; });
     }
 
     public override void Initialize()
