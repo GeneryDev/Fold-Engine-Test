@@ -18,6 +18,7 @@ public partial class ControlLayoutSystem : GameSystem
 {
     private ComponentIterator<Viewport> _viewports;
     private ComponentIterator<Control> _controls;
+    private ComponentIterator<AnchoredControl> _anchoredControls;
 
     private long _mainViewportId = -1;
 
@@ -25,6 +26,7 @@ public partial class ControlLayoutSystem : GameSystem
     {
         _viewports = CreateComponentIterator<Viewport>(IterationFlags.None);
         _controls = CreateComponentIterator<Control>(IterationFlags.None);
+        _anchoredControls = CreateComponentIterator<AnchoredControl>(IterationFlags.None);
     }
 
     public override void OnRender(IRenderingUnit renderer)
@@ -93,11 +95,6 @@ public partial class ControlLayoutSystem : GameSystem
         {
             if (!Scene.Components.HasComponent<Control>(evt.EntityId)) return;
             UpdateControl(evt.EntityId);
-        });
-        // TODO request layout for top-level controls when window size changes
-        Subscribe((ref WindowSizeChangedEvent evt) =>
-        {
-            
         });
     }
 

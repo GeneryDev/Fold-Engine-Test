@@ -1,5 +1,6 @@
 ﻿using System;
 using FoldEngine.Components;
+using FoldEngine.Events;
 using FoldEngine.Gui.Components;
 using FoldEngine.Gui.Events;
 using FoldEngine.Scenes;
@@ -57,8 +58,8 @@ namespace FoldEngine.Gui.Systems
             this.Subscribe((ref LayoutRequestedEvent evt) =>
             {
                 if (evt.ViewportId == -1) return;
-                if (!Scene.Components.HasComponent<Control>(evt.EntityId)) return;
                 if (!Scene.Components.HasComponent<AnchoredControl>(evt.EntityId)) return;
+                if (!Scene.Components.HasComponent<Control>(evt.EntityId)) return;
 
                 ref var hierarchical = ref Scene.Components.GetComponent<Hierarchical>(evt.EntityId);
                 ref var transform = ref Scene.Components.GetComponent<Transform>(evt.EntityId);
@@ -66,6 +67,21 @@ namespace FoldEngine.Gui.Systems
                 ref var anchored = ref Scene.Components.GetComponent<AnchoredControl>(evt.EntityId);
                 
                 LayoutAnchoredControl(evt.ViewportId, ref hierarchical, ref transform, ref control, ref anchored);
+            });
+            this.Subscribe((ref WindowSizeChangedEvent evt) =>
+            {
+                _anchoredControls.Reset();
+                while (_anchoredControls.Next())
+                {
+                    if (!_anchoredControls.HasCoComponent<Control>()) continue;
+                    ref var hierarchical = ref _anchoredControls.GetCoComponent<Hierarchical>();
+                    // If no parent, or parent is not a control, update the layout
+                    if (!hierarchical.HasParent ||
+                        !Scene.Components.HasComponent<Control>(hierarchical.Parent.EntityId))
+                    {
+                        _anchoredControls.GetCoComponent<Control>().RequestLayout = true;
+                    }
+                }
             });
         }
 
