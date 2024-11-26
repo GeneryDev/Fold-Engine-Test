@@ -1,16 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using FoldEngine.Scenes;
 
 namespace FoldEngine.Events;
 
 public class EventMap
 {
-    /// <summary>
-    ///     The scene this event map belongs to
-    /// </summary>
-    private readonly Scene _scene;
-
     /// <summary>
     ///     The map containing the event queues.<br></br>
     /// </summary>
@@ -20,12 +14,10 @@ public class EventMap
     private readonly List<IEventQueue> _endQueues = new List<IEventQueue>();
 
     /// <summary>
-    ///     Creates an EventMap attached to the given scene.
+    ///     Creates an EventMap.
     /// </summary>
-    /// <param name="scene"></param>
-    internal EventMap(Scene scene)
+    public EventMap()
     {
-        _scene = scene;
     }
 
     private EventQueue<T> Get<T>() where T : struct

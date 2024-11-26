@@ -2,6 +2,7 @@
 using FoldEngine;
 using FoldEngine.Commands;
 using FoldEngine.Editor;
+using FoldEngine.Events;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Registries;
@@ -24,6 +25,7 @@ public class WooferGameCore : IGameCore
         CommandQueue = new CommandQueue(this);
         Resources = new ResourceCollections(this);
         ResourceIndex = new ResourceIndex(this);
+        Events = new EventMap();
     }
 
     public float TimeScale => 1;
@@ -44,6 +46,7 @@ public class WooferGameCore : IGameCore
     public ResourceCollections Resources { get; }
 
     public ResourceIndex ResourceIndex { get; }
+    public EventMap Events { get; }
 
     public void Initialize()
     {
@@ -72,15 +75,21 @@ public class WooferGameCore : IGameCore
     public void Input()
     {
         ActiveScene?.Input();
+        Events.FlushAfterSystem();
+        Events.FlushEnd();
     }
 
     public void Update()
     {
         ActiveScene?.Update();
+        Events.FlushAfterSystem();
+        Events.FlushEnd();
     }
 
     public void Render()
     {
         ActiveScene?.Render(RenderingUnit);
+        Events.FlushAfterSystem();
+        Events.FlushEnd();
     }
 }

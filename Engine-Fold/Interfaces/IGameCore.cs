@@ -1,4 +1,5 @@
 ﻿using FoldEngine.Commands;
+using FoldEngine.Events;
 using FoldEngine.Registries;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
@@ -51,6 +52,11 @@ public interface IGameCore
     ///     This Core's global resource index, listing all resources available in disk.
     /// </summary>
     ResourceIndex ResourceIndex { get; }
+
+    /// <summary>
+    ///     This Core's global resources
+    /// </summary>
+    EventMap Events { get; }
 
 
     /// <summary>

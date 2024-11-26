@@ -40,7 +40,7 @@ public class Scene : Resource, ISelfSerializer
     {
         Core = FoldGame.Game.Core;
         Components = new ComponentMap(this);
-        Events = new EventMap(this);
+        Events = new EventMap();
         Systems = new SystemMap(this);
         Resources = new ResourceCollections(Core.Resources);
     }
@@ -49,7 +49,7 @@ public class Scene : Resource, ISelfSerializer
     {
         Core = core;
         Components = new ComponentMap(this);
-        Events = new EventMap(this);
+        Events = new EventMap();
         Systems = new SystemMap(this);
         Resources = new ResourceCollections(Core.Resources);
 
