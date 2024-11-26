@@ -29,6 +29,11 @@ namespace FoldEngine.Gui.Components
         public bool FitIcon;
         public float IconMaxWidth;
         public float IconTextSeparation;
+        
+        public float MarginTop;
+        public float MarginLeft;
+        public float MarginRight;
+        public float MarginBottom;
     
         public bool KeepPressedOutside;
         public MouseActionMode ActionMode;
@@ -97,6 +102,8 @@ namespace FoldEngine.Gui.Systems
         {
             var bounds = new Rectangle(transform.Position.ToPoint(), control.Size.ToPoint());
             var innerBounds = bounds;
+            innerBounds.Location += new Point((int)button.MarginLeft, (int)button.MarginTop);
+            innerBounds.Size -= new Point((int)(button.MarginLeft + button.MarginRight), (int)(button.MarginTop + button.MarginBottom));
             Point offset = Point.Zero;
 
             layer.Surface.Draw(new DrawRectInstruction
@@ -107,7 +114,7 @@ namespace FoldEngine.Gui.Systems
                     : button.Rollover
                         ? button.RolloverColor
                         : button.NormalColor,
-                DestinationRectangle = innerBounds.Translate(offset),
+                DestinationRectangle = bounds.Translate(offset),
                 Z = -control.ZOrder
             });
 
@@ -119,7 +126,8 @@ namespace FoldEngine.Gui.Systems
 
             float totalWidth = textWidth;
             
-            var icon = Scene.Resources.Get<Texture>(ref button.Icon);
+            var icon = Scene.Resources.Get<Texture>(ref button.Icon, out bool iconChanged);
+            if (iconChanged) control.RequestLayout = true;
             Vector2 iconSize = Vector2.Zero;
 
             if (icon != null)
@@ -272,7 +280,8 @@ namespace FoldEngine.Gui.Systems
                     
                     control.ComputedMinimumSize = new Vector2(button.RenderedText.Width, button.RenderedText.Height);
 
-                    var icon = Scene.Resources.Get<Texture>(ref button.Icon);
+                    var icon = Scene.Resources.Get<Texture>(ref button.Icon, out bool iconChanged);
+                    if (iconChanged) control.RequestLayout = true;
 
                     if (!button.FitIcon && icon != null)
                     {
@@ -286,6 +295,9 @@ namespace FoldEngine.Gui.Systems
                             control.ComputedMinimumSize.X += button.IconTextSeparation;
                         }
                     }
+
+                    control.ComputedMinimumSize.X += button.MarginLeft + button.MarginRight;
+                    control.ComputedMinimumSize.Y += button.MarginTop + button.MarginBottom;
                 }
             });
         }
