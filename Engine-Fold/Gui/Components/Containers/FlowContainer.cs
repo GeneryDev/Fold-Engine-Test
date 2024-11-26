@@ -124,7 +124,7 @@ namespace FoldEngine.Gui.Systems
                     lastRowSecSize = maxSecSize;
                     AlignFlowRow(rowStartId, prevChildId, flow, remainingRowGap, lastRowSecSize);
 
-                    float finalSizeSec = (offsetSec == 0 ? 0 : offsetSec - separationSec);
+                    float finalSizeSec = (offsetSec == 0 ? 0 : offsetSec - separationSec) + maxSecSize;
                     // ReSharper disable once CompareOfFloatsByEqualityOperator
                     if (flow.CachedSizeSec != finalSizeSec)
                     {
