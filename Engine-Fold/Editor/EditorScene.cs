@@ -29,6 +29,7 @@ public class EditorScene : Scene
         Systems.Add<ControlLayoutSystem>();
         Systems.Add<ControlRenderer>();
         Systems.Add<ControlInterfaceSystem>();
+        Systems.Add<TabSystem>();
 
         var entViewport = CreateEntity("Viewport");
         entViewport.AddComponent<Viewport>() = new Viewport
@@ -90,6 +91,7 @@ public class EditorScene : Scene
             tabBar.Hierarchical.SetParent(dockContent);
             tabBar.AddComponent<Control>();
             tabBar.AddComponent<FlowContainer>().HSeparation = 2;
+            tabBar.AddComponent<TabList>();
 
             CreateTab("Hierarchy", "editor/hierarchy").Hierarchical.SetParent(tabBar);
             CreateTab("Systems", "editor/cog").Hierarchical.SetParent(tabBar);
@@ -136,6 +138,11 @@ public class EditorScene : Scene
                 Icon = new ResourceIdentifier(icon),
                 Style = new ResourceIdentifier("editor:tab"),
                 KeepPressedOutside = true
+            };
+            tab.AddComponent<Tab>() = new Tab()
+            {
+                DeselectedButtonStyle = "editor:tab",
+                SelectedButtonStyle = "editor:tab.selected"
             };
             return tab;
         }
@@ -198,7 +205,15 @@ public class EditorScene : Scene
         tabButtonStyle.IconTextSeparation = 4;
         tabButtonStyle.MarginLeft = 2;
         tabButtonStyle.MarginRight = 6;
+        tabButtonStyle.TextColor = new Color(255, 255, 255, 150);
         tabButtonStyle.NormalColor = new Color(45, 45, 48);
-        tabButtonStyle.PressedColor = new Color(37, 37, 38);
+        
+        var tabSelectedButtonStyle = Resources.Create<ButtonStyle>("editor:tab.selected");
+        tabSelectedButtonStyle.FontSize = 7;
+        tabSelectedButtonStyle.IconMaxWidth = 8;
+        tabSelectedButtonStyle.IconTextSeparation = 4;
+        tabSelectedButtonStyle.MarginLeft = 2;
+        tabSelectedButtonStyle.MarginRight = 6;
+        tabSelectedButtonStyle.NormalColor = new Color(37, 37, 38);
     }
 }
