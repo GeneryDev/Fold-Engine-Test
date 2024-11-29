@@ -103,5 +103,44 @@ public class TabSystem : GameSystem
                 }
             }
         });
+        Subscribe((ref TabSelectedEvent evt) =>
+        {
+            if (!Scene.Components.HasComponent<TabSwitcher>(evt.TabListId)) return;
+            if (!Scene.Components.HasComponent<Hierarchical>(evt.TabListId)) return;
+            
+            ref var tabSwitcher = ref Scene.Components.GetComponent<TabSwitcher>(evt.TabListId);
+            long containerId = tabSwitcher.ContainerEntityId;
+            if (containerId == -1 || !Scene.Components.HasComponent<Hierarchical>(containerId)) return;
+            ref var containerHierarchical = ref Scene.Components.GetComponent<Hierarchical>(containerId);
+            
+            long newContentId = -1;
+            if (Scene.Components.HasComponent<Tab>(evt.TabId))
+            {
+                newContentId = Scene.Components.GetComponent<Tab>(evt.TabId).LinkedEntityId;
+            }
+
+            foreach (long childId in containerHierarchical.GetChildren())
+            {
+                if (Scene.Components.HasComponent<Hierarchical>(childId))
+                {
+                    if (childId != newContentId)
+                    {
+                        Scene.Components.GetComponent<Hierarchical>(childId).Active = false;
+                    }
+                }
+            }
+
+            if (newContentId != -1 && Scene.Components.HasComponent<Hierarchical>(newContentId) && Scene.Components.HasComponent<Control>(newContentId))
+            {
+                ref var contentHierarchical = ref Scene.Components.GetComponent<Hierarchical>(newContentId);
+
+                if (contentHierarchical.ParentId != containerId)
+                {
+                    contentHierarchical.SetParent(containerId);
+                }
+                
+                contentHierarchical.Active = true;
+            }
+        });
     }
 }

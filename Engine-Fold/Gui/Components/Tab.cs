@@ -4,12 +4,14 @@ using FoldEngine.Scenes;
 
 namespace FoldEngine.Gui.Components;
 
-[Component("fold:control.tab", traits: [typeof(Control), typeof(MousePickable)])]
+[Component("fold:control.tab")]
 [ComponentInitializer(typeof(Tab), nameof(InitializeComponent))]
 public struct Tab
 {
     public string DeselectedButtonStyle;
     public string SelectedButtonStyle;
+
+    [EntityId] public long LinkedEntityId = -1;
     
     public Tab()
     {
@@ -22,8 +24,7 @@ public struct Tab
     }
 }
 
-
-[Component("fold:control.tab_list", traits: [typeof(Control), typeof(MousePickable)])]
+[Component("fold:control.tab_list")]
 [ComponentInitializer(typeof(TabList), nameof(InitializeComponent))]
 public struct TabList
 {
@@ -37,5 +38,21 @@ public struct TabList
     public static TabList InitializeComponent(Scene scene, long entityId)
     {
         return new TabList();
+    }
+}
+
+[Component("fold:control.tab_switcher")]
+[ComponentInitializer(typeof(TabSwitcher), nameof(InitializeComponent))]
+public struct TabSwitcher
+{
+    [EntityId] public long ContainerEntityId = -1;
+    
+    public TabSwitcher()
+    {
+    }
+
+    public static TabSwitcher InitializeComponent(Scene scene, long entityId)
+    {
+        return new TabSwitcher();
     }
 }

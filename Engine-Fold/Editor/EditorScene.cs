@@ -54,13 +54,13 @@ public class EditorScene : Scene
         };
         docksContainer.AddComponent<BorderContainer>() = new BorderContainer()
         {
-            NorthPanelId = CreateDock("Top", out var topDock, Vector2.UnitY).EntityId,
-            WestPanelId = CreateDock("Left", out var leftDock, Vector2.UnitX).EntityId,
-            EastPanelId = CreateDock("Right", out var rightDock, -Vector2.UnitX).EntityId,
-            SouthPanelId = CreateDock("Bottom", out var bottomDock, -Vector2.UnitY).EntityId
+            NorthPanelId = CreateDock("Top", out var topTabs, out var topContainer, Vector2.UnitY).EntityId,
+            WestPanelId = CreateDock("Left", out var leftTabs, out var leftContainer, Vector2.UnitX).EntityId,
+            EastPanelId = CreateDock("Right", out var rightTabs, out var rightContainer, -Vector2.UnitX).EntityId,
+            SouthPanelId = CreateDock("Bottom", out var bottomTabs, out var bottomContainer, -Vector2.UnitY).EntityId
         };
 
-        Entity CreateDock(string name, out long dockContentEntityId, Vector2 resizeDirection)
+        Entity CreateDock(string name, out long dockTabBarEntityId, out long dockContentEntityId, Vector2 resizeDirection)
         {
             const int dockMargin = 4;
             const int resizerSize = 8;
@@ -92,11 +92,15 @@ public class EditorScene : Scene
             tabBar.AddComponent<Control>();
             tabBar.AddComponent<FlowContainer>().HSeparation = 2;
             tabBar.AddComponent<TabList>();
+            
+            var tabContent = CreateEntity("Tab Content");
+            tabContent.Hierarchical.SetParent(dockContent);
+            tabContent.AddComponent<Control>();
+            tabContent.AddComponent<BoxControl>().Color = new Color(37, 37, 38, 255);
+            tabBar.AddComponent<TabSwitcher>().ContainerEntityId = tabContent.EntityId;
 
-            CreateTab("Hierarchy", "editor/hierarchy").Hierarchical.SetParent(tabBar);
-            CreateTab("Systems", "editor/cog").Hierarchical.SetParent(tabBar);
-
-            dockContentEntityId = dockContent.EntityId;
+            dockTabBarEntityId = tabBar.EntityId;
+            dockContentEntityId = tabContent.EntityId;
 
             var dockResizer = CreateEntity("Resizer");
             dockResizer.AddComponent<Control>() = new Control()
@@ -127,7 +131,7 @@ public class EditorScene : Scene
             return dock;
         }
 
-        Entity CreateTab(string name, string icon)
+        Entity CreateTab(string name, string icon, long linkedControl)
         {
             var tab = CreateEntity("Tab");
             tab.AddComponent<Control>().MinimumSize = new Vector2(0, 14);
@@ -142,23 +146,30 @@ public class EditorScene : Scene
             tab.AddComponent<Tab>() = new Tab()
             {
                 DeselectedButtonStyle = "editor:tab",
-                SelectedButtonStyle = "editor:tab.selected"
+                SelectedButtonStyle = "editor:tab.selected",
+                LinkedEntityId = linkedControl
             };
             return tab;
         }
-        
-        Entity CreateEditorView(string name)
+
+        Entity CreateEditorView(string name, string icon, long tabBarId, long tabContainerId)
         {
-            const int viewMargin = 5;
             var view = CreateEntity(name);
             view.AddComponent<Control>().ZOrder = 0;
-            view.AddComponent<BoxControl>().Color = new Color(37, 37, 38, 255);
+            view.AddComponent<AnchoredControl>() = new()
+            {
+                AnchorRight = 1,
+                AnchorBottom = 1
+            };
+            view.Hierarchical.SetParent(tabContainerId);
+            
+            CreateTab(name, icon, view.EntityId).Hierarchical.SetParent(tabBarId);
             return view;
         }
 
-        Entity CreateToolbarView()
+        Entity CreateToolbarView(long tabBarId, long tabContainerId)
         {
-            var view = CreateEditorView("Toolbar");
+            var view = CreateEditorView("Toolbar", "editor/cog", tabBarId, tabContainerId);
 
             view.AddComponent<FlowContainer>() = new FlowContainer()
             {
@@ -191,8 +202,35 @@ public class EditorScene : Scene
 
             return view;
         }
+
+        Entity CreateTempView(string name, string icon, long tabBarId, long tabContainerId)
+        {
+            var view = CreateEditorView(name, icon, tabBarId, tabContainerId);
+
+            view.AddComponent<FlowContainer>() = new FlowContainer()
+            {
+                HSeparation = 4,
+                Alignment = Alignment.Center
+            };
+
+            var label = CreateEntity("Temp Label");
+            label.AddComponent<Control>();
+            label.AddComponent<LabelControl>() = new LabelControl()
+            {
+                Text = name
+            };
+            label.Hierarchical.SetParent(view);
+
+            return view;
+        }
         
-        CreateToolbarView().Hierarchical.SetParent(topDock);
+        CreateToolbarView(topTabs, topContainer);
+        CreateTempView("Hierarchy", "editor/hierarchy", leftTabs, leftContainer);
+        CreateTempView("Systems", "editor/cog", leftTabs, leftContainer);
+        CreateTempView("Inspector", "editor/info", rightTabs, rightContainer);
+        CreateTempView("Debug Actions", "editor/info", rightTabs, rightContainer);
+        CreateTempView("Resources", "editor/checkmark", bottomTabs, bottomContainer);
+        CreateTempView("Scene List", "editor/menu", bottomTabs, bottomContainer);
     }
 
     private void BuildStyles()
