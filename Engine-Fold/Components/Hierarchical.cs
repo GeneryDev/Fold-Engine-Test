@@ -438,7 +438,7 @@ public struct HierarchicalEnumerable : IEnumerator<long>, IEnumerable<long>
             }
 
             if (_currentId == -1) return false;
-            var currentHierarchical = _scene.Components.GetComponent<Hierarchical>(_currentId);
+            ref var currentHierarchical = ref _scene.Components.GetComponent<Hierarchical>(_currentId);
             if (!_includeInactive && !currentHierarchical.IsActiveInHierarchy()) continue;
             return true;
         }
@@ -463,6 +463,7 @@ public struct HierarchicalEnumerable : IEnumerator<long>, IEnumerable<long>
     {
     }
 
+    // TODO this allocates lots of memory. Try something else.
     public IEnumerator<long> GetEnumerator()
     {
         return this;
