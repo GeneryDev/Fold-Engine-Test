@@ -65,6 +65,8 @@ public class EditorHierarchyView : EditorView
             ref Hierarchical current = ref _hierarchicals.GetComponent();
             if (!current.Parent.IsNotNull) RenderEntity(ref current, ContentPanel, renderer);
         }
+        
+        Hierarchy.DrawDragLine(renderer, renderer.RootGroup["editor_gui_overlay"]);
     }
 
     private void RenderEntity(ref Hierarchical hierarchical, GuiPanel panel, IRenderingUnit renderer, int depth = 0)

@@ -46,16 +46,12 @@ public class ViewTab : GuiElement
 
         if (Pressed(MouseEvent.LeftButton) && Environment.HoverTargetPrevious.Element != this) _dragging = true;
 
-        if (_dragging)
-            if (Parent.Environment is EditorEnvironment editorEnvironment)
-                if (!editorEnvironment.DraggingElements.Contains(this))
-                    editorEnvironment.DraggingElements.Add(this);
-
         Rectangle renderingBounds = Bounds;
         if (_dragging)
         {
             offset += Parent.Environment.MousePos - Bounds.Center;
             renderingBounds = renderingBounds.Translate(offset);
+            layer = renderer.RootGroup["editor_gui_overlay"];
         }
 
 
@@ -103,7 +99,6 @@ public class ViewTab : GuiElement
             {
                 if (Parent.Environment is EditorEnvironment editorEnvironment)
                 {
-                    editorEnvironment.DraggingElements.Clear();
                     if (editorEnvironment.HoverViewListPanel != null)
                     {
                         _viewList.RemoveView(_view);

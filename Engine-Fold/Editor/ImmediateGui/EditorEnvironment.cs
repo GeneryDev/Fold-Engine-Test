@@ -182,8 +182,6 @@ public class EditorEnvironment : GuiEnvironment
             EastPanel.Render(renderer, baseLayer);
         }
 
-        foreach (GuiElement panel in DraggingElements) panel?.Render(renderer, overlayLayer);
-
         if (ContextMenu.Showing) ContextMenu.Render(renderer, overlayLayer);
     }
 

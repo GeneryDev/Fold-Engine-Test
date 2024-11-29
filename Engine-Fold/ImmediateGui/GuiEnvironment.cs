@@ -25,7 +25,6 @@ public abstract class GuiEnvironment : IDisposable
 
     public GuiPopupMenu ContextMenu;
     public ControlScheme ControlScheme = new ControlScheme("Gui");
-    public List<GuiElement> DraggingElements = new List<GuiElement>();
     public HoverTarget HoverTarget;
     public HoverTarget HoverTargetPrevious;
     public ButtonAction MouseLeft = ButtonAction.Default;

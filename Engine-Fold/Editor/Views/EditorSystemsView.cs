@@ -84,6 +84,7 @@ public class EditorSystemsView : EditorView
                 }
             }
         }
+        Hierarchy.DrawDragLine(renderer, renderer.RootGroup["editor_gui_overlay"]);
     }
 }
 

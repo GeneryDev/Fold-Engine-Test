@@ -52,7 +52,7 @@ public class Hierarchy<T> : IHierarchy
 
     public void DrawDragLine(IRenderingUnit renderer, IRenderingLayer layer)
     {
-        if (Dragging && Environment.HoverTarget.Hierarchy == this && DragRelative != 0)
+        if (Dragging /*&& Environment.HoverTarget.Hierarchy == this*/ && DragRelative != 0)
         {
             int thickness = 2;
             int arrowSpan = 5;

@@ -117,15 +117,6 @@ public class HierarchyElement<TI> : GuiLabel
             if (_hierarchy != null) _hierarchy.Dragging = true;
         }
 
-        if (_dragging)
-            if (Parent.Environment is EditorEnvironment editorEnvironment)
-                if (!editorEnvironment.DraggingElements.Contains(this))
-                    editorEnvironment.DraggingElements.Add(this);
-
-        // if(_dragging) {
-        //     offset += Parent.Environment.MousePos - Bounds.Center;
-        // }
-
         layer.Surface.Draw(new DrawRectInstruction
         {
             Texture = renderer.WhiteTexture,
@@ -170,7 +161,7 @@ public class HierarchyElement<TI> : GuiLabel
             }
         }
 
-        if (_dragging) _hierarchy?.DrawDragLine(renderer, layer);
+        // if (_dragging) _hierarchy?.DrawDragLine(renderer, layer);
     }
 
     public HierarchyEventType GetEvent(out Point p)
@@ -217,8 +208,6 @@ public class HierarchyElement<TI> : GuiLabel
             _hierarchy.Drop();
             _dragging = false;
             if (_hierarchy != null) _hierarchy.Dragging = false;
-            if (Parent.Environment is EditorEnvironment editorEnvironment)
-                editorEnvironment.DraggingElements.Clear();
         }
 
         if (Bounds.Contains(e.Position))
