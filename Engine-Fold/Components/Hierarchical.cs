@@ -410,6 +410,7 @@ public struct HierarchicalEnumerable : IEnumerator<long>, IEnumerable<long>
     private Scene _scene;
     private long _firstId;
     private long _currentId;
+    private long _nextId;
     private bool _includeInactive;
 
     public HierarchicalEnumerable(Scene scene, long firstId, bool includeInactive)
@@ -417,6 +418,7 @@ public struct HierarchicalEnumerable : IEnumerator<long>, IEnumerable<long>
         this._scene = scene;
         this._firstId = firstId;
         this._currentId = -1;
+        this._nextId = -1;
         this._includeInactive = includeInactive;
     }
     
@@ -434,25 +436,22 @@ public struct HierarchicalEnumerable : IEnumerator<long>, IEnumerable<long>
             }
             else
             {
-                NextSibling();
+                _currentId = _nextId;
+                _nextId = -1;
             }
 
             if (_currentId == -1) return false;
             ref var currentHierarchical = ref _scene.Components.GetComponent<Hierarchical>(_currentId);
+            _nextId = currentHierarchical.NextSiblingId;
             if (!_includeInactive && !currentHierarchical.IsActiveInHierarchy()) continue;
             return true;
         }
     }
 
-    private void NextSibling()
-    {
-        ref var component = ref _scene.Components.GetComponent<Hierarchical>(_currentId);
-        _currentId = component.NextSiblingId;
-    }
-
     public void Reset()
     {
         _currentId = _firstId;
+        _nextId = -1;
     }
 
     public long Current => _currentId;
