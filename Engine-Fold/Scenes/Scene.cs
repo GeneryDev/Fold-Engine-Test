@@ -76,12 +76,20 @@ public class Scene : Resource, ISelfSerializer
     /// </summary>
     public float TimeScale { get; set; }
 
-    public void DeleteEntity(long entityId, bool reclaimable = false)
+    public void DeleteEntity(long entityId, bool reclaimable = false, bool recursively = false)
     {
         ref Hierarchical transform = ref Components.GetComponent<Hierarchical>(entityId);
         if (transform.HasParent)
         {
             transform.MutableParent.RemoveChild(entityId);
+        }
+
+        if (recursively)
+        {
+            foreach(long childId in transform.GetChildren())
+            {
+                DeleteEntity(childId, reclaimable, true);
+            }
         }
 
         Components.RemoveAllComponents(entityId);
