@@ -6,6 +6,7 @@ using FoldEngine.Gui.Components.Traits;
 using FoldEngine.Gui.Events;
 using FoldEngine.ImmediateGui;
 using FoldEngine.Input;
+using FoldEngine.Scenes;
 using FoldEngine.Serialization;
 using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
@@ -18,23 +19,26 @@ public class ControlInterfaceSystem : GameSystem
 {
     private static readonly Point NullMousePos = new Point(-1, -1);
 
+    public float DragStartDistance = 10;
+    
     [DoNotSerialize] [HideInInspector] public ButtonAction MouseLeft = ButtonAction.Default;
     [DoNotSerialize] [HideInInspector] public ButtonAction MouseMiddle = ButtonAction.Default;
     [DoNotSerialize] [HideInInspector] public ButtonAction MouseRight = ButtonAction.Default;
+
+    [DoNotSerialize] private Point _prevMousePos = NullMousePos;
+    [DoNotSerialize] private Point _mousePos = NullMousePos;
+    [DoNotSerialize] private readonly MouseButtonPressMemory[] _buttonPressMemory = new MouseButtonPressMemory[MouseButtonEvent.MaxButtons];
     
     private ComponentIterator<Viewport> _viewports;
     private ComponentIterator<Control> _controls;
 
-    [DoNotSerialize] private Point _prevMousePos = NullMousePos;
-    [DoNotSerialize] private Point _mousePos = NullMousePos;
-    [DoNotSerialize] private readonly long[] _pressedControls = new long[MouseButtonEvent.MaxButtons];
     
     public override void Initialize()
     {
         _viewports = CreateComponentIterator<Viewport>(IterationFlags.None);
         _controls = CreateComponentIterator<Control>(IterationFlags.None);
         
-        Array.Fill(_pressedControls, -1L);
+        Array.Fill(_buttonPressMemory, MouseButtonPressMemory.Empty);
     }
 
     public override void OnInput()
@@ -117,16 +121,77 @@ public class ControlInterfaceSystem : GameSystem
         });
         for (var btnIndex = 0; btnIndex < MouseButtonEvent.MaxButtons; btnIndex++)
         {
-            if (_pressedControls[btnIndex] == -1) continue;
+            var buttonMemory = _buttonPressMemory[btnIndex];
+            if (buttonMemory.ControlId == -1) continue;
+
+            var diffFromPressPoint = _mousePos - buttonMemory.MousePos;
+
+            var startDrag = false;
+            if (btnIndex == MouseButtonEvent.LeftButton && !buttonMemory.DragStarted && diffFromPressPoint.ToVector2().LengthSquared() >= DragStartDistance*DragStartDistance)
+            {
+                // start drag
+                startDrag = true;
+                buttonMemory.DragStarted = true;
+                _buttonPressMemory[btnIndex] = buttonMemory;
+            }
+
+            if (buttonMemory.DragDataId != -1)
+            {
+                Scene.Components.GetComponent<Transform>(buttonMemory.DragDataId).Position = _mousePos.ToVector2();
+            }
             
             Scene.Events.Invoke(new MouseDraggedEvent()
             {
-                EntityId = _pressedControls[btnIndex],
+                EntityId = buttonMemory.ControlId,
                 Position = _mousePos,
                 Delta = mouseDelta,
                 Button = btnIndex
             });
+
+            if (startDrag && Scene.Components.HasTrait<DragOperationStarter>(buttonMemory.ControlId))
+            {
+                long dragDataId = AttemptStartDragOperation(buttonMemory.ControlId);
+
+                if(dragDataId != -1) {
+                    buttonMemory.DragDataId = dragDataId;
+                    _buttonPressMemory[btnIndex] = buttonMemory;
+                }
+            }
         }
+    }
+
+    private long AttemptStartDragOperation(long sourceId)
+    {
+        var operationEntity = Scene.CreateEntity("Drag Operation");
+        operationEntity.AddComponent<Control>().RequestLayout = true;
+        
+        var dragRequestEvt = Scene.Events.Invoke(new DragDataRequestedEvent()
+        {
+            SourceEntityId = sourceId,
+            DragOperationEntityId = operationEntity.EntityId
+        });
+
+        if (!dragRequestEvt.HasData)
+        {
+            CancelDragOperation(operationEntity.EntityId);
+            return -1;
+        }
+        Console.WriteLine("START DRAG WITH DATA");
+
+        return operationEntity.EntityId;
+    }
+
+    private void CancelDragOperation(long dragDataId)
+    {
+        if(dragDataId != -1)
+            Scene.DeleteEntity(dragDataId, recursively: true);
+    }
+
+    private void SubmitDragOperation(long dragDataId)
+    {
+        Console.WriteLine($"DROP: {dragDataId}");
+        if(dragDataId != -1)
+            Scene.DeleteEntity(dragDataId, recursively: true);
     }
 
     private void HandleMouseEvents(ButtonAction mouseButton, int buttonIndex)
@@ -134,7 +199,12 @@ public class ControlInterfaceSystem : GameSystem
         if (mouseButton.Pressed)
         {
             long onEntityId = GetControlAtPoint(_mousePos);
-            _pressedControls[buttonIndex] = onEntityId;
+            _buttonPressMemory[buttonIndex] = new MouseButtonPressMemory()
+            {
+                ControlId = onEntityId,
+                MousePos = _mousePos,
+                DragStarted = false
+            };
             Scene.Events.Invoke(new MouseButtonEvent
             {
                 Type = MouseButtonEventType.Pressed,
@@ -145,14 +215,21 @@ public class ControlInterfaceSystem : GameSystem
         }
         else if (mouseButton.Released)
         {
+            var buttonMemory = _buttonPressMemory[buttonIndex];
+            if (buttonMemory.DragStarted && buttonMemory.DragDataId != -1)
+            {
+                // DROP
+                SubmitDragOperation(buttonMemory.DragDataId);
+            }
+            // TODO drag drop
             Scene.Events.Invoke(new MouseButtonEvent
             {
                 Type = MouseButtonEventType.Released,
-                EntityId = _pressedControls[buttonIndex],
+                EntityId = buttonMemory.ControlId,
                 Position = _mousePos,
                 Button = buttonIndex
             });
-            _pressedControls[buttonIndex] = -1;
+            _buttonPressMemory[buttonIndex] = MouseButtonPressMemory.Empty;
         }
     }
 
@@ -185,5 +262,22 @@ public class ControlInterfaceSystem : GameSystem
         }
 
         return topEntity;
+    }
+
+    private struct MouseButtonPressMemory
+    {
+        public static readonly MouseButtonPressMemory Empty = new()
+        {
+            ControlId = -1
+        };
+        
+        public long ControlId;
+        public Point MousePos;
+        public bool DragStarted;
+        public long DragDataId = -1;
+
+        public MouseButtonPressMemory()
+        {
+        }
     }
 }

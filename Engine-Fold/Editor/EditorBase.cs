@@ -22,24 +22,24 @@ public class EditorBase : GameSystem
     private long _currentSceneTabId = -1;
     private SubScene _nullSubScene;
     
-    private EditorTab _selfTab;
-    private EditorTab _nullTab;
+    private EditorSceneTab _selfSceneTab;
+    private EditorSceneTab _nullSceneTab;
     
     private Transform _selfCameraTransform;
     private Transform _nullTransform;
     
     [DoNotSerialize]
-    public ComponentIterator<EditorTab> TabIterator;
+    public ComponentIterator<EditorSceneTab> TabIterator;
 
-    public ref EditorTab CurrentTab
+    public ref EditorSceneTab CurrentSceneTab
     {
         get
         {
             if (InspectSelf)
-                return ref _selfTab;
-            if (_currentSceneTabId != -1 && Scene.Components.HasComponent<EditorTab>(_currentSceneTabId))
-                return ref Scene.Components.GetComponent<EditorTab>(_currentSceneTabId);
-            return ref _nullTab;
+                return ref _selfSceneTab;
+            if (_currentSceneTabId != -1 && Scene.Components.HasComponent<EditorSceneTab>(_currentSceneTabId))
+                return ref Scene.Components.GetComponent<EditorSceneTab>(_currentSceneTabId);
+            return ref _nullSceneTab;
         }
     }
 
@@ -73,9 +73,9 @@ public class EditorBase : GameSystem
         {
             if (InspectSelf)
                 return ref _selfCameraTransform;
-            if (_currentSceneTabId != -1 && Scene.Components.HasComponent<EditorTab>(_currentSceneTabId))
+            if (_currentSceneTabId != -1 && Scene.Components.HasComponent<EditorSceneTab>(_currentSceneTabId))
             {
-                var tab = Scene.Components.GetComponent<EditorTab>(_currentSceneTabId);
+                var tab = Scene.Components.GetComponent<EditorSceneTab>(_currentSceneTabId);
                 return ref Scene.Components.GetComponent<Transform>(tab.EditorCameraEntityId);
             }
             return ref _nullTransform;
@@ -89,7 +89,7 @@ public class EditorBase : GameSystem
 
     public override void Initialize()
     {
-        _selfTab = new EditorTab()
+        _selfSceneTab = new EditorSceneTab()
         {
             SceneTransactions = new TransactionManager<Scene>(Scene),
             Scene = Scene
@@ -111,7 +111,7 @@ public class EditorBase : GameSystem
         _environment.NorthPanel.ViewLists[0].ActiveView = _environment.GetView<EditorToolbarView>();
         _environment.SouthPanel.ViewLists[0].ActiveView = _environment.GetView<EditorResourcesView>();
 
-        TabIterator = CreateComponentIterator<EditorTab>(IterationFlags.Ordered | IterationFlags.IncludeInactive);
+        TabIterator = CreateComponentIterator<EditorSceneTab>(IterationFlags.Ordered | IterationFlags.IncludeInactive);
     }
 
     public override void OnInput()
@@ -137,8 +137,8 @@ public class EditorBase : GameSystem
 
         if (_currentSceneTabId != -1)
         {
-            var currentTab = CurrentTab;
-            foreach (long entityId in CurrentTab.EditingEntity)
+            var currentTab = CurrentSceneTab;
+            foreach (long entityId in CurrentSceneTab.EditingEntity)
             {
                 if (currentTab.Scene.Components.HasComponent<Hierarchical>(entityId))
                 {
@@ -162,7 +162,7 @@ public class EditorBase : GameSystem
         subScene.Update = false;
         subScene.ProcessInputs = false;
 
-        ref var tab = ref tabEntity.AddComponent<EditorTab>();
+        ref var tab = ref tabEntity.AddComponent<EditorSceneTab>();
         tab.Scene = editedScene;
         tab.SceneTransactions = new TransactionManager<Scene>(editedScene);
 
@@ -198,7 +198,7 @@ public class EditorBase : GameSystem
     {
         if (_currentSceneTabId != -1)
         {
-            CurrentTab.SceneTransactions.Undo();
+            CurrentSceneTab.SceneTransactions.Undo();
         }
     }
 
@@ -206,7 +206,7 @@ public class EditorBase : GameSystem
     {
         if (_currentSceneTabId != -1)
         {
-            CurrentTab.SceneTransactions.Redo();
+            CurrentSceneTab.SceneTransactions.Redo();
         }
     }
 }

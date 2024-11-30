@@ -19,7 +19,7 @@ public class EditorDebugActionsView : EditorView
         ContentPanel.MayScroll = true;
 
         var editorBase = Scene.Systems.Get<EditorBase>();
-        var editingTab = editorBase.CurrentTab;
+        var editingTab = editorBase.CurrentSceneTab;
 
         if (editingTab.Scene != null && ContentPanel.Button("Save Scene", 14).IsPressed())
         {

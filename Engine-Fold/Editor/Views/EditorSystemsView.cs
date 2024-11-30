@@ -26,7 +26,7 @@ public class EditorSystemsView : EditorView
     public override void Render(IRenderingUnit renderer)
     {
         var editorBase = Scene.Systems.Get<EditorBase>();
-        var editingTab = editorBase.CurrentTab;
+        var editingTab = editorBase.CurrentSceneTab;
         if (editingTab.Scene == null) return;
         var editingScene = editingTab.Scene;
         
@@ -104,7 +104,7 @@ public class SystemHierarchy : Hierarchy<Type>
     public override void Drop()
     {
         if (DragTargetId == null) return;
-        var editingScene = ((EditorEnvironment)Environment).EditingTab.Scene;
+        var editingScene = ((EditorEnvironment)Environment).EditingSceneTab.Scene;
         if (editingScene == null) return;
 
         var transactions = new CompoundTransaction<Scene>();

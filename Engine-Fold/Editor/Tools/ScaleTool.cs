@@ -34,7 +34,7 @@ public class ScaleTool : SelectTool
         if (_selectedGizmo != default)
         {
             var editorBase = Scene.Systems.Get<EditorBase>();
-            var editingTab = editorBase.CurrentTab;
+            var editingTab = editorBase.CurrentSceneTab;
             if (editingTab.Scene == null) return;
             
             Vector2 mouseWorldPos =
@@ -88,7 +88,7 @@ public class ScaleTool : SelectTool
         if (!_dragging) _selectedGizmo = default;
         
         var editorBase = Scene.Systems.Get<EditorBase>();
-        var editingTab = editorBase.CurrentTab;
+        var editingTab = editorBase.CurrentSceneTab;
         if (editingTab.Scene == null) return;
 
         bool any = false;

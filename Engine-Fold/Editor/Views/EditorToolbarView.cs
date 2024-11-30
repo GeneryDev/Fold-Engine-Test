@@ -22,7 +22,7 @@ public class EditorToolbarView : EditorView
     public override void Render(IRenderingUnit renderer)
     {
         var editorBase = Scene.Systems.Get<EditorBase>();
-        ref var editingTab = ref editorBase.CurrentTab;
+        ref var editingTab = ref editorBase.CurrentSceneTab;
         
         foreach (EditorTool tool in ((EditorEnvironment)ContentPanel.Environment).Tools)
             if (ContentPanel.Element<ToolbarButton>()
@@ -73,38 +73,38 @@ public class EditorToolbarView : EditorView
         // ContentPanel.Element<ToolbarButton>().Text("Quit").FontSize(14);
     }
 
-    private void Play(EditorEnvironment environment, ref EditorTab editingTab)
+    private void Play(EditorEnvironment environment, ref EditorSceneTab editingSceneTab)
     {
         var stream = new MemoryStream();
 
         var saveOp = new SaveOperation(stream);
         saveOp.Options.Set(SerializeTempResources.Instance, true);
-        environment.EditingTab.Scene.Serialize(saveOp);
+        environment.EditingSceneTab.Scene.Serialize(saveOp);
 
         saveOp.Close();
-        editingTab.StoredSceneData = stream.GetBuffer();
+        editingSceneTab.StoredSceneData = stream.GetBuffer();
         saveOp.Dispose();
-        SetScenePlaying(environment, ref editingTab, true);
+        SetScenePlaying(environment, ref editingSceneTab, true);
     }
 
-    private void Stop(EditorEnvironment environment, ref EditorTab editingTab)
+    private void Stop(EditorEnvironment environment, ref EditorSceneTab editingSceneTab)
     {
-        var loadOp = new LoadOperation(new MemoryStream(editingTab.StoredSceneData));
+        var loadOp = new LoadOperation(new MemoryStream(editingSceneTab.StoredSceneData));
 
         loadOp.Options.Set(DeserializeClearScene.Instance, true);
 
-        environment.EditingTab.Scene.Deserialize(loadOp);
-        environment.EditingTab.Scene.Flush();
+        environment.EditingSceneTab.Scene.Deserialize(loadOp);
+        environment.EditingSceneTab.Scene.Flush();
 
         loadOp.Close();
         loadOp.Dispose();
-        editingTab.StoredSceneData = null;
-        SetScenePlaying(environment, ref editingTab, false);
+        editingSceneTab.StoredSceneData = null;
+        SetScenePlaying(environment, ref editingSceneTab, false);
     }
 
-    private void SetScenePlaying(EditorEnvironment environment, ref EditorTab editingTab, bool playing)
+    private void SetScenePlaying(EditorEnvironment environment, ref EditorSceneTab editingSceneTab, bool playing)
     {
-        editingTab.Playing = playing;
+        editingSceneTab.Playing = playing;
 
         ref var subScene = ref environment.Scene.Systems.Get<EditorBase>().CurrentSubScene;
         subScene.Update = subScene.ProcessInputs = playing;

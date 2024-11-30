@@ -24,7 +24,7 @@ public class SelectTool : EditorTool
     public override void OnMousePressed(ref MouseEvent e)
     {
         var editorBase = Scene.Systems.Get<EditorBase>();
-        var editingTab = editorBase.CurrentTab;
+        var editingTab = editorBase.CurrentSceneTab;
         if (editingTab.Scene == null) return;
         ref Transform cameraTransform = ref editingTab.Scene.MainCameraTransform;
 

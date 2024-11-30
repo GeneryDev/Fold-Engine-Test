@@ -1,7 +1,9 @@
 ﻿using System;
+using FoldEngine.Editor.Tools;
 using FoldEngine.Gui;
 using FoldEngine.Gui.Components;
 using FoldEngine.Gui.Components.Containers;
+using FoldEngine.Gui.Components.Traits;
 using FoldEngine.Gui.Styles;
 using FoldEngine.Gui.Systems;
 using FoldEngine.Interfaces;
@@ -23,6 +25,7 @@ public class EditorScene : Scene
         BuildStyles();
         
         Systems.Add<EditorBase>();
+        Systems.Add<EditorTabSystem>();
         Systems.Add<EditorCameraSyncSystem>();
         Systems.Add<SubSceneSystem>();
         
@@ -149,6 +152,7 @@ public class EditorScene : Scene
                 SelectedButtonStyle = "editor:tab.selected",
                 LinkedEntityId = linkedControl
             };
+            tab.AddComponent<EditorTab>();
             return tab;
         }
 

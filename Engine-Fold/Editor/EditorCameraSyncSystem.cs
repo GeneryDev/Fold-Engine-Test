@@ -27,9 +27,9 @@ public class EditorCameraSyncSystem : GameSystem
             if (!hierarchical.HasParent) continue;
 
             var parentEntity = new Entity(Scene, hierarchical.ParentId);
-            if (parentEntity.HasComponent<EditorTab>() && parentEntity.HasComponent<SubScene>())
+            if (parentEntity.HasComponent<EditorSceneTab>() && parentEntity.HasComponent<SubScene>())
             {
-                ref var tab = ref parentEntity.GetComponent<EditorTab>();
+                ref var tab = ref parentEntity.GetComponent<EditorSceneTab>();
                 var subScene = parentEntity.GetComponent<SubScene>().Scene;
                 if (subScene == null) continue;
                 if (tab is { PreviewSceneCamera: false, Playing: false })

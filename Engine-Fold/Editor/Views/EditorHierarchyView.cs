@@ -37,7 +37,7 @@ public class EditorHierarchyView : EditorView
     public override void Render(IRenderingUnit renderer)
     {
         var editorBase = Scene.Systems.Get<EditorBase>();
-        var editingTab = editorBase.CurrentTab;
+        var editingTab = editorBase.CurrentSceneTab;
         if (editingTab.Scene == null) return;
         
         var editingScene = editingTab.Scene;
@@ -72,7 +72,7 @@ public class EditorHierarchyView : EditorView
     private void RenderEntity(ref Hierarchical hierarchical, GuiPanel panel, IRenderingUnit renderer, int depth = 0)
     {
         var editorBase = Scene.Systems.Get<EditorBase>();
-        var editingTab = editorBase.CurrentTab;
+        var editingTab = editorBase.CurrentSceneTab;
         if (editingTab.Scene == null) return;
         
         long entityId = hierarchical.EntityId;
@@ -126,7 +126,7 @@ public class EditorHierarchyView : EditorView
     private void SelectEntityDown(long id)
     {
         var editorBase = Scene.Systems.Get<EditorBase>();
-        var editingTab = editorBase.CurrentTab;
+        var editingTab = editorBase.CurrentSceneTab;
         if (editingTab.Scene == null) return;
         
         bool wasSelected = editingTab.EditingEntity.Contains(id);
@@ -161,7 +161,7 @@ public class EditorHierarchyView : EditorView
         long id)
     {
         var editorBase = Scene.Systems.Get<EditorBase>();
-        var editingTab = editorBase.CurrentTab;
+        var editingTab = editorBase.CurrentSceneTab;
         if (editingTab.Scene == null) return;
         
         bool wasSelected = editingTab.EditingEntity.Contains(id);
@@ -193,7 +193,7 @@ public class EditorHierarchyView : EditorView
     {
         GuiPopupMenu contextMenu = ContentPanel.Environment.ContextMenu;
         var editorEnvironment = ((EditorEnvironment)ContentPanel.Environment);
-        var editingScene = editorEnvironment.EditingTab.Scene;
+        var editingScene = editorEnvironment.EditingSceneTab.Scene;
         if (editingScene == null) return;
 
         contextMenu.Show(point, m =>
@@ -243,7 +243,7 @@ public class EntityHierarchy : Hierarchy<long>
     public override void Drop()
     {
         if (DragTargetId == -1) return;
-        var editingScene = ((EditorEnvironment)Environment).EditingTab.Scene;
+        var editingScene = ((EditorEnvironment)Environment).EditingSceneTab.Scene;
         if (editingScene == null) return;
         Console.WriteLine("Dropping: ");
 

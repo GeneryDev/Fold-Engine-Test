@@ -31,7 +31,7 @@ public class EditorInspectorView : EditorView
         ContentPanel.MayScroll = true;
         long id = -1;
         var editorBase = Scene.Systems.Get<EditorBase>();
-        var editingTab = editorBase.CurrentTab;
+        var editingTab = editorBase.CurrentSceneTab;
         if (editingTab.Scene != null)
         {
             if (editingTab.EditingEntity.Count == 1) id = editingTab.EditingEntity[0];

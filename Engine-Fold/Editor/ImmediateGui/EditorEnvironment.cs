@@ -25,12 +25,12 @@ public class EditorEnvironment : GuiEnvironment
 
 
     public EditorBase EditorBase;
-    public TransactionManager<Scene> TransactionManager => EditorBase.CurrentTab.SceneTransactions;
+    public TransactionManager<Scene> TransactionManager => EditorBase.CurrentSceneTab.SceneTransactions;
     public List<EditorView> AllViews = new List<EditorView>();
     public EditorTool ForcedTool;
     public EditorTool SelectedTool;
     
-    public ref EditorTab EditingTab => ref EditorBase.CurrentTab;
+    public ref EditorSceneTab EditingSceneTab => ref EditorBase.CurrentSceneTab;
 
     public EditorEnvironment(EditorBase editor) : base(editor.Scene)
     {
