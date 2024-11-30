@@ -15,7 +15,7 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Gui.Components
 {
-    [Component("fold:control.resize_handle", traits: [typeof(Control), typeof(MousePickable)])]
+    [Component("fold:control.resize_handle", traits: [typeof(Control), typeof(MouseFilterDefaults)])]
     [ComponentInitializer(typeof(ResizeHandleControl), nameof(InitializeComponent))]
     public struct ResizeHandleControl
     {

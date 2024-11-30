@@ -10,6 +10,7 @@ using FoldEngine.Scenes;
 using FoldEngine.Serialization;
 using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using Mouse = Microsoft.Xna.Framework.Input.Mouse;
 
 namespace FoldEngine.Gui.Systems;
@@ -138,6 +139,9 @@ public class ControlInterfaceSystem : GameSystem
             if (buttonMemory.DragDataId != -1)
             {
                 Scene.Components.GetComponent<Transform>(buttonMemory.DragDataId).Position = _mousePos.ToVector2();
+                buttonMemory.DropTargetId = FindDropTarget(buttonMemory.DragDataId, GetControlAtPoint(_mousePos));
+                Mouse.SetCursor(buttonMemory.DropTargetId == -1 ? MouseCursor.No : MouseCursor.Arrow);
+                _buttonPressMemory[btnIndex] = buttonMemory;
             }
             
             Scene.Events.Invoke(new MouseDraggedEvent()
@@ -163,9 +167,13 @@ public class ControlInterfaceSystem : GameSystem
     private long AttemptStartDragOperation(long sourceId)
     {
         var operationEntity = Scene.CreateEntity("Drag Operation");
-        operationEntity.AddComponent<Control>().RequestLayout = true;
+        operationEntity.AddComponent<Control>() = new Control
+        {
+            RequestLayout = true,
+            MouseFilter = Control.MouseFilterMode.Ignore
+        };
         
-        var dragRequestEvt = Scene.Events.Invoke(new DragDataRequestedEvent()
+        var dragRequestEvt = Scene.Events.Invoke(new DragDropEvents()
         {
             SourceEntityId = sourceId,
             DragOperationEntityId = operationEntity.EntityId
@@ -187,11 +195,42 @@ public class ControlInterfaceSystem : GameSystem
             Scene.DeleteEntity(dragDataId, recursively: true);
     }
 
-    private void SubmitDragOperation(long dragDataId)
+    private long FindDropTarget(long dragDataId, long targetId)
+    {
+        while (targetId != -1)
+        {
+            Console.WriteLine($"Validating drop on {targetId}");
+            var validationRequestEvt = Scene.Events.Invoke(new DropValidationRequestedEvent() { TargetEntityId = targetId, DragOperationEntityId = dragDataId });
+
+            if (validationRequestEvt.CanDrop)
+            {
+                return targetId;
+            }
+
+            if (Scene.Components.HasComponent<Hierarchical>(targetId))
+            {
+                var hierarchical = Scene.Components.GetComponent<Hierarchical>(targetId);
+                targetId = hierarchical.ParentId;
+            }
+            else
+            {
+                targetId = -1;
+            }
+        }
+
+        return -1;
+    }
+
+    private void SubmitDragOperation(long dragDataId, long target)
     {
         Console.WriteLine($"DROP: {dragDataId}");
-        if(dragDataId != -1)
-            Scene.DeleteEntity(dragDataId, recursively: true);
+        Scene.Events.Invoke(new DroppedDataEvent()
+        {
+            TargetEntityId = target,
+            DragOperationEntityId = dragDataId,
+            Consumed = false
+        });
+        Scene.DeleteEntity(dragDataId, recursively: true);
     }
 
     private void HandleMouseEvents(ButtonAction mouseButton, int buttonIndex)
@@ -219,7 +258,15 @@ public class ControlInterfaceSystem : GameSystem
             if (buttonMemory.DragStarted && buttonMemory.DragDataId != -1)
             {
                 // DROP
-                SubmitDragOperation(buttonMemory.DragDataId);
+                long dropTarget = FindDropTarget(buttonMemory.DragDataId, GetControlAtPoint(_mousePos));
+                if (dropTarget != -1)
+                {
+                    SubmitDragOperation(buttonMemory.DragDataId, dropTarget);
+                }
+                else
+                {
+                    CancelDragOperation(buttonMemory.DragDataId);
+                }
             }
             // TODO drag drop
             Scene.Events.Invoke(new MouseButtonEvent
@@ -231,6 +278,18 @@ public class ControlInterfaceSystem : GameSystem
             });
             _buttonPressMemory[buttonIndex] = MouseButtonPressMemory.Empty;
         }
+    }
+
+    private Control.MouseFilterMode GetMouseFilterMode(long entityId, ref Control control)
+    {
+        if (control.MouseFilter != Control.MouseFilterMode.Auto)
+        {
+            return control.MouseFilter;
+        }
+
+        if (Scene.Components.HasTrait<MouseFilterDefaults>(entityId)) return Control.MouseFilterMode.Stop;
+        if (Scene.Components.HasTrait<MouseFilterDefaultIgnore>(entityId)) return Control.MouseFilterMode.Ignore;
+        return Control.MouseFilterMode.Ignore;
     }
 
     private long GetControlAtPoint(Point point)
@@ -247,7 +306,9 @@ public class ControlInterfaceSystem : GameSystem
 
             if (topEntity == -1 || control.ZOrder >= topZ)
             {
-                if (!Scene.Components.HasTrait<MousePickable>(_controls.GetEntityId())) continue;
+                var mode = GetMouseFilterMode(_controls.GetEntityId(), ref control);
+                if (mode == Control.MouseFilterMode.Ignore) continue;
+                // TODO pass vs stop
                 
                 var position = transform.Position;
                 var containsPoint = (position.X <= point.X && point.X <= position.X + control.Size.X) &&
@@ -275,6 +336,7 @@ public class ControlInterfaceSystem : GameSystem
         public Point MousePos;
         public bool DragStarted;
         public long DragDataId = -1;
+        public long DropTargetId = -1;
 
         public MouseButtonPressMemory()
         {

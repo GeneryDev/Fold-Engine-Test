@@ -15,7 +15,15 @@ public struct Control
     public float ZOrder;
 
     public bool RequestLayout;
+    public MouseFilterMode MouseFilter;
 
     public Vector2 EffectiveMinimumSize => new Vector2(Math.Max(MinimumSize.X, ComputedMinimumSize.X),
         Math.Max(MinimumSize.Y, ComputedMinimumSize.Y));
+
+    public enum MouseFilterMode
+    {
+        Auto,
+        Ignore,
+        Stop
+    }
 }

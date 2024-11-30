@@ -11,7 +11,7 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Gui.Components
 {
-    [Component("fold:control.label", traits: [typeof(Control), typeof(MousePickable)])]
+    [Component("fold:control.label", traits: [typeof(Control), typeof(MouseFilterDefaultPass)])]
     [ComponentInitializer(typeof(LabelControl), nameof(InitializeComponent))]
     public struct LabelControl
     {

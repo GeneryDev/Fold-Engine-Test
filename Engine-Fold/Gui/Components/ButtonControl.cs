@@ -16,7 +16,7 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Gui.Components
 {
-    [Component("fold:control.button", traits: [typeof(Control), typeof(MousePickable)])]
+    [Component("fold:control.button", traits: [typeof(Control), typeof(MouseFilterDefaults)])]
     [ComponentInitializer(typeof(ButtonControl), nameof(InitializeComponent))]
     public struct ButtonControl
     {

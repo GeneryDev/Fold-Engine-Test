@@ -9,6 +9,12 @@ public struct EditorTab
 {
 }
 
+[Component("fold:editor.tab_drop_target")]
+public struct EditorTabDropTarget
+{
+    [EntityId] public long TabBarId;
+}
+
 [Component("fold:drag_data.editor.tab", traits: [typeof(DragData)])]
 public struct EditorTabDragData
 {

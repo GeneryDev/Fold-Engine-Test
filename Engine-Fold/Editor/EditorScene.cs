@@ -101,6 +101,7 @@ public class EditorScene : Scene
             tabContent.AddComponent<Control>();
             tabContent.AddComponent<BoxControl>().Color = new Color(37, 37, 38, 255);
             tabBar.AddComponent<TabSwitcher>().ContainerEntityId = tabContent.EntityId;
+            dockContent.AddComponent<EditorTabDropTarget>().TabBarId = tabBar.EntityId;
 
             dockTabBarEntityId = tabBar.EntityId;
             dockContentEntityId = tabContent.EntityId;
