@@ -63,7 +63,7 @@ public class SceneViewPanel : GuiPanel
 
     public override void Scroll(int dir)
     {
-        var editorBase = ((EditorEnvironment)Environment).EditorBase;
+        var editorBase = Scene.Systems.Get<EditorBase>();
         
         ref Transform cameraTransform = ref editorBase.CurrentCameraTransform;
         if (cameraTransform.IsNull) return;
@@ -81,7 +81,7 @@ public class SceneViewPanel : GuiPanel
 
     public override void OnInput(ControlScheme controls)
     {
-        var editorBase = ((EditorEnvironment)Environment).EditorBase;
+        var editorBase = Scene.Systems.Get<EditorBase>();
         
         ref Transform cameraTransform = ref editorBase.CurrentCameraTransform;
         if (cameraTransform.IsNull) return;

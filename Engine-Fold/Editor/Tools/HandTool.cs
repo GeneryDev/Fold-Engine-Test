@@ -19,7 +19,7 @@ public class HandTool : EditorTool
 
     public override void OnMousePressed(ref MouseEvent e)
     {
-        var editorBase = Environment.EditorBase;
+        var editorBase = Scene.Systems.Get<EditorBase>();
         
         ref Transform cameraTransform = ref editorBase.CurrentCameraTransform;
         if (cameraTransform.IsNull) return;
@@ -39,7 +39,7 @@ public class HandTool : EditorTool
 
     public override void OnInput(ControlScheme controls)
     {
-        var editorBase = Environment.EditorBase;
+        var editorBase = Scene.Systems.Get<EditorBase>();
         
         ref Transform cameraTransform = ref editorBase.CurrentCameraTransform;
         if (cameraTransform.IsNull) return;

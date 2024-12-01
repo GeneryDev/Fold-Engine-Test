@@ -22,13 +22,13 @@ public class GuiPopupMenu : GuiPanel
         _renderer(this);
 
         Showing = true;
-        Environment.VisiblePanels.Add(this);
+        Environment.DockPanels.Add(this);
     }
 
     public void Dismiss()
     {
         Showing = false;
-        Environment.VisiblePanels.Remove(this);
+        Environment.DockPanels.Remove(this);
     }
 
     public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default)

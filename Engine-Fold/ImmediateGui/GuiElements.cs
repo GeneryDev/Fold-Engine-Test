@@ -1,6 +1,7 @@
 ﻿using FoldEngine.Graphics;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
+using FoldEngine.Scenes;
 using FoldEngine.Text;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
@@ -14,6 +15,7 @@ public abstract class GuiElement
     internal GuiPanel Parent;
 
     public virtual GuiEnvironment Environment => Parent.Environment;
+    public virtual Scene Scene => Environment.Scene;
 
     public virtual bool ClickToFocus => true;
     public virtual bool Focusable => false;

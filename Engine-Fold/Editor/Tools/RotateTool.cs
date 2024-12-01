@@ -63,7 +63,7 @@ public class RotateTool : SelectTool
                 _pressEntityRotation.Add(entity.Transform.Rotation);
 
                 var transaction = new SetEntityTransformTransaction(entity.Transform.CreateSnapshot());
-                Environment.TransactionManager.InsertTransaction(transaction);
+                Scene.Systems.Get<EditorBase>().CurrentSceneTab.SceneTransactions.InsertTransaction(transaction);
                 _transactions.Add(transaction);
             }
 

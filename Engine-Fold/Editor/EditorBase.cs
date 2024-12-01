@@ -95,7 +95,7 @@ public class EditorBase : GameSystem
             Scene = Scene
         };
         
-        _environment = new EditorEnvironment(this);
+        _environment = new EditorEnvironment(Scene);
 
         _environment.AddView<EditorToolbarView>(_environment.NorthPanel);
         _environment.AddView<EditorHierarchyView>(_environment.WestPanel);

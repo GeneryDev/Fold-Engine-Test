@@ -61,7 +61,7 @@ public class EditorInspectorView : EditorView
         bool active = entity.Hierarchical.Active;
         if (active != ContentPanel.Element<Checkbox>().Value(active).IsChecked())
         {
-            ((EditorEnvironment)ContentPanel.Environment).TransactionManager.InsertTransaction(
+            Scene.Systems.Get<EditorBase>().CurrentSceneTab.SceneTransactions.InsertTransaction(
                 new SetEntityActiveTransaction(id, !active, active));
         }
 
@@ -123,7 +123,7 @@ public class EditorInspectorView : EditorView
                 {
                     if (def.Type.GetCustomAttribute<HideInInspector>() == null &&
                         !entity.Scene.Components.HasComponent(def.Type, id) && m.Button(def.Type.Name, 9).IsPressed())
-                        ((EditorEnvironment)ContentPanel.Environment).TransactionManager.InsertTransaction(
+                        Scene.Systems.Get<EditorBase>().CurrentSceneTab.SceneTransactions.InsertTransaction(
                             new AddComponentTransaction(def.Type, id));
                 }
             });
@@ -248,7 +248,7 @@ public class ComponentHeader : GuiLabel
             Environment.ContextMenu.Show(e.Position, m =>
             {
                 if (m.Button("Remove", 14).IsPressed())
-                    ((EditorEnvironment)Environment).TransactionManager.InsertTransaction(
+                    Scene.Systems.Get<EditorBase>().CurrentSceneTab.SceneTransactions.InsertTransaction(
                         new RemoveComponentTransaction(_info.ComponentType, _id));
                 ;
             });

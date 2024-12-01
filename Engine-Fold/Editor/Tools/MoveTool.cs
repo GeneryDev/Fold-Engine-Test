@@ -55,7 +55,7 @@ public class MoveTool : SelectTool
                 _pressEntityPivotPosition.Add(relativeEntityPos);
 
                 var transaction = new SetEntityTransformTransaction(entity.Transform.CreateSnapshot());
-                Environment.TransactionManager.InsertTransaction(transaction);
+                Scene.Systems.Get<EditorBase>().CurrentSceneTab.SceneTransactions.InsertTransaction(transaction);
                 _transactions.Add(transaction);
             }
 

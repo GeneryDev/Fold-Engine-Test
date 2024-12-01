@@ -40,7 +40,7 @@ public class EditorSystemsView : EditorView
             {
                 foreach (Type type in Core.RegistryUnit.Systems.GetAllTypes())
                     if (editingScene.Systems.Get(type) == null && m.Button(type.Name, 9).IsPressed())
-                        ((EditorEnvironment)ContentPanel.Environment).TransactionManager.InsertTransaction(
+                        Scene.Systems.Get<EditorBase>().CurrentSceneTab.SceneTransactions.InsertTransaction(
                             new AddSystemTransaction(type));
             });
         }
@@ -77,7 +77,7 @@ public class EditorSystemsView : EditorView
                     contextMenu.Show(clickPoint, m =>
                     {
                         if (m.Button("Remove", 14).IsPressed())
-                            ((EditorEnvironment)ContentPanel.Environment).TransactionManager.InsertTransaction(
+                            Scene.Systems.Get<EditorBase>().CurrentSceneTab.SceneTransactions.InsertTransaction(
                                 new RemoveSystemTransaction(sys.GetType()));
                     });
                     break;
@@ -104,7 +104,7 @@ public class SystemHierarchy : Hierarchy<Type>
     public override void Drop()
     {
         if (DragTargetId == null) return;
-        var editingScene = ((EditorEnvironment)Environment).EditingSceneTab.Scene;
+        var editingScene = Environment.Scene.Systems.Get<EditorBase>().CurrentSceneTab.Scene;
         if (editingScene == null) return;
 
         var transactions = new CompoundTransaction<Scene>();
@@ -124,7 +124,7 @@ public class SystemHierarchy : Hierarchy<Type>
             transactions.Append(() => transaction);
         }
 
-        if (transactions.Count > 0 && Environment is EditorEnvironment editorEnvironment)
-            editorEnvironment.TransactionManager.InsertTransaction(transactions);
+        if (transactions.Count > 0)
+            Environment.Scene.Systems.Get<EditorBase>().CurrentSceneTab.SceneTransactions.InsertTransaction(transactions);
     }
 }

@@ -20,7 +20,7 @@ public class EditorSceneListView : EditorView
     {
         ContentPanel.MayScroll = true;
 
-        var editorBase = (ContentPanel.Environment as EditorEnvironment)?.EditorBase;
+        var editorBase = Scene.Systems.Get<EditorBase>();
         var tabIterator = editorBase?.TabIterator;
         if (tabIterator == null) return;
         

@@ -8,7 +8,6 @@ using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
 using FoldEngine.Util;
-using FoldEngine.Util.Transactions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Keyboard = FoldEngine.Input.Keyboard;
@@ -21,42 +20,33 @@ public class EditorEnvironment : GuiEnvironment
     public const int FrameBorder = 4;
     public const int FrameMargin = 8;
 
-    public readonly List<EditorTool> Tools = new List<EditorTool>();
-
-
-    public EditorBase EditorBase;
-    public TransactionManager<Scene> TransactionManager => EditorBase.CurrentSceneTab.SceneTransactions;
     public List<EditorView> AllViews = new List<EditorView>();
+
+    public readonly List<EditorTool> Tools = new List<EditorTool>();
     public EditorTool ForcedTool;
     public EditorTool SelectedTool;
-    
-    public ref EditorSceneTab EditingSceneTab => ref EditorBase.CurrentSceneTab;
+    public EditorTool ActiveTool => ForcedTool ?? SelectedTool;
 
-    public EditorEnvironment(EditorBase editor) : base(editor.Scene)
+    public sealed override List<GuiPanel> DockPanels { get; } = new List<GuiPanel>();
+
+
+    public EditorEnvironment(Scene scene) : base(scene)
     {
-        EditorBase = editor;
-
         NorthPanel = new BorderPanel(this, -Vector2.UnitY);
         SouthPanel = new BorderPanel(this, Vector2.UnitY);
         WestPanel = new BorderPanel(this, -Vector2.UnitX);
         EastPanel = new BorderPanel(this, Vector2.UnitX);
         CenterPanel = new BorderPanel(this, Vector2.Zero);
 
-        VisiblePanels.Add(NorthPanel);
-        VisiblePanels.Add(SouthPanel);
-        VisiblePanels.Add(WestPanel);
-        VisiblePanels.Add(EastPanel);
-        VisiblePanels.Add(CenterPanel);
+        DockPanels.Add(NorthPanel);
+        DockPanels.Add(SouthPanel);
+        DockPanels.Add(WestPanel);
+        DockPanels.Add(EastPanel);
+        DockPanels.Add(CenterPanel);
 
         SetupControlScheme();
         SetupTools();
     }
-
-    public sealed override List<GuiPanel> VisiblePanels { get; } = new List<GuiPanel>();
-
-    public ViewListPanel HoverViewListPanel { get; set; }
-
-    public EditorTool ActiveTool => ForcedTool ?? SelectedTool;
 
     private void SetupControlScheme()
     {
@@ -102,9 +92,10 @@ public class EditorEnvironment : GuiEnvironment
     public override void Input(InputUnit inputUnit)
     {
         base.Input(inputUnit);
+        var editorBase = Scene.Systems.Get<EditorBase>();
 
-        if (ControlScheme.Get<ButtonAction>("editor.undo").Consume()) EditorBase.Undo();
-        if (ControlScheme.Get<ButtonAction>("editor.redo").Consume()) EditorBase.Redo();
+        if (ControlScheme.Get<ButtonAction>("editor.undo").Consume()) editorBase.Undo();
+        if (ControlScheme.Get<ButtonAction>("editor.redo").Consume()) editorBase.Redo();
 
         if (HoverTarget.ScrollablePanel != null)
             if (HoverTarget.ScrollablePanel.IsAncestorOf(HoverTarget.Element))
@@ -118,8 +109,6 @@ public class EditorEnvironment : GuiEnvironment
     public override void Render(IRenderingUnit renderer, IRenderingLayer baseLayer, IRenderingLayer overlayLayer)
     {
         base.Render(renderer, baseLayer, overlayLayer);
-
-        HoverViewListPanel = default;
 
         renderer.Groups["editor"].Dependencies[0].Group.Size = default;
 
@@ -209,7 +198,7 @@ public class EditorEnvironment : GuiEnvironment
 
     public bool SwitchToView(EditorView view)
     {
-        foreach (BorderPanel borderPanel in VisiblePanels)
+        foreach (BorderPanel borderPanel in DockPanels)
         {
             foreach (ViewListPanel viewListPanel in borderPanel.ViewLists)
                 if (viewListPanel.ContainsView(view))
@@ -393,9 +382,6 @@ public class ViewListPanel : GuiPanel
 
     public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default)
     {
-        if (Environment is EditorEnvironment editorEnvironment && Bounds.Contains(Environment.MousePos))
-            editorEnvironment.HoverViewListPanel = this;
-
         Color? bgColor = ActiveView?.BackgroundColor;
         if (bgColor.HasValue)
             layer.Surface.Draw(new DrawRectInstruction

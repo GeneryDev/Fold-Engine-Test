@@ -41,7 +41,7 @@ public class EditorResourcesView : EditorView
             _main = new GuiPanel(ContentPanel.Environment) { MayScroll = true };
         }
 
-        var editingScene = ((EditorEnvironment)ContentPanel.Environment).EditingSceneTab.Scene;
+        var editingScene = Scene.Systems.Get<EditorBase>().CurrentSceneTab.Scene;
 
         ShowSceneLocalResources = ContentPanel.Element<Checkbox>().Value(ShowSceneLocalResources).IsChecked();
         ContentPanel.Label("Show Local to Scene", 9).TextAlignment(-1);
@@ -135,7 +135,7 @@ public class EditorResourcesView : EditorView
                     {
                         editingTab.EditingEntity.Clear();
                         editorEnvironment.GetView<EditorInspectorView>()
-                            .SetObject((editorEnvironment.EditingSceneTab.Scene?.Resources ?? Scene.Core.Resources).Get(type, ref identifier));
+                            .SetObject((Scene.Systems.Get<EditorBase>()?.CurrentSceneTab.Scene?.Resources ?? Scene.Core.Resources).Get(type, ref identifier));
                         editorEnvironment.SwitchToView<EditorInspectorView>();
                     }
 

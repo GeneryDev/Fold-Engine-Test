@@ -51,7 +51,7 @@ public abstract class GuiEnvironment : IDisposable
 
     public GuiElement FocusOwner { get; private set; }
 
-    public abstract List<GuiPanel> VisiblePanels { get; }
+    public abstract List<GuiPanel> DockPanels { get; }
 
     // Renderer
     public IRenderingUnit Renderer { get; set; }
@@ -115,9 +115,9 @@ public abstract class GuiEnvironment : IDisposable
         {
             if (HoverTarget.PopupMenu != ContextMenu) DismissPopups();
 
-            for (int i = VisiblePanels.Count - 1; i >= 0; i--)
+            for (int i = DockPanels.Count - 1; i >= 0; i--)
             {
-                GuiPanel panel = VisiblePanels[i];
+                GuiPanel panel = DockPanels[i];
                 if (panel.Visible && panel.Bounds.Contains(MousePos))
                 {
                     _pressedPanels[buttonIndex] = panel;

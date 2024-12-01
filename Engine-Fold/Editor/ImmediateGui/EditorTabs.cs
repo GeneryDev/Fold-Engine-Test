@@ -13,9 +13,7 @@ public class ViewTab : GuiElement
     private const float LabelSize = 7;
 
     public const int TabHeight = 14;
-    private bool _dragging;
 
-    private Point _dragStart;
     private RenderedText _renderedName;
 
     private EditorView _view;
@@ -44,16 +42,7 @@ public class ViewTab : GuiElement
     {
         if (Bounds.Contains(Environment.MousePos)) Environment.HoverTarget.Element = this;
 
-        if (Pressed(MouseEvent.LeftButton) && Environment.HoverTargetPrevious.Element != this) _dragging = true;
-
         Rectangle renderingBounds = Bounds;
-        if (_dragging)
-        {
-            offset += Parent.Environment.MousePos - Bounds.Center;
-            renderingBounds = renderingBounds.Translate(offset);
-            layer = renderer.RootGroup["editor_gui_overlay"];
-        }
-
 
         Color defaultColor = _viewList.ActiveView == _view ? new Color(37, 37, 38) : Color.Transparent;
 
@@ -91,23 +80,7 @@ public class ViewTab : GuiElement
     {
         if (e.Button == MouseEvent.LeftButton)
         {
-            if (!_dragging)
-            {
-                _viewList.ActiveView = _view;
-            }
-            else
-            {
-                if (Parent.Environment is EditorEnvironment editorEnvironment)
-                {
-                    if (editorEnvironment.HoverViewListPanel != null)
-                    {
-                        _viewList.RemoveView(_view);
-                        editorEnvironment.HoverViewListPanel.AddView(_view);
-                    }
-                }
-            }
-
-            _dragging = false;
+            _viewList.ActiveView = _view;
         }
     }
 }

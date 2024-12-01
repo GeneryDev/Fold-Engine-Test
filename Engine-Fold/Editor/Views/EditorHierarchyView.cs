@@ -51,7 +51,7 @@ public class EditorHierarchyView : EditorView
         // ContentPanel.Label("Entities", 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
         // ContentPanel.Button("Back").Action(SceneEditor.Actions.ChangeToMenu, 0);
         if (ContentPanel.Button("New Entity", 14).IsPressed())
-            ((EditorEnvironment)ContentPanel.Environment).TransactionManager.InsertTransaction(
+            Scene.Systems.Get<EditorBase>().CurrentSceneTab.SceneTransactions.InsertTransaction(
                 new CreateEntityTransaction(-1));
         ContentPanel.Separator();
 
@@ -188,7 +188,7 @@ public class EditorHierarchyView : EditorView
     {
         GuiPopupMenu contextMenu = ContentPanel.Environment.ContextMenu;
         var editorEnvironment = ((EditorEnvironment)ContentPanel.Environment);
-        var editingScene = editorEnvironment.EditingSceneTab.Scene;
+        var editingScene = Scene.Systems.Get<EditorBase>().CurrentSceneTab.Scene;
         if (editingScene == null) return;
 
         contextMenu.Show(point, m =>
@@ -211,13 +211,13 @@ public class EditorHierarchyView : EditorView
                 foreach (long entityId in EntitiesToDelete)
                     transactions.Append(() => new DeleteEntityTransaction(entityId));
 
-                editorEnvironment.TransactionManager.InsertTransaction(transactions);
+                Scene.Systems.Get<EditorBase>().CurrentSceneTab.SceneTransactions.InsertTransaction(transactions);
             }
 
             m.Separator();
 
             if (m.Button("Create Child", 9).TextMargin(20).TextAlignment(-1).IsPressed())
-                editorEnvironment.TransactionManager.InsertTransaction(
+                Scene.Systems.Get<EditorBase>().CurrentSceneTab.SceneTransactions.InsertTransaction(
                     new CreateEntityTransaction(id));
         }, 120);
     }
@@ -238,7 +238,7 @@ public class EntityHierarchy : Hierarchy<long>
     public override void Drop()
     {
         if (DragTargetId == -1) return;
-        var editingScene = ((EditorEnvironment)Environment).EditingSceneTab.Scene;
+        var editingScene = Environment.Scene.Systems.Get<EditorBase>().CurrentSceneTab.Scene;
         if (editingScene == null) return;
         Console.WriteLine("Dropping: ");
 
@@ -286,7 +286,6 @@ public class EntityHierarchy : Hierarchy<long>
             transactions.Append(() => transaction);
         }
 
-        if (Environment is EditorEnvironment editorEnvironment)
-            editorEnvironment.TransactionManager.InsertTransaction(transactions);
+        Environment.Scene.Systems.Get<EditorBase>().CurrentSceneTab.SceneTransactions.InsertTransaction(transactions);
     }
 }

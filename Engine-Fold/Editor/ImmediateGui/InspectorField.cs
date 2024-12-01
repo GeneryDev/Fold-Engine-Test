@@ -36,7 +36,7 @@ public abstract class SetFieldAction : IGuiAction
         transaction.OldValue = oldValue;
         transaction.NewValue = newValue;
 
-        ((EditorEnvironment)element.Parent.Environment).TransactionManager.InsertTransaction(transaction);
+        element.Scene.Systems.Get<EditorBase>().CurrentSceneTab.SceneTransactions.InsertTransaction(transaction);
     }
 
     public IObjectPool Pool { get; set; }
