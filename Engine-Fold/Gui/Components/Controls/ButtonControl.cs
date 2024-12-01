@@ -84,7 +84,7 @@ namespace FoldEngine.Gui.Components.Controls
 
 namespace FoldEngine.Gui.Systems
 {
-    public partial class ControlRenderer
+    public partial class StandardControlsSystem
     {
         private void RenderButton(IRenderingUnit renderer, IRenderingLayer layer, ref Transform transform,
             ref Control control, ref ButtonControl button)

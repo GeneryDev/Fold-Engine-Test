@@ -12,8 +12,8 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Gui.Systems;
 
-[GameSystem("fold:control_renderer", ProcessingCycles.Render, true)]
-public partial class ControlRenderer : GameSystem
+[GameSystem("fold:controls.standard", ProcessingCycles.Render, true)]
+public partial class StandardControlsSystem : GameSystem
 {
     private ComponentIterator<Viewport> _viewports;
     private ComponentIterator<Control> _controls;

@@ -108,7 +108,7 @@ internal class DemoScene : Scene
         
         
         Systems.Add<ControlLayoutSystem>();
-        Systems.Add<ControlRenderer>();
+        Systems.Add<StandardControlsSystem>();
         Systems.Add<ControlInterfaceSystem>();
         Systems.Add<ControlPopupSystem>();
         Systems.Add<TooltipSystem>();

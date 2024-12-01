@@ -17,7 +17,7 @@ namespace FoldEngine.Gui.Components.Controls
 
 namespace FoldEngine.Gui.Systems
 {
-    public partial class ControlRenderer
+    public partial class StandardControlsSystem
     {
         private void RenderBox(IRenderingUnit renderer, IRenderingLayer layer, ref Transform transform, ref Control control, ref BoxControl box)
         {
