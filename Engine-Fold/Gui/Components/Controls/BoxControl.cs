@@ -1,11 +1,12 @@
 ﻿using FoldEngine.Components;
 using FoldEngine.Graphics;
 using FoldEngine.Gui.Components;
+using FoldEngine.Gui.Components.Controls;
 using FoldEngine.Gui.Components.Traits;
 using FoldEngine.Interfaces;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Gui.Components
+namespace FoldEngine.Gui.Components.Controls
 {
     [Component("fold:control.box", traits: [typeof(Control), typeof(MouseFilterDefaultStop)])]
     public struct BoxControl

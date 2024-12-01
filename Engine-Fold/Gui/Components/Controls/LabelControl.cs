@@ -1,6 +1,7 @@
 ﻿using FoldEngine.Components;
 using FoldEngine.Editor.Inspector;
 using FoldEngine.Gui.Components;
+using FoldEngine.Gui.Components.Controls;
 using FoldEngine.Gui.Components.Traits;
 using FoldEngine.Gui.Events;
 using FoldEngine.Interfaces;
@@ -9,7 +10,7 @@ using FoldEngine.Serialization;
 using FoldEngine.Text;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Gui.Components
+namespace FoldEngine.Gui.Components.Controls
 {
     [Component("fold:control.label", traits: [typeof(Control), typeof(MouseFilterDefaultPass)])]
     [ComponentInitializer(typeof(LabelControl), nameof(InitializeComponent))]

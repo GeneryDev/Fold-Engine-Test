@@ -1,9 +1,8 @@
 ﻿using System;
-using FoldEngine.Editor.Tools;
 using FoldEngine.Gui;
 using FoldEngine.Gui.Components;
-using FoldEngine.Gui.Components.Containers;
-using FoldEngine.Gui.Components.Traits;
+using FoldEngine.Gui.Components.Controls;
+using FoldEngine.Gui.Components.Controls.Containers;
 using FoldEngine.Gui.Styles;
 using FoldEngine.Gui.Systems;
 using FoldEngine.Interfaces;

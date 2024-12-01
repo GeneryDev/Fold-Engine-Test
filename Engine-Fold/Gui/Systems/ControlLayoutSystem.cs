@@ -1,14 +1,10 @@
-﻿using System;
-using FoldEngine.Components;
+﻿using FoldEngine.Components;
 using FoldEngine.Editor.Transactions;
-using FoldEngine.Events;
 using FoldEngine.Gui.Components;
-using FoldEngine.Gui.Components.Containers;
 using FoldEngine.Gui.Components.Traits;
 using FoldEngine.Gui.Events;
 using FoldEngine.Interfaces;
 using FoldEngine.Systems;
-using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Gui.Systems;

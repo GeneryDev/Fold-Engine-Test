@@ -1,13 +1,13 @@
 ﻿using System;
 using FoldEngine.Components;
 using FoldEngine.Gui.Components;
-using FoldEngine.Gui.Components.Containers;
+using FoldEngine.Gui.Components.Controls.Containers;
 using FoldEngine.Gui.Components.Traits;
 using FoldEngine.Gui.Events;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Gui.Components.Containers
+namespace FoldEngine.Gui.Components.Controls.Containers
 {
     [Component("fold:control.flow_container", traits: [typeof(Control), typeof(Container)])]
     public struct FlowContainer

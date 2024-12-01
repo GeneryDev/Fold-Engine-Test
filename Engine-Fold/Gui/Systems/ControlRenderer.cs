@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using FoldEngine.Components;
 using FoldEngine.Graphics;
 using FoldEngine.Gui.Components;
+using FoldEngine.Gui.Components.Controls;
 using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
 using FoldEngine.Systems;

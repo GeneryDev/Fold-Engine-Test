@@ -1,19 +1,17 @@
 ﻿using System;
 using FoldEngine.Components;
-using FoldEngine.Editor.Inspector;
 using FoldEngine.Graphics;
 using FoldEngine.Gui.Components;
+using FoldEngine.Gui.Components.Controls;
 using FoldEngine.Gui.Components.Traits;
 using FoldEngine.Gui.Events;
 using FoldEngine.Interfaces;
-using FoldEngine.Resources;
 using FoldEngine.Scenes;
 using FoldEngine.Serialization;
-using FoldEngine.Text;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Gui.Components
+namespace FoldEngine.Gui.Components.Controls
 {
     [Component("fold:control.resize_handle", traits: [typeof(Control), typeof(MouseFilterDefaultStop)])]
     [ComponentInitializer(typeof(ResizeHandleControl), nameof(InitializeComponent))]
