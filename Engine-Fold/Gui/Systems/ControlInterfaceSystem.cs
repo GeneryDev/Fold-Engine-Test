@@ -25,6 +25,7 @@ public class ControlInterfaceSystem : GameSystem
     [DoNotSerialize] [HideInInspector] public ButtonAction MouseLeft = ButtonAction.Default;
     [DoNotSerialize] [HideInInspector] public ButtonAction MouseMiddle = ButtonAction.Default;
     [DoNotSerialize] [HideInInspector] public ButtonAction MouseRight = ButtonAction.Default;
+    [DoNotSerialize] [HideInInspector] public ButtonAction Escape = ButtonAction.Default;
 
     [DoNotSerialize] private Point _prevMousePos = NullMousePos;
     [DoNotSerialize] private Point _mousePos = NullMousePos;
@@ -51,6 +52,7 @@ public class ControlInterfaceSystem : GameSystem
             MouseLeft = new ButtonAction(inputUnit.Devices.Mouse.LeftButton);
             MouseMiddle = new ButtonAction(inputUnit.Devices.Mouse.MiddleButton);
             MouseRight = new ButtonAction(inputUnit.Devices.Mouse.RightButton);
+            Escape = new ButtonAction(inputUnit.Devices.Keyboard[Keys.Escape]);
         }
 
         _viewports.Reset();
@@ -102,6 +104,10 @@ public class ControlInterfaceSystem : GameSystem
         HandleMouseEvents(MouseLeft, MouseButtonEvent.LeftButton);
         HandleMouseEvents(MouseMiddle, MouseButtonEvent.MiddleButton);
         HandleMouseEvents(MouseRight, MouseButtonEvent.RightButton);
+        if (_buttonPressMemory[MouseButtonEvent.LeftButton].DragDataId != -1 && Escape.Consume())
+        {
+            CancelDragOperation(ref _buttonPressMemory[MouseButtonEvent.LeftButton]);
+        }
         
         // Console.WriteLine($"Hover target: {viewport.HoverTargetId}");
 
@@ -173,7 +179,7 @@ public class ControlInterfaceSystem : GameSystem
             MouseFilter = Control.MouseFilterMode.Ignore
         };
         
-        var dragRequestEvt = Scene.Events.Invoke(new DragDropEvents()
+        var dragRequestEvt = Scene.Events.Invoke(new DragDataRequestedEvent()
         {
             SourceEntityId = sourceId,
             DragOperationEntityId = operationEntity.EntityId
@@ -181,7 +187,7 @@ public class ControlInterfaceSystem : GameSystem
 
         if (!dragRequestEvt.HasData)
         {
-            CancelDragOperation(operationEntity.EntityId);
+            Scene.DeleteEntity(operationEntity.EntityId, recursively: true);
             return -1;
         }
         Console.WriteLine("START DRAG WITH DATA");
@@ -189,10 +195,21 @@ public class ControlInterfaceSystem : GameSystem
         return operationEntity.EntityId;
     }
 
-    private void CancelDragOperation(long dragDataId)
+    private void CancelDragOperation(ref MouseButtonPressMemory buttonMemory)
     {
-        if(dragDataId != -1)
-            Scene.DeleteEntity(dragDataId, recursively: true);
+        if (buttonMemory.DropTargetId != -1)
+        {
+            Scene.Events.Invoke(new DragOperationCanceledEvent()
+            {
+                DragOperationEntityId = buttonMemory.DragDataId,
+                TargetEntityId = buttonMemory.DropTargetId
+            });
+        }
+        if(buttonMemory.DragDataId != -1)
+            Scene.DeleteEntity(buttonMemory.DragDataId, recursively: true);
+
+        buttonMemory.DropTargetId = -1;
+        buttonMemory.DragDataId = -1;
     }
 
     private long FindDropTarget(long dragDataId, long targetId)
@@ -265,7 +282,7 @@ public class ControlInterfaceSystem : GameSystem
                 }
                 else
                 {
-                    CancelDragOperation(buttonMemory.DragDataId);
+                    CancelDragOperation(ref buttonMemory);
                 }
             }
             // TODO drag drop

@@ -4,13 +4,13 @@ using FoldEngine.Scenes;
 namespace FoldEngine.Gui.Events;
 
 [Event("fold:control.drag_data_requested", EventFlushMode.Immediate)]
-public struct DragDropEvents
+public struct DragDataRequestedEvent
 {
     [EntityId] public long SourceEntityId = -1;
     [EntityId] public long DragOperationEntityId = -1;
     public bool HasData = false;
 
-    public DragDropEvents()
+    public DragDataRequestedEvent()
     {
     }
 }
@@ -23,6 +23,17 @@ public struct DropValidationRequestedEvent
     public bool CanDrop = false;
 
     public DropValidationRequestedEvent()
+    {
+    }
+}
+
+[Event("fold:control.drag_operation_canceled", EventFlushMode.Immediate)]
+public struct DragOperationCanceledEvent
+{
+    [EntityId] public long TargetEntityId = -1;
+    [EntityId] public long DragOperationEntityId = -1;
+
+    public DragOperationCanceledEvent()
     {
     }
 }

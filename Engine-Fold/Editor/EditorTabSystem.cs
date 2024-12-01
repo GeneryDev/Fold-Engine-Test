@@ -13,7 +13,7 @@ public class EditorTabSystem : GameSystem
 {
     public override void SubscribeToEvents()
     {
-        Subscribe((ref DragDropEvents evt) =>
+        Subscribe((ref DragDataRequestedEvent evt) =>
         {
             if (Scene.Components.HasComponent<EditorTab>(evt.SourceEntityId))
             {
