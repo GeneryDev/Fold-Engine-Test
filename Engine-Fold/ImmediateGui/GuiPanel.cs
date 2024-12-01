@@ -23,7 +23,6 @@ public class GuiPanel : GuiElement
 
     private GuiElement _previousElement;
     public Point ContentSize = Point.Zero;
-    public bool Focused = true;
 
     public Point LayoutPosition = Point.Zero;
     public bool MayScroll = false;
@@ -39,7 +38,7 @@ public class GuiPanel : GuiElement
         Environment = environment;
     }
 
-    public GuiEnvironment Environment { get; }
+    public override GuiEnvironment Environment { get; }
     public bool Visible => _lastFrameRendered >= Time.TotalFrames - 1;
 
     public virtual void Reset()

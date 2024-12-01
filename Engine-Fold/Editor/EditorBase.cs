@@ -182,7 +182,7 @@ public class EditorBase : GameSystem
         tab.EditorCameraEntityId = editorCameraEntity.EntityId;
     }
 
-    public void SelectTab(long tabId)
+    public void SelectSceneTab(long tabId)
     {
         _currentSceneTabId = tabId;
 

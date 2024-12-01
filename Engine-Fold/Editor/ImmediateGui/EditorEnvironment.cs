@@ -188,7 +188,6 @@ public class EditorEnvironment : GuiEnvironment
     public void AddView<T>(BorderPanel preferredPanel = null) where T : EditorView, new()
     {
         var view = new T { Scene = Scene };
-        view.Initialize();
 
         AllViews.Add(view);
 

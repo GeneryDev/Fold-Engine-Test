@@ -35,6 +35,6 @@ public class EditorSceneListView : EditorView
             }
         }
         if(changeTab.HasValue)
-            editorBase.SelectTab(changeTab.Value);
+            editorBase.SelectSceneTab(changeTab.Value);
     }
 }

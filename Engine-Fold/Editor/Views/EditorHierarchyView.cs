@@ -30,10 +30,6 @@ public class EditorHierarchyView : EditorView
 
     public override string Name => "Hierarchy";
 
-    public override void Initialize()
-    {
-    }
-
     public override void Render(IRenderingUnit renderer)
     {
         var editorBase = Scene.Systems.Get<EditorBase>();
@@ -108,8 +104,7 @@ public class EditorHierarchyView : EditorView
         switch (button.GetEvent(out Point p))
         {
             case HierarchyElement<long>.HierarchyEventType.Expand:
-                (panel.Environment as EditorEnvironment)?.GetView<EditorHierarchyView>()
-                    .Hierarchy.ExpandCollapse(entityId);
+                Hierarchy.ExpandCollapse(entityId);
                 break;
             case HierarchyElement<long>.HierarchyEventType.Down:
                 SelectEntityDown(entityId);

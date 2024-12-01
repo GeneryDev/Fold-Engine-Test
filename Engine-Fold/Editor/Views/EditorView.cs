@@ -19,10 +19,6 @@ public abstract class EditorView
     public virtual bool UseMargin => true;
     public virtual Color? BackgroundColor => null;
 
-    public virtual void Initialize()
-    {
-    }
-
     public abstract void Render(IRenderingUnit renderer);
 
     public virtual void EnsurePanelExists(GuiEnvironment environment)
