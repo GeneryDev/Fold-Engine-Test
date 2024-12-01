@@ -3,7 +3,7 @@
 namespace FoldEngine.Gui.Components.Traits;
 
 [ComponentTrait("#fold:mouse_filter_default.stop")]
-public struct MouseFilterDefaults
+public struct MouseFilterDefaultStop
 {
 }
 [ComponentTrait("#fold:mouse_filter_default.pass")]

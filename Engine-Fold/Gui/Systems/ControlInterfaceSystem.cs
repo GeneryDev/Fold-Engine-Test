@@ -304,7 +304,7 @@ public class ControlInterfaceSystem : GameSystem
             return control.MouseFilter;
         }
 
-        if (Scene.Components.HasTrait<MouseFilterDefaults>(entityId)) return Control.MouseFilterMode.Stop;
+        if (Scene.Components.HasTrait<MouseFilterDefaultStop>(entityId)) return Control.MouseFilterMode.Stop;
         if (Scene.Components.HasTrait<MouseFilterDefaultIgnore>(entityId)) return Control.MouseFilterMode.Ignore;
         return Control.MouseFilterMode.Ignore;
     }

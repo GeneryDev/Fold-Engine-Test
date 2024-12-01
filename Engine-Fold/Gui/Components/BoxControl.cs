@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Gui.Components
 {
-    [Component("fold:control.box", traits: [typeof(Control), typeof(MouseFilterDefaults)])]
+    [Component("fold:control.box", traits: [typeof(Control), typeof(MouseFilterDefaultStop)])]
     public struct BoxControl
     {
         public Color Color;
