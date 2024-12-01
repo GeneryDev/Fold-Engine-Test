@@ -309,6 +309,11 @@ public class ControlInterfaceSystem : GameSystem
         return Control.MouseFilterMode.Ignore;
     }
 
+    public bool AnyMouseDown()
+    {
+        return MouseLeft.Down || MouseRight.Down || MouseMiddle.Down;
+    }
+
     private long GetControlAtPoint(Point point)
     {
         _controls.Reset();

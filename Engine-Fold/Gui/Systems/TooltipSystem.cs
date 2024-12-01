@@ -150,21 +150,10 @@ public class TooltipSystem : GameSystem
         return evt.TooltipText ?? "";
     }
 
-    private void StartHovering(long entityId, string tooltip)
-    {
-        _hoveredProviderId = entityId;
-        if (_hoveredProviderId == entityId && _hoverText == tooltip) return; // same tooltip, same entity. nothing to change
-        
-        _hoverTimer = 0;
-        _hoverText = tooltip;
-        Console.WriteLine($"Hovering over: {_hoveredProviderId} with tooltip: {tooltip}");
-    }
-
     private void StopHovering()
     {
         if (_hoveredProviderId != -1)
         {
-            Console.WriteLine("Stop hovering");
             _hoveredProviderId = -1;
             _hoverTimer = 0;
         }
@@ -174,15 +163,16 @@ public class TooltipSystem : GameSystem
     private void ShowTooltip()
     {
         if (TooltipVisible) return;
-        Console.WriteLine($"Show tooltip: {_hoverText}");
         _popupEntityId = CreateTooltip(_hoverText, _hoverMousePos);
     }
     
     private void DismissTooltip()
     {
         if (!TooltipVisible) return;
-        Console.WriteLine("Dismiss tooltip");
-        Scene.DeleteEntity(_popupEntityId, recursively: true);
+        Scene.Events.Invoke(new PopupDismissalRequested()
+        {
+            PopupEntityId = _popupEntityId
+        });
         _popupEntityId = -1;
     }
 
@@ -193,6 +183,10 @@ public class TooltipSystem : GameSystem
         {
             RequestLayout = true,
             MouseFilter = Control.MouseFilterMode.Ignore
+        };
+        tooltipEntity.AddComponent<Popup>() = new Popup()
+        {
+            DismissOnClick = Popup.PopupClickCondition.Outside
         };
         
         var buildEvt = Scene.Events.Invoke(new TooltipBuildRequestedEvent()
@@ -213,6 +207,12 @@ public class TooltipSystem : GameSystem
     {
         if (_hoveredProviderId != -1)
         {
+            var interfaceSys = Scene.Systems.Get<ControlInterfaceSystem>();
+            if (interfaceSys != null)
+            {
+                if (interfaceSys.AnyMouseDown()) return;
+            }
+            
             _hoverTimer += Time.DeltaTime;
 
             if (_hoverTimer > TooltipDelaySec && !TooltipVisible)
