@@ -8,7 +8,7 @@ public struct DragDataRequestedEvent
 {
     [EntityId] public long SourceEntityId = -1;
     [EntityId] public long DragOperationEntityId = -1;
-    public bool HasData = false;
+    [EventOutput] public bool HasData = false;
 
     public DragDataRequestedEvent()
     {
@@ -20,7 +20,7 @@ public struct DropValidationRequestedEvent
 {
     [EntityId] public long TargetEntityId = -1;
     [EntityId] public long DragOperationEntityId = -1;
-    public bool CanDrop = false;
+    [EventOutput] public bool CanDrop = false;
 
     public DropValidationRequestedEvent()
     {

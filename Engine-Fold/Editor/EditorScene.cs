@@ -31,6 +31,8 @@ public class EditorScene : Scene
         Systems.Add<ControlLayoutSystem>();
         Systems.Add<ControlRenderer>();
         Systems.Add<ControlInterfaceSystem>();
+        Systems.Add<ControlPopupSystem>();
+        Systems.Add<TooltipSystem>();
         Systems.Add<TabSystem>();
 
         var entViewport = CreateEntity("Viewport");
@@ -98,7 +100,7 @@ public class EditorScene : Scene
             var tabContent = CreateEntity("Tab Content");
             tabContent.Hierarchical.SetParent(dockContent);
             tabContent.AddComponent<Control>();
-            tabContent.AddComponent<BoxControl>().Color = new Color(37, 37, 38, 255);
+            // tabContent.AddComponent<BoxControl>().Color = new Color(37, 37, 38, 255);
             tabBar.AddComponent<TabSwitcher>().ContainerEntityId = tabContent.EntityId;
             dockContent.AddComponent<EditorTabDropTarget>().TabBarId = tabBar.EntityId;
 
@@ -181,7 +183,7 @@ public class EditorScene : Scene
                 Alignment = Alignment.Begin
             };
 
-            void AddToolbarButton(string icon)
+            void AddToolbarButton(string name, string icon)
             {
                 var btnEntity = CreateEntity("Toolbar Button");
                 btnEntity.AddComponent<Control>() = new Control()
@@ -193,16 +195,20 @@ public class EditorScene : Scene
                     Icon = new ResourceIdentifier(icon),
                     KeepPressedOutside = true
                 };
+                btnEntity.AddComponent<SimpleTooltip>() = new SimpleTooltip()
+                {
+                    Text = name
+                };
                 btnEntity.Hierarchical.SetParent(view);
             }
             
-            AddToolbarButton("editor/hand");
-            AddToolbarButton("editor/move");
-            AddToolbarButton("editor/scale");
-            AddToolbarButton("editor/rotate");
-            AddToolbarButton("editor/cursor");
-            AddToolbarButton("editor/play");
-            AddToolbarButton("editor/pause");
+            AddToolbarButton("Hand","editor/hand");
+            AddToolbarButton("Move","editor/move");
+            AddToolbarButton("Scale","editor/scale");
+            AddToolbarButton("Rotate","editor/rotate");
+            AddToolbarButton("Select","editor/cursor");
+            AddToolbarButton("Play Scene","editor/play");
+            AddToolbarButton("Pause Scene","editor/pause");
 
             return view;
         }

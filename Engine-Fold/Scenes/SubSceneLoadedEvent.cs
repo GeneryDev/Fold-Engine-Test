@@ -3,14 +3,14 @@
 namespace FoldEngine.Scenes;
 
 [Event("fold:sub_scene.loaded")]
-public class SubSceneLoadedEvent
+public struct SubSceneLoadedEvent
 {
     public Entity Entity;
     public Scene Scene;
 }
 
 [Event("fold:sub_scene.unloaded")]
-public class SubSceneUnloadedEvent
+public struct SubSceneUnloadedEvent
 {
     public Entity Entity;
     public Scene Scene;

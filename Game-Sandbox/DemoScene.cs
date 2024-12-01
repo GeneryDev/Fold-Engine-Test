@@ -110,6 +110,7 @@ internal class DemoScene : Scene
         Systems.Add<ControlLayoutSystem>();
         Systems.Add<ControlRenderer>();
         Systems.Add<ControlInterfaceSystem>();
+        Systems.Add<TooltipSystem>();
         
         
         Entity viewport = CreateEntity("Viewport");
@@ -140,6 +141,10 @@ internal class DemoScene : Scene
         {
             Text = "Click me!",
             Icon = new ResourceIdentifier("editor/cog")
+        };
+        e6.AddComponent<SimpleTooltip>() = new SimpleTooltip()
+        {
+            Text = "Trust me!"
         };
         e6.Hierarchical.SetParent(e5);
 
