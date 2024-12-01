@@ -1,8 +1,10 @@
 ﻿using System;
 using FoldEngine.Components;
 using FoldEngine.Gui.Components;
+using FoldEngine.Gui.Components.Controls;
 using FoldEngine.Gui.Events;
 using FoldEngine.Systems;
+using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Gui.Systems;
 
@@ -18,6 +20,22 @@ public class ControlPopupSystem : GameSystem
 
     public override void SubscribeToEvents()
     {
+        // Create popups from providers
+        Subscribe((ref MouseButtonEvent evt) =>
+        {
+            if (evt.Consumed) return;
+            if (!Scene.Components.HasComponent<PopupProvider>(evt.EntityId)) return;
+            var provider = Scene.Components.GetComponent<PopupProvider>(evt.EntityId);
+            if (((int)provider.ButtonMask & (1 << evt.Button)) == 0) return;
+            if (provider.ActionMode == MouseActionMode.Press && evt.Type != MouseButtonEventType.Pressed) return;
+            if (provider.ActionMode == MouseActionMode.Release && evt.Type != MouseButtonEventType.Released) return;
+
+            Console.WriteLine($"Attempt create popup for {evt.EntityId}");
+            CreatePopup(evt.EntityId, evt.Position);
+            evt.Consume();
+        });
+        
+        // Dismiss popups
         Subscribe((ref MouseButtonEvent evt) =>
         {
             // Even if event consumed, do this check!
@@ -35,6 +53,15 @@ public class ControlPopupSystem : GameSystem
                 if (inside && (popup.DismissOnClick & Popup.PopupClickCondition.Inside) != 0) dismiss = true;
                 if (outside && (popup.DismissOnClick & Popup.PopupClickCondition.Outside) != 0) dismiss = true;
 
+                if (popup.SuppressDismissUntilNextRelease)
+                {
+                    dismiss = false;
+                    if (evt.Type == MouseButtonEventType.Released)
+                    {
+                        popup.SuppressDismissUntilNextRelease = false;
+                    }
+                }
+
                 if (dismiss)
                 {
                     if(popup.ConsumeClickOnDismiss)
@@ -51,6 +78,43 @@ public class ControlPopupSystem : GameSystem
             if (!Scene.Components.HasComponent<Popup>(evt.PopupEntityId)) return;
             Scene.DeleteEntity(evt.PopupEntityId, recursively: true);
         });
+    }
+
+    private void CreatePopup(long providerId, Point globalMousePos)
+    {
+        var popupEntity = Scene.CreateEntity("Popup");
+        popupEntity.AddComponent<Control>() = new Control
+        {
+            RequestLayout = true,
+            MouseFilter = Control.MouseFilterMode.Ignore
+        };
+        popupEntity.AddComponent<Popup>() = new Popup()
+        {
+            SourceEntityId = providerId,
+            DismissOnClick = Popup.PopupClickCondition.Outside,
+            ConsumeClickOnDismiss = true,
+            SuppressDismissUntilNextRelease = true
+        };
+        
+        var buildEvt = Scene.Events.Invoke(new PopupBuildRequestedEvent()
+        {
+            SourceEntityId = providerId,
+            TooltipEntityId = popupEntity.EntityId,
+            Position = GetLocalMousePos(providerId, globalMousePos),
+            GlobalPosition = globalMousePos
+        });
+        var startPos = globalMousePos + buildEvt.Offset;
+        popupEntity.GetComponent<Transform>().Position = startPos.ToVector2();
+    }
+
+    private Point GetLocalMousePos(long entityId, Point globalMousePos)
+    {
+        if (Scene.Components.HasComponent<Control>(entityId) && Scene.Components.HasComponent<Transform>(entityId))
+        {
+            return (globalMousePos.ToVector2() - Scene.Components.GetComponent<Transform>(entityId).Position)
+                .ToPoint();
+        }
+        return globalMousePos;
     }
 
     private long GetPopupForEntity(long entityId)

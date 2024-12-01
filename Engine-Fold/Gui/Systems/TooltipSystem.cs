@@ -206,6 +206,7 @@ public class TooltipSystem : GameSystem
         };
         tooltipEntity.AddComponent<Popup>() = new Popup()
         {
+            SourceEntityId = _hoveredProviderId,
             DismissOnClick = Popup.PopupClickCondition.Outside
         };
         

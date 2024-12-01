@@ -199,6 +199,11 @@ public class EditorScene : Scene
                 {
                     Text = name
                 };
+                btnEntity.AddComponent<PopupProvider>() = new PopupProvider()
+                {
+                    ButtonMask = MouseButtonMask.RightButton,
+                    ActionMode = MouseActionMode.Release
+                };
                 btnEntity.Hierarchical.SetParent(view);
             }
             
