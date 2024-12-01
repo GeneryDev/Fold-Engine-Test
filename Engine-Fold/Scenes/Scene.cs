@@ -78,17 +78,21 @@ public class Scene : Resource, ISelfSerializer
 
     public void DeleteEntity(long entityId, bool reclaimable = false, bool recursively = false)
     {
-        ref Hierarchical transform = ref Components.GetComponent<Hierarchical>(entityId);
-        if (transform.HasParent)
+        ref Hierarchical hierarchical = ref Components.GetComponent<Hierarchical>(entityId);
+        if (hierarchical.HasParent)
         {
-            transform.MutableParent.RemoveChild(entityId);
+            hierarchical.MutableParent.RemoveChild(entityId);
         }
 
-        if (recursively)
+        foreach (long childId in hierarchical.GetChildren(true))
         {
-            foreach(long childId in transform.GetChildren())
+            if (recursively)
             {
                 DeleteEntity(childId, reclaimable, true);
+            }
+            else
+            {
+                Components.GetComponent<Hierarchical>(childId).SetParent(-1);
             }
         }
 

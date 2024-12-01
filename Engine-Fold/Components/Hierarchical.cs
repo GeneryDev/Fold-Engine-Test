@@ -405,11 +405,11 @@ public struct Hierarchical
     }
 }
 
-public struct HierarchicalEnumerable : IEnumerator<long>, IEnumerable<long>
+public struct HierarchicalEnumerable
 {
     private Scene _scene;
     private long _firstId;
-    private long _currentId;
+    private long _childId;
     private long _nextId;
     private bool _includeInactive;
 
@@ -417,7 +417,7 @@ public struct HierarchicalEnumerable : IEnumerator<long>, IEnumerable<long>
     {
         this._scene = scene;
         this._firstId = firstId;
-        this._currentId = -1;
+        this._childId = -1;
         this._nextId = -1;
         this._includeInactive = includeInactive;
     }
@@ -426,22 +426,22 @@ public struct HierarchicalEnumerable : IEnumerator<long>, IEnumerable<long>
     {
         while (true)
         {
-            if (_currentId == -1 && _firstId != -1)
+            if (_childId == -1 && _firstId != -1)
             {
-                _currentId = _firstId;
+                _childId = _firstId;
             }
-            else if (_currentId == -1)
+            else if (_childId == -1)
             {
                 return false;
             }
             else
             {
-                _currentId = _nextId;
+                _childId = _nextId;
                 _nextId = -1;
             }
 
-            if (_currentId == -1) return false;
-            ref var currentHierarchical = ref _scene.Components.GetComponent<Hierarchical>(_currentId);
+            if (_childId == -1) return false;
+            ref var currentHierarchical = ref _scene.Components.GetComponent<Hierarchical>(_childId);
             _nextId = currentHierarchical.NextSiblingId;
             if (!_includeInactive && !currentHierarchical.IsActiveInHierarchy()) continue;
             return true;
@@ -450,25 +450,20 @@ public struct HierarchicalEnumerable : IEnumerator<long>, IEnumerable<long>
 
     public void Reset()
     {
-        _currentId = _firstId;
+        _childId = _firstId;
         _nextId = -1;
     }
 
-    public long Current => _currentId;
-
-    object IEnumerator.Current => Current;
+    public long ChildId => _childId;
+    public ref Hierarchical ChildHierarchical => ref _scene.Components.GetComponent<Hierarchical>(_childId);
+    public Entity Child => new Entity(_scene, _childId);
+    public long Current => _childId;
 
     public void Dispose()
     {
     }
 
-    // TODO this allocates lots of memory. Try something else.
-    public IEnumerator<long> GetEnumerator()
-    {
-        return this;
-    }
-
-    IEnumerator IEnumerable.GetEnumerator()
+    public HierarchicalEnumerable GetEnumerator()
     {
         return this;
     }
