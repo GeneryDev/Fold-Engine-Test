@@ -9,6 +9,7 @@ namespace FoldEngine.Gui.Components;
 public struct Popup
 {
     public PopupClickCondition DismissOnClick = PopupClickCondition.Outside;
+    public bool ConsumeClickOnDismiss = false;
 
     public Popup()
     {

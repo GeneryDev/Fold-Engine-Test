@@ -238,6 +238,8 @@ namespace FoldEngine.Gui.Systems
                 out float sizeSouth,
                 out var sizeCenter);
 
+            // TODO sizeCenter computed values are incorrect since they don't account for panels being extended into corners.
+            // Please fix
             control.ComputedMinimumSize =
                 new Vector2(sizeWest + sizeCenter.X + sizeEast, sizeNorth + sizeCenter.Y + sizeSouth);
         }

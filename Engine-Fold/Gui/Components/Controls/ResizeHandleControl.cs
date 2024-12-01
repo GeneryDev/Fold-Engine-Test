@@ -100,6 +100,7 @@ namespace FoldEngine.Gui.Systems
             });
             Subscribe((ref MouseButtonEvent evt) =>
             {
+                if (evt.Consumed) return;
                 if (evt.EntityId != -1 && Scene.Components.HasComponent<ResizeHandleControl>(evt.EntityId))
                 {
                     ref var handle = ref Scene.Components.GetComponent<ResizeHandleControl>(evt.EntityId);

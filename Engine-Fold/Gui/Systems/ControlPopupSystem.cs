@@ -20,6 +20,7 @@ public class ControlPopupSystem : GameSystem
     {
         Subscribe((ref MouseButtonEvent evt) =>
         {
+            // Even if event consumed, do this check!
             long clickedPopupId = GetPopupForEntity(evt.EntityId);
             
             _popups.Reset();
@@ -36,6 +37,8 @@ public class ControlPopupSystem : GameSystem
 
                 if (dismiss)
                 {
+                    if(popup.ConsumeClickOnDismiss)
+                        evt.Consume();
                     Scene.Events.Invoke(new PopupDismissalRequested()
                     {
                         PopupEntityId = popupId

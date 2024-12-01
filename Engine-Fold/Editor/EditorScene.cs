@@ -29,9 +29,9 @@ public class EditorScene : Scene
         Systems.Add<SubSceneSystem>();
         
         Systems.Add<ControlLayoutSystem>();
-        Systems.Add<ControlRenderer>();
         Systems.Add<ControlInterfaceSystem>();
         Systems.Add<ControlPopupSystem>();
+        Systems.Add<ControlRenderer>();
         Systems.Add<TooltipSystem>();
         Systems.Add<TabSystem>();
 

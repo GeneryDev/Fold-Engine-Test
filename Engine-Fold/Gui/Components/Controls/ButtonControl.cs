@@ -216,6 +216,7 @@ namespace FoldEngine.Gui.Systems
             });
             Subscribe((ref MouseButtonEvent evt) =>
             {
+                if (evt.Consumed) return;
                 if (evt.EntityId != -1 && Scene.Components.HasComponent<ButtonControl>(evt.EntityId))
                 {
                     ref var button = ref Scene.Components.GetComponent<ButtonControl>(evt.EntityId);
@@ -238,6 +239,7 @@ namespace FoldEngine.Gui.Systems
                         }
                         case MouseButtonEventType.Released:
                         {
+                            if (!button.Pressed) break;
                             button.Pressed = false;
                             evt.Consume();
                             if (button is { ActionMode: MouseActionMode.Release, Rollover: true })
