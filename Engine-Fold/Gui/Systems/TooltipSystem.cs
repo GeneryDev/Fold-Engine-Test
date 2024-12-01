@@ -33,6 +33,11 @@ public class TooltipSystem : GameSystem
             _hoverMousePos = evt.Position;
             StartHovering(evt.EntityId, evt.Position);
         });
+        SubscribeToSimpleTooltipEvents();
+    }
+
+    private void SubscribeToSimpleTooltipEvents()
+    {
         Subscribe((ref TooltipRequestedEvent evt) =>
         {
             if (Scene.Components.HasComponent<SimpleTooltip>(evt.EntityId))
@@ -94,6 +99,8 @@ public class TooltipSystem : GameSystem
     
     private void StartHovering(long entityId, Point globalMousePos)
     {
+        if (_popupEntityId != -1 && IsEntityInPopup(entityId, _popupEntityId)) return;
+        
         if (!Scene.Components.HasTrait<TooltipProvider>(entityId))
         {
             entityId = -1;
@@ -115,6 +122,18 @@ public class TooltipSystem : GameSystem
                 DismissTooltip();
             }
         }
+    }
+
+    private bool IsEntityInPopup(long entityId, long popupEntityId)
+    {
+        if (popupEntityId == -1) return false;
+        while (entityId != -1)
+        {
+            if (entityId == popupEntityId) return true;
+            var hierarchical = Scene.Components.GetComponent<Hierarchical>(entityId);
+            entityId = hierarchical.ParentId;
+        }
+        return false;
     }
 
     private void AttemptShowTooltip()
