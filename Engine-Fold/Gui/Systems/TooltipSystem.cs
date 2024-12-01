@@ -217,7 +217,7 @@ public class TooltipSystem : GameSystem
             GlobalPosition = _hoverMousePos
         });
         var startPos = mousePos + buildEvt.Offset;
-        tooltipEntity.GetComponent<Transform>().Position = startPos.ToVector2(); // TODO transform to viewport space
+        tooltipEntity.GetComponent<Transform>().Position = startPos.ToVector2();
 
         return tooltipEntity.EntityId;
     }

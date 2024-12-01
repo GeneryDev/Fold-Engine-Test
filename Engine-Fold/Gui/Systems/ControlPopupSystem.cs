@@ -55,6 +55,7 @@ public class ControlPopupSystem : GameSystem
         while (entityId != -1)
         {
             if (Scene.Components.HasComponent<Popup>(entityId)) return entityId;
+            if (!Scene.Components.HasComponent<Hierarchical>(entityId)) return -1;
             var hierarchical = Scene.Components.GetComponent<Hierarchical>(entityId);
 
             entityId = hierarchical.ParentId;
