@@ -3,6 +3,7 @@ using FoldEngine.Components;
 using FoldEngine.Gui.Components;
 using FoldEngine.Gui.Components.Controls;
 using FoldEngine.Gui.Components.Controls.Containers;
+using FoldEngine.Gui.Components.Traits;
 using FoldEngine.Gui.Events;
 using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
