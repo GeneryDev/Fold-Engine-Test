@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using FoldEngine.Components;
+using FoldEngine.Editor.Components;
 using FoldEngine.Editor.ImmediateGui;
 using FoldEngine.Editor.ImmediateGui.Hierarchy;
 using FoldEngine.Editor.Transactions;
@@ -16,8 +17,6 @@ namespace FoldEngine.Editor.Views;
 
 public class EditorHierarchyView : EditorView
 {
-    private static readonly List<long> EntitiesToDelete = new List<long>();
-
     private Scene _lastRenderedScene;
     private ComponentIterator<Hierarchical> _hierarchicals;
 
@@ -187,38 +186,31 @@ public class EditorHierarchyView : EditorView
     private void ShowEntityContextMenu(long id, Point point)
     {
         GuiPopupMenu contextMenu = ContentPanel.Environment.ContextMenu;
-        var editorEnvironment = ((EditorEnvironment)ContentPanel.Environment);
         var editingScene = Scene.Systems.Get<EditorBase>().CurrentSceneTab.Scene;
         if (editingScene == null) return;
 
         contextMenu.Show(point, m =>
         {
-            m.Button("Copy", 9).TextMargin(20).TextAlignment(-1);
-            m.Button("Paste", 9).TextMargin(20).TextAlignment(-1);
+            m.Button("Copy");
+            m.Button("Paste");
 
             m.Separator();
 
-            m.Button("Rename", 9).TextMargin(20).TextAlignment(-1);
-            m.Button("Duplicate", 9).TextMargin(20).TextAlignment(-1);
-            if (m.Button("Delete", 9).TextMargin(20).TextAlignment(-1).IsPressed())
+            m.Button("Rename");
+            m.Button("Duplicate");
+            m.Button("Delete").AddComponent<EntityActionComponent>() = new EntityActionComponent()
             {
-                EntitiesToDelete.Clear();
-                if (editingScene.Components.HasComponent<Hierarchical>(id))
-                    editingScene.Components.GetComponent<Hierarchical>(id)
-                        .DumpHierarchy(EntitiesToDelete);
-
-                var transactions = new CompoundTransaction<Scene>();
-                foreach (long entityId in EntitiesToDelete)
-                    transactions.Append(() => new DeleteEntityTransaction(entityId));
-
-                Scene.Systems.Get<EditorBase>().CurrentSceneTab.SceneTransactions.InsertTransaction(transactions);
-            }
+                Type = EntityActionComponent.ActionType.Delete,
+                AffectedEntityId = id
+            };
 
             m.Separator();
 
-            if (m.Button("Create Child", 9).TextMargin(20).TextAlignment(-1).IsPressed())
-                Scene.Systems.Get<EditorBase>().CurrentSceneTab.SceneTransactions.InsertTransaction(
-                    new CreateEntityTransaction(id));
+            m.Button("Create Child").AddComponent<EntityActionComponent>() = new EntityActionComponent()
+            {
+                Type = EntityActionComponent.ActionType.CreateChild,
+                AffectedEntityId = id
+            };
         }, 120);
     }
 }

@@ -1,70 +1,129 @@
 ﻿using System;
 using FoldEngine.Graphics;
+using FoldEngine.Gui;
+using FoldEngine.Gui.Components;
+using FoldEngine.Gui.Components.Controls;
+using FoldEngine.Gui.Components.Controls.Containers;
+using FoldEngine.Gui.Systems;
 using FoldEngine.Interfaces;
+using FoldEngine.Resources;
+using FoldEngine.Scenes;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.ImmediateGui;
 
-public class GuiPopupMenu : GuiPanel
+public class GuiPopupMenu
 {
-    private Action<GuiPopupMenu> _renderer;
-    public bool Showing;
+    private Scene _scene;
 
-    public GuiPopupMenu(GuiEnvironment environment) : base(environment)
+    private string _buttonStyle;
+    private Entity _buttonContainer;
+    private Alignment _textAlignment;
+
+    public GuiPopupMenu(Scene scene)
     {
+        this._scene = scene;
     }
 
-    public void Show(Point pos, Action<GuiPopupMenu> renderer, int width = 150)
+    public void Show(Point pos, Action<GuiPopupMenu> renderer, int minWidth = 150, string buttonStyle = "editor:context_menu_item", Alignment textAlignment = Alignment.Begin)
     {
-        Bounds = new Rectangle(pos, new Point(width, 300));
-        _renderer = renderer;
-        _renderer(this);
+        var popupSystem = _scene.Systems.Get<ControlPopupSystem>();
+        long popupId = popupSystem.CreatePopup(-1, pos, sendBuildRequestEvent: false);
 
-        Showing = true;
-        Environment.DockPanels.Add(this);
-    }
+        _buttonStyle = buttonStyle;
+        _textAlignment = textAlignment;
 
-    public void Dismiss()
-    {
-        Showing = false;
-        Environment.DockPanels.Remove(this);
-    }
-
-    public override void Render(IRenderingUnit renderer, IRenderingLayer layer, Point offset = default)
-    {
-        if (!Showing) return;
-        Reset();
-        _renderer(this);
-        EndPreviousElement();
-        // Bounds = new Rectangle(pos, new Point(150, 300));
-        Bounds.Size = ContentSize;
-        if (Bounds.Bottom > renderer.WindowSize.Y)
+        var popupOutlinePanel = _scene.CreateEntity("Context Menu Outline Panel");
+        popupOutlinePanel.Hierarchical.SetParent(popupId);
+        popupOutlinePanel.AddComponent<Control>() = new Control()
         {
-            Bounds.Y -= Bounds.Size.Y;
-        }
-
-        if (Bounds.Right > renderer.WindowSize.X)
+            RequestLayout = true,
+            ZOrder = 90
+        };
+        popupOutlinePanel.AddComponent<BorderContainer>() = new BorderContainer()
         {
-            Bounds.X -= Bounds.Size.X;
-        }
-
-        layer.Surface.Draw(new DrawRectInstruction
+            NorthPanelId = CreateMargin(2, popupOutlinePanel.EntityId),
+            WestPanelId = CreateMargin(2, popupOutlinePanel.EntityId),
+            EastPanelId = CreateMargin(2, popupOutlinePanel.EntityId),
+            SouthPanelId = CreateMargin(2, popupOutlinePanel.EntityId)
+        };
+        popupOutlinePanel.AddComponent<AnchoredControl>() = new AnchoredControl()
         {
-            Texture = renderer.WhiteTexture,
-            DestinationRectangle = Bounds.Grow(2).Translate(offset),
+            AnchorRight = 1.0f,
+            AnchorBottom = 1.0f,
+            GrowHorizontal = AnchoredControl.GrowDirection.End,
+            GrowVertical = AnchoredControl.GrowDirection.End
+        };
+        popupOutlinePanel.AddComponent<BoxControl>() = new BoxControl()
+        {
             Color = new Color(45, 45, 48)
-        });
-        layer.Surface.Draw(new DrawRectInstruction
+        };
+
+        var buttonContainer = _scene.CreateEntity("Context Menu Button Container");
+        buttonContainer.Hierarchical.SetParent(popupOutlinePanel);
+        buttonContainer.AddComponent<Control>() = new Control()
         {
-            Texture = renderer.WhiteTexture,
-            DestinationRectangle = Bounds.Translate(offset),
+            MinimumSize = new Vector2(minWidth, 1),
+            ZOrder = 91
+        };
+        buttonContainer.AddComponent<StackContainer>() = new StackContainer()
+        {
+            Vertical = true,
+            Separation = 4
+        };
+        buttonContainer.AddComponent<BoxControl>() = new BoxControl()
+        {
             Color = new Color(37, 37, 38)
-        });
+        };
+        _buttonContainer = buttonContainer;
 
+        renderer(this);
+    }
 
-        if (Bounds.Contains(Environment.MousePos)) Environment.HoverTarget.PopupMenu = this;
+    private long CreateMargin(int size, long parent)
+    {
+        var margin = _scene.CreateEntity("Margin");
+        margin.AddComponent<Control>() = new Control()
+        {
+            MinimumSize = new Vector2(size, size),
+        };
+        margin.Hierarchical.SetParent(parent);
+        return margin.EntityId;
+    }
 
-        base.Render(renderer, layer, offset);
+    public Entity Button(string text, string icon = null)
+    {
+        icon ??= "editor/blank";
+        var button = _scene.CreateEntity("Button");
+        button.AddComponent<Control>() = new Control()
+        {
+            ZOrder = 92,
+            MinimumSize = new Vector2(1, 15)
+        };
+        button.AddComponent<ButtonControl>() = new ButtonControl()
+        {
+            Text = text,
+            Alignment = _textAlignment,
+            Icon = new ResourceIdentifier(icon),
+            Style = new ResourceIdentifier(_buttonStyle)
+        };
+        button.Hierarchical.SetParent(_buttonContainer);
+        return button;
+    }
+
+    public void Separator()
+    {
+        var separator = _scene.CreateEntity("Separator");
+        separator.AddComponent<Control>() = new Control()
+        {
+            MinimumSize = new Vector2(2, 2),
+            ZOrder = 92
+        };
+        separator.AddComponent<BoxControl>() = new BoxControl()
+        {
+            Color = new Color(45, 45, 48)
+        };
+        separator.Hierarchical.SetParent(_buttonContainer);
     }
 }

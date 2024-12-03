@@ -1,4 +1,5 @@
 ﻿using System;
+using FoldEngine.Editor.Systems;
 using FoldEngine.Gui;
 using FoldEngine.Gui.Components;
 using FoldEngine.Gui.Components.Controls;
@@ -26,6 +27,7 @@ public class EditorScene : Scene
         Systems.Add<EditorBase>();
         Systems.Add<EditorTabSystem>();
         Systems.Add<EditorCameraSyncSystem>();
+        Systems.Add<EditorActionSystem>();
         Systems.Add<SubSceneSystem>();
         
         Systems.Add<ControlLayoutSystem>();
@@ -268,5 +270,20 @@ public class EditorScene : Scene
         tabSelectedButtonStyle.MarginLeft = 2;
         tabSelectedButtonStyle.MarginRight = 6;
         tabSelectedButtonStyle.NormalColor = new Color(37, 37, 38);
+        
+        var contextMenuItemStyle = Resources.Create<ButtonStyle>("editor:context_menu_item");
+        contextMenuItemStyle.FontSize = 9;
+        contextMenuItemStyle.IconMaxWidth = 8;
+        contextMenuItemStyle.IconTextSeparation = 4;
+        contextMenuItemStyle.MarginLeft = 6;
+        contextMenuItemStyle.MarginRight = 6;
+        
+        var dropdownItemStyle = Resources.Create<ButtonStyle>("editor:dropdown_item");
+        dropdownItemStyle.FontSize = 9;
+        dropdownItemStyle.IconMaxWidth = 8;
+        dropdownItemStyle.IconTextSeparation = 4;
+        dropdownItemStyle.MarginLeft = 6;
+        dropdownItemStyle.MarginRight = 6;
+        
     }
 }

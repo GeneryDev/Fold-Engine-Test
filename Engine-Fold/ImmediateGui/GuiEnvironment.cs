@@ -19,7 +19,6 @@ public abstract class GuiEnvironment : IDisposable
 {
     public readonly ObjectPoolCollection<IGuiAction> ActionPool = new ObjectPoolCollection<IGuiAction>();
 
-    private long _dismissPopupsWhen;
     private readonly GuiPanel[] _pressedPanels = new GuiPanel[MouseEvent.MaxButtons];
 
 
@@ -42,7 +41,7 @@ public abstract class GuiEnvironment : IDisposable
     public GuiEnvironment(Scene scene)
     {
         Scene = scene;
-        ContextMenu = new GuiPopupMenu(this);
+        ContextMenu = new GuiPopupMenu(scene);
         scene.Core.FoldGame.Window.TextInput += WindowOnTextInput;
 
         ControlScheme.AddDevice(Core.InputUnit.Devices.Keyboard);
@@ -103,8 +102,6 @@ public abstract class GuiEnvironment : IDisposable
         HandleMouseEvents(MouseLeft, MouseEvent.LeftButton);
         HandleMouseEvents(MouseMiddle, MouseEvent.MiddleButton);
         HandleMouseEvents(MouseRight, MouseEvent.RightButton);
-        
-        if (_dismissPopupsWhen == Time.TotalFixedTicks) DismissPopups();
 
         FocusOwner?.OnInput(ControlScheme);
     }
@@ -113,8 +110,6 @@ public abstract class GuiEnvironment : IDisposable
     {
         if (mouseButton.Pressed)
         {
-            if (HoverTarget.PopupMenu != ContextMenu) DismissPopups();
-
             for (int i = DockPanels.Count - 1; i >= 0; i--)
             {
                 GuiPanel panel = DockPanels[i];
@@ -137,11 +132,6 @@ public abstract class GuiEnvironment : IDisposable
         }
         else if (mouseButton.Released)
         {
-            if (ContextMenu.Showing)
-            {
-                _dismissPopupsWhen = Time.TotalFixedTicks + 2;
-            }
-
             var evt = new MouseEvent
             {
                 Type = MouseEventType.Released,
@@ -153,11 +143,6 @@ public abstract class GuiEnvironment : IDisposable
             _pressedPanels[buttonIndex]?.OnMouseReleased(ref evt);
             _pressedPanels[buttonIndex] = null;
         }
-    }
-
-    public void DismissPopups()
-    {
-        if (ContextMenu.Showing) ContextMenu.Dismiss();
     }
 
     public virtual void Update()

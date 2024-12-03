@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using FoldEngine.Components;
+using FoldEngine.Editor.Components;
 using FoldEngine.Editor.ImmediateGui;
 using FoldEngine.Editor.ImmediateGui.Fields;
 using FoldEngine.Editor.Inspector;
@@ -122,9 +123,11 @@ public class EditorInspectorView : EditorView
                 foreach (ComponentDefinition def in Core.RegistryUnit.Components.GetAllDefinitions())
                 {
                     if (def.Type.GetCustomAttribute<HideInInspector>() == null &&
-                        !entity.Scene.Components.HasComponent(def.Type, id) && m.Button(def.Type.Name, 9).IsPressed())
-                        Scene.Systems.Get<EditorBase>().CurrentSceneTab.SceneTransactions.InsertTransaction(
-                            new AddComponentTransaction(def.Type, id));
+                        !entity.Scene.Components.HasComponent(def.Type, id))
+                    {
+                        m.Button(def.Type.Name, "editor/add").AddComponent<TransactionActionComponent>() =
+                            new TransactionActionComponent(new AddComponentTransaction(def.Type, id));
+                    }
                 }
             });
         }
@@ -247,10 +250,8 @@ public class ComponentHeader : GuiLabel
         if (e.Button == MouseEvent.RightButton)
             Environment.ContextMenu.Show(e.Position, m =>
             {
-                if (m.Button("Remove", 14).IsPressed())
-                    Scene.Systems.Get<EditorBase>().CurrentSceneTab.SceneTransactions.InsertTransaction(
-                        new RemoveComponentTransaction(_info.ComponentType, _id));
-                ;
+                m.Button("Remove").AddComponent<TransactionActionComponent>() =
+                    new TransactionActionComponent(new RemoveComponentTransaction(_info.ComponentType, _id));
             });
         base.OnMouseReleased(ref e);
     }

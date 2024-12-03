@@ -170,8 +170,6 @@ public class EditorEnvironment : GuiEnvironment
             EastPanel.Bounds = bounds;
             EastPanel.Render(renderer, baseLayer);
         }
-
-        if (ContextMenu.Showing) ContextMenu.Render(renderer, overlayLayer);
     }
 
     public void AddView<T>(BorderPanel preferredPanel = null) where T : EditorView, new()

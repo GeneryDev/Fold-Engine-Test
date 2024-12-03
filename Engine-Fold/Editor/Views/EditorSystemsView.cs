@@ -1,4 +1,5 @@
 ﻿using System;
+using FoldEngine.Editor.Components;
 using FoldEngine.Editor.ImmediateGui;
 using FoldEngine.Editor.ImmediateGui.Hierarchy;
 using FoldEngine.Editor.Transactions;
@@ -39,9 +40,11 @@ public class EditorSystemsView : EditorView
             contextMenu.Show(p, m =>
             {
                 foreach (Type type in Core.RegistryUnit.Systems.GetAllTypes())
-                    if (editingScene.Systems.Get(type) == null && m.Button(type.Name, 9).IsPressed())
-                        Scene.Systems.Get<EditorBase>().CurrentSceneTab.SceneTransactions.InsertTransaction(
-                            new AddSystemTransaction(type));
+                    if (editingScene.Systems.Get(type) == null)
+                    {
+                        m.Button(type.Name, "editor/add").AddComponent<TransactionActionComponent>() =
+                            new TransactionActionComponent(new AddSystemTransaction(type));
+                    }
             });
         }
 
@@ -76,9 +79,8 @@ public class EditorSystemsView : EditorView
                     GuiPopupMenu contextMenu = ContentPanel.Environment.ContextMenu;
                     contextMenu.Show(clickPoint, m =>
                     {
-                        if (m.Button("Remove", 14).IsPressed())
-                            Scene.Systems.Get<EditorBase>().CurrentSceneTab.SceneTransactions.InsertTransaction(
-                                new RemoveSystemTransaction(sys.GetType()));
+                        m.Button("Remove").AddComponent<TransactionActionComponent>() =
+                            new TransactionActionComponent(new RemoveSystemTransaction(sys.GetType()));
                     });
                     break;
                 }

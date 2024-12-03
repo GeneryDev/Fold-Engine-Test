@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using FoldEngine.Components;
+using FoldEngine.Editor.Components;
 using FoldEngine.Editor.ImmediateGui;
 using FoldEngine.Editor.ImmediateGui.Fields;
 using FoldEngine.Editor.ImmediateGui.Fields.Text;
 using FoldEngine.Editor.Views;
+using FoldEngine.Gui;
 using FoldEngine.ImmediateGui;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
@@ -91,10 +93,13 @@ public class ComponentMember
                 .IsPressed(out Point p))
                 parentPanel.Environment.ContextMenu.Show(p, m =>
                 {
-                    m.Reset();
                     foreach (object value in member.FieldInfo.FieldType.GetEnumValues())
-                        m.Button(value.ToString(), 9).LeftAction(member.CreateAction(m).ForcedValue(value));
-                });
+                        m.Button(value.ToString()).AddComponent<LegacyActionComponent>() = new LegacyActionComponent()
+                        {
+                            Action = member.CreateAction(parentPanel).ForcedValue(value),
+                            Element = parentPanel
+                        };
+                }, buttonStyle: "editor:dropdown_item", textAlignment: Alignment.Center);
         };
 
     private readonly InspectorElementProvider _createInspectorElement;

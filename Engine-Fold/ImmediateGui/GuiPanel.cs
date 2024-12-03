@@ -240,7 +240,6 @@ public class GuiPanel : GuiElement
             ScrollPosition.Y -= dir * ScrollAmount;
             if (ScrollPosition.Y > ContentSize.Y - Bounds.Height) ScrollPosition.Y = ContentSize.Y - Bounds.Height;
             if (ScrollPosition.Y < 0) ScrollPosition.Y = 0;
-            Environment.DismissPopups();
         }
     }
 

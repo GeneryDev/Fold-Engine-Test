@@ -80,7 +80,7 @@ public class ControlPopupSystem : GameSystem
         });
     }
 
-    private void CreatePopup(long providerId, Point globalMousePos)
+    public long CreatePopup(long providerId, Point globalMousePos, bool sendBuildRequestEvent = true, Point offset = default)
     {
         var popupEntity = Scene.CreateEntity("Popup");
         popupEntity.AddComponent<Control>() = new Control
@@ -93,18 +93,25 @@ public class ControlPopupSystem : GameSystem
             SourceEntityId = providerId,
             DismissOnClick = Popup.PopupClickCondition.Outside,
             ConsumeClickOnDismiss = true,
-            SuppressDismissUntilNextRelease = true
+            SuppressDismissUntilNextRelease = true // TODO broken depending on system order
         };
-        
-        var buildEvt = Scene.Events.Invoke(new PopupBuildRequestedEvent()
+
+        if (sendBuildRequestEvent && providerId != -1)
         {
-            SourceEntityId = providerId,
-            TooltipEntityId = popupEntity.EntityId,
-            Position = GetLocalMousePos(providerId, globalMousePos),
-            GlobalPosition = globalMousePos
-        });
-        var startPos = globalMousePos + buildEvt.Offset;
+            var buildEvt = Scene.Events.Invoke(new PopupBuildRequestedEvent()
+            {
+                SourceEntityId = providerId,
+                TooltipEntityId = popupEntity.EntityId,
+                Position = GetLocalMousePos(providerId, globalMousePos),
+                GlobalPosition = globalMousePos,
+                Offset = offset
+            });
+            offset = buildEvt.Offset;
+        }
+        var startPos = globalMousePos + offset;
         popupEntity.GetComponent<Transform>().Position = startPos.ToVector2();
+
+        return popupEntity.EntityId;
     }
 
     private Point GetLocalMousePos(long entityId, Point globalMousePos)
