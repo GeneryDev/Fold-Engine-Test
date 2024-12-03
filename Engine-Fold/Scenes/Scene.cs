@@ -342,6 +342,7 @@ public class Scene : Resource, ISelfSerializer
         _hasAnything = true;
         if (Reclaim(entityId))
         {
+            ref Hierarchical hierarchical = ref Components.CreateComponent<Hierarchical>(entityId);
             ref Transform transform = ref Components.CreateComponent<Transform>(entityId);
             Components.CreateComponent<EntityName>(entityId).Name = name;
             // Console.WriteLine($"Created entity {entityId}");
