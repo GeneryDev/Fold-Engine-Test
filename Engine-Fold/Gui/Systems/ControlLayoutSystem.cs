@@ -68,6 +68,7 @@ public partial class ControlLayoutSystem : GameSystem
     {
         SubscribeToAnchoredControlEvents();
         SubscribeToFlowContainerEvents();
+        SubscribeToStackContainerEvents();
         SubscribeToBorderContainerEvents();
         this.Subscribe((ref LayoutRequestedEvent evt) =>
         {
