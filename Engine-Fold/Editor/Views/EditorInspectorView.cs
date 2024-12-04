@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using FoldEngine.Components;
 using FoldEngine.Editor.Components;
@@ -70,7 +71,7 @@ public class EditorInspectorView : EditorView
         ContentPanel.Element<ComponentMemberBreak>();
         // ContentPanel.Spacing(12);
 
-        foreach (ComponentSet set in entity.Scene.Components.Sets.Values)
+        foreach (ComponentSet set in entity.Scene.Components.Sets.Values.ToArray())
             if (set.Has(id))
             {
                 ComponentInfo componentInfo = ComponentInfo.Get(set.ComponentType);

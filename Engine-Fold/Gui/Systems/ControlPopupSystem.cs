@@ -38,6 +38,8 @@ public class ControlPopupSystem : GameSystem
         // Dismiss popups
         Subscribe((ref MouseButtonEvent evt) =>
         {
+            if (evt.Type != MouseButtonEventType.Pressed) return;
+            
             // Even if event consumed, do this check!
             long clickedPopupId = GetPopupForEntity(evt.EntityId);
             
@@ -52,15 +54,6 @@ public class ControlPopupSystem : GameSystem
                 bool outside = !inside;
                 if (inside && (popup.DismissOnClick & Popup.PopupClickCondition.Inside) != 0) dismiss = true;
                 if (outside && (popup.DismissOnClick & Popup.PopupClickCondition.Outside) != 0) dismiss = true;
-
-                if (popup.SuppressDismissUntilNextRelease)
-                {
-                    dismiss = false;
-                    if (evt.Type == MouseButtonEventType.Released)
-                    {
-                        popup.SuppressDismissUntilNextRelease = false;
-                    }
-                }
 
                 if (dismiss)
                 {
@@ -92,8 +85,7 @@ public class ControlPopupSystem : GameSystem
         {
             SourceEntityId = providerId,
             DismissOnClick = Popup.PopupClickCondition.Outside,
-            ConsumeClickOnDismiss = true,
-            SuppressDismissUntilNextRelease = true // TODO broken depending on system order
+            ConsumeClickOnDismiss = true
         };
 
         if (sendBuildRequestEvent && providerId != -1)

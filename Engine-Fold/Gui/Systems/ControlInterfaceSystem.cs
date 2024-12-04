@@ -2,6 +2,7 @@
 using FoldEngine.Components;
 using FoldEngine.Editor.Inspector;
 using FoldEngine.Gui.Components;
+using FoldEngine.Gui.Components.Controls;
 using FoldEngine.Gui.Components.Traits;
 using FoldEngine.Gui.Events;
 using FoldEngine.ImmediateGui;
@@ -257,6 +258,7 @@ public class ControlInterfaceSystem : GameSystem
             long onEntityId = GetControlAtPoint(_mousePos);
             _buttonPressMemory[buttonIndex] = new MouseButtonPressMemory()
             {
+                Down = true,
                 ControlId = onEntityId,
                 MousePos = _mousePos,
                 DragStarted = false
@@ -347,13 +349,30 @@ public class ControlInterfaceSystem : GameSystem
         return topEntity;
     }
 
+    public bool IsMouseButtonDown(int btnIndex)
+    {
+        return _buttonPressMemory[btnIndex].Down;
+    }
+
+    public MouseButtonMask GetDownMouseButtonMask()
+    {
+        return (IsMouseButtonDown(MouseButtonEvent.LeftButton)
+            ? MouseButtonMask.LeftButton
+            : 0) | (IsMouseButtonDown(MouseButtonEvent.MiddleButton)
+            ? MouseButtonMask.MiddleButton
+            : 0) | (IsMouseButtonDown(MouseButtonEvent.RightButton)
+            ? MouseButtonMask.RightButton
+            : 0);
+    }
+
     private struct MouseButtonPressMemory
     {
         public static readonly MouseButtonPressMemory Empty = new()
         {
             ControlId = -1
         };
-        
+
+        public bool Down;
         public long ControlId;
         public Point MousePos;
         public bool DragStarted;

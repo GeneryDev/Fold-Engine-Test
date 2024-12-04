@@ -1,6 +1,7 @@
 ﻿using System;
 using FoldEngine.Components;
 using FoldEngine.Editor.Inspector;
+using FoldEngine.Gui.Components.Controls;
 using FoldEngine.Scenes;
 using FoldEngine.Serialization;
 
@@ -13,8 +14,6 @@ public struct Popup
     [EntityId] public long SourceEntityId = -1;
     public PopupClickCondition DismissOnClick = PopupClickCondition.Outside;
     public bool ConsumeClickOnDismiss = false;
-
-    [HideInInspector] [DoNotSerialize] public bool SuppressDismissUntilNextRelease = false;
 
     public Popup()
     {
