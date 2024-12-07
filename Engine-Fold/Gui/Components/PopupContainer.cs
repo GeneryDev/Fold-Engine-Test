@@ -85,6 +85,15 @@ namespace FoldEngine.Gui.Systems
             {
                 contentPos.Y = contentPosNegative.Y;
             }
+            // If the children still go off screen to the top/left, clamp to zero
+            if (contentPos.X < 0)
+            {
+                contentPos.X = contentPosFloored.X;
+            }
+            if (contentPos.Y < 0)
+            {
+                contentPos.Y = contentPosFloored.Y;
+            }
             // If the children still go off screen, tough luck (TODO fix here if it becomes a problem)
             
             
