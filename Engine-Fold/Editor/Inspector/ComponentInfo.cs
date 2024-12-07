@@ -91,7 +91,7 @@ public class ComponentMember
                 .Text(startingValue.ToString())
                 .FontSize(9)
                 .IsPressed(out Point p))
-                parentPanel.Environment.ContextMenu.Show(p, m =>
+                parentPanel.Scene.Systems.Get<EditorContextMenuSystem>().Show(p, m =>
                 {
                     foreach (object value in member.FieldInfo.FieldType.GetEnumValues())
                         m.Button(value.ToString()).AddComponent<LegacyActionComponent>() = new LegacyActionComponent()

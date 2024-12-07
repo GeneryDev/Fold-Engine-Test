@@ -118,7 +118,7 @@ public class EditorInspectorView : EditorView
 
         if (ContentPanel.Button("Add Component", 14).IsPressed(out Point p))
         {
-            GuiPopupMenu contextMenu = ContentPanel.Environment.ContextMenu;
+            var contextMenu = Scene.Systems.Get<EditorContextMenuSystem>();
             contextMenu.Show(p, m =>
             {
                 foreach (ComponentDefinition def in Core.RegistryUnit.Components.GetAllDefinitions())
@@ -249,7 +249,7 @@ public class ComponentHeader : GuiLabel
     public override void OnMouseReleased(ref MouseEvent e)
     {
         if (e.Button == MouseEvent.RightButton)
-            Environment.ContextMenu.Show(e.Position, m =>
+            Scene.Systems.Get<EditorContextMenuSystem>().Show(e.Position, m =>
             {
                 m.Button("Remove").AddComponent<TransactionActionComponent>() =
                     new TransactionActionComponent(new RemoveComponentTransaction(_info.ComponentType, _id));

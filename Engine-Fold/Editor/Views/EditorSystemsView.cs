@@ -36,7 +36,7 @@ public class EditorSystemsView : EditorView
 
         if (ContentPanel.Button("Add System", 14).IsPressed(out Point p))
         {
-            GuiPopupMenu contextMenu = ContentPanel.Environment.ContextMenu;
+            var contextMenu = Scene.Systems.Get<EditorContextMenuSystem>();
             contextMenu.Show(p, m =>
             {
                 foreach (Type type in Core.RegistryUnit.Systems.GetAllTypes())
@@ -76,7 +76,7 @@ public class EditorSystemsView : EditorView
                 }
                 case HierarchyElement<Type>.HierarchyEventType.Context:
                 {
-                    GuiPopupMenu contextMenu = ContentPanel.Environment.ContextMenu;
+                    var contextMenu = Scene.Systems.Get<EditorContextMenuSystem>();
                     contextMenu.Show(clickPoint, m =>
                     {
                         m.Button("Remove").AddComponent<TransactionActionComponent>() =

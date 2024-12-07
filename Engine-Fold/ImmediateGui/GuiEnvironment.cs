@@ -21,8 +21,6 @@ public abstract class GuiEnvironment : IDisposable
 
     private readonly GuiPanel[] _pressedPanels = new GuiPanel[MouseEvent.MaxButtons];
 
-
-    public GuiPopupMenu ContextMenu;
     public ControlScheme ControlScheme = new ControlScheme("Gui");
     public HoverTarget HoverTarget;
     public HoverTarget HoverTargetPrevious;
@@ -41,7 +39,6 @@ public abstract class GuiEnvironment : IDisposable
     public GuiEnvironment(Scene scene)
     {
         Scene = scene;
-        ContextMenu = new GuiPopupMenu(scene);
         scene.Core.FoldGame.Window.TextInput += WindowOnTextInput;
 
         ControlScheme.AddDevice(Core.InputUnit.Devices.Keyboard);
@@ -176,7 +173,6 @@ public struct HoverTarget
 {
     public GuiPanel ScrollablePanel;
     public GuiElement Element;
-    public GuiPopupMenu PopupMenu;
     public IHierarchy Hierarchy;
 }
 

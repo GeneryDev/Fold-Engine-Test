@@ -6,6 +6,7 @@ using FoldEngine.Gui.Components.Controls;
 using FoldEngine.Gui.Components.Controls.Containers;
 using FoldEngine.Gui.Styles;
 using FoldEngine.Gui.Systems;
+using FoldEngine.ImmediateGui;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
@@ -27,6 +28,7 @@ public class EditorScene : Scene
         Systems.Add<EditorBase>();
         Systems.Add<EditorTabSystem>();
         Systems.Add<EditorCameraSyncSystem>();
+        Systems.Add<EditorContextMenuSystem>();
         Systems.Add<EditorActionSystem>();
         Systems.Add<SubSceneSystem>();
         

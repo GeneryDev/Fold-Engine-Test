@@ -185,7 +185,7 @@ public class EditorHierarchyView : EditorView
 
     private void ShowEntityContextMenu(long id, Point point)
     {
-        GuiPopupMenu contextMenu = ContentPanel.Environment.ContextMenu;
+        var contextMenu = Scene.Systems.Get<EditorContextMenuSystem>();
         var editingScene = Scene.Systems.Get<EditorBase>().CurrentSceneTab.Scene;
         if (editingScene == null) return;
 

@@ -1,42 +1,34 @@
 ﻿using System;
-using FoldEngine.Graphics;
 using FoldEngine.Gui;
 using FoldEngine.Gui.Components;
 using FoldEngine.Gui.Components.Controls;
 using FoldEngine.Gui.Components.Controls.Containers;
 using FoldEngine.Gui.Systems;
-using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
-using FoldEngine.Util;
+using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.ImmediateGui;
 
-public class GuiPopupMenu
+[GameSystem("fold:editor.context_menus", ProcessingCycles.None)]
+public class EditorContextMenuSystem : GameSystem
 {
-    private Scene _scene;
-
     private long _popupId = -1;
     private string _buttonStyle;
     private Entity _buttonContainer;
     private Alignment _textAlignment;
 
-    public GuiPopupMenu(Scene scene)
+    public void Show(Point pos, Action<EditorContextMenuSystem> renderer, int minWidth = 150, string buttonStyle = "editor:context_menu_item", Alignment textAlignment = Alignment.Begin)
     {
-        this._scene = scene;
-    }
-
-    public void Show(Point pos, Action<GuiPopupMenu> renderer, int minWidth = 150, string buttonStyle = "editor:context_menu_item", Alignment textAlignment = Alignment.Begin)
-    {
-        var popupSystem = _scene.Systems.Get<ControlPopupSystem>();
+        var popupSystem = Scene.Systems.Get<ControlPopupSystem>();
         long popupId = popupSystem.CreatePopup(-1, pos, sendBuildRequestEvent: false);
 
         _popupId = popupId;
         _buttonStyle = buttonStyle;
         _textAlignment = textAlignment;
 
-        var popupOutlinePanel = _scene.CreateEntity("Context Menu Outline Panel");
+        var popupOutlinePanel = Scene.CreateEntity("Context Menu Outline Panel");
         popupOutlinePanel.Hierarchical.SetParent(popupId);
         popupOutlinePanel.AddComponent<Control>() = new Control()
         {
@@ -55,7 +47,7 @@ public class GuiPopupMenu
             Color = new Color(45, 45, 48)
         };
 
-        var buttonContainer = _scene.CreateEntity("Context Menu Button Container");
+        var buttonContainer = Scene.CreateEntity("Context Menu Button Container");
         buttonContainer.Hierarchical.SetParent(popupOutlinePanel);
         buttonContainer.AddComponent<Control>() = new Control()
         {
@@ -78,7 +70,7 @@ public class GuiPopupMenu
 
     private long CreateMargin(int size, long parent)
     {
-        var margin = _scene.CreateEntity("Margin");
+        var margin = Scene.CreateEntity("Margin");
         margin.AddComponent<Control>() = new Control()
         {
             MinimumSize = new Vector2(size, size),
@@ -90,7 +82,7 @@ public class GuiPopupMenu
     public Entity Button(string text, string icon = null)
     {
         icon ??= "editor/blank";
-        var button = _scene.CreateEntity("Button");
+        var button = Scene.CreateEntity("Button");
         button.AddComponent<Control>() = new Control()
         {
             ZOrder = 92,
@@ -113,7 +105,7 @@ public class GuiPopupMenu
 
     public void Separator()
     {
-        var separator = _scene.CreateEntity("Separator");
+        var separator = Scene.CreateEntity("Separator");
         separator.AddComponent<Control>() = new Control()
         {
             MinimumSize = new Vector2(2, 2),
