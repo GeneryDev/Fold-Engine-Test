@@ -11,7 +11,7 @@ using Microsoft.Xna.Framework;
 namespace FoldEngine.Gui.Components.Controls.Containers
 {
     [Component("fold:control.border_container", traits: [typeof(Control), typeof(Container)])]
-    [ComponentInitializer(typeof(BorderContainer), nameof(InitializeComponent))]
+    [ComponentInitializer(typeof(BorderContainer))]
     public struct BorderContainer
     {
         [EntityId] public long NorthPanelId = -1;
@@ -25,11 +25,6 @@ namespace FoldEngine.Gui.Components.Controls.Containers
         public CornerBias CornerBiasSouthEast = CornerBias.Horizontal;
 
         public BorderContainer() {}
-
-        public static BorderContainer InitializeComponent(Scene scene, long entityId)
-        {
-            return new BorderContainer();
-        }
 
         public enum CornerBias
         {

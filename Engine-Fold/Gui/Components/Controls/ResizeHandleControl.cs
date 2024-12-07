@@ -14,7 +14,7 @@ using Microsoft.Xna.Framework;
 namespace FoldEngine.Gui.Components.Controls
 {
     [Component("fold:control.resize_handle", traits: [typeof(Control), typeof(MouseFilterDefaultStop)])]
-    [ComponentInitializer(typeof(ResizeHandleControl), nameof(InitializeComponent))]
+    [ComponentInitializer(typeof(ResizeHandleControl))]
     public struct ResizeHandleControl
     {
         public Vector2 ResizeDirection;
@@ -34,14 +34,6 @@ namespace FoldEngine.Gui.Components.Controls
     
         public ResizeHandleControl()
         {
-        }
-    
-        /// <summary>
-        ///     Returns an initialized button component with all its correct default values.
-        /// </summary>
-        public static ResizeHandleControl InitializeComponent(Scene scene, long entityId)
-        {
-            return new ResizeHandleControl();
         }
     }
 }

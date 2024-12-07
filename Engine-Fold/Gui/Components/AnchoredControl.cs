@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework;
 namespace FoldEngine.Gui.Components
 {
     [Component("fold:control.anchored", traits: [typeof(Control)])]
-    [ComponentInitializer(typeof(AnchoredControl), nameof(InitializeComponent))]
+    [ComponentInitializer(typeof(AnchoredControl))]
     public struct AnchoredControl
     {
         public float AnchorLeft;
@@ -36,14 +36,6 @@ namespace FoldEngine.Gui.Components
         public AnchoredControl()
         {
             GrowHorizontal = GrowVertical = GrowDirection.Both;
-        }
-    
-        /// <summary>
-        ///     Returns an initialized anchored component with all its correct default values.
-        /// </summary>
-        public static AnchoredControl InitializeComponent(Scene scene, long entityId)
-        {
-            return new AnchoredControl();
         }
     }
 }

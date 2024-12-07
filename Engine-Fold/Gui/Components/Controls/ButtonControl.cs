@@ -18,7 +18,7 @@ using Microsoft.Xna.Framework;
 namespace FoldEngine.Gui.Components.Controls
 {
     [Component("fold:control.button", traits: [typeof(Control), typeof(MouseFilterDefaultStop)])]
-    [ComponentInitializer(typeof(ButtonControl), nameof(InitializeComponent))]
+    [ComponentInitializer(typeof(ButtonControl))]
     public struct ButtonControl
     {
         public string Text;
@@ -46,14 +46,6 @@ namespace FoldEngine.Gui.Components.Controls
             IconColor = Color.White;
             ActionMode = MouseActionMode.Release;
             ButtonMask = MouseButtonMask.LeftButton;
-        }
-    
-        /// <summary>
-        ///     Returns an initialized button component with all its correct default values.
-        /// </summary>
-        public static ButtonControl InitializeComponent(Scene scene, long entityId)
-        {
-            return new ButtonControl();
         }
 
         public bool UpdateRenderedText(IRenderingUnit renderer, ButtonStyle style)

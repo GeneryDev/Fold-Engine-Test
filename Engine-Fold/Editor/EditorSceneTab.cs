@@ -8,7 +8,7 @@ using FoldEngine.Util.Transactions;
 namespace FoldEngine.Editor;
 
 [Component("fold:editor.scene_tab")]
-[ComponentInitializer(typeof(EditorSceneTab), nameof(InitializeComponent))]
+[ComponentInitializer(typeof(EditorSceneTab))]
 public struct EditorSceneTab
 {
     [DoNotSerialize] [HideInInspector] public Scene Scene;
@@ -27,13 +27,5 @@ public struct EditorSceneTab
     {
         EditingEntity = new List<long>();
         EditorCameraEntityId = -1;
-    }
-    
-    /// <summary>
-    ///     Returns an initialized editor tab component with all its correct default values.
-    /// </summary>
-    public static EditorSceneTab InitializeComponent(Scene scene, long entityId)
-    {
-        return new EditorSceneTab();
     }
 }

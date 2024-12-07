@@ -5,7 +5,7 @@ using FoldEngine.Scenes;
 namespace FoldEngine.Gui.Components;
 
 [Component("fold:control.tab")]
-[ComponentInitializer(typeof(Tab), nameof(InitializeComponent))]
+[ComponentInitializer(typeof(Tab))]
 public struct Tab
 {
     public string DeselectedButtonStyle;
@@ -15,12 +15,6 @@ public struct Tab
     
     public Tab()
     {
-        
-    }
-
-    public static Tab InitializeComponent(Scene scene, long entityId)
-    {
-        return new Tab();
     }
 }
 
@@ -42,17 +36,12 @@ public struct TabList
 }
 
 [Component("fold:control.tab_switcher")]
-[ComponentInitializer(typeof(TabSwitcher), nameof(InitializeComponent))]
+[ComponentInitializer(typeof(TabSwitcher))]
 public struct TabSwitcher
 {
     [EntityId] public long ContainerEntityId = -1;
     
     public TabSwitcher()
     {
-    }
-
-    public static TabSwitcher InitializeComponent(Scene scene, long entityId)
-    {
-        return new TabSwitcher();
     }
 }

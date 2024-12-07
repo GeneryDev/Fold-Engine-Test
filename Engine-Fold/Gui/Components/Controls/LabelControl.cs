@@ -13,7 +13,7 @@ using Microsoft.Xna.Framework;
 namespace FoldEngine.Gui.Components.Controls
 {
     [Component("fold:control.label", traits: [typeof(Control), typeof(MouseFilterDefaultPass)])]
-    [ComponentInitializer(typeof(LabelControl), nameof(InitializeComponent))]
+    [ComponentInitializer(typeof(LabelControl))]
     public struct LabelControl
     {
         public string Text;
@@ -29,14 +29,6 @@ namespace FoldEngine.Gui.Components.Controls
             FontSize = 14;
             Color = Color.White;
             Alignment = Alignment.Begin;
-        }
-    
-        /// <summary>
-        ///     Returns an initialized label component with all its correct default values.
-        /// </summary>
-        public static LabelControl InitializeComponent(Scene scene, long entityId)
-        {
-            return new LabelControl();
         }
 
         public bool UpdateRenderedText(IRenderingUnit renderer)

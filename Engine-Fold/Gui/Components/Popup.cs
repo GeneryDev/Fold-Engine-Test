@@ -8,7 +8,7 @@ using FoldEngine.Serialization;
 namespace FoldEngine.Gui.Components;
 
 [Component("fold:control.popup")]
-[ComponentInitializer(typeof(Popup), nameof(InitializeComponent))]
+[ComponentInitializer(typeof(Popup))]
 public struct Popup
 {
     [EntityId] public long SourceEntityId = -1;
@@ -17,12 +17,6 @@ public struct Popup
 
     public Popup()
     {
-    }
-
-
-    public static Popup InitializeComponent(Scene scene, long entityId)
-    {
-        return new Popup();
     }
 
     [Flags]
