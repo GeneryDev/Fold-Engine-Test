@@ -17,6 +17,7 @@ public class GuiPopupMenu
 {
     private Scene _scene;
 
+    private long _popupId = -1;
     private string _buttonStyle;
     private Entity _buttonContainer;
     private Alignment _textAlignment;
@@ -31,6 +32,7 @@ public class GuiPopupMenu
         var popupSystem = _scene.Systems.Get<ControlPopupSystem>();
         long popupId = popupSystem.CreatePopup(-1, pos, sendBuildRequestEvent: false);
 
+        _popupId = popupId;
         _buttonStyle = buttonStyle;
         _textAlignment = textAlignment;
 
@@ -100,6 +102,10 @@ public class GuiPopupMenu
             Alignment = _textAlignment,
             Icon = new ResourceIdentifier(icon),
             Style = new ResourceIdentifier(_buttonStyle)
+        };
+        button.AddComponent<DismissPopupOnPress>() = new DismissPopupOnPress()
+        {
+            PopupId = _popupId
         };
         button.Hierarchical.SetParent(_buttonContainer);
         return button;

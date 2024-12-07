@@ -36,6 +36,19 @@ public class ControlPopupSystem : GameSystem
             evt.Consume();
         });
         
+        // Dismiss popups on button presses
+        Subscribe((ref ButtonPressedEvent evt) =>
+        {
+            if (!Scene.Components.HasComponent<DismissPopupOnPress>(evt.EntityId)) return;
+            long popupId = Scene.Components.GetComponent<DismissPopupOnPress>(evt.EntityId).PopupId;
+            if (popupId == -1 || !Scene.Components.HasComponent<Popup>(popupId)) return;
+            
+            Scene.Events.Invoke(new PopupDismissalRequested()
+            {
+                PopupEntityId = popupId
+            });
+        });
+        
         // Dismiss popups
         Subscribe((ref MouseButtonEvent evt) =>
         {
