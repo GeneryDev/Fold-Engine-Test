@@ -48,13 +48,6 @@ public class GuiPopupMenu
             EastPanelId = CreateMargin(2, popupOutlinePanel.EntityId),
             SouthPanelId = CreateMargin(2, popupOutlinePanel.EntityId)
         };
-        popupOutlinePanel.AddComponent<AnchoredControl>() = new AnchoredControl()
-        {
-            AnchorRight = 1.0f,
-            AnchorBottom = 1.0f,
-            GrowHorizontal = AnchoredControl.GrowDirection.End,
-            GrowVertical = AnchoredControl.GrowDirection.End
-        };
         popupOutlinePanel.AddComponent<BoxControl>() = new BoxControl()
         {
             Color = new Color(45, 45, 48)

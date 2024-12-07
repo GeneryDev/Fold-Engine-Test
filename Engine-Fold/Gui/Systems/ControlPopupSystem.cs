@@ -2,6 +2,7 @@
 using FoldEngine.Components;
 using FoldEngine.Gui.Components;
 using FoldEngine.Gui.Components.Controls;
+using FoldEngine.Gui.Components.Controls.Containers;
 using FoldEngine.Gui.Events;
 using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
@@ -87,6 +88,11 @@ public class ControlPopupSystem : GameSystem
             DismissOnClick = Popup.PopupClickCondition.Outside,
             ConsumeClickOnDismiss = true
         };
+        popupEntity.AddComponent<AnchoredControl>() = new AnchoredControl()
+        {
+            AnchorRight = 1,
+            AnchorBottom = 1
+        };
 
         if (sendBuildRequestEvent && providerId != -1)
         {
@@ -96,12 +102,16 @@ public class ControlPopupSystem : GameSystem
                 TooltipEntityId = popupEntity.EntityId,
                 Position = GetLocalMousePos(providerId, globalMousePos),
                 GlobalPosition = globalMousePos,
-                Offset = offset
+                Gap = offset
             });
-            offset = buildEvt.Offset;
+            offset = buildEvt.Gap;
         }
-        var startPos = globalMousePos + offset;
-        popupEntity.GetComponent<Transform>().Position = startPos.ToVector2();
+        
+        popupEntity.AddComponent<PopupContainer>() = new PopupContainer()
+        {
+            PopupPosition = globalMousePos.ToVector2(),
+            Gap = offset.ToVector2()
+        };
 
         return popupEntity.EntityId;
     }

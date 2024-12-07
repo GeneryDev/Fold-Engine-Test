@@ -70,6 +70,7 @@ public partial class ControlLayoutSystem : GameSystem
         SubscribeToFlowContainerEvents();
         SubscribeToStackContainerEvents();
         SubscribeToBorderContainerEvents();
+        SubscribeToPopupContainerEvents();
         this.Subscribe((ref LayoutRequestedEvent evt) =>
         {
             if (evt.ViewportId == -1) return;

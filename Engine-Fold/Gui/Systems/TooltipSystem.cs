@@ -5,6 +5,7 @@ using FoldEngine.Gui.Components.Controls;
 using FoldEngine.Gui.Components.Controls.Containers;
 using FoldEngine.Gui.Components.Traits;
 using FoldEngine.Gui.Events;
+using FoldEngine.Scenes;
 using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
 
@@ -62,13 +63,6 @@ public class TooltipSystem : GameSystem
                 {
                     Text = evt.TooltipText,
                     FontSize = 9,
-                };
-                label.AddComponent<AnchoredControl>() = new AnchoredControl()
-                {
-                    AnchorRight = 1,
-                    AnchorLeft = 1,
-                    GrowHorizontal = AnchoredControl.GrowDirection.End,
-                    GrowVertical = AnchoredControl.GrowDirection.End
                 };
                 label.Hierarchical.SetParent(evt.TooltipEntityId);
                 
@@ -198,30 +192,23 @@ public class TooltipSystem : GameSystem
 
     private long CreateTooltip(string text, Point mousePos)
     {
-        var tooltipEntity = Scene.CreateEntity("Tooltip");
-        tooltipEntity.AddComponent<Control>() = new Control
-        {
-            RequestLayout = true,
-            MouseFilter = Control.MouseFilterMode.Ignore
-        };
-        tooltipEntity.AddComponent<Popup>() = new Popup()
-        {
-            SourceEntityId = _hoveredProviderId,
-            DismissOnClick = Popup.PopupClickCondition.Outside
-        };
+        var popupSystem = Scene.Systems.Get<ControlPopupSystem>();
+        long popupId = popupSystem.CreatePopup(_hoveredProviderId, mousePos, sendBuildRequestEvent: false);
+        var popupEntity = new Entity(Scene, popupId);
+        popupEntity.Name = "Tooltip";
+        popupEntity.GetComponent<Control>().MouseFilter = Control.MouseFilterMode.Ignore;
+        popupEntity.GetComponent<Popup>().ConsumeClickOnDismiss = false;
         
         var buildEvt = Scene.Events.Invoke(new TooltipBuildRequestedEvent()
         {
             SourceEntityId = _hoveredProviderId,
-            TooltipEntityId = tooltipEntity.EntityId,
+            TooltipEntityId = popupId,
             TooltipText = text,
             Position = GetLocalMousePos(_hoveredProviderId, _hoverMousePos),
             GlobalPosition = _hoverMousePos
         });
-        var startPos = mousePos + buildEvt.Offset;
-        tooltipEntity.GetComponent<Transform>().Position = startPos.ToVector2();
-
-        return tooltipEntity.EntityId;
+        popupEntity.GetComponent<PopupContainer>().Gap = buildEvt.Offset.ToVector2();
+        return popupId;
     }
 
     public override void OnUpdate()

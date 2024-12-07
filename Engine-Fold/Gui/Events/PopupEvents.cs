@@ -12,7 +12,7 @@ public struct PopupBuildRequestedEvent
     public Point Position;
     public Point GlobalPosition;
     
-    [EventOutput] public Point Offset;
+    [EventOutput] public Point Gap;
 
     public PopupBuildRequestedEvent()
     {
