@@ -9,10 +9,10 @@ public class EditorDebugActionsView : EditorView
 {
     public EditorDebugActionsView()
     {
-        Icon = new ResourceIdentifier("editor/info");
+        new ResourceIdentifier("editor/info");
     }
 
-    public override string Name => "Debug Actions";
+    public virtual string Name => "Debug Actions";
 
     public override void Render(IRenderingUnit renderer)
     {

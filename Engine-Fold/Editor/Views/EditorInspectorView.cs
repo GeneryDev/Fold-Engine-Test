@@ -23,10 +23,10 @@ public class EditorInspectorView : EditorView
 
     public EditorInspectorView()
     {
-        Icon = new ResourceIdentifier("editor/info");
+        new ResourceIdentifier("editor/info");
     }
 
-    public override string Name => "Inspector";
+    public virtual string Name => "Inspector";
 
     public override void Render(IRenderingUnit renderer)
     {

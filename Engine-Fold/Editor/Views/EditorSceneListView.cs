@@ -11,10 +11,10 @@ public class EditorSceneListView : EditorView
 {
     public EditorSceneListView()
     {
-        Icon = new ResourceIdentifier("editor/menu");
+        new ResourceIdentifier("editor/menu");
     }
 
-    public override string Name => "Scene List";
+    public virtual string Name => "Scene List";
 
     public override void Render(IRenderingUnit renderer)
     {

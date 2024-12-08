@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using FoldEngine.Editor.ImmediateGui;
+using FoldEngine.Editor.Systems;
 using FoldEngine.Editor.Tools;
 using FoldEngine.Graphics;
 using FoldEngine.Interfaces;
@@ -14,24 +15,29 @@ public class EditorToolbarView : EditorView
 {
     public EditorToolbarView()
     {
-        Icon = new ResourceIdentifier("editor/cog");
+        new ResourceIdentifier("editor/cog");
     }
 
-    public override string Name => "Toolbar";
+    public virtual string Name => "Toolbar";
 
     public override void Render(IRenderingUnit renderer)
     {
         var editorBase = Scene.Systems.Get<EditorBase>();
         ref var editingTab = ref editorBase.CurrentSceneTab;
         
-        foreach (EditorTool tool in ((EditorEnvironment)ContentPanel.Environment).Tools)
-            if (ContentPanel.Element<ToolbarButton>()
-                .Down(tool == ((EditorEnvironment)ContentPanel.Environment).ActiveTool)
-                .Text("")
-                .FontSize(14)
-                .Icon(EditorResources.Get<Texture>(ref tool.Icon))
-                .IsPressed())
-                ((EditorEnvironment)ContentPanel.Environment).SelectedTool = tool;
+        var toolSystem = Scene.Systems.Get<EditorToolSystem>();
+
+        if (toolSystem != null)
+        {
+            foreach (EditorTool tool in toolSystem.Tools)
+                if (ContentPanel.Element<ToolbarButton>()
+                    .Down(tool == toolSystem.ActiveTool)
+                    .Text("")
+                    .FontSize(14)
+                    .Icon(EditorResources.Get<Texture>(ref tool.Icon))
+                    .IsPressed())
+                    toolSystem.SelectedTool = tool;
+        }
 
         // ContentPanel.Label(Scene.Name, 2).TextAlignment(-1).Icon(renderer.Textures["editor:cog"]);
         // ContentPanel.Element<ToolbarButton>().Text("Save").FontSize(14).Icon(renderer.Textures["editor:cog"]);
@@ -39,7 +45,6 @@ public class EditorToolbarView : EditorView
 
         if (editingTab.Scene != ContentPanel.Environment.Scene)
         {
-            
             if (ContentPanel.Element<ToolbarButton>()
                 .Text("")
                 .FontSize(14)

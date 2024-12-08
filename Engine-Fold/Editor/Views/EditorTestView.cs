@@ -9,10 +9,10 @@ public class EditorTestView : EditorView
 {
     public EditorTestView()
     {
-        Icon = new ResourceIdentifier("editor/pause");
+        new ResourceIdentifier("editor/pause");
     }
 
-    public override string Name => "Test";
+    public virtual string Name => "Test";
 
     public override bool UseMargin => false;
     public override Color? BackgroundColor => Color.Black;

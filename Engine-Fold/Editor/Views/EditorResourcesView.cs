@@ -16,10 +16,10 @@ public class EditorResourcesView : EditorView
 {
     public EditorResourcesView()
     {
-        Icon = new ResourceIdentifier("editor/checkmark");
+        new ResourceIdentifier("editor/checkmark");
     }
 
-    public override string Name => "Resources";
+    public virtual string Name => "Resources";
 
     public bool ShowSceneLocalResources = true;
     private bool _fieldsInitialized;

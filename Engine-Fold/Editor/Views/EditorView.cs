@@ -15,10 +15,6 @@ public abstract class EditorView
     public IGameCore Core => Scene.Core;
     public ResourceCollections EditorResources => Scene.Resources;
     
-    // For tab appearance
-    public ResourceIdentifier Icon;
-    public abstract string Name { get; }
-
     // For content appearance
     public virtual bool UseMargin => true;
     public virtual Color? BackgroundColor => null;

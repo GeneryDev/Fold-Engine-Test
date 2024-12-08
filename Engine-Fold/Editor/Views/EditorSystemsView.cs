@@ -19,10 +19,10 @@ public class EditorSystemsView : EditorView
 {
     public EditorSystemsView()
     {
-        Icon = new ResourceIdentifier("editor/cog");
+        new ResourceIdentifier("editor/cog");
     }
 
-    public override string Name => "Systems";
+    public virtual string Name => "Systems";
     public SystemHierarchy Hierarchy;
 
     private GameSystem _selectedSystem;

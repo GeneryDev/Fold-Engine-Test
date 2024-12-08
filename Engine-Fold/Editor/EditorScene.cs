@@ -32,6 +32,7 @@ public class EditorScene : Scene
         Systems.Add<EditorCameraSyncSystem>();
         Systems.Add<EditorContextMenuSystem>();
         Systems.Add<EditorActionSystem>();
+        Systems.Add<EditorToolSystem>();
         Systems.Add<SubSceneSystem>();
         
         Systems.Add<ControlLayoutSystem>();
@@ -69,7 +70,8 @@ public class EditorScene : Scene
             NorthPanelId = CreateDock("Top", out var topTabs, out var topContainer, Vector2.UnitY).EntityId,
             WestPanelId = CreateDock("Left", out var leftTabs, out var leftContainer, Vector2.UnitX).EntityId,
             EastPanelId = CreateDock("Right", out var rightTabs, out var rightContainer, -Vector2.UnitX).EntityId,
-            SouthPanelId = CreateDock("Bottom", out var bottomTabs, out var bottomContainer, -Vector2.UnitY).EntityId
+            SouthPanelId = CreateDock("Bottom", out var bottomTabs, out var bottomContainer, -Vector2.UnitY).EntityId,
+            CornerBiasSouthEast = BorderContainer.CornerBias.Vertical
         };
         CreateDock("Center", out var centerTabs, out var centerContainer, Vector2.Zero);
 

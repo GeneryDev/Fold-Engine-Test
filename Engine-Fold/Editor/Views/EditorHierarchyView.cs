@@ -25,10 +25,10 @@ public class EditorHierarchyView : EditorView
 
     public EditorHierarchyView()
     {
-        Icon = new ResourceIdentifier("editor/hierarchy");
+        new ResourceIdentifier("editor/hierarchy");
     }
 
-    public override string Name => "Hierarchy";
+    public virtual string Name => "Hierarchy";
 
     public override void Render(IRenderingUnit renderer)
     {

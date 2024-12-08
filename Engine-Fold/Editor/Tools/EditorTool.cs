@@ -1,27 +1,30 @@
-﻿using FoldEngine.Editor.ImmediateGui;
+﻿using System;
+using FoldEngine.Editor.ImmediateGui;
+using FoldEngine.Editor.Systems;
 using FoldEngine.ImmediateGui;
-using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
+using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Tools;
 
 public abstract class EditorTool
 {
-    protected readonly EditorEnvironment Environment;
+    protected readonly EditorToolSystem System;
     public ResourceIdentifier Icon;
 
 
-    public EditorTool(EditorEnvironment environment)
+    public EditorTool(EditorToolSystem system)
     {
-        Environment = environment;
+        System = system;
     }
 
-    protected Scene Scene => Environment.Scene;
+    protected Scene Scene => System.Scene;
     public IGameCore Core => Scene.Core;
+    public Vector2 MousePos => System.MousePos;
 
-    public abstract void OnInput(ControlScheme controls);
+    public abstract void OnInput();
     public abstract void OnMousePressed(ref MouseEvent e);
     public abstract void OnMouseReleased(ref MouseEvent e);
 

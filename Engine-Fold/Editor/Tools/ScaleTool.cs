@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using FoldEngine.Components;
 using FoldEngine.Editor.ImmediateGui;
+using FoldEngine.Editor.Systems;
 using FoldEngine.Editor.Transactions;
 using FoldEngine.Graphics;
 using FoldEngine.ImmediateGui;
@@ -24,7 +25,7 @@ public class ScaleTool : SelectTool
     private Vector2 _selectedGizmo;
     private readonly List<SetEntityTransformTransaction> _transactions = new List<SetEntityTransformTransaction>();
 
-    public ScaleTool(EditorEnvironment environment) : base(environment)
+    public ScaleTool(EditorToolSystem system) : base(system)
     {
         Icon = EditorIcons.Scale;
     }
@@ -38,8 +39,8 @@ public class ScaleTool : SelectTool
             if (editingTab.Scene == null) return;
             
             Vector2 mouseWorldPos =
-                editingTab.Scene.MainCameraTransform.Apply(Environment.Renderer.GizmoLayer.LayerToCamera(
-                    Environment.Renderer.GizmoLayer.WindowToLayer(e.Position.ToVector2())));
+                editingTab.Scene.MainCameraTransform.Apply(Core.RenderingUnit.GizmoLayer.LayerToCamera(
+                    Core.RenderingUnit.GizmoLayer.WindowToLayer(e.Position.ToVector2())));
             _pressMousePivotPosition = _movePivot.Relativize(mouseWorldPos);
 
             _pressEntityPivotPosition.Clear();
@@ -96,8 +97,8 @@ public class ScaleTool : SelectTool
         if (_dragging)
         {
             Vector2 mouseWorldPos =
-                editingTab.Scene.MainCameraTransform.Apply(Environment.Renderer.GizmoLayer.LayerToCamera(
-                    Environment.Renderer.GizmoLayer.WindowToLayer(Environment.MousePos.ToVector2())));
+                editingTab.Scene.MainCameraTransform.Apply(Core.RenderingUnit.GizmoLayer.LayerToCamera(
+                    Core.RenderingUnit.GizmoLayer.WindowToLayer(MousePos)));
 
             Vector2 newScale = _movePivot.Relativize(mouseWorldPos) / _pressMousePivotPosition;
 
@@ -204,7 +205,7 @@ public class ScaleTool : SelectTool
         if (!forceHoverState.HasValue)
         {
             var line = new Line(start, end);
-            Vector2 mousePosLayerSpace = renderer.GizmoLayer.WindowToLayer(Environment.MousePos.ToVector2());
+            Vector2 mousePosLayerSpace = renderer.GizmoLayer.WindowToLayer(MousePos);
             hovered = line.DistanceFromPoint(mousePosLayerSpace, true) <= hoverDistance;
         }
         else

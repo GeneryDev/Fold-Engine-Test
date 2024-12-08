@@ -17,17 +17,11 @@ namespace FoldEngine.Editor.ImmediateGui;
 
 public class EditorEnvironment : GuiEnvironment
 {
-    public readonly List<EditorTool> Tools = [];
-    public EditorTool ForcedTool;
-    public EditorTool SelectedTool;
-    public EditorTool ActiveTool => ForcedTool ?? SelectedTool;
-
     public override GuiPanel ContentPanel { get; set; }
 
     public EditorEnvironment(Scene scene) : base(scene)
     {
         SetupControlScheme();
-        SetupTools();
     }
 
     private void SetupControlScheme()
@@ -63,15 +57,6 @@ public class EditorEnvironment : GuiEnvironment
             new AnalogAction(() => (keyboard[Keys.Down].Down ? -1 : 0) + (keyboard[Keys.Up].Down ? 1 : 0)));
 
         ControlScheme.PutAction("editor.movement.faster", new ButtonAction(keyboard[Keys.LeftShift]));
-    }
-
-    private void SetupTools()
-    {
-        Tools.Add(new HandTool(this));
-        Tools.Add(new MoveTool(this));
-        Tools.Add(new ScaleTool(this));
-        Tools.Add(new RotateTool(this));
-        Tools.Add(SelectedTool = new SelectTool(this));
     }
 
     public override void Input(InputUnit inputUnit)

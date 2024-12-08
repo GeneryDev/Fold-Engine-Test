@@ -1,9 +1,9 @@
 ﻿using FoldEngine.Components;
 using FoldEngine.Editor.Events;
 using FoldEngine.Editor.ImmediateGui;
+using FoldEngine.Editor.Systems;
 using FoldEngine.Editor.Views;
 using FoldEngine.ImmediateGui;
-using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Rendering;
 using Microsoft.Xna.Framework;
@@ -13,12 +13,12 @@ namespace FoldEngine.Editor.Tools;
 
 public class SelectTool : EditorTool
 {
-    public SelectTool(EditorEnvironment environment) : base(environment)
+    public SelectTool(EditorToolSystem system) : base(system)
     {
         Icon = EditorIcons.Cursor;
     }
 
-    public override void OnInput(ControlScheme controls)
+    public override void OnInput()
     {
     }
 
@@ -29,9 +29,9 @@ public class SelectTool : EditorTool
         if (editingTab.Scene == null) return;
         ref Transform cameraTransform = ref editingTab.Scene.MainCameraTransform;
 
-        IRenderingLayer worldLayer = Environment.Core.RenderingUnit.WorldLayer;
+        IRenderingLayer worldLayer = Core.RenderingUnit.WorldLayer;
         Vector2 cameraRelativePos =
-            worldLayer.LayerToCamera(worldLayer.WindowToLayer(Environment.MousePos.ToVector2()));
+            worldLayer.LayerToCamera(worldLayer.WindowToLayer(MousePos));
         Vector2 worldPos = cameraTransform.Apply(cameraRelativePos);
 
         long intersectingEntities =

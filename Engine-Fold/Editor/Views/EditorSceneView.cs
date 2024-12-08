@@ -1,5 +1,6 @@
 ﻿using FoldEngine.Components;
 using FoldEngine.Editor.ImmediateGui;
+using FoldEngine.Editor.Systems;
 using FoldEngine.ImmediateGui;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
@@ -12,10 +13,10 @@ public class EditorSceneView : EditorView
 {
     public EditorSceneView()
     {
-        Icon = new ResourceIdentifier("editor/play");
+        new ResourceIdentifier("editor/play");
     }
 
-    public override string Name => "Scene";
+    public virtual string Name => "Scene";
 
     public override bool UseMargin => false;
     public override Color? BackgroundColor => Color.Black;
@@ -25,7 +26,8 @@ public class EditorSceneView : EditorView
         renderer.Groups["editor"].Dependencies[0].Group.Size = ContentPanel.Bounds.Size;
         renderer.Groups["editor"].Dependencies[0].Destination = ContentPanel.Bounds;
 
-        ((EditorEnvironment)ContentPanel.Environment).ActiveTool?.Render(renderer);
+        var toolSystem = Scene.Systems.Get<EditorToolSystem>();
+        toolSystem?.ActiveTool?.Render(renderer);
     }
 
     public override void EnsurePanelExists(GuiEnvironment environment)
@@ -45,20 +47,30 @@ public class SceneViewPanel : GuiPanel
 
     public override void OnMousePressed(ref MouseEvent e)
     {
-        if (e.Button == MouseEvent.MiddleButton || e.Button == MouseEvent.RightButton)
-            ((EditorEnvironment)Environment).ForcedTool = ((EditorEnvironment)Environment).Tools[0];
+        var toolSystem = Scene.Systems.Get<EditorToolSystem>();
+        if (toolSystem != null)
+        {
+            if (e.Button is MouseEvent.MiddleButton or MouseEvent.RightButton)
+                toolSystem.ForcedTool = toolSystem.Tools[0];
 
-        ((EditorEnvironment)Environment).ActiveTool?.OnMousePressed(ref e);
+            toolSystem.ActiveTool?.OnMousePressed(ref e);
+        }
+        
         base.OnMousePressed(ref e);
     }
 
     public override void OnMouseReleased(ref MouseEvent e)
     {
-        if (e.Button == MouseEvent.MiddleButton || e.Button == MouseEvent.RightButton)
-            ((EditorEnvironment)Environment).ForcedTool = null;
+        var toolSystem = Scene.Systems.Get<EditorToolSystem>();
+        if (toolSystem != null)
+        {
+            if (e.Button is MouseEvent.MiddleButton or MouseEvent.RightButton)
+                toolSystem.ForcedTool = null;
+
+            toolSystem.ActiveTool?.OnMouseReleased(ref e);
+        }
 
         base.OnMouseReleased(ref e);
-        ((EditorEnvironment)Environment).ActiveTool?.OnMouseReleased(ref e);
     }
 
     public override void Scroll(int dir)
@@ -98,6 +110,8 @@ public class SceneViewPanel : GuiPanel
             cameraTransform.Position += move * speed * Time.DeltaTime;
         }
 
-        ((EditorEnvironment)Environment).ActiveTool?.OnInput(controls);
+        
+        var toolSystem = Scene.Systems.Get<EditorToolSystem>();
+        toolSystem?.ActiveTool?.OnInput();
     }
 }

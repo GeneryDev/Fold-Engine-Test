@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using FoldEngine.Components;
 using FoldEngine.Editor.ImmediateGui;
+using FoldEngine.Editor.Systems;
 using FoldEngine.Editor.Transactions;
 using FoldEngine.Graphics;
 using FoldEngine.ImmediateGui;
@@ -29,7 +30,7 @@ public class RotateTool : SelectTool
 
     private bool hoveringRing;
 
-    public RotateTool(EditorEnvironment environment) : base(environment)
+    public RotateTool(EditorToolSystem system) : base(system)
     {
         Icon = EditorIcons.Rotate;
     }
@@ -43,8 +44,8 @@ public class RotateTool : SelectTool
             if (editingTab.Scene == null) return;
             
             Vector2 mouseWorldPos =
-                editingTab.Scene.MainCameraTransform.Apply(Environment.Renderer.GizmoLayer.LayerToCamera(
-                    Environment.Renderer.GizmoLayer.WindowToLayer(e.Position.ToVector2())));
+                editingTab.Scene.MainCameraTransform.Apply(Core.RenderingUnit.GizmoLayer.LayerToCamera(
+                    Core.RenderingUnit.GizmoLayer.WindowToLayer(e.Position.ToVector2())));
             _pressMousePivotPosition = _movePivot.Relativize(mouseWorldPos);
             _pressMousePivotRotation = (float)Math.Atan2(_pressMousePivotPosition.Y, _pressMousePivotPosition.X);
 
@@ -106,8 +107,8 @@ public class RotateTool : SelectTool
         if (_dragging)
         {
             Vector2 mouseWorldPos =
-                editingTab.Scene.MainCameraTransform.Apply(Environment.Renderer.GizmoLayer.LayerToCamera(
-                    Environment.Renderer.GizmoLayer.WindowToLayer(Environment.MousePos.ToVector2())));
+                editingTab.Scene.MainCameraTransform.Apply(Core.RenderingUnit.GizmoLayer.LayerToCamera(
+                    Core.RenderingUnit.GizmoLayer.WindowToLayer(MousePos)));
 
             Vector2 mouseOffset = _movePivot.Relativize(mouseWorldPos);
             float newRotation = (float)Math.Atan2(mouseOffset.Y, mouseOffset.X);
@@ -270,7 +271,7 @@ public class RotateTool : SelectTool
         //Check hover
         if (!forceHoverState.HasValue)
         {
-            Vector2 mousePosLayerSpace = renderer.GizmoLayer.WindowToLayer(Environment.MousePos.ToVector2());
+            Vector2 mousePosLayerSpace = renderer.GizmoLayer.WindowToLayer(MousePos);
             float distance = Math.Abs(Vector2.Distance(start, mousePosLayerSpace)
                                       - Vector2.Distance(start, end));
             hovered = distance <= hoverDistance;
