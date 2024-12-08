@@ -10,19 +10,24 @@ public abstract class EditorView
 {
     public GuiPanel ContentPanel;
 
-    public ResourceIdentifier Icon;
+    // Already accessible in environment?
     public Scene Scene;
     public IGameCore Core => Scene.Core;
     public ResourceCollections EditorResources => Scene.Resources;
+    
+    // For tab appearance
+    public ResourceIdentifier Icon;
     public abstract string Name { get; }
 
+    // For content appearance
     public virtual bool UseMargin => true;
     public virtual Color? BackgroundColor => null;
 
+    
     public abstract void Render(IRenderingUnit renderer);
 
     public virtual void EnsurePanelExists(GuiEnvironment environment)
     {
-        if (ContentPanel == null) ContentPanel = new GuiPanel(environment);
+        ContentPanel ??= new GuiPanel(environment);
     }
 }

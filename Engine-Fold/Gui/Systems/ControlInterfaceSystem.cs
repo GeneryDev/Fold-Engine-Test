@@ -85,6 +85,7 @@ public class ControlInterfaceSystem : GameSystem
             _prevMousePos = _mousePos;
         }
 
+        viewport.MousePos = _mousePos;
         viewport.PrevHoverTargetId = viewport.HoverTargetId;
         viewport.HoverTargetId = GetControlAtPoint(_mousePos);
         

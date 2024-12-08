@@ -236,7 +236,7 @@ public class TriangleBatcher
     {
         if (_batchItemCount >= _batchItemList.Length)
         {
-            Console.WriteLine("Resized TriangleBatchItem list");
+            Console.WriteLine($"Resized TriangleBatchItem list to fit {_batchItemCount}");
             int length = _batchItemList.Length;
             int newLength = (length + length / 2 + 63) & -64;
             Array.Resize(ref _batchItemList, newLength);

@@ -30,13 +30,13 @@ public class EditorSceneView : EditorView
 
     public override void EnsurePanelExists(GuiEnvironment environment)
     {
-        if (ContentPanel == null) ContentPanel = new SceneViewPanel(this, environment);
+        if (ContentPanel == null) ContentPanel = new SceneViewPanel(environment);
     }
 }
 
 public class SceneViewPanel : GuiPanel
 {
-    public SceneViewPanel(EditorSceneView editorSceneView, GuiEnvironment environment) : base(environment)
+    public SceneViewPanel(GuiEnvironment environment) : base(environment)
     {
         MayScroll = true;
     }

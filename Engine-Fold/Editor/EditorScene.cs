@@ -1,5 +1,7 @@
 ﻿using System;
+using FoldEngine.Editor.ImmediateGui;
 using FoldEngine.Editor.Systems;
+using FoldEngine.Editor.Views;
 using FoldEngine.Gui;
 using FoldEngine.Gui.Components;
 using FoldEngine.Gui.Components.Controls;
@@ -38,6 +40,8 @@ public class EditorScene : Scene
         Systems.Add<StandardControlsSystem>();
         Systems.Add<TooltipSystem>();
         Systems.Add<TabSystem>();
+        
+        Systems.Add<ImmediateGuiSystem>();
 
         var entViewport = CreateEntity("Viewport");
         entViewport.AddComponent<Viewport>() = new Viewport
@@ -67,6 +71,7 @@ public class EditorScene : Scene
             EastPanelId = CreateDock("Right", out var rightTabs, out var rightContainer, -Vector2.UnitX).EntityId,
             SouthPanelId = CreateDock("Bottom", out var bottomTabs, out var bottomContainer, -Vector2.UnitY).EntityId
         };
+        CreateDock("Center", out var centerTabs, out var centerContainer, Vector2.Zero);
 
         Entity CreateDock(string name, out long dockTabBarEntityId, out long dockContentEntityId, Vector2 resizeDirection)
         {
@@ -77,7 +82,7 @@ public class EditorScene : Scene
             ref var dockControl = ref dock.AddComponent<Control>();
             dockControl.ZOrder = 0;
             dockControl.MinimumSize = dockControl.Size = new Vector2(160, 80);
-            dock.AddComponent<BoxControl>().Color = new Color(Random.Shared.Next(256), Random.Shared.Next(256), Random.Shared.Next(256), 120);
+            dock.AddComponent<BoxControl>().Color = new Color(45, 45, 48);
             dock.Hierarchical.SetParent(docksContainer);
 
             var dockContent = CreateEntity("Dock Content");
@@ -104,7 +109,7 @@ public class EditorScene : Scene
             var tabContent = CreateEntity("Tab Content");
             tabContent.Hierarchical.SetParent(dockContent);
             tabContent.AddComponent<Control>();
-            // tabContent.AddComponent<BoxControl>().Color = new Color(37, 37, 38, 255);
+            tabContent.AddComponent<BoxControl>().Color = new Color(37, 37, 38, 255);
             tabBar.AddComponent<TabSwitcher>().ContainerEntityId = tabContent.EntityId;
             dockContent.AddComponent<EditorTabDropTarget>().TabBarId = tabBar.EntityId;
 
@@ -129,12 +134,15 @@ public class EditorScene : Scene
                 OffsetRight = resizerSize * (resizeDirection.X < 0 ? 1 : 0),
                 OffsetBottom = resizerSize * (resizeDirection.Y < 0 ? 1 : 0)
             };
-            dockResizer.AddComponent<ResizeHandleControl>() = new ResizeHandleControl()
+            if (resizeDirection.LengthSquared() > 0)
             {
-                ResizeDirection = resizeDirection,
-                MinimumSize = dockControl.MinimumSize,
-                EntityToResize = dock.EntityId
-            };
+                dockResizer.AddComponent<ResizeHandleControl>() = new ResizeHandleControl()
+                {
+                    ResizeDirection = resizeDirection,
+                    MinimumSize = dockControl.MinimumSize,
+                    EntityToResize = dock.EntityId
+                };
+            }
             dockResizer.Hierarchical.SetParent(dock);
             
             return dock;
@@ -242,14 +250,36 @@ public class EditorScene : Scene
 
             return view;
         }
+
+        Entity CreateImmediateView<T>(string name, string icon, long tabBarId, long tabContainerId) where T : EditorView, new()
+        {
+            var view = CreateEditorView(name, icon, tabBarId, tabContainerId);
+
+            var content = CreateEntity("Immediate Content");
+            content.AddComponent<Control>();
+            content.AddComponent<AnchoredControl>() = new AnchoredControl()
+            {
+                AnchorRight = 1,
+                AnchorBottom = 1
+            };
+            content.AddComponent<ImmediateGuiControl>() = new ImmediateGuiControl()
+            {
+                View = new T()
+            };
+            content.Hierarchical.SetParent(view);
+
+            return view;
+        }
         
         CreateToolbarView(topTabs, topContainer);
-        CreateTempView("Hierarchy", "editor/hierarchy", leftTabs, leftContainer);
-        CreateTempView("Systems", "editor/cog", leftTabs, leftContainer);
-        CreateTempView("Inspector", "editor/info", rightTabs, rightContainer);
-        CreateTempView("Debug Actions", "editor/info", rightTabs, rightContainer);
-        CreateTempView("Resources", "editor/checkmark", bottomTabs, bottomContainer);
-        CreateTempView("Scene List", "editor/menu", bottomTabs, bottomContainer);
+        CreateImmediateView<EditorToolbarView>("Toolbar (old)", "editor/cog", topTabs, topContainer);
+        CreateImmediateView<EditorHierarchyView>("Hierarchy", "editor/hierarchy", leftTabs, leftContainer);
+        CreateImmediateView<EditorSystemsView>("Systems", "editor/cog", leftTabs, leftContainer);
+        CreateImmediateView<EditorInspectorView>("Inspector", "editor/info", rightTabs, rightContainer);
+        CreateImmediateView<EditorDebugActionsView>("Debug Actions", "editor/info", rightTabs, rightContainer);
+        CreateImmediateView<EditorResourcesView>("Resources", "editor/checkmark", bottomTabs, bottomContainer);
+        CreateImmediateView<EditorSceneListView>("Scene List", "editor/menu", bottomTabs, bottomContainer);
+        CreateImmediateView<EditorSceneView>("Game", "editor/play", centerTabs, centerContainer);
     }
 
     private void BuildStyles()

@@ -16,8 +16,6 @@ namespace FoldEngine.Editor;
 [GameSystem("fold:editor.base", ProcessingCycles.All, true)]
 public class EditorBase : GameSystem
 {
-    [DoNotSerialize] private EditorEnvironment _environment;
-
     public bool InspectSelf = false;
     private long _currentSceneTabId = -1;
     private SubScene _nullSubScene;
@@ -82,11 +80,6 @@ public class EditorBase : GameSystem
         }
     }
 
-    public override void SubscribeToEvents()
-    {
-        Subscribe(Scene.Core.Events, (ref WindowSizeChangedEvent evt) => { _environment.LayoutValidated = false; });
-    }
-
     public override void Initialize()
     {
         _selfSceneTab = new EditorSceneTab()
@@ -95,27 +88,7 @@ public class EditorBase : GameSystem
             Scene = Scene
         };
         
-        _environment = new EditorEnvironment(Scene);
-
-        _environment.AddView<EditorToolbarView>(_environment.NorthPanel);
-        var hierarchyView = _environment.AddView<EditorHierarchyView>(_environment.WestPanel);
-        _environment.AddView<EditorSystemsView>(_environment.WestPanel);
-        _environment.AddView<EditorInspectorView>(_environment.EastPanel);
-        _environment.AddView<EditorSceneView>(_environment.CenterPanel);
-        var resourcesView = _environment.AddView<EditorResourcesView>(_environment.SouthPanel);
-        _environment.AddView<EditorDebugActionsView>(_environment.EastPanel);
-        _environment.AddView<EditorSceneListView>(_environment.SouthPanel);
-        // Environment.AddView<EditorTestView>(Environment.SouthPanel);
-
-        _environment.WestPanel.ViewLists[0].ActiveView = hierarchyView;
-        _environment.SouthPanel.ViewLists[0].ActiveView = resourcesView;
-
         TabIterator = CreateComponentIterator<EditorSceneTab>(IterationFlags.Ordered | IterationFlags.IncludeInactive);
-    }
-
-    public override void OnInput()
-    {
-        _environment.Input(Scene.Core.InputUnit);
     }
 
     public override void OnRender(IRenderingUnit renderer)
@@ -126,8 +99,6 @@ public class EditorBase : GameSystem
             Scene.Core.CommandQueue.Enqueue(new SetRootRendererGroupCommand(renderer.Groups["editor"]));
             return;
         }
-
-        _environment.Render(renderer, renderer.RootGroup["editor_gui"], renderer.RootGroup["editor_gui_overlay"]);
 
         if (_currentSceneTabId != -1)
         {

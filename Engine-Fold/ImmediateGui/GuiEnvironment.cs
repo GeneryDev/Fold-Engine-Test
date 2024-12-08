@@ -39,19 +39,15 @@ public abstract class GuiEnvironment : IDisposable
     {
         Scene = scene;
         scene.Core.FoldGame.Window.TextInput += WindowOnTextInput;
-
-        ControlScheme.AddDevice(Core.InputUnit.Devices.Keyboard);
-        ControlScheme.AddDevice(Core.InputUnit.Devices.Mouse);
     }
 
     public GuiElement FocusOwner { get; private set; }
 
-    public abstract List<GuiPanel> DockPanels { get; }
+    public abstract GuiPanel ContentPanel { get; set; }
 
     // Renderer
     public IRenderingUnit Renderer { get; set; }
     public IRenderingLayer BaseLayer { get; set; }
-    public IRenderingLayer OverlayLayer { get; set; }
 
     public void Dispose()
     {
@@ -106,24 +102,20 @@ public abstract class GuiEnvironment : IDisposable
     {
         if (mouseButton.Pressed)
         {
-            for (int i = DockPanels.Count - 1; i >= 0; i--)
+            GuiPanel panel = ContentPanel;
+            if (panel.Visible && panel.Bounds.Contains(MousePos))
             {
-                GuiPanel panel = DockPanels[i];
-                if (panel.Visible && panel.Bounds.Contains(MousePos))
+                _pressedPanels[buttonIndex] = panel;
+
+                var evt = new MouseEvent
                 {
-                    _pressedPanels[buttonIndex] = panel;
+                    Type = MouseEventType.Pressed,
+                    Position = MousePos,
+                    Button = buttonIndex,
+                    When = Time.Now
+                };
 
-                    var evt = new MouseEvent
-                    {
-                        Type = MouseEventType.Pressed,
-                        Position = MousePos,
-                        Button = buttonIndex,
-                        When = Time.Now
-                    };
-
-                    panel.OnMousePressed(ref evt);
-                    break;
-                }
+                panel.OnMousePressed(ref evt);
             }
         }
         else if (mouseButton.Released)
@@ -141,11 +133,10 @@ public abstract class GuiEnvironment : IDisposable
         }
     }
 
-    public virtual void Render(IRenderingUnit renderer, IRenderingLayer baseLayer, IRenderingLayer overlayLayer)
+    public virtual void PrepareRender(IRenderingUnit renderer, IRenderingLayer baseLayer, IRenderingLayer overlayLayer)
     {
         Renderer = renderer;
         BaseLayer = baseLayer;
-        OverlayLayer = overlayLayer;
 
         HoverTargetPrevious = HoverTarget;
         HoverTarget = default;
