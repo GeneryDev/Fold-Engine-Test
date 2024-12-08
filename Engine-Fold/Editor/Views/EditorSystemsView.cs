@@ -1,5 +1,6 @@
 ﻿using System;
 using FoldEngine.Editor.Components;
+using FoldEngine.Editor.Events;
 using FoldEngine.Editor.ImmediateGui;
 using FoldEngine.Editor.ImmediateGui.Hierarchy;
 using FoldEngine.Editor.Transactions;
@@ -23,6 +24,8 @@ public class EditorSystemsView : EditorView
 
     public override string Name => "Systems";
     public SystemHierarchy Hierarchy;
+
+    private GameSystem _selectedSystem;
 
     public override void Render(IRenderingUnit renderer)
     {
@@ -50,14 +53,12 @@ public class EditorSystemsView : EditorView
 
         ContentPanel.Separator();
 
-        var editorEnvironment = (EditorEnvironment)ContentPanel.Environment;
-
         foreach (GameSystem sys in editingScene.Systems.AllSystems)
         {
             HierarchyElement<Type> element = (HierarchyElement<Type>)ContentPanel.Element<HierarchyElement<Type>>()
                     .Hierarchy(Hierarchy)
                     .Id(sys.GetType())
-                    .Selected(editorEnvironment.GetView<EditorInspectorView>().GetObject() == sys)
+                    .Selected(_selectedSystem == sys)
                     .Icon(EditorResources.Get<Texture>(ref EditorIcons.Cog, null))
                     .Text(sys.SystemName)
                 ;
@@ -67,8 +68,11 @@ public class EditorSystemsView : EditorView
                 case HierarchyElement<Type>.HierarchyEventType.Down:
                 {
                     editingTab.EditingEntity?.Clear();
-                    editorEnvironment.GetView<EditorInspectorView>().SetObject(sys);
-                    editorEnvironment.SwitchToView<EditorInspectorView>();
+                    _selectedSystem = sys;
+                    Scene.Events.Invoke(new ObjectInspectorRequestedEvent()
+                    {
+                        Object = sys
+                    });
 
                     Hierarchy.Selected.Clear();
                     Hierarchy.Selected.Add(sys.GetType());

@@ -1,4 +1,6 @@
-﻿using FoldEngine.Components;
+﻿using System;
+using FoldEngine.Components;
+using FoldEngine.Editor.Events;
 using FoldEngine.Gui.Components;
 using FoldEngine.Gui.Components.Controls;
 using FoldEngine.Gui.Events;
@@ -83,6 +85,18 @@ public class EditorTabSystem : GameSystem
                     evt.Consumed = true;
                 }
             }
+        });
+        Subscribe((ref EditorTabSwitchRequestedEvent evt) =>
+        {
+            Console.WriteLine($"TODO: Editor tab switch: {evt.TabName}");
+        });
+        Subscribe((ref EntityInspectorRequestedEvent evt) =>
+        {
+            Console.WriteLine($"TODO: inspect entities");
+        });
+        Subscribe((ref ObjectInspectorRequestedEvent evt) =>
+        {
+            Console.WriteLine($"TODO: inspect object");
         });
     }
 }

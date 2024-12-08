@@ -41,7 +41,7 @@ public class SceneViewPanel : GuiPanel
         MayScroll = true;
     }
 
-    public override bool Focusable => true;
+    protected override bool Focusable => true;
 
     public override void OnMousePressed(ref MouseEvent e)
     {

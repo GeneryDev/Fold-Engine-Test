@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using FoldEngine.Editor.ImmediateGui.Hierarchy;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
@@ -21,12 +20,12 @@ public abstract class GuiEnvironment : IDisposable
 
     private readonly GuiPanel[] _pressedPanels = new GuiPanel[MouseEvent.MaxButtons];
 
-    public ControlScheme ControlScheme = new ControlScheme("Gui");
+    protected readonly ControlScheme ControlScheme = new ControlScheme("Gui");
     public HoverTarget HoverTarget;
     public HoverTarget HoverTargetPrevious;
-    public ButtonAction MouseLeft = ButtonAction.Default;
-    public ButtonAction MouseMiddle = ButtonAction.Default;
-    public ButtonAction MouseRight = ButtonAction.Default;
+    private ButtonAction _mouseLeft = ButtonAction.Default;
+    private ButtonAction _mouseMiddle = ButtonAction.Default;
+    private ButtonAction _mouseRight = ButtonAction.Default;
 
     // Input
     public Point MousePos;
@@ -78,11 +77,11 @@ public abstract class GuiEnvironment : IDisposable
 
     public virtual void Input(InputUnit inputUnit)
     {
-        if (MouseLeft == ButtonAction.Default)
+        if (_mouseLeft == ButtonAction.Default)
         {
-            MouseLeft = new ButtonAction(inputUnit.Devices.Mouse.LeftButton);
-            MouseMiddle = new ButtonAction(inputUnit.Devices.Mouse.MiddleButton);
-            MouseRight = new ButtonAction(inputUnit.Devices.Mouse.RightButton);
+            _mouseLeft = new ButtonAction(inputUnit.Devices.Mouse.LeftButton);
+            _mouseMiddle = new ButtonAction(inputUnit.Devices.Mouse.MiddleButton);
+            _mouseRight = new ButtonAction(inputUnit.Devices.Mouse.RightButton);
         }
 
         MousePos = Mouse.GetState().Position;
@@ -96,9 +95,9 @@ public abstract class GuiEnvironment : IDisposable
                 Console.WriteLine(ignore.Message);
             }
 
-        HandleMouseEvents(MouseLeft, MouseEvent.LeftButton);
-        HandleMouseEvents(MouseMiddle, MouseEvent.MiddleButton);
-        HandleMouseEvents(MouseRight, MouseEvent.RightButton);
+        HandleMouseEvents(_mouseLeft, MouseEvent.LeftButton);
+        HandleMouseEvents(_mouseMiddle, MouseEvent.MiddleButton);
+        HandleMouseEvents(_mouseRight, MouseEvent.RightButton);
 
         FocusOwner?.OnInput(ControlScheme);
     }
@@ -142,10 +141,6 @@ public abstract class GuiEnvironment : IDisposable
         }
     }
 
-    public virtual void Update()
-    {
-    }
-
     public virtual void Render(IRenderingUnit renderer, IRenderingLayer baseLayer, IRenderingLayer overlayLayer)
     {
         Renderer = renderer;
@@ -173,7 +168,6 @@ public struct HoverTarget
 {
     public GuiPanel ScrollablePanel;
     public GuiElement Element;
-    public IHierarchy Hierarchy;
 }
 
 public struct MouseEvent

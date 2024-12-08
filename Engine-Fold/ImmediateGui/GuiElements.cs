@@ -11,15 +11,15 @@ namespace FoldEngine.ImmediateGui;
 public abstract class GuiElement
 {
     public Rectangle Bounds;
-    public int Margin = 8;
+    protected int Margin = 8;
     internal GuiPanel Parent;
 
     public virtual GuiEnvironment Environment => Parent.Environment;
-    public virtual Scene Scene => Environment.Scene;
+    public Scene Scene => Environment.Scene;
 
-    public virtual bool ClickToFocus => true;
-    public virtual bool Focusable => false;
-    public bool Rollover => Parent.Environment.HoverTargetPrevious.Element == this;
+    private bool ClickToFocus => true;
+    protected virtual bool Focusable => false;
+    protected bool Rollover => Parent.Environment.HoverTargetPrevious.Element == this;
     public bool Focused => Parent?.Environment?.FocusOwner == this;
 
     public abstract void Reset(GuiPanel parent);

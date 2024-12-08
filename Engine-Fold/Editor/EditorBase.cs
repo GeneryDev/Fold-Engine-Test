@@ -98,18 +98,17 @@ public class EditorBase : GameSystem
         _environment = new EditorEnvironment(Scene);
 
         _environment.AddView<EditorToolbarView>(_environment.NorthPanel);
-        _environment.AddView<EditorHierarchyView>(_environment.WestPanel);
+        var hierarchyView = _environment.AddView<EditorHierarchyView>(_environment.WestPanel);
         _environment.AddView<EditorSystemsView>(_environment.WestPanel);
         _environment.AddView<EditorInspectorView>(_environment.EastPanel);
         _environment.AddView<EditorSceneView>(_environment.CenterPanel);
-        _environment.AddView<EditorResourcesView>(_environment.SouthPanel);
+        var resourcesView = _environment.AddView<EditorResourcesView>(_environment.SouthPanel);
         _environment.AddView<EditorDebugActionsView>(_environment.EastPanel);
         _environment.AddView<EditorSceneListView>(_environment.SouthPanel);
         // Environment.AddView<EditorTestView>(Environment.SouthPanel);
 
-        _environment.WestPanel.ViewLists[0].ActiveView = _environment.GetView<EditorHierarchyView>();
-        _environment.NorthPanel.ViewLists[0].ActiveView = _environment.GetView<EditorToolbarView>();
-        _environment.SouthPanel.ViewLists[0].ActiveView = _environment.GetView<EditorResourcesView>();
+        _environment.WestPanel.ViewLists[0].ActiveView = hierarchyView;
+        _environment.SouthPanel.ViewLists[0].ActiveView = resourcesView;
 
         TabIterator = CreateComponentIterator<EditorSceneTab>(IterationFlags.Ordered | IterationFlags.IncludeInactive);
     }
@@ -117,11 +116,6 @@ public class EditorBase : GameSystem
     public override void OnInput()
     {
         _environment.Input(Scene.Core.InputUnit);
-    }
-
-    public override void OnUpdate()
-    {
-        _environment.Update();
     }
 
     public override void OnRender(IRenderingUnit renderer)

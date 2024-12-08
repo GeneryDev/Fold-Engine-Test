@@ -36,7 +36,7 @@ public class TextField : GuiElement, IInspectorField
         Document.Text = "Hello World";
     }
 
-    public override bool Focusable => true;
+    protected override bool Focusable => true;
 
     private Point TextRenderingStartPos => new Point(Bounds.X + 4, Bounds.Y + FontSize + 5);
 

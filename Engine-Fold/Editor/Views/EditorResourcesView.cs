@@ -1,4 +1,5 @@
 ﻿using System;
+using FoldEngine.Editor.Events;
 using FoldEngine.Editor.ImmediateGui;
 using FoldEngine.Editor.ImmediateGui.Fields;
 using FoldEngine.Editor.ImmediateGui.Hierarchy;
@@ -131,13 +132,12 @@ public class EditorResourcesView : EditorView
                 {
                     // Runtime
 
-                    if (ContentPanel.Environment is EditorEnvironment editorEnvironment)
+                    editingTab.EditingEntity.Clear();
+                    
+                    Scene.Events.Invoke(new ObjectInspectorRequestedEvent()
                     {
-                        editingTab.EditingEntity.Clear();
-                        editorEnvironment.GetView<EditorInspectorView>()
-                            .SetObject((Scene.Systems.Get<EditorBase>()?.CurrentSceneTab.Scene?.Resources ?? Scene.Core.Resources).Get(type, ref identifier));
-                        editorEnvironment.SwitchToView<EditorInspectorView>();
-                    }
+                        Object = (Scene.Systems.Get<EditorBase>()?.CurrentSceneTab.Scene?.Resources ?? Scene.Core.Resources).Get(type, ref identifier)
+                    });
 
                     loaded = true;
                 }
@@ -150,9 +150,10 @@ public class EditorResourcesView : EditorView
                         if (ContentPanel.Environment is EditorEnvironment editorEnvironment)
                         {
                             editingTab.EditingEntity.Clear();
-                            editorEnvironment.GetView<EditorInspectorView>()
-                                .SetObject(ContentPanel.Environment.Core.Resources.Get(type, ref identifier));
-                            editorEnvironment.SwitchToView<EditorInspectorView>();
+                            Scene.Events.Invoke(new ObjectInspectorRequestedEvent()
+                            {
+                                Object = ContentPanel.Environment.Core.Resources.Get(type, ref identifier)
+                            });
                         }
 
                         loaded = true;
@@ -162,12 +163,14 @@ public class EditorResourcesView : EditorView
                         if (ContentPanel.Environment is EditorEnvironment editorEnvironment)
                         {
                             editingTab.EditingEntity.Clear();
-                            editorEnvironment.GetView<EditorInspectorView>().SetObject(new Loading()
+                            Scene.Events.Invoke(new ObjectInspectorRequestedEvent()
                             {
-                                Type = type,
-                                Identifier = identifier
+                                Object = new Loading()
+                                {
+                                    Type = type,
+                                    Identifier = identifier
+                                }
                             });
-                            editorEnvironment.SwitchToView<EditorInspectorView>();
                         }
                     }
                 }
@@ -206,9 +209,12 @@ public class LoadingInspector : CustomInspector<Loading>
         panel.Element<GuiLabel>().Text($"Identifier: {obj.Identifier.Identifier}").FontSize(9).TextAlignment(-1);
 
         Resource resource = panel.Environment.Core.Resources.Get(obj.Type, ref obj.Identifier);
-        if (resource != null && panel.Environment is EditorEnvironment editorEnvironment)
+        if (resource != null)
         {
-            editorEnvironment.GetView<EditorInspectorView>().SetObject(resource);
+            panel.Scene.Events.Invoke(new ObjectInspectorRequestedEvent()
+            {
+                Object = resource
+            });
         }
     }
 }

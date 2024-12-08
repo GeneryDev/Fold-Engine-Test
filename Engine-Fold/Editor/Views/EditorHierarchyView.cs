@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using FoldEngine.Components;
 using FoldEngine.Editor.Components;
+using FoldEngine.Editor.Events;
 using FoldEngine.Editor.ImmediateGui;
 using FoldEngine.Editor.ImmediateGui.Hierarchy;
 using FoldEngine.Editor.Transactions;
@@ -176,11 +177,10 @@ public class EditorHierarchyView : EditorView
             editingTab.EditingEntity.Add(id);
         }
 
-        if (ContentPanel.Environment is EditorEnvironment editorEnvironment)
+        Scene.Events.Invoke(new EntityInspectorRequestedEvent()
         {
-            editorEnvironment.GetView<EditorInspectorView>().SetObject(null);
-            editorEnvironment.SwitchToView<EditorInspectorView>();
-        }
+            Entities = editingTab.EditingEntity
+        });
     }
 
     private void ShowEntityContextMenu(long id, Point point)

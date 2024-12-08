@@ -108,7 +108,6 @@ public class HierarchyElement<TI> : GuiLabel
         if (Bounds.Contains(Environment.MousePos))
         {
             Environment.HoverTarget.Element = this;
-            Environment.HoverTarget.Hierarchy = _hierarchy;
         }
 
         if (Pressed(MouseEvent.LeftButton) && Environment.HoverTargetPrevious.Element != this && _hierarchy.CanDrag)

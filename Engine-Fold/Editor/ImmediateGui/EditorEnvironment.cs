@@ -20,14 +20,12 @@ public class EditorEnvironment : GuiEnvironment
     public const int FrameBorder = 4;
     public const int FrameMargin = 8;
 
-    public List<EditorView> AllViews = new List<EditorView>();
-
-    public readonly List<EditorTool> Tools = new List<EditorTool>();
+    public readonly List<EditorTool> Tools = [];
     public EditorTool ForcedTool;
     public EditorTool SelectedTool;
     public EditorTool ActiveTool => ForcedTool ?? SelectedTool;
 
-    public sealed override List<GuiPanel> DockPanels { get; } = new List<GuiPanel>();
+    public sealed override List<GuiPanel> DockPanels { get; } = [];
 
 
     public EditorEnvironment(Scene scene) : base(scene)
@@ -172,41 +170,13 @@ public class EditorEnvironment : GuiEnvironment
         }
     }
 
-    public void AddView<T>(BorderPanel preferredPanel = null) where T : EditorView, new()
+    public T AddView<T>(BorderPanel preferredPanel = null) where T : EditorView, new()
     {
         var view = new T { Scene = Scene };
 
-        AllViews.Add(view);
-
         preferredPanel?.ViewLists[0].AddView(view);
-    }
 
-    public T GetView<T>() where T : EditorView
-    {
-        foreach (EditorView view in AllViews)
-            if (view is T viewT)
-                return viewT;
-        return null;
-    }
-
-    public bool SwitchToView<T>() where T : EditorView
-    {
-        return SwitchToView(GetView<T>());
-    }
-
-    public bool SwitchToView(EditorView view)
-    {
-        foreach (BorderPanel borderPanel in DockPanels)
-        {
-            foreach (ViewListPanel viewListPanel in borderPanel.ViewLists)
-                if (viewListPanel.ContainsView(view))
-                {
-                    viewListPanel.SwitchToView(view);
-                    return true;
-                }
-        }
-
-        return false;
+        return view;
     }
 
     #region Dock Size Properties

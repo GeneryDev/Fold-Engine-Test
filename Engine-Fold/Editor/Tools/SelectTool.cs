@@ -1,4 +1,5 @@
 ﻿using FoldEngine.Components;
+using FoldEngine.Editor.Events;
 using FoldEngine.Editor.ImmediateGui;
 using FoldEngine.Editor.Views;
 using FoldEngine.ImmediateGui;
@@ -42,7 +43,11 @@ public class SelectTool : EditorTool
 
         if (intersectingEntities != -1 && !editingTab.EditingEntity.Contains(intersectingEntities))
             editingTab.EditingEntity.Add(intersectingEntities);
-        Environment.SwitchToView<EditorInspectorView>();
+        
+        Scene.Events.Invoke(new EntityInspectorRequestedEvent()
+        {
+            Entities = editingTab.EditingEntity
+        });
     }
 
     public override void OnMouseReleased(ref MouseEvent e)
