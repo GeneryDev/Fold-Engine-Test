@@ -1,6 +1,8 @@
 ﻿using System;
 using FoldEngine.Components;
 using FoldEngine.Editor.Events;
+using FoldEngine.Editor.ImmediateGui;
+using FoldEngine.Editor.Views;
 using FoldEngine.Gui.Components;
 using FoldEngine.Gui.Components.Controls;
 using FoldEngine.Gui.Events;
@@ -14,6 +16,15 @@ namespace FoldEngine.Editor;
 [GameSystem("fold:editor.tabs", ProcessingCycles.None)]
 public class EditorTabSystem : GameSystem
 {
+    private ComponentIterator<EditorTab> _editorTabs;
+    private ComponentIterator<ImmediateGuiControl> _immediateControls;
+    
+    public override void Initialize()
+    {
+        _editorTabs = CreateComponentIterator<EditorTab>(IterationFlags.None);
+        _immediateControls = CreateComponentIterator<ImmediateGuiControl>(IterationFlags.None);
+    }
+
     public override void SubscribeToEvents()
     {
         Subscribe((ref DragDataRequestedEvent evt) =>
@@ -88,15 +99,52 @@ public class EditorTabSystem : GameSystem
         });
         Subscribe((ref EditorTabSwitchRequestedEvent evt) =>
         {
-            Console.WriteLine($"TODO: Editor tab switch: {evt.TabName}");
+            _editorTabs.Reset();
+            while (_editorTabs.Next())
+            {
+                var tab = _editorTabs.GetComponent();
+                if (tab.TabName != evt.TabName) continue;
+                var tabId = _editorTabs.GetEntityId();
+
+                var hierarchical = _editorTabs.GetCoComponent<Hierarchical>();
+                var tabListId = hierarchical.ParentId;
+                if (!Scene.Components.HasComponent<TabList>(tabListId)) continue;
+                
+                ref var tabList = ref Scene.Components.GetComponent<TabList>(tabListId);
+                tabList.SelectedTabId = tabId;
+                Scene.Events.Invoke(new TabSelectedEvent()
+                {
+                    TabListId = tabListId,
+                    TabId = tabId,
+                });
+                break;
+            }
         });
         Subscribe((ref EntityInspectorRequestedEvent evt) =>
         {
-            Console.WriteLine($"TODO: inspect entities");
+            var inspector = GetEditorView<EditorInspectorView>();
+            inspector?.SetObject(null);
+
+            Scene.Events.Invoke(new EditorTabSwitchRequestedEvent() { TabName = "Inspector" });
         });
         Subscribe((ref ObjectInspectorRequestedEvent evt) =>
         {
-            Console.WriteLine($"TODO: inspect object");
+            var inspector = GetEditorView<EditorInspectorView>();
+            inspector?.SetObject(evt.Object);
+            
+            Scene.Events.Invoke(new EditorTabSwitchRequestedEvent() { TabName = "Inspector" });
         });
+    }
+
+    private T GetEditorView<T>() where T : EditorView
+    {
+        _immediateControls.Reset();
+        while (_immediateControls.Next())
+        {
+            var ic = _immediateControls.GetComponent();
+            if (ic.View is T t) return t;
+        }
+
+        return null;
     }
 }

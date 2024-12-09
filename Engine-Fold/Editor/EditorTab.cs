@@ -7,6 +7,7 @@ namespace FoldEngine.Editor;
 [Component("fold:editor.tab", traits: [typeof(DragOperationStarter)])]
 public struct EditorTab
 {
+    public string TabName;
 }
 
 [Component("fold:editor.tab_drop_target")]

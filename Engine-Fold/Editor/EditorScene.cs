@@ -168,7 +168,10 @@ public class EditorScene : Scene
                 SelectedButtonStyle = "editor:tab.selected",
                 LinkedEntityId = linkedControl
             };
-            tab.AddComponent<EditorTab>();
+            tab.AddComponent<EditorTab>() = new EditorTab()
+            {
+                TabName = name
+            };
             return tab;
         }
 
