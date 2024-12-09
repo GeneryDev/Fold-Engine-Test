@@ -104,10 +104,10 @@ public class EditorTabSystem : GameSystem
             {
                 var tab = _editorTabs.GetComponent();
                 if (tab.TabName != evt.TabName) continue;
-                var tabId = _editorTabs.GetEntityId();
+                long tabId = _editorTabs.GetEntityId();
 
                 var hierarchical = _editorTabs.GetCoComponent<Hierarchical>();
-                var tabListId = hierarchical.ParentId;
+                long tabListId = hierarchical.ParentId;
                 if (!Scene.Components.HasComponent<TabList>(tabListId)) continue;
                 
                 ref var tabList = ref Scene.Components.GetComponent<TabList>(tabListId);

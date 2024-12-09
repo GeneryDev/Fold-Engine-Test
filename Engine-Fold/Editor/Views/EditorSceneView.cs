@@ -98,12 +98,17 @@ public class SceneViewPanel : GuiPanel
         ref Transform cameraTransform = ref editorBase.CurrentCameraTransform;
         if (cameraTransform.IsNull) return;
         
-        Vector2 move = controls.Get<AnalogAction>("editor.movement.axis.x") * Vector2.UnitX
-                       + controls.Get<AnalogAction>("editor.movement.axis.y") * Vector2.UnitY;
+        Vector2 move = default;
+        if (controls != null)
+        {
+            move = controls.Get<AnalogAction>("editor.movement.axis.x") * Vector2.UnitX
+                   + controls.Get<AnalogAction>("editor.movement.axis.y") * Vector2.UnitY;
+        }
+
         if (move != default)
         {
             float speed = 250f;
-            if (controls.Get<ButtonAction>("editor.movement.faster").Down) speed *= 4;
+            if (controls?.Get<ButtonAction>("editor.movement.faster").Down ?? false) speed *= 4;
 
             speed *= cameraTransform.LocalScale.X;
 

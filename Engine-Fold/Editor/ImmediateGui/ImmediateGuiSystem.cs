@@ -71,7 +71,11 @@ public class ImmediateGuiSystem : GameSystem
         while (_immediateControls.Next())
         {
             ref var ic = ref _immediateControls.Get<ImmediateGuiControl>();
-            ic.Environment?.Input(Scene.Core.InputUnit);
+            if (ic.Environment != null)
+            {
+                ic.Environment.ControlScheme = ControlScheme;
+                ic.Environment?.Input(Scene.Core.InputUnit);
+            }
         }
     }
 
@@ -120,6 +124,7 @@ public class ImmediateGuiSystem : GameSystem
         containerPanel.Reset();
         containerPanel.ResetLayoutPosition();
         containerPanel.Bounds = controlBounds;
+        environment.ControlScheme = ControlScheme;
         environment.ContentPanel = containerPanel;
         
         layer.Surface.Draw(new DrawRectInstruction

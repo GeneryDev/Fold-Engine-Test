@@ -20,7 +20,7 @@ public abstract class GuiEnvironment : IDisposable
 
     private readonly GuiPanel[] _pressedPanels = new GuiPanel[MouseEvent.MaxButtons];
 
-    protected readonly ControlScheme ControlScheme = new ControlScheme("Gui");
+    public ControlScheme ControlScheme = new ControlScheme("Gui");
     public HoverTarget HoverTarget;
     public HoverTarget HoverTargetPrevious;
     private ButtonAction _mouseLeft = ButtonAction.Default;

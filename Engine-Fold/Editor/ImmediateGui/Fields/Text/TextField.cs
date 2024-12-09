@@ -214,14 +214,17 @@ public class TextField : GuiElement, IInspectorField
 
     public override void OnInput(ControlScheme controls)
     {
-        Caret.OnInput(controls);
-
-        if (controls.Get<ButtonAction>("editor.undo").Consume()) Transactions.Undo();
-        if (controls.Get<ButtonAction>("editor.redo").Consume()) Transactions.Redo();
-
-        if (controls.Get<ButtonAction>("editor.field.caret.debug").Consume())
+        if (controls != null)
         {
-            // Console.WriteLine(_document.GetLogicalLineForIndex(_dot));
+            Caret.OnInput(controls);
+
+            if (controls.Get<ButtonAction>("editor.undo").Consume()) Transactions.Undo();
+            if (controls.Get<ButtonAction>("editor.redo").Consume()) Transactions.Redo();
+
+            if (controls.Get<ButtonAction>("editor.field.caret.debug").Consume())
+            {
+                // Console.WriteLine(_document.GetLogicalLineForIndex(_dot));
+            }
         }
     }
 
