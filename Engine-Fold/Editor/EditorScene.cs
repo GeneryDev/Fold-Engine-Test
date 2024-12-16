@@ -1,6 +1,7 @@
 ﻿using System;
 using FoldEngine.Editor.Components;
 using FoldEngine.Editor.ImmediateGui;
+using FoldEngine.Editor.Panels;
 using FoldEngine.Editor.Systems;
 using FoldEngine.Editor.Views;
 using FoldEngine.Gui;
@@ -152,162 +153,15 @@ public class EditorScene : Scene
             return dock;
         }
 
-        Entity CreateTab(string name, string icon, long linkedControl)
-        {
-            var tab = CreateEntity("Tab");
-            tab.AddComponent<Control>().MinimumSize = new Vector2(0, 14);
-            tab.AddComponent<ButtonControl>() = new ButtonControl
-            {
-                Text = name,
-                Alignment = Alignment.Begin,
-                Icon = new ResourceIdentifier(icon),
-                Style = new ResourceIdentifier("editor:tab"),
-                KeepPressedOutside = true
-            };
-            tab.AddComponent<Tab>() = new Tab()
-            {
-                DeselectedButtonStyle = "editor:tab",
-                SelectedButtonStyle = "editor:tab.selected",
-                LinkedEntityId = linkedControl
-            };
-            tab.AddComponent<EditorTab>() = new EditorTab()
-            {
-                TabName = name
-            };
-            return tab;
-        }
-
-        Entity CreateEditorView(string name, string icon, long tabBarId, long tabContainerId)
-        {
-            var view = CreateEntity(name);
-            view.AddComponent<Control>().ZOrder = 0;
-            view.AddComponent<AnchoredControl>() = new()
-            {
-                AnchorRight = 1,
-                AnchorBottom = 1
-            };
-            view.Hierarchical.SetParent(tabContainerId);
-            
-            CreateTab(name, icon, view.EntityId).Hierarchical.SetParent(tabBarId);
-            return view;
-        }
-
-        Entity CreateToolbarView(long tabBarId, long tabContainerId)
-        {
-            var view = CreateEditorView("Toolbar", "editor/cog", tabBarId, tabContainerId);
-
-            view.AddComponent<FlowContainer>() = new FlowContainer()
-            {
-                HSeparation = 4,
-                Alignment = Alignment.Begin
-            };
-
-            void AddToolbarButton(string name, string icon)
-            {
-                var btnEntity = CreateEntity("Toolbar Button");
-                btnEntity.AddComponent<Control>() = new Control()
-                {
-                    MinimumSize = new Vector2(24, 24)
-                };
-                btnEntity.AddComponent<ButtonControl>() = new ButtonControl()
-                {
-                    Icon = new ResourceIdentifier(icon),
-                    KeepPressedOutside = true
-                };
-                btnEntity.AddComponent<SimpleTooltip>() = new SimpleTooltip()
-                {
-                    Text = name
-                };
-                btnEntity.AddComponent<PopupProvider>() = new PopupProvider()
-                {
-                    ButtonMask = MouseButtonMask.RightButton,
-                    ActionMode = MouseActionMode.Release
-                };
-                btnEntity.Hierarchical.SetParent(view);
-            }
-            
-            AddToolbarButton("Hand","editor/hand");
-            AddToolbarButton("Move","editor/move");
-            AddToolbarButton("Scale","editor/scale");
-            AddToolbarButton("Rotate","editor/rotate");
-            AddToolbarButton("Select","editor/cursor");
-            AddToolbarButton("Play Scene","editor/play");
-            AddToolbarButton("Pause Scene","editor/pause");
-
-            return view;
-        }
-
-        Entity CreateSceneView(long tabBarId, long tabContainerId)
-        {
-            var view = CreateEditorView("Scene", "editor/play", tabBarId, tabContainerId);
-
-            var sceneView = CreateEntity("Scene View");
-            sceneView.Hierarchical.SetParent(view);
-            sceneView.AddComponent<Control>();
-            sceneView.SetComponent(new BoxControl()
-            {
-                Color = Color.Black
-            });
-            sceneView.SetComponent(new AnchoredControl()
-            {
-                AnchorRight = 1,
-                AnchorBottom = 1
-            });
-            sceneView.AddComponent<EditorSceneViewPanel>();
-
-            return view;
-        }
-
-        Entity CreateTempView(string name, string icon, long tabBarId, long tabContainerId)
-        {
-            var view = CreateEditorView(name, icon, tabBarId, tabContainerId);
-
-            view.AddComponent<FlowContainer>() = new FlowContainer()
-            {
-                HSeparation = 4,
-                Alignment = Alignment.Center
-            };
-
-            var label = CreateEntity("Temp Label");
-            label.AddComponent<Control>();
-            label.AddComponent<LabelControl>() = new LabelControl()
-            {
-                Text = name
-            };
-            label.Hierarchical.SetParent(view);
-
-            return view;
-        }
-
-        Entity CreateImmediateView<T>(string name, string icon, long tabBarId, long tabContainerId) where T : EditorView, new()
-        {
-            var view = CreateEditorView(name, icon, tabBarId, tabContainerId);
-
-            var content = CreateEntity("Immediate Content");
-            content.AddComponent<Control>();
-            content.AddComponent<AnchoredControl>() = new AnchoredControl()
-            {
-                AnchorRight = 1,
-                AnchorBottom = 1
-            };
-            content.AddComponent<ImmediateGuiControl>() = new ImmediateGuiControl()
-            {
-                View = new T()
-            };
-            content.Hierarchical.SetParent(view);
-
-            return view;
-        }
-        
-        CreateToolbarView(topTabs, topContainer);
-        CreateImmediateView<EditorToolbarView>("Toolbar (old)", "editor/cog", topTabs, topContainer);
-        CreateImmediateView<EditorHierarchyView>("Hierarchy", "editor/hierarchy", leftTabs, leftContainer);
-        CreateImmediateView<EditorSystemsView>("Systems", "editor/cog", leftTabs, leftContainer);
-        CreateImmediateView<EditorInspectorView>("Inspector", "editor/info", rightTabs, rightContainer);
-        CreateImmediateView<EditorDebugActionsView>("Debug Actions", "editor/info", rightTabs, rightContainer);
-        CreateImmediateView<EditorResourcesView>("Resources", "editor/checkmark", bottomTabs, bottomContainer);
-        CreateImmediateView<EditorSceneListView>("Scene List", "editor/menu", bottomTabs, bottomContainer);
-        CreateSceneView(centerTabs, centerContainer);
+        EditorPanels.Toolbar(this, topTabs, topContainer);
+        EditorPanels.Immediate<EditorToolbarView>(this, "Toolbar (old)", "editor/cog", topTabs, topContainer);
+        EditorPanels.Immediate<EditorHierarchyView>(this, "Hierarchy", "editor/hierarchy", leftTabs, leftContainer);
+        EditorPanels.Immediate<EditorSystemsView>(this, "Systems", "editor/cog", leftTabs, leftContainer);
+        EditorPanels.Immediate<EditorInspectorView>(this, "Inspector", "editor/info", rightTabs, rightContainer);
+        EditorPanels.Immediate<EditorDebugActionsView>(this, "Debug Actions", "editor/info", rightTabs, rightContainer);
+        EditorPanels.Immediate<EditorResourcesView>(this, "Resources", "editor/checkmark", bottomTabs, bottomContainer);
+        EditorPanels.Immediate<EditorSceneListView>(this, "Scene List", "editor/menu", bottomTabs, bottomContainer);
+        EditorPanels.SceneView(this, centerTabs, centerContainer);
     }
 
     private void BuildStyles()
