@@ -1,17 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using FoldEngine.Editor.Tools;
-using FoldEngine.Editor.Views;
-using FoldEngine.Graphics;
-using FoldEngine.ImmediateGui;
+﻿using FoldEngine.ImmediateGui;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
-using FoldEngine.Util;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
-using Keyboard = FoldEngine.Input.Keyboard;
-using Mouse = FoldEngine.Input.Mouse;
 
 namespace FoldEngine.Editor.ImmediateGui;
 
@@ -39,13 +29,5 @@ public class EditorEnvironment : GuiEnvironment
             {
                 HoverTarget.ScrollablePanel.Scroll(dir);
             }
-    }
-
-    public override void PrepareRender(IRenderingUnit renderer, IRenderingLayer baseLayer, IRenderingLayer overlayLayer)
-    {
-        base.PrepareRender(renderer, baseLayer, overlayLayer);
-        
-        // Make the game view size zero. Supposed to be re-set to the correct size when the EditorSceneView is rendered
-        // renderer.Groups["editor"].Dependencies[0].Group.Size = default;
     }
 }

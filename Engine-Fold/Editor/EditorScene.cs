@@ -307,7 +307,6 @@ public class EditorScene : Scene
         CreateImmediateView<EditorDebugActionsView>("Debug Actions", "editor/info", rightTabs, rightContainer);
         CreateImmediateView<EditorResourcesView>("Resources", "editor/checkmark", bottomTabs, bottomContainer);
         CreateImmediateView<EditorSceneListView>("Scene List", "editor/menu", bottomTabs, bottomContainer);
-        // CreateImmediateView<EditorSceneView>("Game", "editor/play", centerTabs, centerContainer);
         CreateSceneView(centerTabs, centerContainer);
     }
 
