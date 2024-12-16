@@ -131,7 +131,7 @@ public class TabSystem : GameSystem
                 }
             }
 
-            if (newContentId != -1 && Scene.Components.HasComponent<Hierarchical>(newContentId) && Scene.Components.HasComponent<Control>(newContentId))
+            if (newContentId != -1 && Scene.Components.HasComponent<Hierarchical>(newContentId))
             {
                 ref var contentHierarchical = ref Scene.Components.GetComponent<Hierarchical>(newContentId);
 

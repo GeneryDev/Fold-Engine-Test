@@ -3,13 +3,19 @@ using FoldEngine.Components;
 using FoldEngine.Editor.ImmediateGui;
 using FoldEngine.Editor.Views;
 using FoldEngine.Events;
+using FoldEngine.Gui;
+using FoldEngine.Gui.Components;
+using FoldEngine.Gui.Components.Controls;
+using FoldEngine.Gui.Events;
 using FoldEngine.Interfaces;
 using FoldEngine.Physics;
 using FoldEngine.Rendering;
+using FoldEngine.Resources;
 using FoldEngine.Scenes;
 using FoldEngine.Serialization;
 using FoldEngine.Systems;
 using FoldEngine.Util.Transactions;
+using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor;
 
@@ -28,6 +34,7 @@ public class EditorBase : GameSystem
     
     [DoNotSerialize]
     public ComponentIterator<EditorSceneTab> TabIterator;
+    private ComponentIterator<EditorSceneTabContainer> _tabContainerIter;
 
     public ref EditorSceneTab CurrentSceneTab
     {
@@ -89,6 +96,7 @@ public class EditorBase : GameSystem
         };
         
         TabIterator = CreateComponentIterator<EditorSceneTab>(IterationFlags.Ordered | IterationFlags.IncludeInactive);
+        _tabContainerIter = CreateComponentIterator<EditorSceneTabContainer>(IterationFlags.IncludeInactive);
     }
 
     public override void OnRender(IRenderingUnit renderer)
@@ -120,42 +128,65 @@ public class EditorBase : GameSystem
     {
         editedScene.Flush();
         
-        var tabEntity = Scene.CreateEntity($"Tab: {editedScene.Name}");
-        ref var subScene = ref tabEntity.AddComponent<SubScene>();
+        var loaderEntity = Scene.CreateEntity($"Scene Loader: {editedScene.Name}");
+        ref var subScene = ref loaderEntity.AddComponent<SubScene>();
         subScene.Scene = editedScene;
         subScene.Render = true;
         subScene.Update = false;
         subScene.ProcessInputs = false;
 
-        ref var tab = ref tabEntity.AddComponent<EditorSceneTab>();
-        tab.Scene = editedScene;
-        tab.SceneTransactions = new TransactionManager<Scene>(editedScene);
+        ref var loader = ref loaderEntity.AddComponent<EditorSceneTab>();
+        loader.Scene = editedScene;
+        loader.SceneTransactions = new TransactionManager<Scene>(editedScene);
 
         if (_currentSceneTabId == -1)
         {
-            _currentSceneTabId = tabEntity.EntityId;
+            _currentSceneTabId = loaderEntity.EntityId;
         }
         else
         {
-            tabEntity.Hierarchical.Active = false;
+            loaderEntity.Hierarchical.Active = false;
         }
         
         var editorCameraEntity = Scene.CreateEntity("Editor Camera");
         editorCameraEntity.AddComponent<Camera>();
-        editorCameraEntity.Hierarchical.SetParent(tabEntity.EntityId);
+        editorCameraEntity.Hierarchical.SetParent(loaderEntity.EntityId);
 
-        tab.EditorCameraEntityId = editorCameraEntity.EntityId;
-    }
+        loader.EditorCameraEntityId = editorCameraEntity.EntityId;
 
-    public void SelectSceneTab(long tabId)
-    {
-        _currentSceneTabId = tabId;
 
-        TabIterator.Reset();
-        while (TabIterator.Next())
+
+        var tabEntity = Scene.CreateEntity($"Tab: {editedScene.Name}");
+        tabEntity.SetComponent(new Control()
         {
-            var entity = new Entity(Scene, TabIterator.GetEntityId());
-            entity.Hierarchical.Active = entity.EntityId == tabId;
+            MinimumSize = new Vector2(0, 14)
+        });
+        tabEntity.SetComponent(new ButtonControl()
+        {
+            Text = editedScene.Name,
+            Alignment = Alignment.Begin,
+            Style = new ResourceIdentifier("editor:scene_tab"),
+            KeepPressedOutside = true
+        });
+        tabEntity.SetComponent(new Tab()
+        {
+            DeselectedButtonStyle = "editor:scene_tab",
+            SelectedButtonStyle = "editor:scene_tab.selected",
+            LinkedEntityId = loaderEntity.EntityId
+        });
+        
+        _tabContainerIter.Reset();
+        while (_tabContainerIter.Next())
+        {
+            ref var tabContainer = ref _tabContainerIter.GetComponent();
+            loaderEntity.Hierarchical.SetParent(_tabContainerIter.GetEntityId());
+
+            long tabListId = tabContainer.TabListId;
+            if (tabListId != -1)
+            {
+                tabEntity.Hierarchical.SetParent(tabListId);
+            }
+            break;
         }
     }
 
@@ -173,5 +204,18 @@ public class EditorBase : GameSystem
         {
             CurrentSceneTab.SceneTransactions.Redo();
         }
+    }
+
+    public override void SubscribeToEvents()
+    {
+        Subscribe((ref TabSelectedEvent evt) =>
+        {
+            if (!Scene.Components.HasComponent<Tab>(evt.TabId)) return;
+            ref var tab = ref Scene.Components.GetComponent<Tab>(evt.TabId);
+            if (Scene.Components.HasComponent<EditorSceneTab>(tab.LinkedEntityId))
+            {
+                _currentSceneTabId = tab.LinkedEntityId;
+            }
+        });
     }
 }

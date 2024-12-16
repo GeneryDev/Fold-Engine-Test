@@ -160,7 +160,6 @@ public class EditorScene : Scene
         EditorPanels.Immediate<EditorInspectorView>(this, "Inspector", "editor/info", rightTabs, rightContainer);
         EditorPanels.Immediate<EditorDebugActionsView>(this, "Debug Actions", "editor/info", rightTabs, rightContainer);
         EditorPanels.Immediate<EditorResourcesView>(this, "Resources", "editor/checkmark", bottomTabs, bottomContainer);
-        EditorPanels.Immediate<EditorSceneListView>(this, "Scene List", "editor/menu", bottomTabs, bottomContainer);
         EditorPanels.SceneView(this, centerTabs, centerContainer);
     }
 
@@ -184,6 +183,27 @@ public class EditorScene : Scene
         tabSelectedButtonStyle.MarginLeft = 2;
         tabSelectedButtonStyle.MarginRight = 6;
         tabSelectedButtonStyle.NormalColor = new Color(37, 37, 38);
+        
+        var sceneTabButtonStyle = Resources.Create<ButtonStyle>("editor:scene_tab");
+        sceneTabButtonStyle.FontSize = 7;
+        sceneTabButtonStyle.IconMaxWidth = 8;
+        sceneTabButtonStyle.IconTextSeparation = 4;
+        sceneTabButtonStyle.MarginTop = 2;
+        sceneTabButtonStyle.MarginBottom = 2;
+        sceneTabButtonStyle.MarginLeft = 8;
+        sceneTabButtonStyle.MarginRight = 8;
+        sceneTabButtonStyle.TextColor = new Color(255, 255, 255, 150);
+        sceneTabButtonStyle.NormalColor = new Color(45, 45, 48);
+        
+        var sceneTabSelectedButtonStyle = Resources.Create<ButtonStyle>("editor:scene_tab.selected");
+        sceneTabSelectedButtonStyle.FontSize = 7;
+        sceneTabSelectedButtonStyle.IconMaxWidth = 8;
+        sceneTabSelectedButtonStyle.IconTextSeparation = 4;
+        sceneTabSelectedButtonStyle.MarginTop = 2;
+        sceneTabSelectedButtonStyle.MarginBottom = 2;
+        sceneTabSelectedButtonStyle.MarginLeft = 8;
+        sceneTabSelectedButtonStyle.MarginRight = 8;
+        sceneTabSelectedButtonStyle.NormalColor = new Color(37, 37, 38);
         
         var contextMenuItemStyle = Resources.Create<ButtonStyle>("editor:context_menu_item");
         contextMenuItemStyle.FontSize = 9;
