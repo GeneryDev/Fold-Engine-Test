@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using FoldEngine.Components;
+using FoldEngine.Editor.Components;
 using FoldEngine.Editor.Tools;
 using FoldEngine.Gui.Components;
 using FoldEngine.Gui.Systems;
@@ -21,10 +22,12 @@ public class EditorToolSystem : GameSystem
     public Vector2 MousePos;
 
     private ComponentIterator<Viewport> _viewports;
+    private ComponentIterator<EditorSceneViewPanel> _sceneViewPanels;
 
     public override void Initialize()
     {
         _viewports = CreateComponentIterator<Viewport>(IterationFlags.None);
+        _sceneViewPanels = CreateComponentIterator<EditorSceneViewPanel>(IterationFlags.None);
         
         SetupTools();
     }
@@ -46,13 +49,19 @@ public class EditorToolSystem : GameSystem
             MousePos = _viewports.GetComponent().MousePos.ToVector2();
         }
 
-        // These are currently called by EditorSceneView
-        // ActiveTool?.OnInput();
+        _sceneViewPanels.Reset();
+        while (_sceneViewPanels.Next())
+        {
+            ActiveTool?.OnInput();
+        }
     }
 
     public override void OnRender(IRenderingUnit renderer)
     {
-        // These are currently called by EditorSceneView
-        // ActiveTool?.Render(renderer);
+        _sceneViewPanels.Reset();
+        while (_sceneViewPanels.Next())
+        {
+            ActiveTool?.Render(renderer);
+        }
     }
 }

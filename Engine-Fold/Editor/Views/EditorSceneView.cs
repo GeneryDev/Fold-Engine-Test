@@ -11,13 +11,6 @@ namespace FoldEngine.Editor.Views;
 
 public class EditorSceneView : EditorView
 {
-    public EditorSceneView()
-    {
-        new ResourceIdentifier("editor/play");
-    }
-
-    public virtual string Name => "Scene";
-
     public override bool UseMargin => false;
     public override Color? BackgroundColor => Color.Black;
 

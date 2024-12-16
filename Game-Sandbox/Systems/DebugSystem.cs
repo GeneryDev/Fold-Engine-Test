@@ -62,12 +62,12 @@ public class DebugSystem : GameSystem
         float moveX = Scene.Core.InputUnit.Players[0].Get<AnalogAction>("movement.axis.x");
         if (Scene.Core.InputUnit.Players[0].Get<ButtonAction>("movement.sprint").Down) moveX *= 2;
 
-        if (Scene.Core.InputUnit.Players[0].Get<ChangeAction>("editor.zoom.in"))
+        if (Scene.Core.InputUnit.Players[0].Get<ChangeAction>("ui.scroll.up"))
         {
             Scene.MainCameraTransform.LocalScale /= 1.2f;
             Console.WriteLine("Scale is now: " + Scene.MainCameraTransform.LocalScale.X);
         }
-        else if (Scene.Core.InputUnit.Players[0].Get<ChangeAction>("editor.zoom.out"))
+        else if (Scene.Core.InputUnit.Players[0].Get<ChangeAction>("ui.scroll.down"))
         {
             Scene.MainCameraTransform.LocalScale *= 1.2f;
             Console.WriteLine("Scale is now: " + Scene.MainCameraTransform.LocalScale.X);

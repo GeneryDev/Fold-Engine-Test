@@ -3,7 +3,7 @@ using FoldEngine.Rendering;
 using FoldEngine.Scenes;
 using FoldEngine.Systems;
 
-namespace FoldEngine.Editor;
+namespace FoldEngine.Editor.Systems;
 
 [GameSystem("fold:editor.camera_sync", ProcessingCycles.Update, true)]
 public class EditorCameraSyncSystem : GameSystem

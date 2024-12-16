@@ -49,6 +49,13 @@ public struct Entity
         return ref Scene.Components.CreateComponent<T>(EntityId);
     }
 
+    public ref T SetComponent<T>(T componentData) where T : struct
+    {
+        ref var component = ref Scene.Components.CreateComponent<T>(EntityId);
+        component = componentData;
+        return ref component;
+    }
+
     public void RemoveComponent<T>() where T : struct
     {
         Scene.Components.RemoveComponent<T>(EntityId);

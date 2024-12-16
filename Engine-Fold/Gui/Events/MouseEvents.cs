@@ -31,7 +31,7 @@ public struct MouseExitedEvent
     }
 }
 
-[Event("fold:mouse_moved")]
+[Event("fold:mouse_moved", EventFlushMode.Immediate)]
 public struct MouseMovedEvent
 {
     [EntityId] public long EntityId = -1;
@@ -50,7 +50,7 @@ public struct MouseMovedEvent
     }
 }
 
-[Event("fold:mouse_dragged")]
+[Event("fold:mouse_dragged", EventFlushMode.Immediate)]
 public struct MouseDraggedEvent
 {
     [EntityId] public long EntityId = -1;
@@ -70,7 +70,7 @@ public struct MouseDraggedEvent
     }
 }
 
-[Event("fold:mouse_button")]
+[Event("fold:mouse_button", EventFlushMode.Immediate)]
 public struct MouseButtonEvent
 {
     public const int LeftButton = 0;
@@ -100,4 +100,24 @@ public enum MouseButtonEventType
 {
     Pressed,
     Released
+}
+
+
+[Event("fold:mouse_scrolled", EventFlushMode.Immediate)]
+public struct MouseScrolledEvent
+{
+    [EntityId] public long EntityId = -1;
+    public float Amount;
+    public Point Position;
+
+    public bool Consumed;
+
+    public MouseScrolledEvent()
+    {
+    }
+
+    public void Consume()
+    {
+        Consumed = true;
+    }
 }

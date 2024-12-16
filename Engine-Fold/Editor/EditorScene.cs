@@ -1,4 +1,5 @@
 ﻿using System;
+using FoldEngine.Editor.Components;
 using FoldEngine.Editor.ImmediateGui;
 using FoldEngine.Editor.Systems;
 using FoldEngine.Editor.Views;
@@ -29,6 +30,7 @@ public class EditorScene : Scene
         
         Systems.Add<EditorBase>();
         Systems.Add<EditorTabSystem>();
+        Systems.Add<EditorSceneViewSystem>();
         Systems.Add<EditorCameraSyncSystem>();
         Systems.Add<EditorContextMenuSystem>();
         Systems.Add<EditorActionSystem>();
@@ -235,6 +237,27 @@ public class EditorScene : Scene
             return view;
         }
 
+        Entity CreateSceneView(long tabBarId, long tabContainerId)
+        {
+            var view = CreateEditorView("Scene", "editor/play", tabBarId, tabContainerId);
+
+            var sceneView = CreateEntity("Scene View");
+            sceneView.Hierarchical.SetParent(view);
+            sceneView.AddComponent<Control>();
+            sceneView.SetComponent(new BoxControl()
+            {
+                Color = Color.Black
+            });
+            sceneView.SetComponent(new AnchoredControl()
+            {
+                AnchorRight = 1,
+                AnchorBottom = 1
+            });
+            sceneView.AddComponent<EditorSceneViewPanel>();
+
+            return view;
+        }
+
         Entity CreateTempView(string name, string icon, long tabBarId, long tabContainerId)
         {
             var view = CreateEditorView(name, icon, tabBarId, tabContainerId);
@@ -284,7 +307,8 @@ public class EditorScene : Scene
         CreateImmediateView<EditorDebugActionsView>("Debug Actions", "editor/info", rightTabs, rightContainer);
         CreateImmediateView<EditorResourcesView>("Resources", "editor/checkmark", bottomTabs, bottomContainer);
         CreateImmediateView<EditorSceneListView>("Scene List", "editor/menu", bottomTabs, bottomContainer);
-        CreateImmediateView<EditorSceneView>("Game", "editor/play", centerTabs, centerContainer);
+        // CreateImmediateView<EditorSceneView>("Game", "editor/play", centerTabs, centerContainer);
+        CreateSceneView(centerTabs, centerContainer);
     }
 
     private void BuildStyles()

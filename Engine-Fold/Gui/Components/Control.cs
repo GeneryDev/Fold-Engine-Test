@@ -16,6 +16,7 @@ public struct Control
 
     public bool RequestLayout;
     public MouseFilterMode MouseFilter;
+    public FocusGrabMode FocusMode;
 
     public Vector2 EffectiveMinimumSize => new Vector2(Math.Max(MinimumSize.X, ComputedMinimumSize.X),
         Math.Max(MinimumSize.Y, ComputedMinimumSize.Y));
@@ -24,6 +25,15 @@ public struct Control
     {
         Auto,
         Ignore,
+        Pass,
         Stop
+    }
+    
+    public enum FocusGrabMode
+    {
+        Auto,
+        None,
+        Click,
+        All
     }
 }

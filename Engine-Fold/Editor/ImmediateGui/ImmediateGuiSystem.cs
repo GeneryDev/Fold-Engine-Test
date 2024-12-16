@@ -6,6 +6,7 @@ using FoldEngine.ImmediateGui;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
+using FoldEngine.Serialization;
 using FoldEngine.Systems;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
@@ -18,7 +19,7 @@ namespace FoldEngine.Editor.ImmediateGui;
 [GameSystem("fold:legacy.immediate_gui", ProcessingCycles.Input | ProcessingCycles.Render)]
 public class ImmediateGuiSystem : GameSystem
 {
-    public readonly ControlScheme ControlScheme = new ControlScheme("Gui");
+    [DoNotSerialize] public readonly ControlScheme ControlScheme = new ControlScheme("Gui");
 
     private ComponentIterator<Viewport> _viewports;
     private MultiComponentIterator _immediateControls;
@@ -53,9 +54,6 @@ public class ImmediateGuiSystem : GameSystem
         ControlScheme.PutAction("editor.field.caret.end", new ButtonAction(keyboard[Keys.End]) { Repeat = true });
 
         ControlScheme.PutAction("editor.field.caret.debug", new ButtonAction(keyboard[Keys.F1]) { Repeat = true });
-
-        ControlScheme.PutAction("editor.zoom.in", new ChangeAction(mouse.ScrollWheel, 0.5f, null));
-        ControlScheme.PutAction("editor.zoom.out", new ChangeAction(mouse.ScrollWheel, null, -1.5f));
 
         ControlScheme.PutAction("editor.movement.axis.x",
             new AnalogAction(() => (keyboard[Keys.Left].Down ? -1 : 0) + (keyboard[Keys.Right].Down ? 1 : 0)));
@@ -164,6 +162,14 @@ public class ImmediateGuiSystem : GameSystem
             var entity = new Entity(Scene, evt.EntityId);
             var ic = entity.GetComponent<ImmediateGuiControl>();
             ic.Environment.MousePos = evt.Position;
+        });
+        Subscribe((ref MouseScrolledEvent evt) =>
+        {
+            if (!Scene.Components.HasComponent<ImmediateGuiControl>(evt.EntityId)) return;
+            
+            var entity = new Entity(Scene, evt.EntityId);
+            var ic = entity.GetComponent<ImmediateGuiControl>();
+            ic.Environment.HandleScroll((int)-evt.Amount);
         });
     }
 }

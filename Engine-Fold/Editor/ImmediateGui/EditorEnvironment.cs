@@ -30,13 +30,14 @@ public class EditorEnvironment : GuiEnvironment
 
         if (ControlScheme?.Get<ButtonAction>("editor.undo").Consume() ?? false) editorBase.Undo();
         if (ControlScheme?.Get<ButtonAction>("editor.redo").Consume() ?? false) editorBase.Redo();
+    }
 
+    public void HandleScroll(int dir)
+    {
         if (HoverTarget.ScrollablePanel != null)
             if (HoverTarget.ScrollablePanel.IsAncestorOf(HoverTarget.Element))
             {
-                if (ControlScheme?.Get<ChangeAction>("editor.zoom.in") ?? false)
-                    HoverTarget.ScrollablePanel.Scroll(1);
-                else if (ControlScheme?.Get<ChangeAction>("editor.zoom.out") ?? false) HoverTarget.ScrollablePanel.Scroll(-1);
+                HoverTarget.ScrollablePanel.Scroll(dir);
             }
     }
 
@@ -45,6 +46,6 @@ public class EditorEnvironment : GuiEnvironment
         base.PrepareRender(renderer, baseLayer, overlayLayer);
         
         // Make the game view size zero. Supposed to be re-set to the correct size when the EditorSceneView is rendered
-        renderer.Groups["editor"].Dependencies[0].Group.Size = default;
+        // renderer.Groups["editor"].Dependencies[0].Group.Size = default;
     }
 }

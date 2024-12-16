@@ -5,14 +5,14 @@ using FoldEngine.Gui.Components;
 using FoldEngine.Gui.Components.Controls;
 using FoldEngine.Gui.Components.Traits;
 using FoldEngine.Gui.Events;
-using FoldEngine.ImmediateGui;
 using FoldEngine.Input;
 using FoldEngine.Scenes;
 using FoldEngine.Serialization;
 using FoldEngine.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using Mouse = Microsoft.Xna.Framework.Input.Mouse;
+using Keyboard = FoldEngine.Input.Keyboard;
+using Mouse = FoldEngine.Input.Mouse;
 
 namespace FoldEngine.Gui.Systems;
 
@@ -35,6 +35,8 @@ public class ControlInterfaceSystem : GameSystem
     private ComponentIterator<Viewport> _viewports;
     private ComponentIterator<Control> _controls;
 
+    [DoNotSerialize] public ControlScheme InterfaceControlScheme = new ControlScheme("ui");
+
     
     public override void Initialize()
     {
@@ -42,6 +44,28 @@ public class ControlInterfaceSystem : GameSystem
         _controls = CreateComponentIterator<Control>(IterationFlags.None);
         
         Array.Fill(_buttonPressMemory, MouseButtonPressMemory.Empty);
+
+        SetupControlScheme();
+    }
+
+    private void SetupControlScheme()
+    {
+        Keyboard keyboard = Scene.Core.InputUnit.Devices.Keyboard;
+        Mouse mouse = Scene.Core.InputUnit.Devices.Mouse;
+        
+        InterfaceControlScheme.AddDevice(keyboard);
+        InterfaceControlScheme.AddDevice(mouse);
+
+        InterfaceControlScheme.PutAction("ui.scroll.up", new ChangeAction(mouse.ScrollWheel, 0.5f, null));
+        InterfaceControlScheme.PutAction("ui.scroll.down", new ChangeAction(mouse.ScrollWheel, null, -1.5f));
+    }
+
+    public override void SubscribeToEvents()
+    {
+        Subscribe((ref FocusRequestedEvent evt) =>
+        {
+            TryGrabFocus(evt.EntityId);
+        });
     }
 
     public override void OnInput()
@@ -60,18 +84,29 @@ public class ControlInterfaceSystem : GameSystem
         while (_viewports.Next())
         {
             ref var viewport = ref _viewports.GetComponent();
-            HandleViewport(ref viewport);
+            HandleViewportInput(ref viewport);
             break;
         }
     }
 
-    private void HandleViewport(ref Viewport viewport)
+    private long GetViewportIdForControl(long entityId)
+    {
+        _viewports.Reset();
+        while (_viewports.Next())
+        {
+            return _viewports.GetEntityId();
+        }
+
+        return -1;
+    }
+
+    private void HandleViewportInput(ref Viewport viewport)
     {
         var layer = viewport.GetLayer(Scene.Core.RenderingUnit);
         if (layer == null) return;
 
         _prevMousePos = _mousePos;
-        _mousePos = Mouse.GetState().Position;
+        _mousePos = Microsoft.Xna.Framework.Input.Mouse.GetState().Position;
         try
         {
             _mousePos = layer.WindowToLayer(_mousePos.ToVector2()).ToPoint();
@@ -85,17 +120,18 @@ public class ControlInterfaceSystem : GameSystem
             _prevMousePos = _mousePos;
         }
 
+        long prevHoverTargetId = viewport.HoverTargetId;
+
         viewport.MousePos = _mousePos;
-        viewport.PrevHoverTargetId = viewport.HoverTargetId;
         viewport.HoverTargetId = GetControlAtPoint(_mousePos);
         
         HandleMouseMotionEvents(ref viewport);
 
-        if (viewport.PrevHoverTargetId != viewport.HoverTargetId)
+        if (prevHoverTargetId != viewport.HoverTargetId)
         {
-            if (viewport.PrevHoverTargetId != -1)
+            if (prevHoverTargetId != -1)
             {
-                Scene.Events.Invoke(new MouseExitedEvent(viewport.PrevHoverTargetId, _mousePos));
+                Scene.Events.Invoke(new MouseExitedEvent(prevHoverTargetId, _mousePos));
             }
             if (viewport.HoverTargetId != -1)
             {
@@ -103,18 +139,57 @@ public class ControlInterfaceSystem : GameSystem
             }
         }
         
-        HandleMouseEvents(MouseLeft, MouseButtonEvent.LeftButton);
+        HandleMouseEvents(MouseLeft, MouseButtonEvent.LeftButton, handleFocus: true);
         HandleMouseEvents(MouseMiddle, MouseButtonEvent.MiddleButton);
         HandleMouseEvents(MouseRight, MouseButtonEvent.RightButton);
         if (_buttonPressMemory[MouseButtonEvent.LeftButton].DragDataId != -1 && Escape.Consume())
         {
             CancelDragOperation(ref _buttonPressMemory[MouseButtonEvent.LeftButton]);
         }
+
+        if (InterfaceControlScheme.Get<ChangeAction>("ui.scroll.up"))
+        {
+            // scroll up
+            OnScroll(ref viewport, -1);
+        }
+        if (InterfaceControlScheme.Get<ChangeAction>("ui.scroll.down"))
+        {
+            // scroll down
+            OnScroll(ref viewport, 1);
+        }
+        HandleControlInput(viewport.FocusOwnerId);
         
         // Console.WriteLine($"Hover target: {viewport.HoverTargetId}");
 
         //
         // FocusOwner?.OnInput(ControlScheme);
+    }
+
+    private void OnScroll(ref Viewport viewport, int dir)
+    {
+        long hoverEntityId = viewport.HoverTargetId;
+
+        while (hoverEntityId != -1)
+        {
+            if (!Scene.Components.HasComponent<Hierarchical>(hoverEntityId)) break;
+
+            if (Scene.Components.HasTrait<Scrollable>(hoverEntityId))
+            {
+                var evt = new MouseScrolledEvent()
+                {
+                    EntityId = hoverEntityId,
+                    Position = viewport.MousePos,
+                    Amount = dir
+                };
+
+                evt = Scene.Events.Invoke(evt);
+                if (evt.Consumed) break;
+            }
+
+            if (!Scene.Components.HasComponent<Hierarchical>(hoverEntityId)) break;
+            ref var hierarchical = ref Scene.Components.GetComponent<Hierarchical>(hoverEntityId);
+            hoverEntityId = hierarchical.ParentId;
+        }
     }
 
     private void HandleMouseMotionEvents(ref Viewport viewport)
@@ -148,7 +223,7 @@ public class ControlInterfaceSystem : GameSystem
             {
                 Scene.Components.GetComponent<Transform>(buttonMemory.DragDataId).Position = _mousePos.ToVector2();
                 buttonMemory.DropTargetId = FindDropTarget(buttonMemory.DragDataId, GetControlAtPoint(_mousePos));
-                Mouse.SetCursor(buttonMemory.DropTargetId == -1 ? MouseCursor.No : MouseCursor.Arrow);
+                Microsoft.Xna.Framework.Input.Mouse.SetCursor(buttonMemory.DropTargetId == -1 ? MouseCursor.No : MouseCursor.Arrow);
                 _buttonPressMemory[btnIndex] = buttonMemory;
             }
             
@@ -252,7 +327,7 @@ public class ControlInterfaceSystem : GameSystem
         Scene.DeleteEntity(dragDataId, recursively: true);
     }
 
-    private void HandleMouseEvents(ButtonAction mouseButton, int buttonIndex)
+    private void HandleMouseEvents(ButtonAction mouseButton, int buttonIndex, bool handleFocus = false)
     {
         if (mouseButton.Pressed)
         {
@@ -264,13 +339,8 @@ public class ControlInterfaceSystem : GameSystem
                 MousePos = _mousePos,
                 DragStarted = false
             };
-            Scene.Events.Invoke(new MouseButtonEvent
-            {
-                Type = MouseButtonEventType.Pressed,
-                EntityId = onEntityId,
-                Position = _mousePos,
-                Button = buttonIndex
-            });
+            
+            SendMousePressEvent(onEntityId, buttonIndex, handleFocus);
         }
         else if (mouseButton.Released)
         {
@@ -288,15 +358,114 @@ public class ControlInterfaceSystem : GameSystem
                     CancelDragOperation(ref buttonMemory);
                 }
             }
-            // TODO drag drop
-            Scene.Events.Invoke(new MouseButtonEvent
-            {
-                Type = MouseButtonEventType.Released,
-                EntityId = buttonMemory.ControlId,
-                Position = _mousePos,
-                Button = buttonIndex
-            });
+            SendMouseReleaseEvent(buttonMemory.ControlId, buttonIndex);
             _buttonPressMemory[buttonIndex] = MouseButtonPressMemory.Empty;
+        }
+    }
+
+    private void TryGrabFocus(long entityId)
+    {
+        long viewportId = GetViewportIdForControl(entityId);
+        if (viewportId == -1 || !Scene.Components.HasComponent<Viewport>(viewportId)) return;
+        ref var viewport = ref Scene.Components.GetComponent<Viewport>(viewportId);
+        
+        long prevFocusOwnerId = viewport.FocusOwnerId;
+
+        viewport.FocusOwnerId = entityId;
+        
+        if (prevFocusOwnerId != viewport.FocusOwnerId)
+        {
+            if (prevFocusOwnerId != -1)
+            {
+                Scene.Events.Invoke(new FocusLostEvent()
+                {
+                    EntityId = prevFocusOwnerId
+                });
+            }
+            if (viewport.FocusOwnerId != -1)
+            {
+                Scene.Events.Invoke(new FocusGainedEvent()
+                {
+                    EntityId = viewport.FocusOwnerId
+                });
+            }
+        }
+    }
+
+    private void HandleControlInput(long entityId)
+    {
+        while (entityId != -1)
+        {
+            if (!Scene.Components.HasComponent<Control>(entityId)) break;
+            if (Scene.Components.HasTrait<InputCaptor>(entityId))
+            {
+                Scene.Events.Invoke(new HandleInputsEvent()
+                {
+                    EntityId = entityId,
+                });
+            }
+                
+            // pass to parent
+            var hierarchical = Scene.Components.GetComponent<Hierarchical>(entityId);
+            entityId = hierarchical.ParentId;
+        }
+    }
+
+    private void SendMousePressEvent(long entityId, int buttonIndex, bool focus)
+    {
+        while (entityId != -1)
+        {
+            if (!Scene.Components.HasComponent<Control>(entityId)) break;
+            ref var control = ref Scene.Components.GetComponent<Control>(entityId);
+            var mouseFilter = GetMouseFilterMode(entityId, ref control);
+            var focusMode = GetFocusMode(entityId, ref control);
+            if (focus && focusMode != Control.FocusGrabMode.None)
+            {
+                TryGrabFocus(entityId);
+                focus = false;
+            }
+            if (mouseFilter != Control.MouseFilterMode.Ignore)
+            {
+                // Console.WriteLine($"Call pressed event on {onEntityId}");
+                var evt = Scene.Events.Invoke(new MouseButtonEvent
+                {
+                    Type = MouseButtonEventType.Pressed,
+                    EntityId = entityId,
+                    Position = _mousePos,
+                    Button = buttonIndex
+                });
+            }
+            if (mouseFilter == Control.MouseFilterMode.Stop) break;
+                
+            // pass to parent
+            var hierarchical = Scene.Components.GetComponent<Hierarchical>(entityId);
+            entityId = hierarchical.ParentId;
+        }
+    }
+
+    private void SendMouseReleaseEvent(long entityId, int buttonIndex)
+    {
+        while (entityId != -1)
+        {
+            if (!Scene.Components.HasComponent<Control>(entityId)) break;
+            ref var control = ref Scene.Components.GetComponent<Control>(entityId);
+            var mouseFilter = GetMouseFilterMode(entityId, ref control);
+            if (mouseFilter != Control.MouseFilterMode.Ignore)
+            {
+                // Console.WriteLine($"Call pressed event on {onEntityId}");
+                var evt = Scene.Events.Invoke(new MouseButtonEvent
+                {
+                    Type = MouseButtonEventType.Released,
+                    EntityId = entityId,
+                    Position = _mousePos,
+                    Button = buttonIndex
+                });
+            }
+            if (mouseFilter == Control.MouseFilterMode.Stop) break;
+                
+            // pass to parent
+            var hierarchical = Scene.Components.GetComponent<Hierarchical>(entityId);
+            entityId = hierarchical.ParentId;
         }
     }
 
@@ -308,8 +477,20 @@ public class ControlInterfaceSystem : GameSystem
         }
 
         if (Scene.Components.HasTrait<MouseFilterDefaultStop>(entityId)) return Control.MouseFilterMode.Stop;
-        if (Scene.Components.HasTrait<MouseFilterDefaultIgnore>(entityId)) return Control.MouseFilterMode.Ignore;
+        if (Scene.Components.HasTrait<MouseFilterDefaultPass>(entityId)) return Control.MouseFilterMode.Pass;
         return Control.MouseFilterMode.Ignore;
+    }
+
+    private Control.FocusGrabMode GetFocusMode(long entityId, ref Control control)
+    {
+        if (control.FocusMode != Control.FocusGrabMode.Auto)
+        {
+            return control.FocusMode;
+        }
+
+        if (Scene.Components.HasTrait<FocusModeDefaultAll>(entityId)) return Control.FocusGrabMode.All;
+        if (Scene.Components.HasTrait<FocusModeDefaultClick>(entityId)) return Control.FocusGrabMode.Click;
+        return Control.FocusGrabMode.None;
     }
 
     public bool AnyMouseDown()

@@ -1,17 +1,14 @@
-﻿using System;
-using FoldEngine.Components;
+﻿using FoldEngine.Components;
 using FoldEngine.Editor.Events;
 using FoldEngine.Editor.ImmediateGui;
 using FoldEngine.Editor.Views;
 using FoldEngine.Gui.Components;
 using FoldEngine.Gui.Components.Controls;
 using FoldEngine.Gui.Events;
-using FoldEngine.Gui.Styles;
 using FoldEngine.Resources;
 using FoldEngine.Systems;
-using Microsoft.Xna.Framework;
 
-namespace FoldEngine.Editor;
+namespace FoldEngine.Editor.Systems;
 
 [GameSystem("fold:editor.tabs", ProcessingCycles.None)]
 public class EditorTabSystem : GameSystem

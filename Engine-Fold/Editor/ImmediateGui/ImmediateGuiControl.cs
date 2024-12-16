@@ -7,7 +7,7 @@ using FoldEngine.Serialization;
 
 namespace FoldEngine.Editor.ImmediateGui;
 
-[Component("fold:control.immediate_gui", traits: [typeof(Control), typeof(MouseFilterDefaultStop)])]
+[Component("fold:control.immediate_gui", traits: [typeof(Control), typeof(MouseFilterDefaultStop), typeof(Scrollable), typeof(FocusModeDefaultAll), typeof(InputCaptor)])]
 public struct ImmediateGuiControl
 {
     [DoNotSerialize]

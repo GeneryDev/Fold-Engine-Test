@@ -1,4 +1,5 @@
-﻿using FoldEngine.Components;
+﻿using System.Collections.Generic;
+using FoldEngine.Components;
 using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
 using FoldEngine.Serialization;
@@ -7,7 +8,7 @@ using Microsoft.Xna.Framework;
 namespace FoldEngine.Gui.Components;
 
 [Component("fold:control.viewport")]
-[ComponentInitializer(typeof(Viewport), nameof(InitializeComponent))]
+[ComponentInitializer(typeof(Viewport))]
 public struct Viewport
 {
     public string RenderGroupName;
@@ -15,20 +16,15 @@ public struct Viewport
     
     [DoNotSerialize] public Point MousePos;
     
-    [DoNotSerialize] [EntityId] public long HoverTargetId;
-    [DoNotSerialize] [EntityId] public long PrevHoverTargetId;
+    [DoNotSerialize] [EntityId] public long HoverTargetId = -1;
+
+    [EntityId] public long FocusOwnerId = -1;
+    public List<long> FocusableAncestorIds = new();
 
     public Viewport()
     {
-        HoverTargetId = -1;
-        PrevHoverTargetId = -1;
         RenderGroupName = "main";
         RenderLayerName = "screen";
-    }
-
-    public static Viewport InitializeComponent(Scene scene, long entityId)
-    {
-        return new Viewport();
     }
 
     public IRenderingLayer GetLayer(IRenderingUnit renderer)

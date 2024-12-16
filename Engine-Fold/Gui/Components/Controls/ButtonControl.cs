@@ -17,7 +17,7 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Gui.Components.Controls
 {
-    [Component("fold:control.button", traits: [typeof(Control), typeof(MouseFilterDefaultStop)])]
+    [Component("fold:control.button", traits: [typeof(Control), typeof(MouseFilterDefaultStop), typeof(FocusModeDefaultAll), typeof(InputCaptor)])]
     [ComponentInitializer(typeof(ButtonControl))]
     public struct ButtonControl
     {
@@ -245,7 +245,6 @@ namespace FoldEngine.Gui.Systems
 
                     if (performAction)
                     {
-                        Console.WriteLine($"Click!");
                         Scene.Events.Invoke(new ButtonPressedEvent
                         {
                             EntityId = evt.EntityId,
