@@ -7,7 +7,7 @@ public class EntityIdAttribute : Attribute
 {
 }
 
-public struct Entity
+public readonly struct Entity
 {
     public readonly Scene Scene;
     public readonly long EntityId;
@@ -49,11 +49,20 @@ public struct Entity
         return ref Scene.Components.CreateComponent<T>(EntityId);
     }
 
-    public ref T SetComponent<T>(T componentData) where T : struct
+    public ref T SetComponent<T>(T component) where T : struct
     {
-        ref var component = ref Scene.Components.CreateComponent<T>(EntityId);
-        component = componentData;
-        return ref component;
+        if (HasComponent<T>())
+        {
+            ref var componentRef = ref Scene.Components.GetComponent<T>(EntityId);
+            componentRef = component;
+            return ref componentRef;
+        }
+        else
+        {
+            ref var componentRef = ref Scene.Components.CreateComponent<T>(EntityId);
+            componentRef = component;
+            return ref componentRef;
+        }
     }
 
     public void RemoveComponent<T>() where T : struct
