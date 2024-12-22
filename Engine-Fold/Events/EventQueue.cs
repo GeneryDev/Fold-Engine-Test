@@ -6,7 +6,10 @@ namespace FoldEngine.Events;
 
 public interface IEventQueue
 {
-    void Flush();
+    public EventAttribute EventAttribute { get; }
+    
+    void FlushAll();
+    void FlushOne();
     void Unsubscribe(object listener);
     bool AnyListeners();
 }
@@ -15,7 +18,7 @@ public class EventQueue<T> : IEventQueue where T : struct
 {
     private const int StartingSize = 4;
 
-    internal readonly EventAttribute EventAttribute;
+    public EventAttribute EventAttribute { get; init; }
 
     private T[] _events; //resized immediately, holds all queued events
     private int _flushIndex;
@@ -30,7 +33,7 @@ public class EventQueue<T> : IEventQueue where T : struct
         _events = new T[StartingSize];
     }
 
-    public void Flush()
+    public void FlushAll()
     {
         _flushIndex = 0;
         while (_flushIndex < _insertionIndex)
@@ -41,6 +44,25 @@ public class EventQueue<T> : IEventQueue where T : struct
         }
 
         _insertionIndex = 0;
+    }
+
+    public void FlushOne()
+    {
+        if (_flushIndex < _insertionIndex)
+        {
+            foreach (EventListener<T> listener in _listeners) listener(ref _events[_flushIndex]);
+
+            if (_flushIndex >= _insertionIndex)
+            {
+                // Reached end
+                _insertionIndex = 0;
+                _flushIndex = 0;
+            }
+            else
+            {
+                _flushIndex++;
+            }
+        }
     }
 
     public void Unsubscribe(object listener)

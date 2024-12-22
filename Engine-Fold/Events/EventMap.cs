@@ -10,8 +10,8 @@ public class EventMap
     /// </summary>
     internal readonly Dictionary<Type, IEventQueue> Map = new Dictionary<Type, IEventQueue>();
 
-    private readonly List<IEventQueue> _afterSystemQueues = new List<IEventQueue>();
-    private readonly List<IEventQueue> _endQueues = new List<IEventQueue>();
+    private EventScheduler _afterSystemScheduler = new();
+    private EventScheduler _endScheduler = new();
 
     /// <summary>
     ///     Creates an EventMap.
@@ -26,23 +26,6 @@ public class EventMap
         {
             var queue = new EventQueue<T>();
             Map[typeof(T)] = queue;
-            switch (queue.EventAttribute.FlushMode)
-            {
-                case EventFlushMode.AfterSystem:
-                {
-                    _afterSystemQueues.Add(queue);
-                    break;
-                }
-                case EventFlushMode.End:
-                {
-                    _endQueues.Add(queue);
-                    break;
-                }
-                case EventFlushMode.Immediate:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
         }
 
         return (EventQueue<T>)Map[typeof(T)];
@@ -55,9 +38,33 @@ public class EventMap
 
     public T Invoke<T>(T evt) where T : struct
     {
-        if(HasListeners<T>())
-            return Get<T>().Enqueue(evt);
+        if (HasListeners<T>())
+        {
+            var queue = Get<T>();
+            ScheduleFlush(queue);
+            return queue.Enqueue(evt);
+        }
         return evt;
+    }
+
+    private void ScheduleFlush(IEventQueue queue)
+    {
+        switch (queue.EventAttribute.FlushMode)
+        {
+            case EventFlushMode.AfterSystem:
+            {
+                _afterSystemScheduler.Schedule(queue);
+                break;
+            }
+            case EventFlushMode.End:
+            {
+                _endScheduler.Schedule(queue);
+                break;
+            }
+            case EventFlushMode.Immediate:
+            default:
+                break;
+        }
     }
 
     public EventUnsubscriber Subscribe<T>(EventListener<T> listener) where T : struct
@@ -67,21 +74,11 @@ public class EventMap
 
     public void FlushAfterSystem()
     {
-        // ReSharper disable once ForCanBeConvertedToForeach
-        for (int i = 0; i < _afterSystemQueues.Count; i++)
-        {
-            IEventQueue queue = _afterSystemQueues[i];
-            queue.Flush();
-        }
+        _afterSystemScheduler.Flush();
     }
 
     public void FlushEnd()
     {
-        // ReSharper disable once ForCanBeConvertedToForeach
-        for (int i = 0; i < _endQueues.Count; i++)
-        {
-            IEventQueue queue = _endQueues[i];
-            queue.Flush();
-        }
+        _endScheduler.Flush();
     }
 }
