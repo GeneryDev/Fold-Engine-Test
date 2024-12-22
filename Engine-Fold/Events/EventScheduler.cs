@@ -2,9 +2,9 @@
 
 namespace FoldEngine.Events;
 
-public struct EventScheduler
+public readonly struct EventScheduler
 {
-    private List<IEventQueue> _queues;
+    private readonly List<IEventQueue> _queues;
 
     public EventScheduler()
     {
