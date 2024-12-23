@@ -6,10 +6,10 @@ using Microsoft.Xna.Framework.Input;
 
 namespace FoldEngine.Input;
 
-[Event("fold:input")]
+[Event("fold:input", EventFlushMode.Immediate)]
 public struct InputEvent
 {
-    public int PlayerIndex;
+    public int DeviceIndex;
 
     public Type EventType;
     
@@ -23,7 +23,7 @@ public struct InputEvent
     public char TypedCharacter;
     
     // Mouse Event Properties
-    public MouseButtonMask ButtonMask;
+    public MouseButtonMask MouseButtonMask;
     public Vector2 MousePosition;
     public MouseButtons MouseButton;
     public Point MouseWheelMovement;
@@ -33,6 +33,8 @@ public struct InputEvent
     public Buttons Button;
     public GamePadAxis Axis;
     public float AxisValue;
+    
+    public bool Consumed;
 
     public bool Is<T>()
     {
@@ -71,7 +73,7 @@ public struct InputEvent
 
     public override string ToString()
     {
-        return $"{EventType?.Name ?? nameof(InputEvent)}[{nameof(PlayerIndex)}: {PlayerIndex}, {EventTypeToString()}]";
+        return $"{EventType?.Name ?? nameof(InputEvent)}[{nameof(DeviceIndex)}: {DeviceIndex}, {EventTypeToString()}]";
     }
 
     private string EventTypeToString()
@@ -83,6 +85,11 @@ public struct InputEvent
         if (EventType == typeof(InputEventGamepadButton)) return ((InputEventGamepadButton)this).ToString();
         if (EventType == typeof(InputEventGamepadMotion)) return ((InputEventGamepadMotion)this).ToString();
         return "Invalid";
+    }
+
+    public void Consume()
+    {
+        Consumed = true;
     }
 }
 
@@ -127,15 +134,15 @@ public struct InputEventKey : IInputEventWrapper
         this.UnderlyingEvent = underlyingEvent;
     }
 
-    public InputEventKey() : this(-1)
+    public InputEventKey() : this(0)
     {
     }
 
-    public InputEventKey(int playerIndex = -1)
+    public InputEventKey(int deviceIndex = 0)
     {
         UnderlyingEvent = new InputEvent()
         {
-            PlayerIndex = playerIndex,
+            DeviceIndex = deviceIndex,
             EventType = this.GetType()
         };
     }
@@ -152,8 +159,8 @@ public struct InputEventMouseButton : IInputEventWrapper
 
     public MouseButtonMask ButtonMask
     {
-        get => UnderlyingEvent.ButtonMask;
-        set => UnderlyingEvent.ButtonMask = value;
+        get => UnderlyingEvent.MouseButtonMask;
+        set => UnderlyingEvent.MouseButtonMask = value;
     }
 
     public Vector2 Position
@@ -185,15 +192,15 @@ public struct InputEventMouseButton : IInputEventWrapper
         this.UnderlyingEvent = underlyingEvent;
     }
 
-    public InputEventMouseButton() : this(-1)
+    public InputEventMouseButton() : this(0)
     {
     }
 
-    public InputEventMouseButton(int playerIndex = -1)
+    public InputEventMouseButton(int deviceIndex = 0)
     {
         UnderlyingEvent = new InputEvent()
         {
-            PlayerIndex = playerIndex,
+            DeviceIndex = deviceIndex,
             EventType = this.GetType()
         };
     }
@@ -210,8 +217,8 @@ public struct InputEventMouseWheelMotion : IInputEventWrapper
 
     public MouseButtonMask ButtonMask
     {
-        get => UnderlyingEvent.ButtonMask;
-        set => UnderlyingEvent.ButtonMask = value;
+        get => UnderlyingEvent.MouseButtonMask;
+        set => UnderlyingEvent.MouseButtonMask = value;
     }
 
     public Vector2 Position
@@ -243,15 +250,15 @@ public struct InputEventMouseWheelMotion : IInputEventWrapper
         this.UnderlyingEvent = underlyingEvent;
     }
 
-    public InputEventMouseWheelMotion() : this(-1)
+    public InputEventMouseWheelMotion() : this(0)
     {
     }
 
-    public InputEventMouseWheelMotion(int playerIndex = -1)
+    public InputEventMouseWheelMotion(int deviceIndex = 0)
     {
         UnderlyingEvent = new InputEvent()
         {
-            PlayerIndex = playerIndex,
+            DeviceIndex = deviceIndex,
             EventType = this.GetType()
         };
     }
@@ -268,8 +275,8 @@ public struct InputEventMouseMotion : IInputEventWrapper
 
     public MouseButtonMask ButtonMask
     {
-        get => UnderlyingEvent.ButtonMask;
-        set => UnderlyingEvent.ButtonMask = value;
+        get => UnderlyingEvent.MouseButtonMask;
+        set => UnderlyingEvent.MouseButtonMask = value;
     }
 
     public Vector2 Position
@@ -295,15 +302,15 @@ public struct InputEventMouseMotion : IInputEventWrapper
         this.UnderlyingEvent = underlyingEvent;
     }
 
-    public InputEventMouseMotion() : this(-1)
+    public InputEventMouseMotion() : this(0)
     {
     }
 
-    public InputEventMouseMotion(int playerIndex = -1)
+    public InputEventMouseMotion(int deviceIndex = 0)
     {
         UnderlyingEvent = new InputEvent()
         {
-            PlayerIndex = playerIndex,
+            DeviceIndex = deviceIndex,
             EventType = this.GetType()
         };
     }
@@ -335,15 +342,15 @@ public struct InputEventGamepadButton : IInputEventWrapper
         this.UnderlyingEvent = underlyingEvent;
     }
 
-    public InputEventGamepadButton() : this(-1)
+    public InputEventGamepadButton() : this(0)
     {
     }
 
-    public InputEventGamepadButton(int playerIndex = -1)
+    public InputEventGamepadButton(int deviceIndex = 0)
     {
         UnderlyingEvent = new InputEvent()
         {
-            PlayerIndex = playerIndex,
+            DeviceIndex = deviceIndex,
             EventType = this.GetType()
         };
     }
@@ -375,15 +382,15 @@ public struct InputEventGamepadMotion : IInputEventWrapper
         this.UnderlyingEvent = underlyingEvent;
     }
 
-    public InputEventGamepadMotion() : this(-1)
+    public InputEventGamepadMotion() : this(0)
     {
     }
 
-    public InputEventGamepadMotion(int playerIndex = -1)
+    public InputEventGamepadMotion(int deviceIndex = 0)
     {
         UnderlyingEvent = new InputEvent()
         {
-            PlayerIndex = playerIndex,
+            DeviceIndex = deviceIndex,
             EventType = this.GetType()
         };
     }
