@@ -116,7 +116,16 @@ public class Mouse : IInputDevice
         if (state.LeftButton == ButtonState.Pressed) mask |= MouseButtonMask.LeftButton;
         if (state.MiddleButton == ButtonState.Pressed) mask |= MouseButtonMask.MiddleButton;
         if (state.RightButton == ButtonState.Pressed) mask |= MouseButtonMask.RightButton;
+        if (state.XButton1 == ButtonState.Pressed) mask |= MouseButtonMask.XButton1;
+        if (state.XButton2 == ButtonState.Pressed) mask |= MouseButtonMask.XButton2;
         return mask;
+    }
+
+    public MouseButtonMask GetButtonMask() => GetButtonMask(_prevState);
+
+    public bool IsButtonDown(MouseButtons button)
+    {
+        return GetButtonMask().Has(button);
     }
 
     public T Get<T>(string name) where T : IInputInfo
