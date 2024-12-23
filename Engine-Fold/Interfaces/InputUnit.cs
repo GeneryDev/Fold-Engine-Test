@@ -9,12 +9,13 @@ public class InputUnit
     public IGameCore Core { get; }
 
     public InputDevices Devices;
-    public Players Players = new Players();
+    public Players Players;
 
     public InputUnit(IGameCore core)
     {
         Core = core;
 
+        Players = new Players(this);
         Devices = new InputDevices(this);
     }
 
@@ -35,6 +36,11 @@ public class InputUnit
     public void InvokeInputEvent(InputEvent evt)
     {
         // Console.WriteLine($"Input: {evt}");
+        Core.Events.Invoke(evt);
+    }
+
+    public void InvokeActionEvent(InputActionEvent evt)
+    {
         Core.Events.Invoke(evt);
     }
 }

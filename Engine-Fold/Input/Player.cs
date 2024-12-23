@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using FoldEngine.Interfaces;
 
 namespace FoldEngine.Input;
 
@@ -25,7 +26,7 @@ public class Player
         //TODO invoke event
     }
 
-    public void Update()
+    public void Update(InputUnit inputUnit, int playerIndex)
     {
         if (ActiveScheme == null && _controlSchemes.Count >= 1)
         {
@@ -40,5 +41,12 @@ public class Player
                 break;
             }
         }
+
+        // ActiveScheme?.Update(inputUnit, playerIndex);
+    }
+
+    public void HandleInputEvent(ref InputEvent evt, InputUnit inputUnit, int playerIndex)
+    {
+        // ActiveScheme?.HandleInputEvent(ref evt, inputUnit, playerIndex);
     }
 }
