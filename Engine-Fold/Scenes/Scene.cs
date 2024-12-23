@@ -32,6 +32,7 @@ public class Scene : Resource, ISelfSerializer
     private long _nextEntityId;
     private List<bool> _reclaimableIds;
 
+    [DoNotSerialize]
     public CameraOverrides CameraOverrides;
 
     public bool Paused = false;
