@@ -78,7 +78,9 @@ public class EditorSceneViewSystem : GameSystem
             if (toolSystem != null)
             {
                 if (evt.Button is MouseButtonEvent.MiddleButton or MouseButtonEvent.RightButton)
-                    toolSystem.ForcedTool = toolSystem.Tools[0];
+                {
+                    toolSystem.ForcedTool = evt.Type == MouseButtonEventType.Pressed ? toolSystem.Tools[0] : null;
+                }
 
                 var evtTransformed = new MouseEvent()
                 {
