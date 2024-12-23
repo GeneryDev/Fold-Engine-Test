@@ -59,7 +59,7 @@ public class FoldGame : Game
         Window.ClientSizeChanged += (sender, args) =>
         {
             Point newSize = Window.ClientBounds.Size;
-            if (_lastKnownWindowSize != newSize)
+            if (newSize is { X: > 0, Y: > 0 } && _lastKnownWindowSize != newSize)
             {
                 _lastKnownWindowSize = newSize;
                 Core.RenderingUnit.WindowSize = newSize;
