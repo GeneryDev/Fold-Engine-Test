@@ -5,6 +5,7 @@ using FoldEngine.Gui.Components;
 using FoldEngine.Gui.Components.Controls;
 using FoldEngine.Gui.Components.Traits;
 using FoldEngine.Gui.Events;
+using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Scenes;
 using FoldEngine.Serialization;

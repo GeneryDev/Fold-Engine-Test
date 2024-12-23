@@ -1,17 +1,26 @@
 ﻿using System;
+using FoldEngine.Interfaces;
 using Microsoft.Xna.Framework.Input;
 
 namespace FoldEngine.Input;
 
 public class GamePad : IInputDevice
 {
+    private Buttons[] _allButtons;
+
+    public readonly int PlayerIndex;
+    
     public GamePadButtons Buttons;
     public GamePadDPad DPad;
     public GamePadThumbsticks Thumbsticks;
     public GamePadTriggers Triggers;
+    
+    private GamePadState _prevState;
 
     public GamePad(int playerIndex)
     {
+        PlayerIndex = playerIndex;
+        
         Buttons = new GamePadButtons(playerIndex);
         Thumbsticks = new GamePadThumbsticks(playerIndex);
         DPad = new GamePadDPad(playerIndex);
@@ -21,14 +30,58 @@ public class GamePad : IInputDevice
     public bool IsBeingUsed =>
         Thumbsticks.IsBeingUsed || Buttons.IsBeingUsed || Triggers.IsBeingUsed || DPad.IsBeingUsed;
 
-    public void Update()
+    public void Update(InputUnit inputUnit)
     {
+        var gamepadState = Microsoft.Xna.Framework.Input.GamePad.GetState(PlayerIndex);
+        
+        _allButtons ??= Enum.GetValues<Buttons>();
+        
         Buttons.Update();
         DPad.Update();
         Thumbsticks.Update();
         Triggers.Update();
+        
+        foreach (var button in _allButtons)
+        {
+            bool wasDown = _prevState.IsButtonDown(button);
+            bool down = gamepadState.IsButtonDown(button);
+            HandleGamePadButton(button, down, wasDown, inputUnit);
+        }
+        HandleGamePadAxis(GamePadAxis.TriggerLeft, gamepadState.Triggers.Left, _prevState.Triggers.Left, inputUnit);
+        HandleGamePadAxis(GamePadAxis.TriggerRight, gamepadState.Triggers.Right, _prevState.Triggers.Right, inputUnit);
+        
+        HandleGamePadAxis(GamePadAxis.LeftX, gamepadState.ThumbSticks.Left.X, _prevState.ThumbSticks.Left.X, inputUnit);
+        HandleGamePadAxis(GamePadAxis.LeftY, gamepadState.ThumbSticks.Left.Y, _prevState.ThumbSticks.Left.Y, inputUnit);
+        HandleGamePadAxis(GamePadAxis.RightX, gamepadState.ThumbSticks.Right.X, _prevState.ThumbSticks.Right.X, inputUnit);
+        HandleGamePadAxis(GamePadAxis.RightY, gamepadState.ThumbSticks.Right.Y, _prevState.ThumbSticks.Right.Y, inputUnit);
+
+        _prevState = gamepadState;
     }
 
+    private void HandleGamePadButton(Buttons button, bool isDown, bool wasDown, InputUnit inputUnit)
+    {
+        if (isDown != wasDown)
+        {
+            inputUnit.InvokeInputEvent(new InputEventGamepadButton(PlayerIndex)
+            {
+                Button = button,
+                Pressed = isDown
+            }.UnderlyingEvent);
+        }
+    }
+
+    private void HandleGamePadAxis(GamePadAxis axis, float value, float prevValue, InputUnit inputUnit)
+    {
+        // ReSharper disable once CompareOfFloatsByEqualityOperator
+        if (value != prevValue)
+        {
+            inputUnit.InvokeInputEvent(new InputEventGamepadMotion(PlayerIndex)
+            {
+                Axis = axis,
+                AxisValue = value
+            }.UnderlyingEvent);
+        }
+    }
 
     public T Get<T>(string name) where T : IInputInfo
     {

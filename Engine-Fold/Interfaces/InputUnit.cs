@@ -1,4 +1,5 @@
-﻿using FoldEngine.Input;
+﻿using System;
+using FoldEngine.Input;
 using FoldEngine.Util.JsonSerialization;
 
 namespace FoldEngine.Interfaces;
@@ -7,12 +8,14 @@ public class InputUnit
 {
     public IGameCore Core { get; }
 
-    public InputDevices Devices = new InputDevices();
+    public InputDevices Devices;
     public Players Players = new Players();
 
     public InputUnit(IGameCore core)
     {
         Core = core;
+
+        Devices = new InputDevices(this);
     }
 
     public void Update()
@@ -27,5 +30,11 @@ public class InputUnit
                          new JsonDeserializerRoot(def.Identifier, def.Root).AsObject())
                      .Build())
             Players.Add(player);
+    }
+
+    public void InvokeInputEvent(InputEvent evt)
+    {
+        // Console.WriteLine($"Input: {evt}");
+        Core.Events.Invoke(evt);
     }
 }

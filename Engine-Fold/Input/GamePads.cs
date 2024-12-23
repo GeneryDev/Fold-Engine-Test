@@ -1,13 +1,26 @@
-﻿namespace FoldEngine.Input;
+﻿using FoldEngine.Interfaces;
 
-public class GamePads
+namespace FoldEngine.Input;
+
+public readonly struct GamePads
 {
-    public GamePad[] _gamepads = new GamePad[Microsoft.Xna.Framework.Input.GamePad.MaximumGamePadCount];
+    public readonly GamePad[] Gamepads;
 
-    public GamePad this[int index] => _gamepads[index] ?? (_gamepads[index] = new GamePad(index));
-
-    public void Update()
+    public GamePads()
     {
-        foreach (GamePad gamepad in _gamepads) gamepad?.Update();
+        Gamepads = new GamePad[Microsoft.Xna.Framework.Input.GamePad.MaximumGamePadCount];
+    }
+
+    public GamePad this[int index] => Gamepads[index] ?? (Gamepads[index] = new GamePad(index));
+
+    public void Update(InputUnit inputUnit)
+    {
+        if (!inputUnit.Core.FoldGame.IsActive) return;
+        
+        for (var index = 0; index < Gamepads.Length; index++)
+        {
+            var gamepad = Gamepads[index];
+            gamepad?.Update(inputUnit);
+        }
     }
 }

@@ -7,6 +7,7 @@ using FoldEngine.Gui.Components.Controls;
 using FoldEngine.Gui.Components.Traits;
 using FoldEngine.Gui.Events;
 using FoldEngine.Gui.Styles;
+using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
@@ -60,13 +61,6 @@ namespace FoldEngine.Gui.Components.Controls
         }
     }
 
-    [Flags]
-    public enum MouseButtonMask
-    {
-        LeftButton = 1 << MouseButtonEvent.LeftButton,
-        MiddleButton = 1 << MouseButtonEvent.MiddleButton,
-        RightButton = 1 << MouseButtonEvent.RightButton
-    }
     public enum MouseActionMode
     {
         Press,

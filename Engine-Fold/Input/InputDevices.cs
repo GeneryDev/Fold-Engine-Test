@@ -1,12 +1,21 @@
 ﻿using System;
+using FoldEngine.Interfaces;
 
 namespace FoldEngine.Input;
 
 public class InputDevices
 {
+    public InputUnit InputUnit;
+    
     public GamePads GamePads = new GamePads();
     public Keyboard Keyboard = new Keyboard();
     public Mouse Mouse = new Mouse();
+
+    public InputDevices(InputUnit inputUnit)
+    {
+        InputUnit = inputUnit;
+        Mouse.Keyboard = Keyboard;
+    }
 
     public IInputDevice this[string identifier]
     {
@@ -30,8 +39,8 @@ public class InputDevices
 
     public void Update()
     {
-        Keyboard.Update();
-        Mouse.Update();
-        GamePads.Update();
+        Keyboard.Update(InputUnit);
+        Mouse.Update(InputUnit);
+        GamePads.Update(InputUnit);
     }
 }
