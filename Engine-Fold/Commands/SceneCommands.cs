@@ -20,9 +20,8 @@ public class SaveSceneCommand : ICommand
 
     public void Execute(IGameCore core)
     {
-        string savePath = core.RegistryUnit.Resources.AttributeOf(GetType()).CreateResourcePath(_identifier);
-        _scene.Save(savePath,
-            options => { options.Set(SerializeExcludeSystems.Instance, new List<Type> { typeof(EditorBase) }); });
+        string savePath = core.RegistryUnit.Resources.AttributeOf(_scene.GetType()).CreateResourcePath(_identifier);
+        _scene.Save(savePath);
 
         core.ResourceIndex.Update();
     }
