@@ -1,4 +1,5 @@
-﻿using FoldEngine.Components;
+﻿using System;
+using FoldEngine.Components;
 using FoldEngine.Editor.Events;
 using FoldEngine.Editor.ImmediateGui;
 using FoldEngine.Editor.Views;
@@ -130,6 +131,13 @@ public class EditorTabSystem : GameSystem
             inspector?.SetObject(evt.Object);
             
             Scene.Events.Invoke(new EditorTabSwitchRequestedEvent() { TabName = "Inspector" });
+        });
+        Subscribe((ref MouseButtonEvent evt) =>
+        {
+            if (!Scene.Components.HasComponent<Tab>(evt.EntityId)) return;
+            if (evt is not { Button: MouseButtonEvent.MiddleButton, Type: MouseButtonEventType.Pressed }) return;
+            // close tab
+            Scene.Systems.Get<EditorBase>().CloseScene(evt.EntityId);
         });
     }
 

@@ -190,6 +190,16 @@ public class EditorBase : GameSystem
         }
     }
 
+    public void CloseScene(long tabEntityId)
+    {
+        if (!Scene.Components.HasComponent<Tab>(tabEntityId)) return;
+        ref var tab = ref Scene.Components.GetComponent<Tab>(tabEntityId);
+        long sceneLoaderId = tab.LinkedEntityId;
+        if (!Scene.Components.HasComponent<EditorSceneTab>(sceneLoaderId)) return;
+        Scene.DeleteEntity(tabEntityId);
+        Scene.DeleteEntity(sceneLoaderId);
+    }
+
     public void Undo()
     {
         if (_currentSceneTabId != -1)
