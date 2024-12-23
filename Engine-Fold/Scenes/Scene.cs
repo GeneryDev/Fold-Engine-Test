@@ -295,7 +295,7 @@ public class Scene : Resource, ISelfSerializer
 
     public void Load(string path)
     {
-        var loadOp = new LoadOperation(path);
+        var loadOp = new BinaryLoadOperation(path);
         Deserialize(loadOp);
         loadOp.Close();
         loadOp.Dispose();

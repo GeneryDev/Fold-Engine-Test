@@ -82,7 +82,7 @@ public class EditorToolbarView : EditorView
     {
         var stream = new MemoryStream();
 
-        var saveOp = new SaveOperation(stream);
+        var saveOp = new BinarySaveOperation(stream);
         saveOp.Options.Set(SerializeTempResources.Instance, true);
         Scene.Systems.Get<EditorBase>().CurrentSceneTab.Scene.Serialize(saveOp);
 
@@ -94,7 +94,7 @@ public class EditorToolbarView : EditorView
 
     private void Stop(EditorEnvironment environment, ref EditorSceneTab editingSceneTab)
     {
-        var loadOp = new LoadOperation(new MemoryStream(editingSceneTab.StoredSceneData));
+        var loadOp = new BinaryLoadOperation(new MemoryStream(editingSceneTab.StoredSceneData));
 
         loadOp.Options.Set(DeserializeClearScene.Instance, true);
 

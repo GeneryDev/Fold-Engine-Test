@@ -257,7 +257,7 @@ public abstract class Resource
 
     public virtual void DeserializeResource(string path)
     {
-        var reader = new LoadOperation(Data.In.Stream(path));
+        var reader = new BinaryLoadOperation(Data.In.Stream(path));
         try
         {
             GenericSerializer.Deserialize(this, reader);
@@ -270,7 +270,7 @@ public abstract class Resource
 
     public void Save(string path, FieldCollection.Configurator configurator = null)
     {
-        var writer = new SaveOperation(Data.Out.Stream(path));
+        var writer = new BinarySaveOperation(Data.Out.Stream(path));
         configurator?.Invoke(writer.Options);
         try
         {

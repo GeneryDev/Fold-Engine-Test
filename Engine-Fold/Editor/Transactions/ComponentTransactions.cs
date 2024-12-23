@@ -62,7 +62,7 @@ public class RemoveComponentTransaction : Transaction<Scene>
         {
             var stream = new MemoryStream();
 
-            var saveOp = new SaveOperation(stream);
+            var saveOp = new BinarySaveOperation(stream);
             saveOp.Options.Set(SerializeOnlyEntities.Instance, new List<long> { _entityId });
             saveOp.Options.Set(SerializeOnlyComponents.Instance, new List<Type> { _type });
 
@@ -88,7 +88,7 @@ public class RemoveComponentTransaction : Transaction<Scene>
         if (target.Components.HasComponent<Hierarchical>(_entityId)
             && !target.Components.HasComponent(_type, _entityId))
         {
-            var loadOp = new LoadOperation(new MemoryStream(_serializedData));
+            var loadOp = new BinaryLoadOperation(new MemoryStream(_serializedData));
 
             target.Deserialize(loadOp);
 

@@ -54,7 +54,7 @@ public class LoadSceneCommand : ICommand
                 SceneEditor.ResetViewport(core.RenderingUnit);
             }
         });
-        // var loadOp = new LoadOperation(SourcePath);
+        // var loadOp = new BinaryLoadOperation(SourcePath);
         //
         // loadOp.Options.Set(DeserializeClearScene.Instance, true);
         // loadOp.Options.Set(DeserializeRemapIds.Instance, new EntityIdRemapper(core.ActiveScene));
