@@ -8,6 +8,7 @@ namespace FoldEngine.Editor.Transactions;
 public abstract class SetFieldTransaction : Transaction<Scene>
 {
     public FieldInfo FieldInfo;
+    public PropertyInfo PropertyInfo;
     public object NewValue;
 
     public object OldValue;
@@ -50,13 +51,15 @@ public class SetObjectFieldTransaction : SetFieldTransaction
 
     public override bool Redo(Scene target)
     {
-        FieldInfo.SetValue(Parent, NewValue);
+        FieldInfo?.SetValue(Parent, NewValue);
+        PropertyInfo?.SetValue(Parent, NewValue);
         return OldValue != NewValue;
     }
 
     public override bool Undo(Scene target)
     {
-        FieldInfo.SetValue(Parent, OldValue);
+        FieldInfo?.SetValue(Parent, OldValue);
+        PropertyInfo?.SetValue(Parent, NewValue);
         return OldValue != NewValue;
     }
 }

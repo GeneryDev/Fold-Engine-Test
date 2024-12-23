@@ -15,6 +15,7 @@ public interface IInspectorField
 public abstract class SetFieldAction : IGuiAction
 {
     protected FieldInfo _fieldInfo;
+    protected PropertyInfo _propertyInfo;
 
     protected object _forcedValue;
     protected int _index;
@@ -28,11 +29,12 @@ public abstract class SetFieldAction : IGuiAction
         if (_useForcedValue) newValue = _forcedValue;
 
         if (element is IInspectorField inspectorField)
-            if (!inspectorField.EditValueForType(_fieldInfo.FieldType, ref newValue, _index))
+            if (!inspectorField.EditValueForType(_fieldInfo?.FieldType ?? _propertyInfo.PropertyType, ref newValue, _index))
                 return;
 
         SetFieldTransaction transaction = CreateBaseTransaction();
         transaction.FieldInfo = _fieldInfo;
+        transaction.PropertyInfo = _propertyInfo;
         transaction.OldValue = oldValue;
         transaction.NewValue = newValue;
 
@@ -44,6 +46,17 @@ public abstract class SetFieldAction : IGuiAction
     public SetFieldAction FieldInfo(FieldInfo fieldInfo)
     {
         _fieldInfo = fieldInfo;
+        _propertyInfo = null;
+        _index = 0;
+        _forcedValue = null;
+        _useForcedValue = false;
+        return this;
+    }
+
+    public SetFieldAction FieldInfo(PropertyInfo propertyInfo)
+    {
+        _fieldInfo = null;
+        _propertyInfo = propertyInfo;
         _index = 0;
         _forcedValue = null;
         _useForcedValue = false;
@@ -111,7 +124,7 @@ public class SetObjectFieldAction : SetFieldAction
 
     protected override object GetOldValue()
     {
-        return _fieldInfo.GetValue(_obj);
+        return _fieldInfo != null ? _fieldInfo.GetValue(_obj) : _propertyInfo.GetValue(_obj);
     }
 
     protected override SetFieldTransaction CreateBaseTransaction()
