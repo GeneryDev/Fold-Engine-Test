@@ -16,6 +16,7 @@ public class GamePad : IInputDevice
     public GamePadTriggers Triggers;
     
     private GamePadState _prevState;
+    private float[] _axes;
 
     public GamePad(int playerIndex)
     {
@@ -35,6 +36,7 @@ public class GamePad : IInputDevice
         var gamepadState = Microsoft.Xna.Framework.Input.GamePad.GetState(PlayerIndex);
         
         _allButtons ??= Enum.GetValues<Buttons>();
+        _axes = new float[Enum.GetValues<GamePadAxis>().Length];
         
         Buttons.Update();
         DPad.Update();
@@ -72,6 +74,8 @@ public class GamePad : IInputDevice
 
     private void HandleGamePadAxis(GamePadAxis axis, float value, float prevValue, InputUnit inputUnit)
     {
+        _axes[(int)axis] = value;
+        
         // ReSharper disable once CompareOfFloatsByEqualityOperator
         if (value != prevValue)
         {
@@ -81,6 +85,11 @@ public class GamePad : IInputDevice
                 AxisValue = value
             }.UnderlyingEvent);
         }
+    }
+
+    public bool IsButtonDown(Buttons button)
+    {
+        return _prevState.IsButtonDown(button);
     }
 
     public T Get<T>(string name) where T : IInputInfo
