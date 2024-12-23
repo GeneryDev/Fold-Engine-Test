@@ -27,7 +27,7 @@ public class EditorBase : GameSystem
     private SubScene _nullSubScene;
     
     private EditorSceneTab _selfSceneTab;
-    private EditorSceneTab _nullSceneTab;
+    private EditorSceneTab _nullSceneTab = new EditorSceneTab();
     
     private Transform _selfCameraTransform;
     private Transform _nullTransform;
@@ -196,8 +196,11 @@ public class EditorBase : GameSystem
         ref var tab = ref Scene.Components.GetComponent<Tab>(tabEntityId);
         long sceneLoaderId = tab.LinkedEntityId;
         if (!Scene.Components.HasComponent<EditorSceneTab>(sceneLoaderId)) return;
+        ref var sceneTabInfo = ref Scene.Components.GetComponent<EditorSceneTab>(sceneLoaderId);
         Scene.DeleteEntity(tabEntityId);
         Scene.DeleteEntity(sceneLoaderId);
+        if(sceneTabInfo.EditorCameraEntityId != -1)
+            Scene.DeleteEntity(sceneTabInfo.EditorCameraEntityId);
     }
 
     public void Undo()
