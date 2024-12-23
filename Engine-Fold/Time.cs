@@ -12,6 +12,8 @@ public static class Time
 
     public static float TotalTime { get; internal set; }
     public static double TotalTimeD { get; internal set; }
+    
+    public static long TotalTimeMs { get; internal set; }
 
     public static float FramesPerSecond { get; internal set; }
 
@@ -23,6 +25,7 @@ public static class Time
     {
         DeltaTimeD = gameTime.ElapsedGameTime.TotalSeconds;
         TotalTimeD = gameTime.TotalGameTime.TotalSeconds;
+        TotalTimeMs = (long)gameTime.TotalGameTime.TotalMilliseconds;
 
         DeltaTime = (float)DeltaTimeD;
         TotalTime = (float)TotalTimeD;
