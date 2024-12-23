@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Reflection;
 using FoldEngine.Commands;
+using FoldEngine.Editor.ImmediateGui;
+using FoldEngine.Editor.ImmediateGui.Fields.Text;
+using FoldEngine.Editor.Inspector;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 
@@ -7,24 +11,12 @@ namespace FoldEngine.Editor.Views;
 
 public class EditorDebugActionsView : EditorView
 {
-    public EditorDebugActionsView()
-    {
-        new ResourceIdentifier("editor/info");
-    }
-
-    public virtual string Name => "Debug Actions";
-
     public override void Render(IRenderingUnit renderer)
     {
         ContentPanel.MayScroll = true;
 
         var editorBase = Scene.Systems.Get<EditorBase>();
         var editingTab = editorBase.CurrentSceneTab;
-
-        if (editingTab.Scene != null && ContentPanel.Button("Save Scene", 14).IsPressed())
-        {
-            Core.CommandQueue.Enqueue(new SaveSceneCommand(editingTab.Scene, editingTab.Scene.Identifier ?? "__new_scene"));
-        }
 
         if (ContentPanel.Button("Detach Editor (no undo!)", 14).IsPressed())
         {

@@ -160,6 +160,7 @@ public class EditorScene : Scene
         EditorPanels.Immediate<EditorInspectorView>(this, "Inspector", "editor/info", rightTabs, rightContainer);
         EditorPanels.Immediate<EditorDebugActionsView>(this, "Debug Actions", "editor/info", rightTabs, rightContainer);
         EditorPanels.Immediate<EditorResourcesView>(this, "Resources", "editor/checkmark", bottomTabs, bottomContainer);
+        EditorPanels.Immediate<EditorSceneSettingsView>(this, "Scene Settings", "editor/cog", bottomTabs, bottomContainer);
         EditorPanels.SceneView(this, centerTabs, centerContainer);
     }
 

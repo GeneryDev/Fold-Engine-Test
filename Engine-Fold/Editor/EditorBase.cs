@@ -128,7 +128,7 @@ public class EditorBase : GameSystem
     {
         editedScene.Flush();
         
-        var loaderEntity = Scene.CreateEntity($"Scene Loader: {editedScene.Name}");
+        var loaderEntity = Scene.CreateEntity($"Scene Loader: {editedScene.Identifier}");
         ref var subScene = ref loaderEntity.AddComponent<SubScene>();
         subScene.Scene = editedScene;
         subScene.Render = true;
@@ -156,14 +156,14 @@ public class EditorBase : GameSystem
 
 
 
-        var tabEntity = Scene.CreateEntity($"Tab: {editedScene.Name}");
+        var tabEntity = Scene.CreateEntity($"Tab: {editedScene.Identifier}");
         tabEntity.SetComponent(new Control()
         {
             MinimumSize = new Vector2(0, 14)
         });
         tabEntity.SetComponent(new ButtonControl()
         {
-            Text = editedScene.Name,
+            Text = editedScene.Identifier,
             Alignment = Alignment.Begin,
             Style = new ResourceIdentifier("editor:scene_tab"),
             KeepPressedOutside = true

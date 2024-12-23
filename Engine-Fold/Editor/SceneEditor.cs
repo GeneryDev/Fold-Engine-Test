@@ -15,7 +15,7 @@ public static class SceneEditor
     {
         scene.CameraOverrides = new CameraOverrides(scene);
 
-        scene.Core.CommandQueue.Enqueue(new SetWindowTitleCommand(scene.Name + " - Scene Editor"));
+        scene.Core.CommandQueue.Enqueue(new SetWindowTitleCommand(scene.Identifier + " - Scene Editor"));
         scene.Paused = true;
 
         scene.Systems.Add(new EditorBase());
@@ -25,7 +25,7 @@ public static class SceneEditor
     {
         scene.CameraOverrides = null;
 
-        scene.Core.CommandQueue.Enqueue(new SetWindowTitleCommand(scene.Name));
+        scene.Core.CommandQueue.Enqueue(new SetWindowTitleCommand(scene.Identifier));
         scene.Paused = false;
 
         scene.Systems.Remove<EditorBase>();

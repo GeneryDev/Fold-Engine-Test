@@ -57,8 +57,6 @@ public class Scene : Resource, ISelfSerializer
         Identifier = identifier;
     }
 
-    public string Name { get; set; } = "Scene";
-
     public Matrix GizmoTransformMatrix { get; set; }
     public long MainCameraId { get; set; }
 
@@ -284,7 +282,6 @@ public class Scene : Resource, ISelfSerializer
         {
             if (!writer.Options.Has(SerializeOnlyEntities.Instance))
             {
-                c.WriteMember(nameof(Name), Name);
                 c.WriteMember(nameof(_nextEntityId), _nextEntityId);
                 c.WriteMember(nameof(_deletedIds), _deletedIds);
                 c.WriteMember(nameof(Systems), (ISelfSerializer)Systems);
@@ -310,7 +307,6 @@ public class Scene : Resource, ISelfSerializer
         {
             if (reader.Options.Has(DeserializeClearScene.Instance) || !_hasAnything)
             {
-                if (c.HasMember(nameof(Name))) Name = c.GetMember<string>(nameof(Name));
                 if (c.HasMember(nameof(_nextEntityId))) _nextEntityId = c.GetMember<long>(nameof(_nextEntityId));
                 if (c.HasMember(nameof(_deletedIds))) _deletedIds = c.GetListMember<long>(nameof(_deletedIds));
             }
