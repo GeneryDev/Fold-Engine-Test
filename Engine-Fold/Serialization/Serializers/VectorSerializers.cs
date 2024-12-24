@@ -24,7 +24,7 @@ public class Vector2Serializer : Serializer<Vector2>
 
     public override void Serialize(Vector2 vec, SaveOperation writer)
     {
-        writer.Write(vec.X).Write(vec.Y);
+        writer.StartStruct().Write(vec.X).Write(vec.Y).EndStruct();
     }
 
     public override Vector2 Deserialize(LoadOperation reader)
@@ -39,7 +39,7 @@ public class Vector3Serializer : Serializer<Vector3>
 
     public override void Serialize(Vector3 vec, SaveOperation writer)
     {
-        writer.Write(vec.X).Write(vec.Y).Write(vec.Z);
+        writer.StartStruct().Write(vec.X).Write(vec.Y).Write(vec.Z).EndStruct();
     }
 
     public override Vector3 Deserialize(LoadOperation reader)
@@ -54,7 +54,7 @@ public class Vector4Serializer : Serializer<Vector4>
 
     public override void Serialize(Vector4 vec, SaveOperation writer)
     {
-        writer.Write(vec.X).Write(vec.Y).Write(vec.Z).Write(vec.W);
+        writer.StartStruct().Write(vec.X).Write(vec.Y).Write(vec.Z).Write(vec.W).EndStruct();
     }
 
     public override Vector4 Deserialize(LoadOperation reader)
@@ -85,6 +85,7 @@ public class MatrixSerializer : Serializer<Matrix>
     public override void Serialize(Matrix mat, SaveOperation writer)
     {
         writer
+            .StartStruct()
             .Write(mat.M11)
             .Write(mat.M12)
             .Write(mat.M13)
@@ -101,6 +102,7 @@ public class MatrixSerializer : Serializer<Matrix>
             .Write(mat.M42)
             .Write(mat.M43)
             .Write(mat.M44)
+            .EndStruct()
             ;
     }
 

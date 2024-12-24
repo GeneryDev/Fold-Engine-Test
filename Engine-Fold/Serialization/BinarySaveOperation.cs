@@ -54,6 +54,16 @@ public class BinarySaveOperation : SaveOperation
         _writer.Flush();
     }
 
+    public override SaveOperation StartStruct()
+    {
+        return this;
+    }
+
+    public override SaveOperation EndStruct()
+    {
+        return this;
+    }
+
     public override SaveOperation Write(bool value)
     {
         _writer.Write(value);
@@ -179,11 +189,6 @@ public class BinarySaveOperation : SaveOperation
         Current = endOffset;
 
         return this;
-    }
-
-    public override void Write<T>(T element)
-    {
-        SerializerSuite.Write(element, this);
     }
 
     protected override SaveOperation WriteMember(string name, object value)

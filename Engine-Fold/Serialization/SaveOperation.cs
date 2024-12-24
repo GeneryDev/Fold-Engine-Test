@@ -22,6 +22,10 @@ public abstract class SaveOperation
     public abstract void Dispose();
 
     public abstract void Flush();
+    
+    public abstract SaveOperation StartStruct();
+
+    public abstract SaveOperation EndStruct();
 
     public abstract SaveOperation Write(bool value);
 
@@ -55,7 +59,10 @@ public abstract class SaveOperation
 
     public abstract SaveOperation WriteArray(ArrayWriter writer);
 
-    public abstract void Write<T>(T element);
+    public void Write<T>(T element)
+    {
+        SerializerSuite.Write(element, this);
+    }
 
     protected abstract SaveOperation WriteMember(string name, object value);
 

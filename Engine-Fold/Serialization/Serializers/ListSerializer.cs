@@ -9,8 +9,13 @@ public class ListSerializer<T> : Serializer<List<T>>
 
     public override void Serialize(List<T> t, SaveOperation writer)
     {
-        writer.Write(t.Count);
-        foreach (T element in t) writer.Write(element);
+        writer.WriteArray((ref SaveOperation.Array arr) =>
+        {
+            foreach (var element in t)
+            {
+                arr.WriteMember(element);
+            }
+        });
     }
 
     public override List<T> Deserialize(LoadOperation reader)
