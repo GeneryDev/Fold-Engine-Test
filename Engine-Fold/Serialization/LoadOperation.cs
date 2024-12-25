@@ -75,13 +75,15 @@ public abstract class LoadOperation
         selfSerializer.Deserialize(this);
     }
 
-    public struct CompoundMember
+    public ref struct CompoundMember
     {
         public LoadOperation Reader;
         public string Name;
+        internal bool Skipped;
 
         public void Skip()
         {
+            Skipped = true;
         }
     }
 
@@ -91,16 +93,17 @@ public abstract class LoadOperation
         public int MemberCount;
     }
 
-    public struct ArrayMember
+    public ref struct ArrayMember
     {
         public ArrayHeader Array;
         public int Index;
+        internal bool Skipped;
         
         public LoadOperation Reader => Array.Reader;
 
         public void Skip()
         {
-            
+            Skipped = true;
         }
     }
 }
