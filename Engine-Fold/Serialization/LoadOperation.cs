@@ -7,7 +7,8 @@ namespace FoldEngine.Serialization;
 
 public abstract class LoadOperation
 {
-    public delegate void ArrayReader(Array c);
+    public delegate void ArrayHeaderReader(ArrayHeader m);
+    public delegate void ArrayMemberReader(ArrayMember m);
 
     public delegate void CompoundMemberReader(CompoundMember m);
 
@@ -18,6 +19,10 @@ public abstract class LoadOperation
     public abstract void Close();
 
     public abstract void Dispose();
+    
+    public abstract LoadOperation StartStruct();
+
+    public abstract LoadOperation EndStruct();
 
     public abstract bool ReadBoolean();
 
@@ -53,9 +58,12 @@ public abstract class LoadOperation
 
     public abstract void ReadCompound(CompoundMemberReader reader);
 
-    public abstract void ReadArray(ArrayReader reader);
+    public void ReadArray(ArrayMemberReader reader)
+    {
+        ReadArray(null, reader);
+    }
 
-    protected abstract void StartReadArrayMember(Array compound, int index);
+    public abstract void ReadArray(ArrayHeaderReader headerReader, ArrayMemberReader reader);
 
     public List<T> ReadList<T>()
     {
@@ -77,39 +85,22 @@ public abstract class LoadOperation
         }
     }
 
-    public struct Array
+    public struct ArrayHeader
     {
-        public LoadOperation LoadOperation;
+        public LoadOperation Reader;
         public int MemberCount;
-        public long[] MemberDataOffsets;
-        public int[] MemberDataLengths;
+    }
 
-        public bool HasMember(int index)
-        {
-            return index >= 0 && index < MemberCount;
-        }
+    public struct ArrayMember
+    {
+        public ArrayHeader Array;
+        public int Index;
+        
+        public LoadOperation Reader => Array.Reader;
 
-        public void StartReadMember(int index)
+        public void Skip()
         {
-            LoadOperation.StartReadArrayMember(this, index);
-        }
-
-        public T GetMember<T>(int index)
-        {
-            StartReadMember(index);
-            return LoadOperation.SerializerSuite.Read<T>(LoadOperation);
-        }
-
-        public List<T> GetListMember<T>(int index)
-        {
-            StartReadMember(index);
-            return LoadOperation.SerializerSuite.ReadList<T>(LoadOperation);
-        }
-
-        public void DeserializeMember(int index, ISelfSerializer selfSerializer)
-        {
-            StartReadMember(index);
-            selfSerializer.Deserialize(LoadOperation);
+            
         }
     }
 }

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using FoldEngine.Serialization;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
+using Newtonsoft.Json;
 
 namespace FoldEngine.Resources;
 
@@ -64,28 +66,29 @@ public class Mesh : Resource, ISelfSerializer
             {
                 case "Vertices":
                     reader.ReadArray(a =>
-                    {
-                        Vertices = new MeshVertex[a.MemberCount];
-                        _vertexCount = Vertices.Length;
-                        for (int i = 0; i < a.MemberCount; i++)
                         {
-                            a.StartReadMember(i);
-                            Vertices[i] = GenericSerializer.Deserialize(new MeshVertex(), reader);
-                            ProcessVertex(Vertices[i]);
+                            Vertices = new MeshVertex[a.MemberCount];
+                            _vertexCount = Vertices.Length;
+                        },
+                        elem =>
+                        {
+                            var vertex = GenericSerializer.Deserialize(new MeshVertex(), reader);
+                            Vertices[elem.Index] = vertex;
+                            ProcessVertex(vertex);
                         }
-                    });
+                    );
                     break;
                 case "Indices":
                     reader.ReadArray(a =>
-                    {
-                        Indices = new int[a.MemberCount];
-                        _triangleCount = Indices.Length / 3;
-                        for (int i = 0; i < a.MemberCount; i++)
                         {
-                            a.StartReadMember(i);
-                            Indices[i] = reader.ReadInt32();
+                            Indices = new int[a.MemberCount];
+                            _triangleCount = Indices.Length / 3;
+                        },
+                        elem =>
+                        {
+                            Indices[elem.Index] = reader.ReadInt32();
                         }
-                    });
+                    );
                     break;
             }
         });

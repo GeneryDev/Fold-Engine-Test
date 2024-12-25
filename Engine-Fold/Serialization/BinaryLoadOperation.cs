@@ -57,6 +57,16 @@ public class BinaryLoadOperation : LoadOperation
         _reader.Dispose();
     }
 
+    public override LoadOperation StartStruct()
+    {
+        return this;
+    }
+
+    public override LoadOperation EndStruct()
+    {
+        return this;
+    }
+
     public override bool ReadBoolean()
     {
         return _reader.ReadBoolean();
@@ -155,34 +165,33 @@ public class BinaryLoadOperation : LoadOperation
         }
     }
 
-    public override void ReadArray(ArrayReader reader)
+    public override void ReadArray(ArrayHeaderReader headerReader, ArrayMemberReader reader)
     {
         int memberCount = _reader.ReadInt32();
-        var array = new Array
+
+        var header = new ArrayHeader()
         {
-            LoadOperation = this,
-            MemberCount = memberCount,
-            MemberDataOffsets = new long[memberCount],
-            MemberDataLengths = new int[memberCount]
+            Reader = this,
+            MemberCount = memberCount
         };
+        
+        if (headerReader != null)
+        {
+            long startAddress = Current;
+            headerReader(header);
+            Current = startAddress;
+        }
 
         for (int i = 0; i < memberCount; i++)
         {
             int byteLength = ReadInt32();
-            array.MemberDataOffsets[i] = Current;
-            array.MemberDataLengths[i] = byteLength;
-            Current += byteLength;
+            long nextAddress = Current + byteLength;
+            reader(new ArrayMember()
+            {
+                Array = header,
+                Index = i
+            });
+            Current = nextAddress;
         }
-
-        long end = Current;
-
-        reader(array);
-
-        Current = end;
-    }
-
-    protected override void StartReadArrayMember(Array compound, int index)
-    {
-        Current = compound.MemberDataOffsets[index];
     }
 }

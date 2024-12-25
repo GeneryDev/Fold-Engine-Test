@@ -325,8 +325,10 @@ public class ComponentSet<T> : ComponentSet where T : struct
                 arr.WriteMember(() =>
                 {
                     // ReSharper disable twice AccessToModifiedClosure
+                    writer.StartStruct();
                     writer.Write(Dense[Sparse[entityId - MinId]].EntityId);
                     ComponentSerializer.Serialize(Get(Dense[Sparse[entityId - MinId]].EntityId), writer);
+                    writer.EndStruct();
                 });
             }
         });
@@ -334,18 +336,16 @@ public class ComponentSet<T> : ComponentSet where T : struct
 
     public override void Deserialize(LoadOperation reader)
     {
-        reader.ReadArray(arr =>
+        reader.ReadArray(elem =>
         {
-            for (int i = 0; i < arr.MemberCount; i++)
-            {
-                arr.StartReadMember(i);
-                long entityId = reader.ReadInt64();
-                if (reader.Options.Has(DeserializeRemapIds.Instance))
-                    entityId = reader.Options.Get(DeserializeRemapIds.Instance).TransformId(entityId);
-                // Console.WriteLine($"{ComponentType} for entity id " + entityId);
-                if (!Has((int)entityId)) CreateFor(entityId);
-                ComponentSerializer.Deserialize<T>(this, entityId, reader);
-            }
+            reader.StartStruct();
+            long entityId = reader.ReadInt64();
+            if (reader.Options.Has(DeserializeRemapIds.Instance))
+                entityId = reader.Options.Get(DeserializeRemapIds.Instance).TransformId(entityId);
+            // Console.WriteLine($"{ComponentType} for entity id " + entityId);
+            if (!Has((int)entityId)) CreateFor(entityId);
+            ComponentSerializer.Deserialize<T>(this, entityId, reader);
+            reader.EndStruct();
         });
     }
 
