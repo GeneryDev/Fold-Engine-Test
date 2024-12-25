@@ -9,7 +9,7 @@ public abstract class LoadOperation
 {
     public delegate void ArrayReader(Array c);
 
-    public delegate void CompoundReader(Compound c);
+    public delegate void CompoundMemberReader(CompoundMember m);
 
     public readonly FieldCollection Options = new FieldCollection();
 
@@ -51,50 +51,29 @@ public abstract class LoadOperation
 
     public abstract object Read(Type type);
 
-    public abstract void ReadCompound(CompoundReader reader);
+    public abstract void ReadCompound(CompoundMemberReader reader);
 
     public abstract void ReadArray(ArrayReader reader);
 
-    protected abstract void StartReadCompoundMember(Compound compound, string name);
     protected abstract void StartReadArrayMember(Array compound, int index);
 
-    public struct Compound
+    public List<T> ReadList<T>()
     {
-        public LoadOperation LoadOperation;
-        public int MemberCount;
-        public string[] MemberNames;
-        public long[] MemberDataOffsets;
-        public int[] MemberDataLengths;
+        return SerializerSuite.ReadList<T>(this);
+    }
 
-        public bool HasMember(string name)
-        {
-            foreach (string memberName in MemberNames)
-                if (memberName == name)
-                    return true;
-            return false;
-        }
+    public void Deserialize(ISelfSerializer selfSerializer)
+    {
+        selfSerializer.Deserialize(this);
+    }
 
-        public void StartReadMember(string name)
-        {
-            LoadOperation.StartReadCompoundMember(this, name);
-        }
+    public struct CompoundMember
+    {
+        public LoadOperation Reader;
+        public string Name;
 
-        public T GetMember<T>(string name)
+        public void Skip()
         {
-            StartReadMember(name);
-            return LoadOperation.SerializerSuite.Read<T>(LoadOperation);
-        }
-
-        public List<T> GetListMember<T>(string name)
-        {
-            StartReadMember(name);
-            return LoadOperation.SerializerSuite.ReadList<T>(LoadOperation);
-        }
-
-        public void DeserializeMember(string name, ISelfSerializer selfSerializer)
-        {
-            StartReadMember(name);
-            selfSerializer.Deserialize(LoadOperation);
         }
     }
 

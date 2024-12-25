@@ -52,37 +52,34 @@ public class ComponentMap : ISelfSerializer
 
     public void Deserialize(LoadOperation reader)
     {
-        reader.ReadCompound(c =>
+        if (reader.Options.Get(DeserializeClearScene.Instance))
         {
-            if (reader.Options.Get(DeserializeClearScene.Instance))
+            Console.WriteLine("Clearing sets");
+            foreach (ComponentSet set in Sets.Values) set.Clear();
+        }
+        reader.ReadCompound(m =>
+        {
+            var componentIdentifier = m.Name;
+            Type componentType = _scene.Core.RegistryUnit.Components.TypeForIdentifier(componentIdentifier);
+            if (componentType == null)
             {
-                Console.WriteLine("Clearing sets");
-                foreach (ComponentSet set in Sets.Values) set.Clear();
+                Console.WriteLine($"Warning: Component identifier '{componentIdentifier}' not recognized");
+                return;
             }
 
-            foreach (string componentIdentifier in c.MemberNames)
+            ComponentSet set;
+
+            if (Sets.ContainsKey(componentType))
             {
-                Type componentType = _scene.Core.RegistryUnit.Components.TypeForIdentifier(componentIdentifier);
-                if (componentType == null)
-                {
-                    Console.WriteLine($"Warning: Component identifier '{componentIdentifier}' not recognized");
-                    continue;
-                }
-
-                ComponentSet set;
-
-                if (Sets.ContainsKey(componentType))
-                {
-                    set = Sets[componentType];
-                }
-                else
-                {
-                    set = _scene.Core.RegistryUnit.Components.CreateSetForType(componentType, _scene, 0);
-                    Sets[componentType] = set;
-                }
-
-                c.DeserializeMember(componentIdentifier, set);
+                set = Sets[componentType];
             }
+            else
+            {
+                set = _scene.Core.RegistryUnit.Components.CreateSetForType(componentType, _scene, 0);
+                Sets[componentType] = set;
+            }
+
+            reader.Deserialize(set);
         });
     }
 

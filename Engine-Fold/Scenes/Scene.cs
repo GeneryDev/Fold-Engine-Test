@@ -303,17 +303,30 @@ public class Scene : Resource, ISelfSerializer
 
     public void Deserialize(LoadOperation reader)
     {
-        reader.ReadCompound(c =>
+        bool resetIds = reader.Options.Has(DeserializeClearScene.Instance) || !_hasAnything;
+        reader.ReadCompound(m =>
         {
-            if (reader.Options.Has(DeserializeClearScene.Instance) || !_hasAnything)
+            switch (m.Name)
             {
-                if (c.HasMember(nameof(_nextEntityId))) _nextEntityId = c.GetMember<long>(nameof(_nextEntityId));
-                if (c.HasMember(nameof(_deletedIds))) _deletedIds = c.GetListMember<long>(nameof(_deletedIds));
+                case nameof(_nextEntityId):
+                    if (resetIds) _nextEntityId = reader.Read<long>();
+                    break;
+                case nameof(_deletedIds):
+                    if (resetIds) _deletedIds = reader.ReadList<long>();
+                    break;
+                case nameof(Systems):
+                    reader.Deserialize(Systems);
+                    break;
+                case nameof(Components):
+                    reader.Deserialize(Components);
+                    break;
+                case nameof(Resources):
+                    reader.Deserialize(Resources);
+                    break;
+                default:
+                    m.Skip();
+                    break;
             }
-
-            if (c.HasMember(nameof(Systems))) c.DeserializeMember(nameof(Systems), Systems);
-            if (c.HasMember(nameof(Components))) c.DeserializeMember(nameof(Components), Components);
-            if (c.HasMember(nameof(Resources))) c.DeserializeMember(nameof(Resources), Resources);
         });
         _hasAnything = true;
     }

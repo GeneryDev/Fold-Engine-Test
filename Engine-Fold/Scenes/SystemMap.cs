@@ -80,32 +80,31 @@ public class SystemMap : ISelfSerializer
         }
 
         _queueModifications = true;
-        reader.ReadCompound(c =>
+        reader.ReadCompound(m =>
         {
-            if (c.HasMember(nameof(_all)))
+            switch (m.Name)
             {
-                //Old format, list of strings:
-                c.StartReadMember(nameof(_all));
-                int count = reader.ReadInt32();
-                for (int i = 0; i < count; i++)
+                case nameof(_all):
                 {
-                    string sysName = reader.ReadString();
-                    Add(_owner.Core.RegistryUnit.Systems.CreateForIdentifier(sysName));
-                }
-            }
-            else
-            {
-                c.StartReadMember(nameof(AllSystems));
-                reader.ReadCompound(c2 =>
-                {
-                    foreach (string sysName in c2.MemberNames)
+                    //Old format, list of strings:
+                    int count = reader.ReadInt32();
+                    for (int i = 0; i < count; i++)
                     {
+                        string sysName = reader.ReadString();
+                        Add(_owner.Core.RegistryUnit.Systems.CreateForIdentifier(sysName));
+                    }
+
+                    break;
+                }
+                case nameof(AllSystems):
+                    reader.ReadCompound(m2 =>
+                    {
+                        string sysName = m2.Name;
                         GameSystem sys = _owner.Core.RegistryUnit.Systems.CreateForIdentifier(sysName);
                         Add(sys);
-                        c2.StartReadMember(sysName);
                         GenericSerializer.Deserialize(sys, reader);
-                    }
-                });
+                    });
+                    break;
             }
         });
         _queueModifications = false;

@@ -58,31 +58,36 @@ public class Mesh : Resource, ISelfSerializer
 
     public void Deserialize(LoadOperation reader)
     {
-        reader.ReadCompound(c =>
+        reader.ReadCompound(m =>
         {
-            c.StartReadMember("Vertices");
-            reader.ReadArray(a =>
+            switch (m.Name)
             {
-                Vertices = new MeshVertex[a.MemberCount];
-                _vertexCount = Vertices.Length;
-                for (int i = 0; i < a.MemberCount; i++)
-                {
-                    a.StartReadMember(i);
-                    Vertices[i] = GenericSerializer.Deserialize(new MeshVertex(), reader);
-                    ProcessVertex(Vertices[i]);
-                }
-            });
-            c.StartReadMember("Indices");
-            reader.ReadArray(a =>
-            {
-                Indices = new int[a.MemberCount];
-                _triangleCount = Indices.Length / 3;
-                for (int i = 0; i < a.MemberCount; i++)
-                {
-                    a.StartReadMember(i);
-                    Indices[i] = reader.ReadInt32();
-                }
-            });
+                case "Vertices":
+                    reader.ReadArray(a =>
+                    {
+                        Vertices = new MeshVertex[a.MemberCount];
+                        _vertexCount = Vertices.Length;
+                        for (int i = 0; i < a.MemberCount; i++)
+                        {
+                            a.StartReadMember(i);
+                            Vertices[i] = GenericSerializer.Deserialize(new MeshVertex(), reader);
+                            ProcessVertex(Vertices[i]);
+                        }
+                    });
+                    break;
+                case "Indices":
+                    reader.ReadArray(a =>
+                    {
+                        Indices = new int[a.MemberCount];
+                        _triangleCount = Indices.Length / 3;
+                        for (int i = 0; i < a.MemberCount; i++)
+                        {
+                            a.StartReadMember(i);
+                            Indices[i] = reader.ReadInt32();
+                        }
+                    });
+                    break;
+            }
         });
     }
 

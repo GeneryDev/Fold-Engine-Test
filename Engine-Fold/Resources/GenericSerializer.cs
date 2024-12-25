@@ -37,22 +37,24 @@ public static class GenericSerializer
         }
 
         object boxed = obj;
-        reader.ReadCompound(c =>
+        var fieldInfos = obj.GetType().GetFields();
+        // TODO optimize, via type.GetField() + support for FormerlySerializedAsAttribute
+        reader.ReadCompound(m =>
         {
-            foreach (FieldInfo fieldInfo in obj.GetType().GetFields())
+            foreach (FieldInfo fieldInfo in fieldInfos)
             {
                 if (fieldInfo.IsStatic) continue;
-                if (c.HasMember(fieldInfo.Name))
+                if (m.Name == fieldInfo.Name)
                 {
-                    object value = DeserializeComponentField(fieldInfo.Name, fieldInfo, reader, c);
+                    object value = DeserializeObjectField(fieldInfo.Name, fieldInfo, reader);
                     fieldInfo.SetValue(boxed, value);
                 }
                 else if (fieldInfo.GetCustomAttribute<FormerlySerializedAs>() != null)
                 {
                     foreach (FormerlySerializedAs attr in fieldInfo.GetCustomAttributes<FormerlySerializedAs>())
-                        if (attr.FormerName != null && c.HasMember(attr.FormerName))
+                        if (attr.FormerName == m.Name)
                         {
-                            object value = DeserializeComponentField(attr.FormerName, fieldInfo, reader, c);
+                            object value = DeserializeObjectField(attr.FormerName, fieldInfo, reader);
                             fieldInfo.SetValue(boxed, value);
                             break;
                         }
@@ -62,13 +64,11 @@ public static class GenericSerializer
         return (T)boxed;
     }
 
-    private static object DeserializeComponentField(
+    private static object DeserializeObjectField(
         string name,
         FieldInfo fieldInfo,
-        LoadOperation reader,
-        LoadOperation.Compound c)
+        LoadOperation reader)
     {
-        c.StartReadMember(name);
         object value = reader.Read(fieldInfo.FieldType);
 
         if (reader.Options.Has(DeserializeRemapIds.Instance)

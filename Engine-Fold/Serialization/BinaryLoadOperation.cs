@@ -137,32 +137,22 @@ public class BinaryLoadOperation : LoadOperation
         return SerializerSuite.Read(type, this);
     }
 
-    public override void ReadCompound(CompoundReader reader)
+    public override void ReadCompound(CompoundMemberReader reader)
     {
         int memberCount = _reader.ReadInt32();
-        var compound = new Compound
-        {
-            LoadOperation = this,
-            MemberCount = memberCount,
-            MemberNames = new string[memberCount],
-            MemberDataOffsets = new long[memberCount],
-            MemberDataLengths = new int[memberCount]
-        };
 
         for (int i = 0; i < memberCount; i++)
         {
-            compound.MemberNames[i] = ReadString();
+            string memberName = ReadString();
             int byteLength = ReadInt32();
-            compound.MemberDataOffsets[i] = Current;
-            compound.MemberDataLengths[i] = byteLength;
-            Current += byteLength;
+            long nextAddress = Current + byteLength;
+            reader(new CompoundMember()
+            {
+                Reader = this,
+                Name = memberName
+            });
+            Current = nextAddress;
         }
-
-        long end = Current;
-
-        reader(compound);
-
-        Current = end;
     }
 
     public override void ReadArray(ArrayReader reader)
@@ -189,23 +179,6 @@ public class BinaryLoadOperation : LoadOperation
         reader(array);
 
         Current = end;
-    }
-
-    private int IndexOfCompoundMember(Compound compound, string name)
-    {
-        for (int i = 0; i < compound.MemberCount; i++)
-            if (compound.MemberNames[i] == name)
-                return i;
-        return -1;
-    }
-
-    protected override void StartReadCompoundMember(Compound compound, string name)
-    {
-        int memberIndex = IndexOfCompoundMember(compound, name);
-
-        if (memberIndex == -1) throw new ArgumentException($"No such member exists: {name}");
-
-        Current = compound.MemberDataOffsets[memberIndex];
     }
 
     protected override void StartReadArrayMember(Array compound, int index)

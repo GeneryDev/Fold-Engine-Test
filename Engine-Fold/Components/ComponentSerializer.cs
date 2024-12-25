@@ -25,22 +25,24 @@ public static class ComponentSerializer
     public static void Deserialize<T>(ComponentSet componentSet, long entityId, LoadOperation reader)
         where T : struct
     {
-        reader.ReadCompound(c =>
+        // TODO optimize, via type.GetField() + support for FormerlySerializedAsAttribute
+        var fieldInfos = typeof(T).GetFields();
+        reader.ReadCompound(m =>
         {
-            foreach (FieldInfo fieldInfo in typeof(T).GetFields())
+            foreach (FieldInfo fieldInfo in fieldInfos)
             {
                 if (fieldInfo.IsStatic) continue;
-                if (c.HasMember(fieldInfo.Name))
+                if (m.Name == fieldInfo.Name)
                 {
-                    object value = DeserializeComponentField(fieldInfo.Name, fieldInfo, reader, c);
+                    object value = DeserializeComponentField(fieldInfo, reader);
                     componentSet.SetFieldValue(entityId, fieldInfo, value);
                 }
                 else if (fieldInfo.GetCustomAttribute<FormerlySerializedAs>() != null)
                 {
                     foreach (FormerlySerializedAs attr in fieldInfo.GetCustomAttributes<FormerlySerializedAs>())
-                        if (attr.FormerName != null && c.HasMember(attr.FormerName))
+                        if (m.Name == attr.FormerName)
                         {
-                            object value = DeserializeComponentField(attr.FormerName, fieldInfo, reader, c);
+                            object value = DeserializeComponentField(fieldInfo, reader);
                             componentSet.SetFieldValue(entityId, fieldInfo, value);
                             break;
                         }
@@ -49,13 +51,9 @@ public static class ComponentSerializer
         });
     }
 
-    private static object DeserializeComponentField(
-        string name,
-        FieldInfo fieldInfo,
-        LoadOperation reader,
-        LoadOperation.Compound c)
+    private static object DeserializeComponentField(FieldInfo fieldInfo,
+        LoadOperation reader)
     {
-        c.StartReadMember(name);
         object value = reader.Read(fieldInfo.FieldType);
 
         if (reader.Options.Has(DeserializeRemapIds.Instance)

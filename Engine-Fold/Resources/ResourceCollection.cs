@@ -101,13 +101,9 @@ public class ResourceCollection<T> : IResourceCollection where T : Resource, new
 
     public void Deserialize(LoadOperation reader)
     {
-        reader.ReadCompound(c =>
+        reader.ReadCompound(m =>
         {
-            foreach (string identifier in c.MemberNames)
-            {
-                c.StartReadMember(identifier);
-                Create(identifier, reader);
-            }
+            Create(m.Name, reader);
         });
     }
 
@@ -270,7 +266,7 @@ public abstract class Resource
 
     public void Save(string path, FieldCollection.Configurator configurator = null)
     {
-        var writer = new TextSaveOperation(Data.Out.Stream(path));
+        var writer = new BinarySaveOperation(Data.Out.Stream(path));
         configurator?.Invoke(writer.Options);
         try
         {

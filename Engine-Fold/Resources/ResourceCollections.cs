@@ -53,20 +53,16 @@ public class ResourceCollections : ISelfSerializer
     public void Deserialize(LoadOperation reader)
     {
         Clear();
-        reader.ReadCompound(c =>
+        reader.ReadCompound(m =>
         {
-            foreach (string rawResourceType in c.MemberNames)
+            var resourceType = Type.GetType(m.Name);
+            if (resourceType == null)
             {
-                var resourceType = Type.GetType(rawResourceType);
-                if (resourceType == null)
-                {
-                    Console.WriteLine("[WARN] Unknown resource type: " + rawResourceType + ". Skipping");
-                    continue;
-                }
-
-                c.StartReadMember(rawResourceType);
-                CollectionFor(resourceType, true).Deserialize(reader);
+                Console.WriteLine("[WARN] Unknown resource type: " + m.Name + ". Skipping");
+                return;
             }
+
+            CollectionFor(resourceType, true).Deserialize(reader);
         });
     }
 
