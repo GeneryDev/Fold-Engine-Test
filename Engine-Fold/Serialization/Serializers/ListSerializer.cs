@@ -20,10 +20,19 @@ public class ListSerializer<T> : Serializer<List<T>>
 
     public override List<T> Deserialize(LoadOperation reader)
     {
-        int length = reader.ReadInt32();
-        var list = new List<T>(length);
-        for (int i = 0; i < length; i++) list.Add(reader.Read<T>());
-
+        var list = new List<T>();
+        reader.ReadArray(a =>
+            {
+                list.EnsureCapacity(a.MemberCount);
+                while (list.Count < a.MemberCount)
+                {
+                    list.Add(default);
+                }
+            }, m =>
+            {
+                list[m.Index] = reader.Read<T>();
+            }
+        );
         return list;
     }
 }
