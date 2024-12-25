@@ -107,7 +107,7 @@ public static class Data
         {
             path = InData(path);
             PrepareForWriting(path);
-            return File.OpenWrite(path);
+            return File.Open(path, FileMode.Create);
         }
     }
 }
