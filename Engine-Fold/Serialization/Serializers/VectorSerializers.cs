@@ -9,12 +9,15 @@ public class PointSerializer : Serializer<Point>
 
     public override void Serialize(Point vec, SaveOperation writer)
     {
-        writer.Write(vec.X).Write(vec.Y);
+        writer.StartStruct().Write(vec.X).Write(vec.Y).EndStruct();
     }
 
     public override Point Deserialize(LoadOperation reader)
     {
-        return new Point(reader.ReadInt32(), reader.ReadInt32());
+        reader.StartStruct();
+        var result = new Point(reader.ReadInt32(), reader.ReadInt32());
+        reader.EndStruct();
+        return result;
     }
 }
 
@@ -29,7 +32,10 @@ public class Vector2Serializer : Serializer<Vector2>
 
     public override Vector2 Deserialize(LoadOperation reader)
     {
-        return new Vector2(reader.ReadSingle(), reader.ReadSingle());
+        reader.StartStruct();
+        var result = new Vector2(reader.ReadSingle(), reader.ReadSingle());
+        reader.EndStruct();
+        return result;
     }
 }
 
@@ -44,7 +50,10 @@ public class Vector3Serializer : Serializer<Vector3>
 
     public override Vector3 Deserialize(LoadOperation reader)
     {
-        return new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+        reader.StartStruct();
+        var result = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+        reader.EndStruct();
+        return result;
     }
 }
 
@@ -59,7 +68,10 @@ public class Vector4Serializer : Serializer<Vector4>
 
     public override Vector4 Deserialize(LoadOperation reader)
     {
-        return new Vector4(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+        reader.StartStruct();
+        var result = new Vector4(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+        reader.EndStruct();
+        return result;
     }
 }
 
@@ -108,11 +120,14 @@ public class MatrixSerializer : Serializer<Matrix>
 
     public override Matrix Deserialize(LoadOperation reader)
     {
-        return new Matrix(
+        reader.StartStruct();
+        var result = new Matrix(
             reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
             reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
             reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
             reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()
         );
+        reader.EndStruct();
+        return result;
     }
 }
