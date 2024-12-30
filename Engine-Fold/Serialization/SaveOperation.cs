@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using FoldEngine.Util;
 
@@ -166,5 +167,10 @@ public abstract class SaveOperation
             MemberCount++;
             return this;
         }
+    }
+
+    public static SaveOperation Create(Stream stream, StorageFormat format)
+    {
+        return format.SaveOperationProvider.Invoke(stream);
     }
 }

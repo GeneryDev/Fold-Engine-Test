@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 
 namespace FoldEngine.Input;
 
-[Resource("input", extensions: "json")]
+[Resource("input", extensions: ["json"])]
 public class InputDefinition : Resource
 {
     public JObject Root;

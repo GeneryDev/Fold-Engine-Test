@@ -92,7 +92,7 @@ public class ResourceIndex
         ResourceAttribute resourceAttribute,
         string relativeTo = null)
     {
-        relativeTo = relativeTo ?? path;
+        relativeTo ??= path;
         if (Data.In.IsDirectory(path))
         {
             foreach (string entry in Data.In.ListEntries(path))
@@ -124,7 +124,7 @@ public class ResourceIndex
         ResourceAttribute resourceAttribute,
         string relativeTo = null)
     {
-        relativeTo = relativeTo ?? path;
+        relativeTo ??= path;
         if (Data.In.IsDirectory(path))
         {
             foreach (string entry in Data.In.ListEntries(path))

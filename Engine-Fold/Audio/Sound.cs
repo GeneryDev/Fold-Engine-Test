@@ -4,7 +4,7 @@ using FoldEngine.Resources;
 
 namespace FoldEngine.Audio;
 
-[Resource("sound", directoryName: "sound", unloadTime: 5000, "wav", "ogg", "mp3")]
+[Resource("sound", directoryName: "sound", unloadTime: 5000, extensions: ["wav", "ogg", "mp3"])]
 public class Sound : Resource
 {
     internal FmodForFoxes.Sound Effect;

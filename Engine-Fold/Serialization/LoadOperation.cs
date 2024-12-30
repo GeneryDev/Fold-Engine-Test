@@ -106,4 +106,9 @@ public abstract class LoadOperation
             Skipped = true;
         }
     }
+
+    public static LoadOperation Create(Stream stream, StorageFormat format)
+    {
+        return format.LoadOperationProvider.Invoke(stream);
+    }
 }

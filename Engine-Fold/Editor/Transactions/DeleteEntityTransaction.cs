@@ -25,7 +25,7 @@ public class DeleteEntityTransaction : Transaction<Scene>
         {
             var stream = new MemoryStream();
 
-            var saveOp = new BinarySaveOperation(stream);
+            var saveOp = SaveOperation.Create(stream, StorageFormat.Binary);
             saveOp.Options.Set(SerializeOnlyEntities.Instance, new List<long> { _entityId });
 
             target.Serialize(saveOp);
@@ -59,7 +59,7 @@ public class DeleteEntityTransaction : Transaction<Scene>
 
         if (target.Reclaim(_entityId))
         {
-            var loadOp = new BinaryLoadOperation(new MemoryStream(_serializedData));
+            var loadOp = LoadOperation.Create(new MemoryStream(_serializedData), StorageFormat.Binary);
 
             target.Deserialize(loadOp);
 

@@ -4,6 +4,7 @@ using FoldEngine.Components;
 using FoldEngine.Editor;
 using FoldEngine.Events;
 using FoldEngine.Interfaces;
+using FoldEngine.IO;
 using FoldEngine.Resources;
 using FoldEngine.Serialization;
 using FoldEngine.Util;
@@ -11,7 +12,7 @@ using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Scenes;
 
-[Resource("scene")]
+[Resource("scene", preferredExtension: ExtensionJson)]
 public class Scene : Resource, ISelfSerializer
 {
     public const string Extension = "foldscene";
@@ -291,14 +292,6 @@ public class Scene : Resource, ISelfSerializer
 
             c.WriteMember(nameof(Components), (ISelfSerializer)Components);
         });
-    }
-
-    public void Load(string path)
-    {
-        var loadOp = new BinaryLoadOperation(path);
-        Deserialize(loadOp);
-        loadOp.Close();
-        loadOp.Dispose();
     }
 
     public void Deserialize(LoadOperation reader)

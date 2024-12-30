@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace FoldEngine.Text;
 
-[Resource("font", extensions: "json")]
+[Resource("font", extensions: ["json"])]
 public class FontDefinition : Resource
 {
     public JObject Root;

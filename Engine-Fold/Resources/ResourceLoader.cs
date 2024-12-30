@@ -103,6 +103,7 @@ public class ResourceLoader
         {
             var resource = new T { Identifier = task.Identifier };
             resource.DeserializeResource(task.Path);
+            resource.ResourcePath = task.Path;
 
             task.CompletedResource = resource;
             task.Status = ResourceStatus.Complete;

@@ -22,14 +22,6 @@ public class BinaryLoadOperation : LoadOperation
         ReadHeader();
     }
 
-    public BinaryLoadOperation(string path)
-    {
-        _reader = new BinaryReader(new FileStream(path, FileMode.Open));
-
-        ReadHeader();
-    }
-    
-
     private void ReadHeader()
     {
         long stringPoolOffset = _reader.ReadInt64();

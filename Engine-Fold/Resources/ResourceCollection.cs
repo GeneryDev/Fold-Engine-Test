@@ -112,10 +112,10 @@ public class ResourceCollection<T> : IResourceCollection where T : Resource, new
         var attribute = Core.RegistryUnit.Resources.AttributeOf(typeof(T));
         foreach (T resource in Resources)
         {
-            if (resource.CanSerialize)
+            if (resource.CanSerialize && resource.ResourcePath != null)
             {
                 Console.WriteLine($"Serializing resource: {resource.Identifier} of type {typeof(T)}");
-                resource.Save(attribute.CreateResourcePath(resource.Identifier));
+                resource.Save(resource.ResourcePath);
             }
         }
     }
@@ -212,8 +212,12 @@ public struct ResourceIdentifier
 
 public abstract class Resource
 {
+    public const string ExtensionBinary = "foldres";
+    public const string ExtensionJson = "foldjres";
+    
     protected internal long LastAccessTime = Time.Now;
     public string Identifier { get; protected internal set; }
+    public string ResourcePath;
 
     public virtual bool CanSerialize { get; } = true;
 
@@ -253,7 +257,14 @@ public abstract class Resource
 
     public virtual void DeserializeResource(string path)
     {
-        var reader = new BinaryLoadOperation(Data.In.Stream(path));
+        string extension = Path.GetExtension(path).Trim('.');
+        var format = extension switch
+        {
+            ExtensionBinary => StorageFormat.Binary,
+            ExtensionJson => StorageFormat.Json,
+            _ => StorageFormat.Binary
+        };
+        var reader = LoadOperation.Create(Data.In.Stream(path), format);
         try
         {
             GenericSerializer.Deserialize(this, reader);
@@ -266,7 +277,14 @@ public abstract class Resource
 
     public void Save(string path, FieldCollection.Configurator configurator = null)
     {
-        var writer = new BinarySaveOperation(Data.Out.Stream(path));
+        string extension = Path.GetExtension(path).Trim('.');
+        var format = extension switch
+        {
+            ExtensionBinary => StorageFormat.Binary,
+            ExtensionJson => StorageFormat.Json,
+            _ => StorageFormat.Binary
+        };
+        var writer = SaveOperation.Create(Data.Out.Stream(path), format);
         configurator?.Invoke(writer.Options);
         try
         {
@@ -284,25 +302,33 @@ public sealed class ResourceAttribute : Attribute
     public readonly string Identifier;
     public readonly string DirectoryName;
     public readonly string[] Extensions;
+    public readonly string PreferredExtension;
     public readonly int UnloadTime; //ms
     public Type ResourceType;
 
-    public ResourceAttribute(string identifier, string directoryName = null, int unloadTime = 5000,
-        params string[] extensions)
+    public ResourceAttribute(string identifier, string[] extensions, string directoryName = null, int unloadTime = 5000)
     {
         Identifier = identifier;
         DirectoryName = directoryName ?? identifier;
         UnloadTime = unloadTime;
-        if (extensions == null || extensions.Length == 0)
-            Extensions = new[] { "foldresource" };
-        else
-            Extensions = extensions;
+        Extensions = extensions;
+        PreferredExtension = extensions[0];
+    }
+    
+    public ResourceAttribute(string identifier, string directoryName = null, int unloadTime = 5000,
+        string preferredExtension = default)
+    {
+        Identifier = identifier;
+        DirectoryName = directoryName ?? identifier;
+        UnloadTime = unloadTime;
+        Extensions = new[] { Resource.ExtensionBinary, Resource.ExtensionJson };
+        PreferredExtension = preferredExtension;
     }
 
     public string CreateResourcePath(string resourceIdentifier)
     {
         string resourceFolder = Path.Combine("resources", DirectoryName);
-        string path = Path.Combine(resourceFolder, $"{resourceIdentifier}.{Extensions[0]}");
+        string path = Path.Combine(resourceFolder, $"{resourceIdentifier}.{PreferredExtension}");
         return path;
     }
 }

@@ -91,7 +91,7 @@ public class AtlasedTexture : ITexture
     }
 }
 
-[Resource("texture", extensions: "png")]
+[Resource("texture", extensions: ["png"])]
 public class Texture : Resource, ITexture
 {
     public static Texture White;

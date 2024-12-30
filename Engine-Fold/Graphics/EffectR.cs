@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace FoldEngine.Graphics;
 
-[Resource("effect", extensions: "fx")]
+[Resource("effect", extensions: ["fx"])]
 public class EffectR : Resource
 {
     public Effect Effect { get; private set; }

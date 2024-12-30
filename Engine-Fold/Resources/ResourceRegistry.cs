@@ -70,10 +70,4 @@ public class ResourceRegistry : IRegistry
     {
         return _attributes.Keys;
     }
-
-    public string GetResourcePath(Resource resource)
-    {
-        ResourceAttribute resourceAttribute = AttributeOf(resource.GetType());
-        return resourceAttribute.CreateResourcePath(resource.Identifier);
-    }
 }
