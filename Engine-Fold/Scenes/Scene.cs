@@ -279,6 +279,7 @@ public class Scene : Resource, ISelfSerializer
 
     public void Serialize(SaveOperation writer)
     {
+        Flush();
         writer.WriteCompound((ref SaveOperation.Compound c) =>
         {
             if (!writer.Options.Has(SerializeOnlyEntities.Instance))
@@ -296,6 +297,7 @@ public class Scene : Resource, ISelfSerializer
 
     public void Deserialize(LoadOperation reader)
     {
+        Flush();
         bool resetIds = reader.Options.Has(DeserializeClearScene.Instance) || !_hasAnything;
         reader.ReadCompound(m =>
         {
