@@ -132,7 +132,7 @@ public class TextField : GuiElement, IInspectorField
         }
         else if (type == typeof(LRTB))
         {
-            if (!byte.TryParse(Document.Text, out byte parsed)) return false;
+            if (!float.TryParse(Document.Text, out float parsed)) return false;
             var newLrtb = (LRTB)value;
 
             switch (index)
@@ -152,6 +152,15 @@ public class TextField : GuiElement, IInspectorField
             }
 
             value = newLrtb;
+        }
+        else if (type == typeof(Matrix))
+        {
+            if (!float.TryParse(Document.Text, out float parsed)) return false;
+            var newMatrix = (Matrix)value;
+
+            newMatrix[index] = parsed;
+
+            value = newMatrix;
         }
         else
         {

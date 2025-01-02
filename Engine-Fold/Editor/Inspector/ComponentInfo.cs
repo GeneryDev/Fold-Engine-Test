@@ -210,6 +210,85 @@ public class ComponentMember
                 .Value(((LRTB)startingValue).Bottom.ToString(CultureInfo.InvariantCulture))
                 .EditedAction(member.CreateAction(parentPanel, 3));
         });
+        
+        // Matrix
+        SetDefaultInspectorElementProvider<Matrix>((parentPanel, member, startingValue) =>
+        {
+            parentPanel.Element<TextField>()
+                .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
+                .Value(((Matrix)startingValue).M11.ToString(CultureInfo.InvariantCulture))
+                .EditedAction(member.CreateAction(parentPanel, 0));
+            parentPanel.Element<TextField>()
+                .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
+                .Value(((Matrix)startingValue).M12.ToString(CultureInfo.InvariantCulture))
+                .EditedAction(member.CreateAction(parentPanel, 1));
+            parentPanel.Element<TextField>()
+                .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
+                .Value(((Matrix)startingValue).M13.ToString(CultureInfo.InvariantCulture))
+                .EditedAction(member.CreateAction(parentPanel, 2));
+            parentPanel.Element<TextField>()
+                .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
+                .Value(((Matrix)startingValue).M14.ToString(CultureInfo.InvariantCulture))
+                .EditedAction(member.CreateAction(parentPanel, 3));
+            parentPanel.Element<ComponentMemberBreak>();
+
+            parentPanel.Element<ComponentMemberLabel>().Text("");
+            parentPanel.Element<TextField>()
+                .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
+                .Value(((Matrix)startingValue).M21.ToString(CultureInfo.InvariantCulture))
+                .EditedAction(member.CreateAction(parentPanel, 4+0));
+            parentPanel.Element<TextField>()
+                .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
+                .Value(((Matrix)startingValue).M22.ToString(CultureInfo.InvariantCulture))
+                .EditedAction(member.CreateAction(parentPanel, 4+1));
+            parentPanel.Element<TextField>()
+                .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
+                .Value(((Matrix)startingValue).M23.ToString(CultureInfo.InvariantCulture))
+                .EditedAction(member.CreateAction(parentPanel, 4+2));
+            parentPanel.Element<TextField>()
+                .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
+                .Value(((Matrix)startingValue).M24.ToString(CultureInfo.InvariantCulture))
+                .EditedAction(member.CreateAction(parentPanel, 4+3));
+            parentPanel.Element<ComponentMemberBreak>();
+            
+            parentPanel.Element<ComponentMemberLabel>().Text("");
+            parentPanel.Element<TextField>()
+                .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
+                .Value(((Matrix)startingValue).M31.ToString(CultureInfo.InvariantCulture))
+                .EditedAction(member.CreateAction(parentPanel, 8+0));
+            parentPanel.Element<TextField>()
+                .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
+                .Value(((Matrix)startingValue).M32.ToString(CultureInfo.InvariantCulture))
+                .EditedAction(member.CreateAction(parentPanel, 8+1));
+            parentPanel.Element<TextField>()
+                .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
+                .Value(((Matrix)startingValue).M33.ToString(CultureInfo.InvariantCulture))
+                .EditedAction(member.CreateAction(parentPanel, 8+2));
+            parentPanel.Element<TextField>()
+                .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
+                .Value(((Matrix)startingValue).M34.ToString(CultureInfo.InvariantCulture))
+                .EditedAction(member.CreateAction(parentPanel, 8+3));
+            parentPanel.Element<ComponentMemberBreak>();
+            
+            parentPanel.Element<ComponentMemberLabel>().Text("");
+            parentPanel.Element<TextField>()
+                .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
+                .Value(((Matrix)startingValue).M41.ToString(CultureInfo.InvariantCulture))
+                .EditedAction(member.CreateAction(parentPanel, 12+0));
+            parentPanel.Element<TextField>()
+                .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
+                .Value(((Matrix)startingValue).M42.ToString(CultureInfo.InvariantCulture))
+                .EditedAction(member.CreateAction(parentPanel, 12+1));
+            parentPanel.Element<TextField>()
+                .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
+                .Value(((Matrix)startingValue).M43.ToString(CultureInfo.InvariantCulture))
+                .EditedAction(member.CreateAction(parentPanel, 12+2));
+            parentPanel.Element<TextField>()
+                .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
+                .Value(((Matrix)startingValue).M44.ToString(CultureInfo.InvariantCulture))
+                .EditedAction(member.CreateAction(parentPanel, 12+3));
+            parentPanel.Element<ComponentMemberBreak>();
+        });
     }
 
     public ComponentMember(FieldInfo fieldInfo)
