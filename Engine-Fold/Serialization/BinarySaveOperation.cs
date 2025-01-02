@@ -54,7 +54,7 @@ public class BinarySaveOperation : SaveOperation
         _writer.Flush();
     }
 
-    public override SaveOperation StartStruct()
+    public override SaveOperation StartStruct(bool compactFormatting = true)
     {
         return this;
     }

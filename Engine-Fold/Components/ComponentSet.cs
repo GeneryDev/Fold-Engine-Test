@@ -325,7 +325,7 @@ public class ComponentSet<T> : ComponentSet where T : struct
                 arr.WriteMember(() =>
                 {
                     // ReSharper disable twice AccessToModifiedClosure
-                    writer.StartStruct();
+                    writer.StartStruct(compactFormatting: false);
                     writer.Write(Dense[Sparse[entityId - MinId]].EntityId);
                     ComponentSerializer.Serialize(Get(Dense[Sparse[entityId - MinId]].EntityId), writer);
                     writer.EndStruct();

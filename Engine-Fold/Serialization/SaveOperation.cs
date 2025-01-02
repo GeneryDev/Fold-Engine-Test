@@ -24,7 +24,7 @@ public abstract class SaveOperation
 
     public abstract void Flush();
     
-    public abstract SaveOperation StartStruct();
+    public abstract SaveOperation StartStruct(bool compactFormatting = true);
 
     public abstract SaveOperation EndStruct();
 

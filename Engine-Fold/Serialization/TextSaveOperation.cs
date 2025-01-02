@@ -31,15 +31,20 @@ public class TextSaveOperation : SaveOperation
         _writer.Flush();
     }
 
-    public override SaveOperation StartStruct()
+    public override SaveOperation StartStruct(bool compactFormatting = true)
     {
         _writer.WriteStartArray();
+        if (compactFormatting)
+        {
+            _writer.Formatting = Formatting.None;
+        }
         return this;
     }
 
     public override SaveOperation EndStruct()
     {
         _writer.WriteEndArray();
+        _writer.Formatting = Formatting.Indented;
         return this;
     }
 
