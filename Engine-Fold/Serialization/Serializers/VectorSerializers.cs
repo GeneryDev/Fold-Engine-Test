@@ -1,4 +1,5 @@
 ﻿using System;
+using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Serialization.Serializers;
@@ -127,6 +128,24 @@ public class MatrixSerializer : Serializer<Matrix>
             reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
             reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()
         );
+        reader.EndStruct();
+        return result;
+    }
+}
+
+public class LRTBSerializer : Serializer<LRTB>
+{
+    public override Type WorkingType => typeof(LRTB);
+
+    public override void Serialize(LRTB vec, SaveOperation writer)
+    {
+        writer.StartStruct().Write(vec.Left).Write(vec.Right).Write(vec.Top).Write(vec.Bottom).EndStruct();
+    }
+
+    public override LRTB Deserialize(LoadOperation reader)
+    {
+        reader.StartStruct();
+        var result = new LRTB(Left: reader.ReadSingle(), Right: reader.ReadSingle(), Top: reader.ReadSingle(), Bottom: reader.ReadSingle());
         reader.EndStruct();
         return result;
     }

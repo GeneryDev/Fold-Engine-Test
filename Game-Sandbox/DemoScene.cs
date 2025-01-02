@@ -129,14 +129,21 @@ internal class DemoScene : Scene
         ref var e6Anchors = ref e6.AddComponent<AnchoredControl>();
         e6Anchors = e6Anchors with
         {
-            AnchorLeft = 0.5f,
-            AnchorRight = 0.5f,
-            AnchorTop = 1.0f,
-            AnchorBottom = 1.0f,
-            OffsetLeft = 0,
-            OffsetRight = 0,
-            OffsetTop = -70,
-            OffsetBottom = -48,
+            Anchor = new LRTB()
+            {
+                Left = 0.5f,
+                Right = 0.5f,
+                Top = 1.0f,
+                Bottom = 1.0f
+            },
+            
+            Offset = new LRTB()
+            {
+                Left = 0,
+                Right = 0,
+                Top = -70,
+                Bottom = -48
+            }
         };
         e6.AddComponent<ButtonControl>() = new ButtonControl()
         {
@@ -156,8 +163,7 @@ internal class DemoScene : Scene
         ref var containerAnchored = ref container.AddComponent<AnchoredControl>();
         containerAnchored = containerAnchored with
         {
-            AnchorRight = 1,
-            AnchorBottom = 1
+            Anchor = AnchoredControl.Presets.FullRect
         };
 
         void AddBoxInContainer()
@@ -183,10 +189,7 @@ internal class DemoScene : Scene
         };
         labelEntity.AddComponent<AnchoredControl>() = new AnchoredControl()
         {
-            AnchorLeft = 0.5f,
-            AnchorTop = 0.5f,
-            AnchorRight = 0.5f,
-            AnchorBottom = 0.5f
+            Anchor = AnchoredControl.Presets.Center
         };
         labelEntity.AddComponent<LabelControl>() = new LabelControl()
         {
@@ -202,8 +205,7 @@ internal class DemoScene : Scene
         };
         labelBounds.AddComponent<AnchoredControl>() = new AnchoredControl
         {
-            AnchorRight = 1,
-            AnchorBottom = 1
+            Anchor = AnchoredControl.Presets.FullRect
         };
         labelBounds.AddComponent<BoxControl>() = new BoxControl()
         {

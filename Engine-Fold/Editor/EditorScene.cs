@@ -14,6 +14,7 @@ using FoldEngine.ImmediateGui;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
+using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor;
@@ -56,8 +57,7 @@ public class EditorScene : Scene
         entViewport.AddComponent<Control>().RequestLayout = true;
         entViewport.AddComponent<AnchoredControl>() = new AnchoredControl()
         {
-            AnchorRight = 1,
-            AnchorBottom = 1
+            Anchor = AnchoredControl.Presets.FullRect
         };
 
         var docksContainer = CreateEntity("Docks");
@@ -65,8 +65,7 @@ public class EditorScene : Scene
         docksContainer.AddComponent<Control>();
         docksContainer.AddComponent<AnchoredControl>() = new AnchoredControl()
         {
-            AnchorRight = 1,
-            AnchorBottom = 1
+            Anchor = AnchoredControl.Presets.FullRect
         };
         docksContainer.AddComponent<BorderContainer>() = new BorderContainer()
         {
@@ -94,12 +93,8 @@ public class EditorScene : Scene
             dockContent.AddComponent<Control>();
             dockContent.AddComponent<AnchoredControl>() = new AnchoredControl
             {
-                AnchorRight = 1,
-                AnchorBottom = 1,
-                OffsetTop = dockMargin,
-                OffsetLeft = dockMargin,
-                OffsetRight = -dockMargin,
-                OffsetBottom = -dockMargin
+                Anchor = AnchoredControl.Presets.FullRect,
+                Offset = new LRTB(Left: dockMargin, Right: -dockMargin, Top: dockMargin, Bottom: -dockMargin)
             };
             dockContent.AddComponent<BorderContainer>();
             dockContent.Hierarchical.SetParent(dock);
@@ -128,16 +123,13 @@ public class EditorScene : Scene
             };
             dockResizer.AddComponent<AnchoredControl>() = new AnchoredControl()
             {
-                AnchorTop = resizeDirection.Y == 0 ? 0 : (resizeDirection.Y / 2) + 0.5f,
-                AnchorBottom = resizeDirection.Y == 0 ? 1 : (resizeDirection.Y / 2) + 0.5f,
-
-                AnchorLeft = resizeDirection.X == 0 ? 0 : (resizeDirection.X / 2) + 0.5f,
-                AnchorRight = resizeDirection.X == 0 ? 1 : (resizeDirection.X / 2) + 0.5f,
+                Anchor = new LRTB(
+                    Left: resizeDirection.X == 0 ? 0 : (resizeDirection.X / 2) + 0.5f,
+                    Right: resizeDirection.X == 0 ? 1 : (resizeDirection.X / 2) + 0.5f, Top: resizeDirection.Y == 0 ? 0 : (resizeDirection.Y / 2) + 0.5f, Bottom: resizeDirection.Y == 0 ? 1 : (resizeDirection.Y / 2) + 0.5f),
                 
-                OffsetTop = -resizerSize * (resizeDirection.Y > 0 ? 1 : 0),
-                OffsetLeft = -resizerSize * (resizeDirection.X > 0 ? 1 : 0),
-                OffsetRight = resizerSize * (resizeDirection.X < 0 ? 1 : 0),
-                OffsetBottom = resizerSize * (resizeDirection.Y < 0 ? 1 : 0)
+                Offset = new LRTB(
+                    Left: -resizerSize * (resizeDirection.X > 0 ? 1 : 0),
+                    Right: resizerSize * (resizeDirection.X < 0 ? 1 : 0), Top: -resizerSize * (resizeDirection.Y > 0 ? 1 : 0), Bottom: resizerSize * (resizeDirection.Y < 0 ? 1 : 0))
             };
             if (resizeDirection.LengthSquared() > 0)
             {

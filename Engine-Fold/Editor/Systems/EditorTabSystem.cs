@@ -8,6 +8,7 @@ using FoldEngine.Gui.Components.Controls;
 using FoldEngine.Gui.Events;
 using FoldEngine.Resources;
 using FoldEngine.Systems;
+using FoldEngine.Util;
 
 namespace FoldEngine.Editor.Systems;
 
@@ -47,8 +48,7 @@ public class EditorTabSystem : GameSystem
                     };
                     dragVisualEntity.AddComponent<AnchoredControl>() = new AnchoredControl()
                     {
-                        AnchorLeft = 0.5f,
-                        AnchorRight = 0.5f
+                        Anchor = new LRTB {Left = 0.5f, Right = 0.5f}
                     };
                     dragVisualEntity.Hierarchical.SetParent(evt.DragOperationEntityId);
                     

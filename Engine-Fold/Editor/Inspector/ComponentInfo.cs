@@ -12,6 +12,7 @@ using FoldEngine.Gui;
 using FoldEngine.ImmediateGui;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
+using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Editor.Inspector;
@@ -174,6 +175,39 @@ public class ComponentMember
             parentPanel.Element<TextField>()
                 .FieldSpacing(ComponentMemberLabel.LabelWidth, 4)
                 .Value(((Color)startingValue).A.ToString(CultureInfo.InvariantCulture))
+                .EditedAction(member.CreateAction(parentPanel, 3));
+        });
+        
+        // LRTB
+        SetDefaultInspectorElementProvider<LRTB>((parentPanel, member, startingValue) =>
+        {
+            const string indentation = "        ";
+            parentPanel.Element<ComponentMemberBreak>();
+            parentPanel.Element<ComponentMemberLabel>().Text($"{indentation}Left");
+            parentPanel.Element<TextField>()
+                .FieldSpacing(ComponentMemberLabel.LabelWidth, 1)
+                .Value(((LRTB)startingValue).Left.ToString(CultureInfo.InvariantCulture))
+                .EditedAction(member.CreateAction(parentPanel, 0));
+            parentPanel.Element<ComponentMemberBreak>();
+
+            parentPanel.Element<ComponentMemberLabel>().Text($"{indentation}Right");
+            parentPanel.Element<TextField>()
+                .FieldSpacing(ComponentMemberLabel.LabelWidth, 1)
+                .Value(((LRTB)startingValue).Right.ToString(CultureInfo.InvariantCulture))
+                .EditedAction(member.CreateAction(parentPanel, 1));
+            parentPanel.Element<ComponentMemberBreak>();
+
+            parentPanel.Element<ComponentMemberLabel>().Text($"{indentation}Top");
+            parentPanel.Element<TextField>()
+                .FieldSpacing(ComponentMemberLabel.LabelWidth, 1)
+                .Value(((LRTB)startingValue).Top.ToString(CultureInfo.InvariantCulture))
+                .EditedAction(member.CreateAction(parentPanel, 2));
+            parentPanel.Element<ComponentMemberBreak>();
+
+            parentPanel.Element<ComponentMemberLabel>().Text($"{indentation}Bottom");
+            parentPanel.Element<TextField>()
+                .FieldSpacing(ComponentMemberLabel.LabelWidth, 1)
+                .Value(((LRTB)startingValue).Bottom.ToString(CultureInfo.InvariantCulture))
                 .EditedAction(member.CreateAction(parentPanel, 3));
         });
     }

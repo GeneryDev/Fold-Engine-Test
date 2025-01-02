@@ -38,8 +38,7 @@ public static partial class EditorPanels
         content.AddComponent<Control>();
         content.AddComponent<AnchoredControl>() = new AnchoredControl()
         {
-            AnchorRight = 1,
-            AnchorBottom = 1
+            Anchor = AnchoredControl.Presets.FullRect
         };
         content.AddComponent<ImmediateGuiControl>() = new ImmediateGuiControl()
         {

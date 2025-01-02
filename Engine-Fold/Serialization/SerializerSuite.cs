@@ -42,6 +42,7 @@ public class SerializerSuite
         AddSerializer(new Vector4Serializer());
         AddSerializer(new ColorSerializer());
         AddSerializer(new MatrixSerializer());
+        AddSerializer(new LRTBSerializer());
     }
 
     public SerializerSuite AddSerializer(ISerializer serializer)

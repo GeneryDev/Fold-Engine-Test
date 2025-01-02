@@ -13,10 +13,9 @@ public static partial class EditorPanels
     {
         var view = scene.CreateEntity(name);
         view.AddComponent<Control>().ZOrder = 0;
-        view.AddComponent<AnchoredControl>() = new()
+        view.AddComponent<AnchoredControl>() = new AnchoredControl
         {
-            AnchorRight = 1,
-            AnchorBottom = 1
+            Anchor = AnchoredControl.Presets.FullRect
         };
         view.Hierarchical.SetParent(tabContainerId);
             

@@ -103,8 +103,7 @@ public class ControlPopupSystem : GameSystem
         };
         popupEntity.AddComponent<AnchoredControl>() = new AnchoredControl()
         {
-            AnchorRight = 1,
-            AnchorBottom = 1
+            Anchor = AnchoredControl.Presets.FullRect
         };
 
         if (sendBuildRequestEvent && providerId != -1)

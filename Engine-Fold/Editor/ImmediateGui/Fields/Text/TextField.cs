@@ -130,6 +130,29 @@ public class TextField : GuiElement, IInspectorField
 
             value = newColor;
         }
+        else if (type == typeof(LRTB))
+        {
+            if (!byte.TryParse(Document.Text, out byte parsed)) return false;
+            var newLrtb = (LRTB)value;
+
+            switch (index)
+            {
+                case 0:
+                    newLrtb.Left = parsed;
+                    break;
+                case 1:
+                    newLrtb.Right = parsed;
+                    break;
+                case 2:
+                    newLrtb.Top = parsed;
+                    break;
+                case 3:
+                    newLrtb.Bottom = parsed;
+                    break;
+            }
+
+            value = newLrtb;
+        }
         else
         {
             throw new ArgumentException("Unsupported text field type " + type);

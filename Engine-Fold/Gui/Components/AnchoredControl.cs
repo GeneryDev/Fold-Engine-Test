@@ -13,15 +13,8 @@ namespace FoldEngine.Gui.Components
     [ComponentInitializer(typeof(AnchoredControl))]
     public struct AnchoredControl
     {
-        public float AnchorLeft;
-        public float AnchorTop;
-        public float AnchorRight;
-        public float AnchorBottom;
-
-        public float OffsetLeft;
-        public float OffsetTop;
-        public float OffsetRight;
-        public float OffsetBottom;
+        public LRTB Anchor;
+        public LRTB Offset;
     
         public GrowDirection GrowHorizontal;
         public GrowDirection GrowVertical;
@@ -36,6 +29,30 @@ namespace FoldEngine.Gui.Components
         public AnchoredControl()
         {
             GrowHorizontal = GrowVertical = GrowDirection.Both;
+        }
+
+        public static class Presets
+        {
+            public static readonly LRTB TopLeft = new(Left: 0, Right: 0, Top: 0, Bottom: 0);
+            public static readonly LRTB TopRight = new(Left: 1, Right: 1, Top: 0, Bottom: 0);
+            public static readonly LRTB BottomLeft = new(Left: 0, Right: 0, Top: 1, Bottom: 1);
+            public static readonly LRTB BottomRight = new(Left: 1, Right: 1, Top: 1, Bottom: 1);
+            
+            public static readonly LRTB CenterLeft = new(Left: 0, Right: 0, Top: 0.5f, Bottom: 0.5f);
+            public static readonly LRTB CenterRight = new(Left: 1, Right: 1, Top: 0.5f, Bottom: 0.5f);
+            public static readonly LRTB CenterTop = new(Left: 0.5f, Right: 0.5f, Top: 0, Bottom: 0);
+            public static readonly LRTB CenterBottom = new(Left: 0.5f, Right: 0.5f, Top: 1, Bottom: 1);
+            
+            public static readonly LRTB LeftWide = new(Left: 0, Right: 0, Top: 0, Bottom: 1);
+            public static readonly LRTB RightWide = new(Left: 1, Right: 1, Top: 0, Bottom: 1);
+            public static readonly LRTB TopWide = new(Left: 0, Right: 1, Top: 0, Bottom: 0);
+            public static readonly LRTB BottomWide = new(Left: 0, Right: 1, Top: 1, Bottom: 1);
+            
+            public static readonly LRTB Center = new(Left: 0.5f, Right: 0.5f, Top: 0.5f, Bottom: 0.5f);
+            public static readonly LRTB HCenterWide = new(Left: 0, Right: 1, Top: 0.5f, Bottom: 0.5f);
+            public static readonly LRTB VCenterWide = new(Left: 0.5f, Right: 0.5f, Top: 0, Bottom: 1);
+            
+            public static readonly LRTB FullRect = new(Left: 0, Right: 1, Top: 0, Bottom: 1);
         }
     }
 }
@@ -84,16 +101,16 @@ namespace FoldEngine.Gui.Systems
             var parentEnd = Vector2.Zero + parentSize;
 
             var anchorBegin = new Vector2(
-                Mathf.Lerp(parentBegin.X, parentEnd.X, anchored.AnchorLeft),
-                Mathf.Lerp(parentBegin.Y, parentEnd.Y, anchored.AnchorTop)
+                Mathf.Lerp(parentBegin.X, parentEnd.X, anchored.Anchor.Left),
+                Mathf.Lerp(parentBegin.Y, parentEnd.Y, anchored.Anchor.Top)
             );
             var anchorEnd = new Vector2(
-                Mathf.Lerp(parentBegin.X, parentEnd.X, anchored.AnchorRight),
-                Mathf.Lerp(parentBegin.Y, parentEnd.Y, anchored.AnchorBottom)
+                Mathf.Lerp(parentBegin.X, parentEnd.X, anchored.Anchor.Right),
+                Mathf.Lerp(parentBegin.Y, parentEnd.Y, anchored.Anchor.Bottom)
             );
 
-            var ownBegin = anchorBegin + new Vector2(anchored.OffsetLeft, anchored.OffsetTop);
-            var ownEnd = anchorEnd + new Vector2(anchored.OffsetRight, anchored.OffsetBottom);
+            var ownBegin = anchorBegin + new Vector2(anchored.Offset.Left, anchored.Offset.Top);
+            var ownEnd = anchorEnd + new Vector2(anchored.Offset.Right, anchored.Offset.Bottom);
 
             var minimumSize = control.EffectiveMinimumSize;
             if(minimumSize != Vector2.Zero) {

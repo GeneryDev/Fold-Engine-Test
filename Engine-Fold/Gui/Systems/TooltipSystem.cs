@@ -7,6 +7,7 @@ using FoldEngine.Gui.Components.Traits;
 using FoldEngine.Gui.Events;
 using FoldEngine.Scenes;
 using FoldEngine.Systems;
+using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
 namespace FoldEngine.Gui.Systems;
@@ -76,12 +77,15 @@ public class TooltipSystem : GameSystem
                 bg.AddComponent<BoxControl>().Color = new Color(0, 0, 0, 200);
                 bg.AddComponent<AnchoredControl>() = new AnchoredControl()
                 {
-                    AnchorRight = 1,
-                    AnchorBottom = 1,
-                    OffsetLeft = -8,
-                    OffsetRight = 8,
-                    OffsetTop = -4,
-                    OffsetBottom = 4
+                    Anchor = AnchoredControl.Presets.FullRect,
+                    
+                    Offset = new LRTB
+                    {
+                        Left = -8,
+                        Right = 8,
+                        Top = -4,
+                        Bottom = 4
+                    }
                 };
                 bg.Hierarchical.SetParent(label);
                 
