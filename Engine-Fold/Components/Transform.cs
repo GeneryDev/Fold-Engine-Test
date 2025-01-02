@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using FoldEngine.Editor.Inspector;
 using FoldEngine.Scenes;
+using FoldEngine.Serialization;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 
@@ -22,7 +23,7 @@ public struct Transform
     ///     Double negative was chosen such that default transforms have this as false by default, and thus can't be considered
     ///     not-null
     /// </summary>
-    [HideInInspector] public readonly bool IsNotNull;
+    [DoNotSerialize] [HideInInspector] public readonly bool IsNotNull;
 
     public bool IsNull => !IsNotNull;
 

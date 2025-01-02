@@ -22,7 +22,7 @@ public struct Hierarchical
     ///     Double negative was chosen such that default hierarchicals have this as false by default, and thus can't be considered
     ///     not-null
     /// </summary>
-    [HideInInspector] public readonly bool IsNotNull;
+    [DoNotSerialize] [HideInInspector] public readonly bool IsNotNull;
     public bool IsNull => !IsNotNull;
 
     /// <summary>
