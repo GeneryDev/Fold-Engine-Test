@@ -154,6 +154,44 @@ public class ResourceCollections : ISelfSerializer
     }
 
     /// <summary>
+    ///     Retrieves the resource of the given type and identifier.
+    ///     If exists and is not loaded, suspends execution of the current thread until the resource finishes loaded.
+    /// </summary>
+    /// <returns>The requested resource, if it exists; the def parameter otherwise.</returns>
+    public Resource AwaitGet(Type type, ref ResourceIdentifier identifier, Resource def = default)
+    {
+        if (identifier.Identifier == null) return def;
+        
+        IResourceCollection collection = FindOwner(type, ref identifier);
+        if (collection != null)
+            return collection.Get(ref identifier, def);
+        
+        Root.StartLoad(type, identifier.Identifier);
+        Root._loader.Await(type, identifier.Identifier);
+        
+        return Root.Get(type, ref identifier);
+    }
+
+    /// <summary>
+    ///     Retrieves the resource of the given type and identifier.
+    ///     If exists and is not loaded, suspends execution of the current thread until the resource finishes loaded.
+    /// </summary>
+    /// <returns>The requested resource, if it exists; the def parameter otherwise.</returns>
+    public T AwaitGet<T>(ref ResourceIdentifier identifier, T def = default) where T : Resource, new()
+    {
+        if (identifier.Identifier == null) return def;
+        
+        IResourceCollection collection = FindOwner<T>(ref identifier);
+        if (collection != null)
+            return ((ResourceCollection<T>)collection).Get(ref identifier, def);
+        
+        Root.StartLoad<T>(identifier.Identifier);
+        Root._loader.Await<T>(identifier.Identifier);
+        
+        return Root.Get<T>(ref identifier);
+    }
+
+    /// <summary>
     ///     Requests that a resource be loaded into memory asynchronously,
     ///     then invokes the given callback method with the resource once it is loaded.
     ///     If the resource is already in memory, the callback method is called immediately.

@@ -19,10 +19,10 @@ public class ResourceLoader
     //MAIN THREAD
     private ResourceLoadTask PrepareTask()
     {
-        if (_inactiveTasks.Count > 0)
+        for (int index = _inactiveTasks.Count-1; index >= 0; index--)
         {
-            ResourceLoadTask reused = _inactiveTasks[_inactiveTasks.Count - 1];
-            _inactiveTasks.RemoveAt(_inactiveTasks.Count - 1);
+            var reused = _inactiveTasks[index];
+            _inactiveTasks.RemoveAt(index);
             _activeTasks.Add(reused);
             return reused;
         }
@@ -80,7 +80,24 @@ public class ResourceLoader
             methodToCall.Invoke(this, new object[] { task });
         }
     }
-
+    
+    //MAIN THREAD
+    public void Await(Type type, string identifier)
+    {
+        while (GetStatusOfResource(type, identifier) == ResourceStatus.Loading)
+        {
+            // Wait
+        }
+    }
+    //MAIN THREAD
+    public void Await<T>(string identifier)
+    {
+        while (GetStatusOfResource<T>(identifier) == ResourceStatus.Loading)
+        {
+            // Wait
+        }
+    }
+    
     //MAIN THREAD
     public void StartLoading<T>(ResourceLoadTask task) where T : Resource, new()
     {
@@ -118,27 +135,18 @@ public class ResourceLoader
     //MAIN THREAD
     public void Update()
     {
-        for (int i = 0; i < _activeTasks.Count; i++)
+        for (var i = 0; i < _activeTasks.Count; i++)
         {
             ResourceLoadTask task = _activeTasks[i];
             switch (task.Status)
             {
                 case ResourceStatus.Complete:
-                {
-                    TaskCompleted(task);
-                    ResetTask(task);
-                    _activeTasks.RemoveAt(i);
-                    _inactiveTasks.Add(task);
-                    i--;
-                    break;
-                }
                 case ResourceStatus.Error:
                 {
-                    TaskError(task);
-                    ResetTask(task);
+                    TaskFinished(task);
                     _activeTasks.RemoveAt(i);
-                    _inactiveTasks.Add(task);
                     i--;
+                    _inactiveTasks.Add(task);
                     break;
                 }
                 case ResourceStatus.Inactive:
@@ -146,10 +154,24 @@ public class ResourceLoader
                     Console.WriteLine("Blasphemy!");
                     break;
                 }
+                case ResourceStatus.Loading:
+                default:
+                    break;
             }
         }
     }
 
+    //MAIN THREAD
+    private void TaskFinished(ResourceLoadTask task)
+    {
+        if(task.Status == ResourceStatus.Complete)
+            TaskCompleted(task);
+        else 
+            TaskError(task);
+        ResetTask(task);
+    }
+
+    //MAIN THREAD
     private void ResetTask(ResourceLoadTask task)
     {
         task.Identifier = null;
@@ -182,11 +204,11 @@ public class ResourceLoadTask
     public readonly List<ResourceCollections.OnResourceLoaded> Callbacks =
         new List<ResourceCollections.OnResourceLoaded>();
 
-    public Resource CompletedResource;
-    public string Identifier;
-    public string Path;
-    public ResourceStatus Status;
-    public Type Type;
+    public string Identifier; // Input
+    public string Path; // Input
+    public Type Type; // Input
+    public Resource CompletedResource; // Worker write, Main read (Main reset)
+    public ResourceStatus Status; // Worker write, Main read (Main reset) 
 }
 
 public enum ResourceStatus
