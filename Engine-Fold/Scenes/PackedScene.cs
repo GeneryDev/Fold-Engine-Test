@@ -9,19 +9,32 @@ public class PackedResource<T> : Resource, ISelfSerializer where T : Resource, n
     public override bool CanSerialize => true;
     private byte[] _serializedBytes;
 
-    public void Deserialize(LoadOperation reader)
+    public PackedResource()
     {
-        var temp = new T();
-        
-        temp.DeserializeResource(reader);
-        
+    }
+
+    public PackedResource(T instance)
+    {
+        Pack(instance);
+    }
+
+    public void Pack(T instance)
+    {
         var stream = new MemoryStream();
         var reserializer = SaveOperation.Create(stream, StorageFormat.Binary);
-        temp.SerializeResource(reserializer);
+        instance.SerializeResource(reserializer);
 
         reserializer.Close();
         _serializedBytes = stream.GetBuffer();
         reserializer.Dispose();
+    }
+
+    public void Deserialize(LoadOperation reader)
+    {
+        var instance = new T();
+        instance.DeserializeResource(reader);
+        
+        Pack(instance);
     }
     
     public void Serialize(SaveOperation writer)
