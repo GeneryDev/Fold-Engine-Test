@@ -10,7 +10,6 @@ using FoldEngine.Gui.Styles;
 using FoldEngine.Input;
 using FoldEngine.Interfaces;
 using FoldEngine.Resources;
-using FoldEngine.Scenes;
 using FoldEngine.Serialization;
 using FoldEngine.Text;
 using FoldEngine.Util;
@@ -25,9 +24,9 @@ namespace FoldEngine.Gui.Components.Controls
         public string Text;
         public Alignment Alignment;
         
-        public ResourceIdentifier Style;
+        [ResourceIdentifier(typeof(ButtonStyle))] public ResourceIdentifier Style;
     
-        public ResourceIdentifier Icon;
+        [ResourceIdentifier(typeof(Texture))] public ResourceIdentifier Icon;
         public Color IconColor;
         public bool FitIcon;
     

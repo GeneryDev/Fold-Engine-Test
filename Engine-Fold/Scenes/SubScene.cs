@@ -8,7 +8,7 @@ namespace FoldEngine.Scenes;
 [Component("fold:sub_scene")]
 public struct SubScene
 {
-    public ResourceIdentifier SceneIdentifier;
+    [ResourceIdentifier(typeof(PackedScene))] public ResourceIdentifier SceneIdentifier;
     [DoNotSerialize] [HideInInspector] public ResourceIdentifier LoadedSceneIdentifier;
     [DoNotSerialize] [HideInInspector] public Scene Scene;
 

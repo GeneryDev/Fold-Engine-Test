@@ -19,7 +19,7 @@ public struct TextureAtlasComponent
 
     [DoNotSerialize] [HideInInspector] public TextureAtlas Atlas;
 
-    [DoNotSerialize] [HideInInspector] public ResourceIdentifier AtlasIdentifier;
+    [DoNotSerialize] [HideInInspector] [ResourceIdentifier(typeof(Texture))] public ResourceIdentifier AtlasIdentifier;
 }
 
 [CustomInspector(typeof(TextureAtlasComponent))]

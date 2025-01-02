@@ -3,6 +3,7 @@ using FoldEngine.Resources;
 using FoldEngine.Scenes;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace FoldEngine.Rendering;
 
@@ -10,9 +11,9 @@ namespace FoldEngine.Rendering;
 [ComponentInitializer(typeof(MeshRenderable), nameof(InitializeComponent))]
 public struct MeshRenderable
 {
-    public ResourceIdentifier TextureIdentifier;
-    public ResourceIdentifier MeshIdentifier;
-    public ResourceIdentifier EffectIdentifier;
+    [ResourceIdentifier(typeof(Texture))] public ResourceIdentifier TextureIdentifier;
+    [ResourceIdentifier(typeof(Mesh))] public ResourceIdentifier MeshIdentifier;
+    [ResourceIdentifier(typeof(Effect))] public ResourceIdentifier EffectIdentifier;
     public Matrix Matrix;
     public Vector2 UVOffset;
     public Vector2 UVScale;

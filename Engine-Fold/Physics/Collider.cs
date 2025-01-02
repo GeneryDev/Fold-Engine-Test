@@ -15,7 +15,7 @@ public struct Collider
     public ColliderType Type;
 
     [ShowOnlyIf.Not(nameof(Type), ColliderType.None)] [ShowOnlyIf(nameof(Type), ColliderType.Mesh)]
-    public ResourceIdentifier MeshIdentifier;
+    [ResourceIdentifier(typeof(Mesh))] public ResourceIdentifier MeshIdentifier;
 
     [ShowOnlyIf.Not(nameof(Type), ColliderType.None)] [ShowOnlyIf(nameof(Type), ColliderType.Box)]
     public float Width;
