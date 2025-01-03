@@ -8,27 +8,20 @@ using Microsoft.Xna.Framework.Graphics;
 namespace FoldEngine.Rendering;
 
 [Component("fold:mesh_renderable")]
-[ComponentInitializer(typeof(MeshRenderable), nameof(InitializeComponent))]
+[ComponentInitializer(typeof(MeshRenderable))]
 public struct MeshRenderable
 {
     [ResourceIdentifier(typeof(Texture))] public ResourceIdentifier TextureIdentifier;
     [ResourceIdentifier(typeof(Mesh))] public ResourceIdentifier MeshIdentifier;
     [ResourceIdentifier(typeof(Effect))] public ResourceIdentifier EffectIdentifier;
-    public Matrix Matrix;
+    public Matrix Matrix = Matrix.Identity;
     public Vector2 UVOffset;
-    public Vector2 UVScale;
-    public Color Color;
+    public Vector2 UVScale = Vector2.One;
+    public Color Color = Color.White;
     public float ZIndex;
 
-    /// <summary>
-    ///     Returns an initialized mesh renderable component with all its correct default values.
-    /// </summary>
-    /// <param name="scene">The scene this component is being created in</param>
-    /// <param name="entityId">The ID of the entity this component is being created for</param>
-    /// <returns>An initialized component with all its correct default values.</returns>
-    public static MeshRenderable InitializeComponent(Scene scene, long entityId)
+    public MeshRenderable()
     {
-        return new MeshRenderable { Matrix = Matrix.Identity, UVScale = Vector2.One, Color = Color.White };
     }
 
     public Line[] GetFaces(ref Transform transform)

@@ -9,37 +9,33 @@ using Microsoft.Xna.Framework;
 namespace FoldEngine.Physics;
 
 [Component("fold:physics.collider")]
-[ComponentInitializer(typeof(Collider), nameof(InitializeComponent))]
+[ComponentInitializer(typeof(Collider))]
 public struct Collider
 {
-    public ColliderType Type;
+    public ColliderType Type = ColliderType.Box;
 
     [ShowOnlyIf.Not(nameof(Type), ColliderType.None)] [ShowOnlyIf(nameof(Type), ColliderType.Mesh)]
     [ResourceIdentifier(typeof(Mesh))] public ResourceIdentifier MeshIdentifier;
 
     [ShowOnlyIf.Not(nameof(Type), ColliderType.None)] [ShowOnlyIf(nameof(Type), ColliderType.Box)]
-    public float Width;
+    public float Width = 1;
 
     [ShowOnlyIf.Not(nameof(Type), ColliderType.None)] [ShowOnlyIf(nameof(Type), ColliderType.Box)]
-    public float Height;
+    public float Height = 1;
 
     [ShowOnlyIf.Not(nameof(Type), ColliderType.None)]
     public bool ThickFaces;
 
     [ShowOnlyIf.Not(nameof(Type), ColliderType.None)] [ShowOnlyIf(nameof(ThickFaces), false)]
-    public float ThinFaceTolerance;
+    public float ThinFaceTolerance = 0.1f;
 
     public bool IsTrigger;
 
-    public static Collider InitializeComponent(Scene scene, long entityId)
+    public Collider()
     {
-        return new Collider
-        {
-            Type = ColliderType.Box,
-            Width = 1,
-            Height = 1,
-            ThinFaceTolerance = 0.1f
-        };
+        MeshIdentifier = default;
+        ThickFaces = false;
+        IsTrigger = false;
     }
 
     public void SetBox(float width, float height)

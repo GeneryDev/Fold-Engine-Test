@@ -19,19 +19,13 @@ public struct Tab
 }
 
 [Component("fold:control.tab_list")]
-[ComponentInitializer(typeof(TabList), nameof(InitializeComponent))]
+[ComponentInitializer(typeof(TabList))]
 public struct TabList
 {
     public long SelectedTabId = -1;
     
     public TabList()
     {
-        
-    }
-
-    public static TabList InitializeComponent(Scene scene, long entityId)
-    {
-        return new TabList();
     }
 }
 

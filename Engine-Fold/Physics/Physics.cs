@@ -7,19 +7,14 @@ using Microsoft.Xna.Framework;
 namespace FoldEngine.Physics;
 
 [Component("fold:physics")]
-[ComponentInitializer(typeof(Physics), nameof(InitializeComponent))]
+[ComponentInitializer(typeof(Physics))]
 public struct Physics
 {
-    public static readonly bool DrawForceGizmos = false;
-
-    private Scene _scene;
-    private long _entityId;
-
     public bool Static;
 
-    public float Mass;
+    public float Mass = 1;
 
-    [ShowOnlyIf.Not(nameof(Static), true)] public float GravityMultiplier;
+    [ShowOnlyIf.Not(nameof(Static), true)] public float GravityMultiplier = 1;
 
     [ShowOnlyIf.Not(nameof(Static), true)] public Vector2 Velocity;
 
@@ -37,22 +32,13 @@ public struct Physics
 
     [HideInInspector] public Vector2 ContactDisplacement;
 
-    public float Restitution;
-    public float Friction;
+    public float Restitution = 0.0f;
+    public float Friction = 0.03f;
 
     public Vector2 LinearMomentum => Static ? Vector2.Zero : Mass * Velocity;
 
-    public static Physics InitializeComponent(Scene scene, long entityId)
+    public Physics()
     {
-        return new Physics
-        {
-            _scene = scene,
-            _entityId = entityId,
-            GravityMultiplier = 1,
-            Mass = 1,
-            Restitution = 0.0f,
-            Friction = 0.03f
-        };
     }
 
     public void ApplyForce(Vector2 force, Vector2 point, ForceMode mode, Color? gizmoColor = null)
@@ -70,12 +56,6 @@ public struct Physics
 
         AccelerationFromForce += accel;
         Torque += torque;
-
-        if (DrawForceGizmos)
-        {
-            Vector2 ownerPos = _scene.Components.GetComponent<Transform>(_entityId).Position;
-            _scene.DrawGizmo(ownerPos + point, ownerPos + point + force / 40, gizmoColor ?? Color.Red);
-        }
     }
 }
 
