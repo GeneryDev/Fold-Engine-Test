@@ -276,6 +276,10 @@ public class Scene : Resource, ISelfSerializer
     public void Serialize(SaveOperation writer)
     {
         Flush();
+        foreach (var componentSerializer in writer.SerializerSuite.ComponentSerializers)
+        {
+            componentSerializer.ScenePreSerialize(this, writer);
+        }
         writer.WriteCompound((ref SaveOperation.Compound c) =>
         {
             if (!writer.Options.Has(SerializeOnlyEntities.Instance))
@@ -289,6 +293,10 @@ public class Scene : Resource, ISelfSerializer
 
             c.WriteMember(nameof(Components), (ISelfSerializer)Components);
         });
+        foreach (var componentSerializer in writer.SerializerSuite.ComponentSerializers)
+        {
+            componentSerializer.ScenePostSerialize(this, writer);
+        }
     }
 
     public void Deserialize(LoadOperation reader)
@@ -296,6 +304,11 @@ public class Scene : Resource, ISelfSerializer
         Flush();
         bool resetIds = reader.Options.Has(DeserializeClearScene.Instance) || !AnyEntities();
         reader.Options.Set(ExpandPrefabs.Instance, new ExpandPrefabs());
+        
+        foreach (var componentSerializer in reader.SerializerSuite.ComponentSerializers)
+        {
+            componentSerializer.ScenePreDeserialize(this, reader);
+        }
         reader.ReadCompound(m =>
         {
             switch (m.Name)
@@ -320,6 +333,7 @@ public class Scene : Resource, ISelfSerializer
                     break;
             }
         });
+        
         if (reader.Options.Get(ExpandPrefabs.Instance).IdsWithPrefabs is { } idsWithPrefabs)
         {
             foreach (long entityId in idsWithPrefabs)
@@ -330,6 +344,11 @@ public class Scene : Resource, ISelfSerializer
                 
                 InstantiatePrefab(entityId, ref prefabComponent, packedScene);
             }
+        }
+        
+        foreach (var componentSerializer in reader.SerializerSuite.ComponentSerializers)
+        {
+            componentSerializer.ScenePostDeserialize(this, reader);
         }
     }
 

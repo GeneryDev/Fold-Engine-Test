@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using FoldEngine.Scenes;
 using FoldEngine.Serialization;
 
@@ -6,8 +7,18 @@ namespace FoldEngine.Components;
 
 public static class ComponentSerializer
 {
-    public static void Serialize<T>(T component, SaveOperation writer) where T : struct
+    public static void Serialize<T>(T component, SaveOperation writer, bool useCustomSerializers = true) where T : struct
     {
+        if (useCustomSerializers)
+        {
+            foreach (var serializer in writer.SerializerSuite.ComponentSerializers)
+            {
+                if (!serializer.HandlesComponentType(typeof(T))) continue;
+                serializer.Serialize(component, writer);
+                return;
+            }
+        }
+        
         writer.WriteCompound((ref SaveOperation.Compound c) =>
         {
             foreach (FieldInfo fieldInfo in typeof(T).GetFields())
@@ -22,9 +33,19 @@ public static class ComponentSerializer
         });
     }
 
-    public static void Deserialize<T>(ComponentSet componentSet, long entityId, LoadOperation reader)
+    public static void Deserialize<T>(ComponentSet componentSet, long entityId, LoadOperation reader, bool useCustomSerializers = true)
         where T : struct
     {
+        if (useCustomSerializers)
+        {
+            foreach (var serializer in reader.SerializerSuite.ComponentSerializers)
+            {
+                if (!serializer.HandlesComponentType(typeof(T))) continue;
+                serializer.Deserialize(componentSet, entityId, reader);
+                return;
+            }
+        }
+        
         // TODO optimize, via type.GetField() + support for FormerlySerializedAsAttribute
         var fieldInfos = typeof(T).GetFields();
         reader.ReadCompound(m =>
@@ -36,6 +57,7 @@ public static class ComponentSerializer
                 {
                     object value = DeserializeComponentField(fieldInfo, reader);
                     componentSet.SetFieldValue(entityId, fieldInfo, value);
+                    return;
                 }
                 else if (fieldInfo.GetCustomAttribute<FormerlySerializedAs>() != null)
                 {
@@ -44,10 +66,11 @@ public static class ComponentSerializer
                         {
                             object value = DeserializeComponentField(fieldInfo, reader);
                             componentSet.SetFieldValue(entityId, fieldInfo, value);
-                            break;
+                            return;
                         }
                 }
             }
+            m.Skip();
         });
     }
 
@@ -66,5 +89,33 @@ public static class ComponentSerializer
         // Console.WriteLine($"Set field {fieldInfo.Name} to value {value}");
 
         return value;
+    }
+}
+
+public class CustomComponentSerializer
+{
+    public virtual bool HandlesComponentType(Type type)
+    {
+        return false;
+    }
+    
+    public virtual void ScenePreSerialize(Scene scene, SaveOperation writer)
+    {
+    }
+    public virtual void Serialize(object component, SaveOperation writer)
+    {
+    }
+    public virtual void ScenePostSerialize(Scene scene, SaveOperation writer)
+    {
+    }
+
+    public virtual void ScenePreDeserialize(Scene scene, LoadOperation reader)
+    {
+    }
+    public virtual void Deserialize(ComponentSet componentSet, long entityId, LoadOperation reader)
+    {
+    }
+    public virtual void ScenePostDeserialize(Scene scene, LoadOperation reader)
+    {
     }
 }

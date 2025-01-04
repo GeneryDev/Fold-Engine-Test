@@ -105,6 +105,9 @@ public class SystemMap : ISelfSerializer
                         GenericSerializer.Deserialize(sys, reader);
                     });
                     break;
+                default:
+                    m.Skip();
+                    break;
             }
         });
         _queueModifications = false;

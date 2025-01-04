@@ -48,6 +48,7 @@ public static class GenericSerializer
                 {
                     object value = DeserializeObjectField(fieldInfo.Name, fieldInfo, reader);
                     fieldInfo.SetValue(boxed, value);
+                    return;
                 }
                 else if (fieldInfo.GetCustomAttribute<FormerlySerializedAs>() != null)
                 {
@@ -56,10 +57,11 @@ public static class GenericSerializer
                         {
                             object value = DeserializeObjectField(attr.FormerName, fieldInfo, reader);
                             fieldInfo.SetValue(boxed, value);
-                            break;
+                            return;
                         }
                 }
             }
+            m.Skip();
         });
         return (T)boxed;
     }

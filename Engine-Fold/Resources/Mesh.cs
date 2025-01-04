@@ -90,6 +90,9 @@ public class Mesh : Resource, ISelfSerializer
                         }
                     );
                     break;
+                default:
+                    m.Skip();
+                    break;
             }
         });
     }

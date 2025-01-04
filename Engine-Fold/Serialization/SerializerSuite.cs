@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using FoldEngine.Components;
 using FoldEngine.Resources;
 using FoldEngine.Serialization.Serializers;
 
@@ -11,7 +12,9 @@ public class SerializerSuite
     public static readonly SerializerSuite Instance = new SerializerSuite();
 
 
-    private readonly Dictionary<Type, ISerializer> Serializers = new Dictionary<Type, ISerializer>();
+    private readonly Dictionary<Type, ISerializer> _serializers = new Dictionary<Type, ISerializer>();
+
+    public List<CustomComponentSerializer> ComponentSerializers { get; } = new();
 
     public SerializerSuite()
     {
@@ -43,32 +46,40 @@ public class SerializerSuite
         AddSerializer(new ColorSerializer());
         AddSerializer(new MatrixSerializer());
         AddSerializer(new LRTBSerializer());
+
+        AddComponentSerializer(new HierarchicalSerializer());
     }
 
     public SerializerSuite AddSerializer(ISerializer serializer)
     {
-        Serializers[serializer.WorkingType] = serializer;
+        _serializers[serializer.WorkingType] = serializer;
+        return this;
+    }
+
+    public SerializerSuite AddComponentSerializer(CustomComponentSerializer serializer)
+    {
+        ComponentSerializers.Add(serializer);
         return this;
     }
 
 
     private ISerializer GetSerializer(Type type)
     {
-        if (!Serializers.ContainsKey(type)) throw new ArgumentException($"No serializer available for type {type}");
-        return Serializers[type];
+        if (!_serializers.ContainsKey(type)) throw new ArgumentException($"No serializer available for type {type}");
+        return _serializers[type];
     }
 
     private Serializer<T> GetSerializer<T>()
     {
-        if (!Serializers.ContainsKey(typeof(T)))
+        if (!_serializers.ContainsKey(typeof(T)))
             throw new ArgumentException($"No serializer available for type {typeof(T)}");
-        return (Serializer<T>)Serializers[typeof(T)];
+        return (Serializer<T>)_serializers[typeof(T)];
     }
 
     private Serializer<List<T>> GetListSerializer<T>()
     {
-        if (!Serializers.ContainsKey(typeof(List<T>))) Serializers[typeof(List<T>)] = new ListSerializer<T>();
-        return (Serializer<List<T>>)Serializers[typeof(List<T>)];
+        if (!_serializers.ContainsKey(typeof(List<T>))) _serializers[typeof(List<T>)] = new ListSerializer<T>();
+        return (Serializer<List<T>>)_serializers[typeof(List<T>)];
     }
 
 

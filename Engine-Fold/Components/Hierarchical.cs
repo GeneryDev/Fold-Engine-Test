@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.Design.Serialization;
 using System.Diagnostics.Contracts;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using FoldEngine.Editor.Inspector;
 using FoldEngine.Scenes;
 using FoldEngine.Serialization;
+using FoldEngine.Util;
 
 namespace FoldEngine.Components;
 
@@ -286,6 +290,23 @@ public struct Hierarchical
         }
     }
 
+    public int IndexInParent
+    {
+        get
+        {
+            if (!HasParent) return -1;
+            var index = 0;
+            var sibling = Parent.FirstChild;
+            while (sibling.IsNotNull)
+            {
+                if (sibling.EntityId == this.EntityId) return index;
+                sibling = sibling.NextSibling;
+                index++;
+            }
+            return -1;
+        }
+    }
+
     public List<long> DumpHierarchy(List<long> list)
     {
         Hierarchical nextChild = FirstChild;
@@ -467,4 +488,102 @@ public struct HierarchicalEnumerable
     {
         return this;
     }
+}
+
+public class HierarchicalSerializer : CustomComponentSerializer
+{
+    public override bool HandlesComponentType(Type type)
+    {
+        return type == typeof(Hierarchical);
+    }
+
+    public override void Serialize(object component, SaveOperation writer)
+    {
+        var hierarchical = (Hierarchical)component;
+
+        writer.WriteCompound((ref SaveOperation.Compound c) =>
+        {
+            c.WriteMember(nameof(Hierarchical.Active), hierarchical.Active);
+            c.WriteMember(nameof(Hierarchical.ParentId), hierarchical.ParentId);
+            c.WriteMember(nameof(Hierarchical.IndexInParent), hierarchical.IndexInParent);
+        });
+    }
+
+    public override void ScenePreDeserialize(Scene scene, LoadOperation reader)
+    {
+        reader.Options.Set(HierarchicalMemory.Instance, new HierarchicalMemory());
+    }
+
+    public override void Deserialize(ComponentSet componentSet, long entityId, LoadOperation reader)
+    {
+        var hComponentSet = ((ComponentSet<Hierarchical>)componentSet);
+
+        var boxedEntry = new StrongBox<HierarchicalMemory.Entry>(new HierarchicalMemory.Entry());
+        boxedEntry.Value.EntityId = entityId;
+        
+        reader.ReadCompound(m =>
+        {
+            ref var component = ref hComponentSet.Get(entityId);
+            switch (m.Name)
+            {
+                case nameof(Hierarchical.Active):
+                {
+                    component.Active = reader.ReadBoolean();
+                    break;
+                }
+                case nameof(Hierarchical.ParentId):
+                {
+                    long parentId = reader.ReadInt64();
+                    if (parentId != -1 && reader.Options.Has(DeserializeRemapIds.Instance))
+                    {
+                        parentId = reader.Options.Get(DeserializeRemapIds.Instance).TransformId(parentId);
+                    }
+
+                    boxedEntry.Value.ParentId = parentId;
+                    break;
+                }
+                case nameof(Hierarchical.IndexInParent):
+                {
+                    int index = reader.ReadInt32();
+                    boxedEntry.Value.Index = index;
+                    break;
+                }
+                default:
+                {
+                    m.Skip();
+                    break;
+                }
+            }
+        });
+
+        reader.Options.Get(HierarchicalMemory.Instance).Entries.Add(boxedEntry.Value);
+    }
+
+    public override void ScenePostDeserialize(Scene scene, LoadOperation reader)
+    {
+        var memory = reader.Options.Get(HierarchicalMemory.Instance);
+        
+        memory.Entries.Sort((a, b) => a.Index - b.Index);
+
+        foreach (var entry in memory.Entries)
+        {
+            ref var component = ref scene.Components.GetComponent<Hierarchical>(entry.EntityId);
+            component.SetParent(entry.ParentId);
+        }
+    }
+}
+
+public class HierarchicalMemory : Field<HierarchicalMemory>
+{
+    public static readonly HierarchicalMemory Instance = new();
+
+    public List<Entry> Entries = new();
+
+    public struct Entry
+    {
+        public long EntityId;
+        public long ParentId;
+        public int Index;
+    }
+
 }

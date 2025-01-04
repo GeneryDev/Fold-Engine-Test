@@ -65,6 +65,7 @@ public class ComponentMap : ISelfSerializer
             if (componentType == null)
             {
                 Console.WriteLine($"Warning: Component identifier '{componentIdentifier}' not recognized");
+                m.Skip();
                 return;
             }
 

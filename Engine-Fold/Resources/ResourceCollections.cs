@@ -59,6 +59,7 @@ public class ResourceCollections : ISelfSerializer
             if (resourceType == null)
             {
                 Console.WriteLine("[WARN] Unknown resource type: " + m.Name + ". Skipping");
+                m.Skip();
                 return;
             }
 
