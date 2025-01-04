@@ -14,8 +14,7 @@ public static class ComponentSerializer
             foreach (var serializer in writer.SerializerSuite.ComponentSerializers)
             {
                 if (!serializer.HandlesComponentType(typeof(T))) continue;
-                serializer.Serialize(component, writer);
-                return;
+                if (serializer.Serialize(component, writer)) return;
             }
         }
         
@@ -41,8 +40,7 @@ public static class ComponentSerializer
             foreach (var serializer in reader.SerializerSuite.ComponentSerializers)
             {
                 if (!serializer.HandlesComponentType(typeof(T))) continue;
-                serializer.Deserialize(componentSet, entityId, reader);
-                return;
+                if (serializer.Deserialize(componentSet, entityId, reader)) return;
             }
         }
         
@@ -102,8 +100,9 @@ public class CustomComponentSerializer
     public virtual void ScenePreSerialize(Scene scene, SaveOperation writer)
     {
     }
-    public virtual void Serialize(object component, SaveOperation writer)
+    public virtual bool Serialize(object component, SaveOperation writer)
     {
+        return false;
     }
     public virtual void ScenePostSerialize(Scene scene, SaveOperation writer)
     {
@@ -112,8 +111,9 @@ public class CustomComponentSerializer
     public virtual void ScenePreDeserialize(Scene scene, LoadOperation reader)
     {
     }
-    public virtual void Deserialize(ComponentSet componentSet, long entityId, LoadOperation reader)
+    public virtual bool Deserialize(ComponentSet componentSet, long entityId, LoadOperation reader)
     {
+        return false;
     }
     public virtual void ScenePostDeserialize(Scene scene, LoadOperation reader)
     {

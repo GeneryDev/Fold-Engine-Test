@@ -356,22 +356,20 @@ public class ComponentSet<T> : ComponentSet where T : struct
                 // }
             }
             
-            if (ComponentType == typeof(Prefab) && reader.Options.Has(ExpandPrefabs.Instance))
-            {
-                reader.Options.Get(ExpandPrefabs.Instance).IdsWithPrefabs.Add(entityId);
-            }
-            
             // Console.WriteLine($"{ComponentType} for entity id " + entityId);
-            object existingComponentData = null;
-            if (!Has((int)entityId)) CreateFor(entityId);
-            else existingComponentData = GetBoxedComponent(entityId);
-            
-            ComponentSerializer.Deserialize<T>(this, entityId, reader);
-            
-            if (reader.Options.Get(ResolveComponentConflicts.Instance) == ComponentConflictResolution.Skip && existingComponentData != null)
+            var deserialize = true;
+            if (!Has((int)entityId))
             {
-                Get(entityId) = (T)existingComponentData;
+                CreateFor(entityId);
             }
+            else if (reader.Options.Get(ResolveComponentConflicts.Instance) == ComponentConflictResolution.Skip)
+            {
+                reader.ReadCompound(m => m.Skip());
+                deserialize = false;
+            }
+            
+            if(deserialize)
+                ComponentSerializer.Deserialize<T>(this, entityId, reader);
             
             reader.EndStruct();
         });

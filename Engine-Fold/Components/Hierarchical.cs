@@ -497,7 +497,7 @@ public class HierarchicalSerializer : CustomComponentSerializer
         return type == typeof(Hierarchical);
     }
 
-    public override void Serialize(object component, SaveOperation writer)
+    public override bool Serialize(object component, SaveOperation writer)
     {
         var hierarchical = (Hierarchical)component;
 
@@ -507,6 +507,7 @@ public class HierarchicalSerializer : CustomComponentSerializer
             c.WriteMember(nameof(Hierarchical.ParentId), hierarchical.ParentId);
             c.WriteMember(nameof(Hierarchical.IndexInParent), hierarchical.IndexInParent);
         });
+        return true;
     }
 
     public override void ScenePreDeserialize(Scene scene, LoadOperation reader)
@@ -514,7 +515,7 @@ public class HierarchicalSerializer : CustomComponentSerializer
         reader.Options.Set(HierarchicalMemory.Instance, new HierarchicalMemory());
     }
 
-    public override void Deserialize(ComponentSet componentSet, long entityId, LoadOperation reader)
+    public override bool Deserialize(ComponentSet componentSet, long entityId, LoadOperation reader)
     {
         var hComponentSet = ((ComponentSet<Hierarchical>)componentSet);
 
@@ -557,6 +558,7 @@ public class HierarchicalSerializer : CustomComponentSerializer
         });
 
         reader.Options.Get(HierarchicalMemory.Instance).Entries.Add(boxedEntry.Value);
+        return true;
     }
 
     public override void ScenePostDeserialize(Scene scene, LoadOperation reader)
@@ -568,7 +570,8 @@ public class HierarchicalSerializer : CustomComponentSerializer
         foreach (var entry in memory.Entries)
         {
             ref var component = ref scene.Components.GetComponent<Hierarchical>(entry.EntityId);
-            component.SetParent(entry.ParentId);
+            if(entry.ParentId != -1)
+                component.SetParent(entry.ParentId);
         }
     }
 }

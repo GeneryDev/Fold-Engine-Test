@@ -334,29 +334,10 @@ public class Scene : Resource, ISelfSerializer
             }
         });
         
-        if (reader.Options.Get(ExpandPrefabs.Instance).IdsWithPrefabs is { } idsWithPrefabs)
-        {
-            foreach (long entityId in idsWithPrefabs)
-            {
-                if (!Components.HasComponent<Prefab>(entityId)) continue;
-                ref var prefabComponent = ref Components.GetComponent<Prefab>(entityId);
-                var packedScene = Resources.AwaitGet<PackedScene>(ref prefabComponent.Identifier);
-                
-                InstantiatePrefab(entityId, ref prefabComponent, packedScene);
-            }
-        }
-        
         foreach (var componentSerializer in reader.SerializerSuite.ComponentSerializers)
         {
             componentSerializer.ScenePostDeserialize(this, reader);
         }
-    }
-
-    private void InstantiatePrefab(long entityId, ref Prefab prefabComponent, PackedScene packedScene)
-    {
-        if (packedScene == null) return;
-
-        packedScene.Instantiate(this, entityId, prefabComponent.LoadMode);
     }
 
     public bool Reclaim(long entityId)

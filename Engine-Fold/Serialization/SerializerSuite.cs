@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using FoldEngine.Components;
 using FoldEngine.Resources;
+using FoldEngine.Scenes.Prefabs;
 using FoldEngine.Serialization.Serializers;
 
 namespace FoldEngine.Serialization;
@@ -48,6 +49,7 @@ public class SerializerSuite
         AddSerializer(new LRTBSerializer());
 
         AddComponentSerializer(new HierarchicalSerializer());
+        AddComponentSerializer(new PrefabSerializer());
     }
 
     public SerializerSuite AddSerializer(ISerializer serializer)
