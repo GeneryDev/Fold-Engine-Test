@@ -73,20 +73,28 @@ public class PackedScene : PackedResource<Scene>
         var stream = new MemoryStream(SerializedBytes);
         var deserializer = LoadOperation.Create(stream, StorageFormat.Binary);
         
+        var idRemapper = new EntityIdRemapper(scene);
+        if (ownerEntityId != -1 && loadMode == PrefabLoadMode.Replace && TopLevelEntityIds.Count > 0)
+        {
+            idRemapper.SetMapping(TopLevelEntityIds[0], ownerEntityId);
+        }
+        if (ownerEntityId == -1 && TopLevelEntityIds.Count > 0) ownerEntityId = TopLevelEntityIds[0];
+        
+        deserializer.Options.Set(DeserializeRemapIds.Instance, idRemapper);
+        deserializer.Options.Set(ResolveComponentConflicts.Instance, ComponentConflictResolution.Skip);
         deserializer.Options.Set(LoadAsPrefab.Instance, new LoadAsPrefab()
         {
             OwnerEntityId = ownerEntityId,
             LoadMode = loadMode
         });
-        var idRemapper = new EntityIdRemapper(scene);
-        deserializer.Options.Set(DeserializeRemapIds.Instance, idRemapper);
-        if (ownerEntityId != -1 && loadMode == PrefabLoadMode.Replace && TopLevelEntityIds.Count > 0)
-        {
-            idRemapper.SetMapping(TopLevelEntityIds[0], ownerEntityId);
-        }
-        deserializer.Options.Set(ResolveComponentConflicts.Instance, ComponentConflictResolution.Skip);
         
         scene.DeserializeResource(deserializer);
+
+        foreach (var entry in deserializer.Options.Get(HierarchicalMemory.Instance).Entries)
+        {
+            if (entry.EntityId == ownerEntityId) continue;
+            scene.Components.CreateComponent<FromPrefab>(entry.EntityId).PrefabInstanceId = ownerEntityId;
+        }
         
         deserializer.Close();
         stream.Close();

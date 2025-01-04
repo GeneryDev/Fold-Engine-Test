@@ -276,6 +276,7 @@ public class Scene : Resource, ISelfSerializer
     public void Serialize(SaveOperation writer)
     {
         Flush();
+        writer.Options.Set(CollapsePrefabs.Instance, new CollapsePrefabs());
         foreach (var componentSerializer in writer.SerializerSuite.ComponentSerializers)
         {
             componentSerializer.ScenePreSerialize(this, writer);
@@ -421,6 +422,8 @@ public class ExpandPrefabs : Field<ExpandPrefabs>
 public class CollapsePrefabs : Field<CollapsePrefabs>
 {
     public static readonly CollapsePrefabs Instance = new CollapsePrefabs();
+
+    public readonly List<long> IdsFromPrefabs = new List<long>();
 }
 
 public class ResolveComponentConflicts : Field<ComponentConflictResolution>

@@ -27,6 +27,19 @@ public class PrefabSerializer : CustomComponentSerializer
         return type == typeof(Prefab);
     }
 
+    public override void ScenePreSerialize(Scene scene, SaveOperation writer)
+    {
+        if (writer.Options.Get(CollapsePrefabs.Instance).IdsFromPrefabs is { } idsFromPrefabs)
+        {
+            var iterator = scene.Components.CreateIterator<FromPrefab>(IterationFlags.None);
+            iterator.Reset();
+            while (iterator.Next())
+            {
+                idsFromPrefabs.Add(iterator.GetEntityId());
+            }
+        }
+    }
+
     public override bool Deserialize(ComponentSet componentSet, long entityId, LoadOperation reader)
     {
         if (reader.Options.Get(ExpandPrefabs.Instance).IdsWithPrefabs is { } idsWithPrefabs)

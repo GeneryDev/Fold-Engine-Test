@@ -311,18 +311,27 @@ public class ComponentSet<T> : ComponentSet where T : struct
             for (int entityId = MinId; entityId < MaxId; entityId++)
             {
                 if (!Has(entityId)) continue;
+                bool shouldSerialize = true;
                 if (writer.Options.Has(SerializeOnlyEntities.Instance))
                 {
-                    bool shouldSerialize = false;
+                    shouldSerialize = false;
                     foreach (long filteredEntityId in writer.Options.Get(SerializeOnlyEntities.Instance))
                         if ((int)filteredEntityId == entityId)
                         {
                             shouldSerialize = true;
                             break;
                         }
-
-                    if (!shouldSerialize) continue;
                 }
+                if (writer.Options.Has(CollapsePrefabs.Instance))
+                {
+                    foreach (long filteredEntityId in writer.Options.Get(CollapsePrefabs.Instance).IdsFromPrefabs)
+                        if ((int)filteredEntityId == entityId)
+                        {
+                            shouldSerialize = false;
+                            break;
+                        }
+                }
+                if (!shouldSerialize) continue;
 
                 arr.WriteMember(() =>
                 {
@@ -344,17 +353,6 @@ public class ComponentSet<T> : ComponentSet where T : struct
             long entityId = reader.ReadInt64();
             if (reader.Options.Has(DeserializeRemapIds.Instance))
                 entityId = reader.Options.Get(DeserializeRemapIds.Instance).TransformId(entityId);
-            if (reader.Options.Get(LoadAsPrefab.Instance) is { OwnerEntityId: not -1 } loadOptions)
-            {
-                // TODO
-                // switch (loadOptions.LoadMode)
-                // {
-                //     case PrefabLoadMode.Replace:
-                //     {
-                //         if()
-                //     }
-                // }
-            }
             
             // Console.WriteLine($"{ComponentType} for entity id " + entityId);
             var deserialize = true;
