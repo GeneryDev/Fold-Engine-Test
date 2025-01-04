@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using FoldEngine.Scenes;
+using FoldEngine.Scenes.Prefabs;
 using FoldEngine.Serialization;
 
 namespace FoldEngine.Components;
@@ -146,6 +147,19 @@ public class ComponentMap : ISelfSerializer
     public void RemoveAllComponents(long entityId)
     {
         foreach (ComponentSet set in Sets.Values) set.Remove(entityId);
+    }
+
+    /// <summary>
+    ///     Returns whether any entities have any components assigned
+    /// </summary>
+    public bool AnyEntities()
+    {
+        foreach (ComponentSet set in Sets.Values)
+        {
+            if (set.HasAny()) return true;
+        }
+
+        return false;
     }
 
     /// <summary>

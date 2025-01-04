@@ -13,12 +13,17 @@ public class EntityIdRemapper
         _scene = scene;
     }
 
+    public void SetMapping(long fromId, long toId)
+    {
+        _map[fromId] = toId;
+    }
+
     public long TransformId(long oldId)
     {
         if (!_map.ContainsKey(oldId))
         {
             if (CreateNewIfNotPresent)
-                return _map[oldId] = _scene.CreateEntityId("a");
+                return _map[oldId] = _scene.CreateEntityId("a", prepopulateComponents: false);
             return oldId;
         }
 

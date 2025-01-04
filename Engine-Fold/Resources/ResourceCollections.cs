@@ -390,7 +390,7 @@ public class ResourceCollections : ISelfSerializer
 
     private void PollResources()
     {
-        _lastPollTime = Time.Now;
+        _lastPollTime = Time.TotalTimeMs;
 
         _core.ActiveScene?.Systems.PollResources();
 
@@ -399,7 +399,7 @@ public class ResourceCollections : ISelfSerializer
 
     public void Update()
     {
-        if (Time.Now > _lastPollTime + 5_000) PollResources();
+        if (Time.TotalTimeMs > _lastPollTime + 5_000) PollResources();
 
         _loader.Update();
     }

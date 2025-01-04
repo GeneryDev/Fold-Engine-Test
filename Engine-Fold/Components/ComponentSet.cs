@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using FoldEngine.Scenes;
+using FoldEngine.Scenes.Prefabs;
 using FoldEngine.Serialization;
 using FoldEngine.Util;
 
@@ -24,6 +25,7 @@ public abstract class ComponentSet : ISelfSerializer
     public abstract object GetFieldValue(long entityId, FieldInfo fieldInfo);
     public abstract void SetFieldValue(long entityId, FieldInfo fieldInfo, object value);
 
+    public abstract bool HasAny();
     public abstract void Clear();
 }
 
@@ -342,11 +344,42 @@ public class ComponentSet<T> : ComponentSet where T : struct
             long entityId = reader.ReadInt64();
             if (reader.Options.Has(DeserializeRemapIds.Instance))
                 entityId = reader.Options.Get(DeserializeRemapIds.Instance).TransformId(entityId);
+            if (reader.Options.Get(LoadAsPrefab.Instance) is { OwnerEntityId: not -1 } loadOptions)
+            {
+                // TODO
+                // switch (loadOptions.LoadMode)
+                // {
+                //     case PrefabLoadMode.Replace:
+                //     {
+                //         if()
+                //     }
+                // }
+            }
+            
+            if (ComponentType == typeof(Prefab) && reader.Options.Has(ExpandPrefabs.Instance))
+            {
+                reader.Options.Get(ExpandPrefabs.Instance).IdsWithPrefabs.Add(entityId);
+            }
+            
             // Console.WriteLine($"{ComponentType} for entity id " + entityId);
+            object existingComponentData = null;
             if (!Has((int)entityId)) CreateFor(entityId);
+            else existingComponentData = GetBoxedComponent(entityId);
+            
             ComponentSerializer.Deserialize<T>(this, entityId, reader);
+            
+            if (reader.Options.Get(ResolveComponentConflicts.Instance) == ComponentConflictResolution.Skip && existingComponentData != null)
+            {
+                Get(entityId) = (T)existingComponentData;
+            }
+            
             reader.EndStruct();
         });
+    }
+
+    public override bool HasAny()
+    {
+        return N > 0;
     }
 
     public override void Clear()

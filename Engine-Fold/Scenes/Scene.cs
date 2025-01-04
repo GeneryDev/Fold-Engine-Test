@@ -6,6 +6,7 @@ using FoldEngine.Events;
 using FoldEngine.Interfaces;
 using FoldEngine.IO;
 using FoldEngine.Resources;
+using FoldEngine.Scenes.Prefabs;
 using FoldEngine.Serialization;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
@@ -27,8 +28,6 @@ public class Scene : Resource, ISelfSerializer
 
     private List<long> _deletedIds = new List<long>();
 
-
-    private bool _hasAnything;
 
     private long _nextEntityId;
     private List<bool> _reclaimableIds;
@@ -116,7 +115,7 @@ public class Scene : Resource, ISelfSerializer
         _deletedIds.Add(entityId);
     }
 
-    public long CreateEntityId(string name)
+    public long CreateEntityId(string name, bool prepopulateComponents = true)
     {
         long newEntityId;
         if (_reclaimableIds != null && _reclaimableIds.Count > 0)
@@ -147,15 +146,12 @@ public class Scene : Resource, ISelfSerializer
             newEntityId = _nextEntityId++;
         }
 
-        ref Hierarchical hierarchical = ref Components.CreateComponent<Hierarchical>(newEntityId);
-        ref Transform transform = ref Components.CreateComponent<Transform>(newEntityId);
-        // try {
-        //     Components.GetComponent<Transform>(newEntityId);
-        // } catch(Exception x) {
-        //     FoldUtil.Breakpoint();
-        // }
-        Components.CreateComponent<EntityName>(newEntityId).Name = name;
-        _hasAnything = true;
+        if (prepopulateComponents)
+        {
+            ref Hierarchical hierarchical = ref Components.CreateComponent<Hierarchical>(newEntityId);
+            ref Transform transform = ref Components.CreateComponent<Transform>(newEntityId);
+            Components.CreateComponent<EntityName>(newEntityId).Name = name;
+        }
         // Console.WriteLine($"Created entity {newEntityId}");
         return newEntityId;
     }
@@ -298,7 +294,8 @@ public class Scene : Resource, ISelfSerializer
     public void Deserialize(LoadOperation reader)
     {
         Flush();
-        bool resetIds = reader.Options.Has(DeserializeClearScene.Instance) || !_hasAnything;
+        bool resetIds = reader.Options.Has(DeserializeClearScene.Instance) || !AnyEntities();
+        reader.Options.Set(ExpandPrefabs.Instance, new ExpandPrefabs());
         reader.ReadCompound(m =>
         {
             switch (m.Name)
@@ -323,7 +320,24 @@ public class Scene : Resource, ISelfSerializer
                     break;
             }
         });
-        _hasAnything = true;
+        if (reader.Options.Get(ExpandPrefabs.Instance).IdsWithPrefabs is { } idsWithPrefabs)
+        {
+            foreach (long entityId in idsWithPrefabs)
+            {
+                if (!Components.HasComponent<Prefab>(entityId)) continue;
+                ref var prefabComponent = ref Components.GetComponent<Prefab>(entityId);
+                var packedScene = Resources.AwaitGet<PackedScene>(ref prefabComponent.Identifier);
+                
+                InstantiatePrefab(entityId, ref prefabComponent, packedScene);
+            }
+        }
+    }
+
+    private void InstantiatePrefab(long entityId, ref Prefab prefabComponent, PackedScene packedScene)
+    {
+        if (packedScene == null) return;
+
+        packedScene.Instantiate(this, entityId, prefabComponent.LoadMode);
     }
 
     public bool Reclaim(long entityId)
@@ -344,7 +358,6 @@ public class Scene : Resource, ISelfSerializer
 
     public bool ReclaimAndCreate(long entityId, string name)
     {
-        _hasAnything = true;
         if (Reclaim(entityId))
         {
             ref Hierarchical hierarchical = ref Components.CreateComponent<Hierarchical>(entityId);
@@ -355,6 +368,11 @@ public class Scene : Resource, ISelfSerializer
         }
 
         return false;
+    }
+
+    public bool AnyEntities()
+    {
+        return Components.AnyEntities();
     }
 
     public bool IsEditorAttached()
@@ -391,4 +409,27 @@ public class DeserializeClearScene : Field<bool>
 public class DeserializeRemapIds : Field<EntityIdRemapper>
 {
     public static readonly DeserializeRemapIds Instance = new DeserializeRemapIds();
+}
+
+public class ExpandPrefabs : Field<ExpandPrefabs>
+{
+    public static readonly ExpandPrefabs Instance = new ExpandPrefabs();
+
+    public readonly List<long> IdsWithPrefabs = new List<long>();
+}
+
+public class CollapsePrefabs : Field<CollapsePrefabs>
+{
+    public static readonly CollapsePrefabs Instance = new CollapsePrefabs();
+}
+
+public class ResolveComponentConflicts : Field<ComponentConflictResolution>
+{
+    public static readonly ResolveComponentConflicts Instance = new();
+}
+
+public enum ComponentConflictResolution
+{
+    Overwrite,
+    Skip
 }

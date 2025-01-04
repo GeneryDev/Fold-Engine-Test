@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
@@ -7,46 +8,32 @@ namespace FoldEngine.Resources;
 
 public class ResourceLoader
 {
-    private readonly List<ResourceLoadTask> _activeTasks = new List<ResourceLoadTask>();
-    private readonly List<ResourceLoadTask> _inactiveTasks = new List<ResourceLoadTask>();
     private readonly ResourceCollections _resources;
+    private readonly Thread _mainThread;
+    private readonly Thread _schedulerThread;
+
+    private ConcurrentDictionary<ResourceLoadKey, ResourceLoadTask> _activeTasks = new();
+    private ConcurrentQueue<ResourceLoadTask> _startQueue = new();
+    private ConcurrentQueue<ResourceLoadTask> _completedQueue = new();
 
     public ResourceLoader(ResourceCollections resources)
     {
         _resources = resources;
+        _mainThread = Thread.CurrentThread;
+        _schedulerThread = new Thread(SchedulerLoop);
+        _schedulerThread.Start();
     }
 
-    //MAIN THREAD
-    private ResourceLoadTask PrepareTask()
-    {
-        for (int index = _inactiveTasks.Count-1; index >= 0; index--)
-        {
-            var reused = _inactiveTasks[index];
-            _inactiveTasks.RemoveAt(index);
-            _activeTasks.Add(reused);
-            return reused;
-        }
-
-        var created = new ResourceLoadTask();
-        _activeTasks.Add(created);
-        return created;
-    }
-
-    //MAIN THREAD
     public ResourceStatus GetStatusOfResource(Type type, string identifier)
     {
-        foreach (ResourceLoadTask task in _activeTasks)
-            if (task.Type == type && task.Identifier == identifier)
-                return task.Status;
-        return ResourceStatus.Inactive;
+        _activeTasks.TryGetValue(new(type, identifier), out var task);
+        return task?.Status ?? ResourceStatus.Inactive;
     }
 
     public ResourceStatus GetStatusOfResource<T>(string identifier)
     {
-        foreach (ResourceLoadTask task in _activeTasks)
-            if (task.Type == typeof(T) && task.Identifier == identifier)
-                return task.Status;
-        return ResourceStatus.Inactive;
+        _activeTasks.TryGetValue(new(typeof(T), identifier), out var task);
+        return task?.Status ?? ResourceStatus.Inactive;
     }
 
     //MAIN THREAD
@@ -54,13 +41,15 @@ public class ResourceLoader
     {
         if (GetStatusOfResource<T>(identifier) == ResourceStatus.Inactive)
         {
-            ResourceLoadTask task = PrepareTask();
-            task.Type = typeof(T);
-            task.Identifier = identifier;
-            task.Path = path;
-            task.Status = ResourceStatus.Loading;
-
-            StartLoading<T>(task);
+            var task = new ResourceLoadTask
+            {
+                Type = typeof(T),
+                Identifier = identifier,
+                Path = path,
+                Status = ResourceStatus.Loading
+            };
+            _activeTasks[new ResourceLoadKey(typeof(T), identifier)] = task;
+            _startQueue.Enqueue(task);
         }
     }
 
@@ -68,16 +57,15 @@ public class ResourceLoader
     {
         if (GetStatusOfResource(type, identifier) == ResourceStatus.Inactive)
         {
-            MethodInfo methodToCall = typeof(ResourceLoader)
-                .GetMethod(nameof(StartLoading), new Type[] { typeof(ResourceLoadTask) }).MakeGenericMethod(type);
-
-            ResourceLoadTask task = PrepareTask();
-            task.Type = type;
-            task.Identifier = identifier;
-            task.Path = path;
-            task.Status = ResourceStatus.Loading;
-
-            methodToCall.Invoke(this, new object[] { task });
+            var task = new ResourceLoadTask
+            {
+                Type = type,
+                Identifier = identifier,
+                Path = path,
+                Status = ResourceStatus.Loading
+            };
+            _activeTasks[new ResourceLoadKey(type, identifier)] = task;
+            _startQueue.Enqueue(task);
         }
     }
     
@@ -97,56 +85,28 @@ public class ResourceLoader
             // Wait
         }
     }
-    
-    //MAIN THREAD
-    public void StartLoading<T>(ResourceLoadTask task) where T : Resource, new()
-    {
-        ThreadPool.QueueUserWorkItem(_ => Load<T>(task));
-    }
 
     //MAIN THREAD
     public void AddLoadCallback<T>(string identifier, ResourceCollections.OnResourceLoaded callback)
         where T : Resource, new()
     {
-        foreach (ResourceLoadTask task in _activeTasks)
-            if (task.Type == typeof(T) && task.Identifier == identifier)
-                task.Callbacks.Add(callback);
-    }
-
-    //WORK THREAD
-    private static void Load<T>(ResourceLoadTask task) where T : Resource, new()
-    {
-        try
-        {
-            var resource = new T { Identifier = task.Identifier };
-            resource.DeserializeResource(task.Path);
-            resource.ResourcePath = task.Path;
-
-            task.CompletedResource = resource;
-            task.Status = ResourceStatus.Complete;
-        }
-        catch (Exception x)
-        {
-            Console.WriteLine("Could not load resource '" + task.Identifier + "': " + x.Message);
-            task.Status = ResourceStatus.Error;
-        }
+        var key = new ResourceLoadKey(typeof(T), identifier);
+        _activeTasks[key]?.Callbacks.Add(callback);
     }
 
     //MAIN THREAD
     public void Update()
     {
-        for (var i = 0; i < _activeTasks.Count; i++)
+        foreach (var key in _activeTasks.Keys)
         {
-            ResourceLoadTask task = _activeTasks[i];
+            var task = _activeTasks[key];
             switch (task.Status)
             {
                 case ResourceStatus.Complete:
                 case ResourceStatus.Error:
                 {
                     TaskFinished(task);
-                    _activeTasks.RemoveAt(i);
-                    i--;
-                    _inactiveTasks.Add(task);
+                    _activeTasks.TryRemove(key, out task);
                     break;
                 }
                 case ResourceStatus.Inactive:
@@ -168,25 +128,11 @@ public class ResourceLoader
             TaskCompleted(task);
         else 
             TaskError(task);
-        ResetTask(task);
-    }
-
-    //MAIN THREAD
-    private void ResetTask(ResourceLoadTask task)
-    {
-        task.Identifier = null;
-        task.Path = null;
-        task.Type = null;
-        task.CompletedResource = null;
-        task.Status = ResourceStatus.Inactive;
-        task.Callbacks.Clear();
     }
 
     //MAIN THREAD
     private void TaskCompleted(ResourceLoadTask task)
     {
-        _resources.Attach(task.CompletedResource);
-
         foreach (ResourceCollections.OnResourceLoaded callback in task.Callbacks) callback(task.CompletedResource);
 
         task.Status = ResourceStatus.Inactive;
@@ -197,18 +143,69 @@ public class ResourceLoader
     {
         task.Status = ResourceStatus.Inactive;
     }
+    
+    private void SchedulerLoop()
+    {
+        while (_mainThread.IsAlive)
+        {
+            // Consume start queue, check for tasks to start
+            while (_startQueue.TryDequeue(out var task))
+            {
+                Console.WriteLine($"Queued task to load {task.Identifier}");
+                ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    task.Load();
+                    _completedQueue.Enqueue(task);
+                });
+            }
+
+            // Consume completed queue, check for tasks that have completed and add their resources to the collection
+            while (_completedQueue.TryDequeue(out var task))
+            {
+                if (task.CompletedResource != null)
+                {
+                    _resources.Attach(task.CompletedResource);
+                    task.Status = ResourceStatus.Complete;
+                }
+                //TODO handle errors
+            }
+        }
+    }
+
+    private record struct ResourceLoadKey(Type Type, string Identifier)
+    {
+    }
 }
 
 public class ResourceLoadTask
 {
-    public readonly List<ResourceCollections.OnResourceLoaded> Callbacks =
-        new List<ResourceCollections.OnResourceLoaded>();
+    public readonly List<ResourceCollections.OnResourceLoaded> Callbacks = new();
 
     public string Identifier; // Input
     public string Path; // Input
     public Type Type; // Input
     public Resource CompletedResource; // Worker write, Main read (Main reset)
     public ResourceStatus Status; // Worker write, Main read (Main reset) 
+
+    public void Load()
+    {
+        try
+        {
+            var emptyConstructor = Type.GetConstructor(Type.EmptyTypes);
+            var resource = (Resource) emptyConstructor!.Invoke(Array.Empty<object>());
+
+            resource.Identifier = this.Identifier;
+            resource.DeserializeResource(this.Path);
+            resource.ResourcePath = this.Path;
+
+            this.CompletedResource = resource;
+        }
+        catch (Exception x)
+        {
+            Console.WriteLine("Could not load resource '" + this.Identifier + "': " + x.Message);
+            this.Status = ResourceStatus.Error;
+        }
+    }
 }
 
 public enum ResourceStatus

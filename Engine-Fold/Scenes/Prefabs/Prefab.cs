@@ -7,4 +7,12 @@ namespace FoldEngine.Scenes.Prefabs;
 public struct Prefab
 {
     [ResourceIdentifier(typeof(PackedScene))] public ResourceIdentifier Identifier;
+
+    public PrefabLoadMode LoadMode;
+}
+
+public enum PrefabLoadMode
+{
+    Replace,
+    AsChild
 }
