@@ -36,11 +36,31 @@ public class PrefabSystem : GameSystem
     
     public void PackPrefab(long entityId)
     {
+        long packedEntityId = entityId;
+        
         _tempPackQueue.Enqueue(entityId);
 
         while (_tempPackQueue.TryDequeue(out entityId))
         {
             if (!Scene.Components.HasComponent<PrefabInstance>(entityId)) continue;
+
+            if (packedEntityId == entityId)
+            {
+                ref var component = ref Scene.Components.GetComponent<PrefabInstance>(entityId);
+
+                if (component.PersistentComponents != null)
+                {
+                    foreach (var set in Scene.Components.Sets.Values)
+                    {
+                        if (set.Has(entityId) && !component.PersistentComponents.Contains(Scene.Core.RegistryUnit.Components.IdentifierOf(set.ComponentType)))
+                        {
+                            set.Remove(entityId);
+                        }
+                    }
+                }
+
+                component.PersistentComponents = null;
+            }
             
             _fromPrefabs.Reset();
             while (_fromPrefabs.Next())
@@ -69,6 +89,16 @@ public class PrefabSystem : GameSystem
         var packedScene = scene.Resources.AwaitGet<PackedScene>(ref component.Identifier);
                 
         if (packedScene == null) return;
+
+        component.PersistentComponents ??= new List<string>();
+        component.PersistentComponents.Clear();
+        foreach (var set in scene.Components.Sets.Values)
+        {
+            if (set.Has(entityId))
+            {
+                component.PersistentComponents.Add(scene.Core.RegistryUnit.Components.IdentifierOf(set.ComponentType));
+            }
+        }
         
         packedScene.Instantiate(scene, entityId, component.LoadMode);
     }

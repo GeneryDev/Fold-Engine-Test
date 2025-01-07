@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using FoldEngine.Components;
 using FoldEngine.Resources;
 using FoldEngine.Serialization;
@@ -12,6 +13,8 @@ public struct PrefabInstance
     [ResourceIdentifier(typeof(PackedScene))] public ResourceIdentifier Identifier;
 
     public PrefabLoadMode LoadMode;
+
+    public List<string> PersistentComponents;
 }
 
 public enum PrefabLoadMode
