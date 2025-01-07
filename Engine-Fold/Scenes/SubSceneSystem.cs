@@ -27,7 +27,10 @@ public class SubSceneSystem : GameSystem
             if(instance.ProcessInputs && _subSceneComponents.GetCoComponent<Hierarchical>().IsActiveInHierarchy())
                 instance.Scene?.Input();
             else
+            {
                 instance.Scene?.Flush();
+                instance.Scene?.Events.FlushEnd();
+            }
         }
     }
 
@@ -40,7 +43,10 @@ public class SubSceneSystem : GameSystem
             if(instance.Update && _subSceneComponents.GetCoComponent<Hierarchical>().IsActiveInHierarchy())
                 instance.Scene?.Update();
             else
+            {
                 instance.Scene?.Flush();
+                instance.Scene?.Events.FlushEnd();
+            }
         }
     }
 
@@ -82,7 +88,10 @@ public class SubSceneSystem : GameSystem
             if(instance.Render && _subSceneComponents.GetCoComponent<Hierarchical>().IsActiveInHierarchy())
                 instance.Scene?.Render(renderer);
             else
+            {
                 instance.Scene?.Flush();
+                instance.Scene?.Events.FlushEnd();
+            }
         }
     }
 

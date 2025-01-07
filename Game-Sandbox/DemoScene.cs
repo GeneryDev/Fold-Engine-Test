@@ -12,6 +12,7 @@ using FoldEngine.Physics.Systems;
 using FoldEngine.Rendering;
 using FoldEngine.Resources;
 using FoldEngine.Scenes;
+using FoldEngine.Scenes.Prefabs;
 using FoldEngine.Util;
 using Microsoft.Xna.Framework;
 using Sandbox.Components;
@@ -30,6 +31,7 @@ internal class DemoScene : Scene
     {
         // BuildMeshes();
 
+        Systems.Add<PrefabSystem>();
         Systems.Add<TextureAtlasSystem>();
         Systems.Add<SimplePhysicsSystem>();
         Systems.Add<LevelRenderer2D>();

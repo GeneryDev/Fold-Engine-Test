@@ -7,7 +7,7 @@ using FoldEngine.Util;
 namespace FoldEngine.Scenes.Prefabs;
 
 [Component("fold:prefab")]
-public struct Prefab
+public struct PrefabInstance
 {
     [ResourceIdentifier(typeof(PackedScene))] public ResourceIdentifier Identifier;
 
@@ -24,7 +24,7 @@ public class PrefabSerializer : CustomComponentSerializer
 {
     public override bool HandlesComponentType(Type type)
     {
-        return type == typeof(Prefab);
+        return type == typeof(PrefabInstance);
     }
 
     public override void ScenePreSerialize(Scene scene, SaveOperation writer)
@@ -55,19 +55,10 @@ public class PrefabSerializer : CustomComponentSerializer
         {
             foreach (long entityId in idsWithPrefabs)
             {
-                if (!scene.Components.HasComponent<Prefab>(entityId)) continue;
-                ref var prefabComponent = ref scene.Components.GetComponent<Prefab>(entityId);
-                var packedScene = scene.Resources.AwaitGet<PackedScene>(ref prefabComponent.Identifier);
+                if (!scene.Components.HasComponent<PrefabInstance>(entityId)) continue;
                 
-                InstantiatePrefab(scene, entityId, ref prefabComponent, packedScene);
+                PrefabSystem.UnpackPrefab(scene, entityId);
             }
         }
-    }
-
-    private void InstantiatePrefab(Scene scene, long entityId, ref Prefab prefabComponent, PackedScene packedScene)
-    {
-        if (packedScene == null) return;
-
-        packedScene.Instantiate(scene, entityId, prefabComponent.LoadMode);
     }
 }
